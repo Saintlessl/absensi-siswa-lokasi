@@ -9,9 +9,11 @@ use App\Models\Kelas;
 use App\Models\Jurusan;
 use App\Models\LokasiSekolah;
 use App\Models\OrangTua;
+use App\Models\Room;
 use App\Models\Siswa;
 use App\Services\FaceBiometricService;
 use App\Services\WhatsAppNotificationService;
+use App\Services\RoomAssignmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -76,11 +78,12 @@ class AbsensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 403);
         }
 
-        $kelas = Kelas::with('jurusan')->where('qr_token', $request->qr_token)->first();
+        $assignment = app(RoomAssignmentService::class)->activeForToken($request->qr_token, Carbon::now());
+        $kelas = $assignment?->kelas ?? Kelas::with('jurusan')->where('qr_token', $request->qr_token)->first();
         if (!$kelas) {
             return response()->json([
                 'success' => false,
-                'message' => 'QR Code tidak valid atau tidak terdaftar di sistem sekolah!'
+                'message' => 'QR ruangan tidak valid, nonaktif, atau tidak memiliki alokasi aktif.'
             ], 404);
         }
 
@@ -94,7 +97,7 @@ class AbsensiController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "QR Code valid untuk {$kelas->nama_kelas}.",
+            'message' => "QR " . ($assignment ? "ruangan {$assignment->room->name}" : 'kelas') . " valid untuk {$kelas->nama_kelas}.",
             'kelas' => [
                 'id' => $kelas->id,
                 'nama_kelas' => $kelas->nama_kelas,
@@ -126,9 +129,10 @@ class AbsensiController extends Controller
         $tipe = $request->tipe ?? 'masuk';
 
         // 1. Validasi QR Code token
-        $kelas = Kelas::where('qr_token', $request->qr_token)->first();
+        $assignment = app(RoomAssignmentService::class)->activeForToken($request->qr_token, Carbon::now());
+        $kelas = $assignment?->kelas ?? Kelas::where('qr_token', $request->qr_token)->first();
         if (!$kelas) {
-            return response()->json(['success' => false, 'message' => 'QR Code kelas tidak valid.'], 404);
+            return response()->json(['success' => false, 'message' => 'QR ruangan tidak valid, nonaktif, atau tidak memiliki alokasi aktif.'], 404);
         }
 
         if ($siswa->kelas_id != $kelas->id) {
@@ -241,6 +245,7 @@ class AbsensiController extends Controller
 
             $absenHariIni->update([
                 'jam_pulang'            => $now->format('H:i:s'),
+                'room_id'               => $assignment?->room_id ?? $absenHariIni->room_id,
                 'foto_pulang'           => 'selfie/' . $fileName,
                 'confidence_pulang'     => $confidence,
                 'liveness_score_pulang' => $livenessScore,
@@ -298,6 +303,7 @@ class AbsensiController extends Controller
 
             $absensi = Absensi::create([
                 'siswa_id'              => $siswa->id,
+                'room_id'               => $assignment?->room_id,
                 'tanggal'               => $todayStr,
                 'jam_masuk'             => $now->format('H:i:s'),
                 'status'                => 'Hadir',
@@ -337,27 +343,47 @@ class AbsensiController extends Controller
     public function qrCodes(Request $request)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['superadmin', 'admin'])) {
-            return redirect()->route('dashboard')->with('error', 'Hanya Superadmin atau Admin yang dapat mengakses halaman QR Code.');
+        if (!in_array($user->role, ['superadmin', 'admin', 'kaprog'])) {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki hak akses untuk halaman QR Code Ruangan.');
         }
 
-        $query = Kelas::with(['jurusan', 'siswa']);
+        $query = Room::with(['assignments' => function ($q) {
+            $today = Carbon::today()->toDateString();
+            $q->where(function ($sub) use ($today) {
+                $sub->whereNull('starts_on')->orWhere('starts_on', '<=', $today);
+            })->where(function ($sub) use ($today) {
+                $sub->whereNull('ends_on')->orWhere('ends_on', '>=', $today);
+            })->with('kelas.jurusan');
+        }]);
 
-        if ($request->filled('jurusan_id')) {
-            $query->where('jurusan_id', $request->jurusan_id);
+        if ($request->filled('building')) {
+            $query->where('building', $request->building);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('nama_kelas', 'LIKE', '%' . $search . '%');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('code', 'LIKE', '%' . $search . '%')
+                    ->orWhere('building', 'LIKE', '%' . $search . '%');
+            });
         }
 
-        $kelasList = $query->orderBy('nama_kelas')->get();
-        $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+        $rooms = $query->orderBy('name')->get();
+        $buildings = Room::whereNotNull('building')->distinct()->pluck('building');
+        $types = Room::whereNotNull('type')->distinct()->pluck('type');
 
-        return view('absensi.qr-codes', compact('kelasList', 'jurusans') + [
-            'jurusan_id' => $request->jurusan_id ?? '',
-            'search'     => $request->search ?? ''
+        return view('absensi.qr-codes', [
+            'rooms'     => $rooms,
+            'buildings' => $buildings,
+            'types'     => $types,
+            'building'  => $request->building ?? '',
+            'type'      => $request->type ?? '',
+            'search'    => $request->search ?? '',
         ]);
     }
 

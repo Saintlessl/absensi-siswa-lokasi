@@ -17,6 +17,8 @@ use App\Http\Controllers\OrangTuaController;
 use App\Http\Controllers\ParentActivationController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\AcademicStructureController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -140,9 +142,25 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // QR Code Kelas
         Route::get('/qr-codes', [AbsensiController::class, 'qrCodes'])->name('absensi.qrcodes');
 
+        Route::get('/ruangan', [RoomController::class, 'index'])->name('rooms.index');
+        Route::post('/ruangan', [RoomController::class, 'store'])->name('rooms.store');
+        Route::post('/ruangan/{room}', [RoomController::class, 'update'])->name('rooms.update');
+        Route::post('/ruangan/{room}/delete', [RoomController::class, 'destroy'])->name('rooms.destroy');
+        Route::post('/ruangan/{room}/regenerate-qr', [RoomController::class, 'regenerate'])->name('rooms.regenerate');
+
         // Biometrik Actions (Superadmin & Admin)
         Route::post('/admin/biometrik-siswa/{id}/request-re-enroll', [FaceBiometricController::class, 'adminRequestReEnroll'])->name('admin.biometrik.re_enroll');
         Route::post('/admin/biometrik-siswa/{id}/toggle-suspend', [FaceBiometricController::class, 'adminToggleSuspend'])->name('admin.biometrik.toggle_suspend');
+    });
+
+    Route::middleware(['role:superadmin,admin,kaprog'])->group(function () {
+        Route::get('/struktur-akademik', [AcademicStructureController::class, 'index'])->name('academic.index');
+        Route::get('/struktur-akademik/{jurusan}', [AcademicStructureController::class, 'major'])->name('academic.major');
+        Route::get('/struktur-akademik/{jurusan}/tingkat/{tingkat}', [AcademicStructureController::class, 'level'])->name('academic.level');
+        Route::get('/struktur-akademik/rombel/{kelas}', [AcademicStructureController::class, 'roomClass'])->name('academic.class');
+        Route::get('/alokasi-ruangan', [RoomController::class, 'assignments'])->name('rooms.assignments');
+        Route::post('/alokasi-ruangan', [RoomController::class, 'storeAssignment'])->name('rooms.assignments.store');
+        Route::post('/alokasi-ruangan/{assignment}/delete', [RoomController::class, 'destroyAssignment'])->name('rooms.assignments.destroy');
     });
 
     // Pendaftaran Biometrik Terpandu Sekolah / Lab Komputer & Monitoring (Superadmin, Admin, Guru)

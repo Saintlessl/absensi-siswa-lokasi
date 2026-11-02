@@ -11,6 +11,7 @@ class Absensi extends Model
 {
     protected $fillable = [
         'siswa_id',
+        'room_id',
         'tanggal',
         'jam_masuk',
         'jam_pulang',
@@ -46,6 +47,11 @@ class Absensi extends Model
     public function siswa()
     {
         return $this->belongsTo(Siswa::class);
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 
     public function manualOverrideUser()

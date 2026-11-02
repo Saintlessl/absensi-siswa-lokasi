@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class JurusanController extends Controller
@@ -21,9 +22,16 @@ class JurusanController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
         $jurusans = $query->orderBy('kode_jurusan')->paginate(10)->appends($request->query());
 
-        return view('jurusan.index', compact('jurusans') + ['search' => $request->search ?? '']);
+        return view('jurusan.index', compact('jurusans') + [
+            'search' => $request->search ?? '',
+            'status' => $request->status ?? '',
+        ]);
     }
 
     public function store(Request $request)
@@ -32,12 +40,21 @@ class JurusanController extends Controller
             'kode_jurusan' => 'required|string|max:20|unique:jurusans,kode_jurusan',
             'nama_jurusan' => 'required|string|max:255',
             'deskripsi'    => 'nullable|string',
+            'logo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'is_active'    => 'nullable|boolean',
         ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('jurusan-logos', 'public');
+        }
 
         Jurusan::create([
             'kode_jurusan' => strtoupper(trim($request->kode_jurusan)),
             'nama_jurusan' => $request->nama_jurusan,
             'deskripsi'    => $request->deskripsi,
+            'logo_path'    => $logoPath,
+            'is_active'    => $request->boolean('is_active', true),
         ]);
 
         return redirect()->back()->with('success', 'Data Jurusan berhasil ditambahkan');
@@ -57,12 +74,31 @@ class JurusanController extends Controller
             'kode_jurusan' => ['required', 'string', 'max:20', Rule::unique('jurusans', 'kode_jurusan')->ignore($jurusan->id)],
             'nama_jurusan' => 'required|string|max:255',
             'deskripsi'    => 'nullable|string',
+            'logo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'is_active'    => 'nullable|boolean',
         ]);
+
+        $logoPath = $jurusan->logo_path;
+        if ($request->boolean('remove_logo')) {
+            if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            $logoPath = null;
+        }
+
+        if ($request->hasFile('logo')) {
+            if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            $logoPath = $request->file('logo')->store('jurusan-logos', 'public');
+        }
 
         $jurusan->update([
             'kode_jurusan' => strtoupper(trim($request->kode_jurusan)),
             'nama_jurusan' => $request->nama_jurusan,
             'deskripsi'    => $request->deskripsi,
+            'logo_path'    => $logoPath,
+            'is_active'    => $request->boolean('is_active', true),
         ]);
 
         return redirect()->route('jurusan')->with('success', 'Data Jurusan berhasil diperbarui!');
@@ -75,6 +111,10 @@ class JurusanController extends Controller
 
             if ($jurusan->kelas()->exists()) {
                 return redirect()->back()->with('error', 'Jurusan tidak bisa dihapus karena masih memiliki data kelas terkait.');
+            }
+
+            if ($jurusan->logo_path && Storage::disk('public')->exists($jurusan->logo_path)) {
+                Storage::disk('public')->delete($jurusan->logo_path);
             }
 
             $jurusan->delete();

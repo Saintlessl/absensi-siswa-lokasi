@@ -8,6 +8,7 @@ use App\Models\Kelas;
 use App\Models\OrangTua;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Models\StudentEnrollment;
 use App\Services\ParentAccountService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -23,13 +24,21 @@ class SiswaController extends Controller
     }
     public function index(Request $request)
     {
+        $user = Auth::user();
         $query = Siswa::with(['kelas.jurusan', 'user', 'orangtua']);
+
+        if ($user && $user->role === 'kaprog') {
+            $query->whereHas('kelas', function ($q) use ($user) {
+                $q->where('jurusan_id', $user->jurusan_id);
+            });
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'LIKE', '%' . $search . '%')
-                  ->orWhere('nis', 'LIKE', '%' . $search . '%');
+                  ->orWhere('nis', 'LIKE', '%' . $search . '%')
+                  ->orWhere('nisn', 'LIKE', '%' . $search . '%');
             });
         }
 
@@ -39,19 +48,33 @@ class SiswaController extends Controller
             });
         }
 
+        if ($request->filled('tingkat')) {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('tingkat', $request->tingkat);
+            });
+        }
+
         if ($request->filled('kelas_id')) {
             $query->where('kelas_id', $request->kelas_id);
         }
 
         $siswa = $query->orderBy('nama')->paginate(10)->appends($request->query());
-        $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
-        $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+
+        if ($user && $user->role === 'kaprog') {
+            $jurusans = Jurusan::where('id', $user->jurusan_id)->get();
+            $kelas = Kelas::with('jurusan')->where('jurusan_id', $user->jurusan_id)->where('is_active', true)->orderBy('nama_kelas')->get();
+        } else {
+            $jurusans = Jurusan::where('is_active', true)->orderBy('kode_jurusan')->get();
+            $kelas = Kelas::with('jurusan')->where('is_active', true)->orderBy('nama_kelas')->get();
+        }
+
         $orangTuaExisting = OrangTua::with('siswa')->orderBy('nama')->get();
 
         return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting') + [
             'search'     => $request->search ?? '',
             'kelas_id'   => $request->kelas_id ?? '',
             'jurusan_id' => $request->jurusan_id ?? '',
+            'tingkat'    => $request->tingkat ?? '',
         ]);
     }
 
@@ -80,6 +103,7 @@ class SiswaController extends Controller
             'nama'             => 'required|string|max:255',
             'jenis_kelamin'    => 'required|in:L,P',
             'kelas_id'         => 'required|exists:kelas,id',
+            'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'parent_name'      => 'required_without:existing_orangtua_id|nullable|string|max:255',
             'parent_phone'     => 'required_without:existing_orangtua_id|nullable|string|max:25',
             'parent_address'   => 'required_without:existing_orangtua_id|nullable|string|max:2000',
@@ -94,13 +118,23 @@ class SiswaController extends Controller
             'nisn.unique'               => 'NISN sudah terdaftar.',
         ]);
 
+        $targetKelas = Kelas::with('jurusan')->findOrFail($request->kelas_id);
+        if (Auth::user() && Auth::user()->role === 'kaprog' && Auth::user()->jurusan_id !== $targetKelas->jurusan_id) {
+            return back()->with('error', 'Akses ditolak: Anda hanya dapat menambahkan siswa ke jurusan Anda sendiri.')->withInput();
+        }
+
         try {
             $parentPhone = $request->filled('existing_orangtua_id') ? null : $this->normalizeIndonesianPhone($request->parent_phone);
             if (!$request->filled('existing_orangtua_id') && !$parentPhone) {
                 return back()->withErrors(['parent_phone' => 'Nomor WhatsApp harus berupa nomor Indonesia yang valid.'])->withInput();
             }
 
-            $activationLink = DB::transaction(function () use ($request, $finalEmail, $parentPhone) {
+            $photoPath = null;
+            if ($request->hasFile('photo')) {
+                $photoPath = $request->file('photo')->store('siswa-photos', 'public');
+            }
+
+            $activationLink = DB::transaction(function () use ($request, $finalEmail, $parentPhone, $photoPath, $targetKelas) {
             $user = User::create([
                 'name'     => $request->nama,
                 'email'    => $finalEmail,
@@ -114,8 +148,15 @@ class SiswaController extends Controller
                 'nis'              => $request->nis,
                 'nama'             => $request->nama,
                 'jenis_kelamin'    => $request->jenis_kelamin,
+                'photo_path'       => $photoPath,
                 'kelas_id'         => $request->kelas_id,
                 'biometric_status' => 'not_enrolled',
+            ]);
+            $kelas = $targetKelas;
+            StudentEnrollment::create([
+                'siswa_id' => $siswa->id, 'kelas_id' => $kelas->id,
+                'tahun_ajaran' => $kelas->tahun_ajaran ?: now()->format('Y') . '/' . now()->addYear()->format('Y'),
+                'started_at' => now()->toDateString(), 'is_active' => true,
             ]);
 
             if ($request->filled('existing_orangtua_id')) {
@@ -186,6 +227,7 @@ class SiswaController extends Controller
             'nama'             => 'required|string|max:255',
             'jenis_kelamin'    => 'required|in:L,P',
             'kelas_id'         => 'required|exists:kelas,id',
+            'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'parent_name'      => 'required|string|max:255',
             'parent_phone'     => 'required|string|max:25',
             'parent_address'   => 'required|string|max:2000',
@@ -196,12 +238,34 @@ class SiswaController extends Controller
             'parent_phone.required' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
         ]);
 
+        if (Auth::user() && Auth::user()->role === 'kaprog') {
+            $targetKelas = Kelas::findOrFail($request->kelas_id);
+            if (Auth::user()->jurusan_id !== $targetKelas->jurusan_id) {
+                return back()->with('error', 'Akses ditolak: Anda hanya dapat memindahkan siswa ke jurusan Anda sendiri.');
+            }
+        }
+
         try {
             $parentPhone = $this->normalizeIndonesianPhone($request->parent_phone);
             if (!$parentPhone) {
                 return back()->withErrors(['parent_phone' => 'Nomor WhatsApp harus berupa nomor Indonesia yang valid.'])->withInput();
             }
-            DB::transaction(function () use ($request, $siswa, $finalEmail, $parentPhone) {
+
+            $photoPath = $siswa->photo_path;
+            if ($request->boolean('remove_photo')) {
+                if ($photoPath && Storage::disk('public')->exists($photoPath)) {
+                    Storage::disk('public')->delete($photoPath);
+                }
+                $photoPath = null;
+            }
+            if ($request->hasFile('photo')) {
+                if ($photoPath && Storage::disk('public')->exists($photoPath)) {
+                    Storage::disk('public')->delete($photoPath);
+                }
+                $photoPath = $request->file('photo')->store('siswa-photos', 'public');
+            }
+
+            DB::transaction(function () use ($request, $siswa, $finalEmail, $parentPhone, $photoPath) {
             $userData = [
                 'name'  => $request->nama,
                 'email' => $finalEmail,
@@ -215,13 +279,23 @@ class SiswaController extends Controller
                 $siswa->user->update($userData);
             }
 
+            $kelasChanged = (int) $siswa->kelas_id !== (int) $request->kelas_id;
             $siswa->update([
                 'nisn'             => $request->nisn,
                 'nis'              => $request->nis,
                 'nama'             => $request->nama,
                 'jenis_kelamin'    => $request->jenis_kelamin,
+                'photo_path'       => $photoPath,
                 'kelas_id'         => $request->kelas_id,
             ]);
+            if ($kelasChanged) {
+                StudentEnrollment::where('siswa_id', $siswa->id)->where('is_active', true)->update(['is_active'=>false, 'ended_at'=>now()->toDateString()]);
+                $kelasBaru = Kelas::findOrFail($request->kelas_id);
+                StudentEnrollment::updateOrCreate(
+                    ['siswa_id'=>$siswa->id, 'tahun_ajaran'=>$kelasBaru->tahun_ajaran ?: now()->format('Y') . '/' . now()->addYear()->format('Y')],
+                    ['kelas_id'=>$kelasBaru->id, 'started_at'=>now()->toDateString(), 'ended_at'=>null, 'is_active'=>true]
+                );
+            }
 
             $parent = $siswa->orangtua->first();
             if (!$parent) {

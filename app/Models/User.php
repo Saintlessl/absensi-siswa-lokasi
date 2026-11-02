@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'jurusan_id',
     ];
     public function guru()
     {
@@ -44,6 +45,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(ParentAccountActivation::class);
     }
+    public function jurusan() { return $this->belongsTo(Jurusan::class); }
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -41,17 +41,22 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kelas'   => 'required|string|max:255',
-            'jurusan_id'   => 'nullable|exists:jurusans,id',
+            'nama_kelas'   => 'nullable|string|max:255',
+            'jurusan_id'   => 'required|exists:jurusans,id',
+            'tingkat'      => 'required|in:10,11,12',
+            'nomor_rombel' => 'required|integer|min:1|max:99',
+            'tahun_ajaran' => 'required|string|max:20',
             'jumlah_siswa' => 'required|integer',
             'wali_kelas'   => 'required|string|max:255',
         ]);
 
+        $jurusan = Jurusan::whereKey($request->jurusan_id)->where('is_active', true)->firstOrFail();
         Kelas::create([
-            'nama_kelas'   => $request->nama_kelas,
+            'nama_kelas'   => "{$request->tingkat} {$jurusan->kode_jurusan} {$request->nomor_rombel}",
             'jurusan_id'   => $request->jurusan_id,
             'jumlah_siswa' => $request->jumlah_siswa,
             'wali_kelas'   => $request->wali_kelas,
+            'tingkat' => $request->tingkat, 'nomor_rombel' => $request->nomor_rombel, 'tahun_ajaran' => $request->tahun_ajaran, 'is_active' => true,
         ]);
 
         return redirect()->back()->with('success', 'Data Kelas berhasil ditambahkan');
@@ -67,19 +72,24 @@ class KelasController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nama_kelas'   => 'required|string|max:255',
-            'jurusan_id'   => 'nullable|exists:jurusans,id',
+            'nama_kelas'   => 'nullable|string|max:255',
+            'jurusan_id'   => 'required|exists:jurusans,id',
+            'tingkat'      => 'required|in:10,11,12',
+            'nomor_rombel' => 'required|integer|min:1|max:99',
+            'tahun_ajaran' => 'required|string|max:20',
             'jumlah_siswa' => 'required|integer',
             'wali_kelas'   => 'required|string|max:255',
         ]);
 
         try {
             $kelas = Kelas::findOrFail($id);
+            $jurusan = Jurusan::whereKey($request->jurusan_id)->where('is_active', true)->firstOrFail();
             $kelas->update([
-                'nama_kelas'   => $request->nama_kelas,
+                'nama_kelas'   => "{$request->tingkat} {$jurusan->kode_jurusan} {$request->nomor_rombel}",
                 'jurusan_id'   => $request->jurusan_id,
                 'jumlah_siswa' => $request->jumlah_siswa,
                 'wali_kelas'   => $request->wali_kelas,
+                'tingkat' => $request->tingkat, 'nomor_rombel' => $request->nomor_rombel, 'tahun_ajaran' => $request->tahun_ajaran,
             ]);
 
             return redirect()->route('kelas')->with('success', 'Data kelas berhasil diperbarui!');

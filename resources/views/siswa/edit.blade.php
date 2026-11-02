@@ -1,4 +1,4 @@
-<form action="{{ route('siswa.update', ['id' => $siswa->id]) }}" method="POST" id="frmEditSiswa">
+<form action="{{ route('siswa.update', ['id' => $siswa->id]) }}" method="POST" id="frmEditSiswa" enctype="multipart/form-data">
     @csrf
 
     {{-- Section A: Identitas Siswa --}}
@@ -7,6 +7,33 @@
             <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">1</div>
             <h4 class="text-sm font-semibold text-dark-800">Identitas Siswa</h4>
         </div>
+
+        {{-- Foto Profil Siswa --}}
+        <div class="mb-4 p-3 rounded-xl bg-dark-50/50 border border-dark-100">
+            <label class="block text-xs font-medium text-dark-700 mb-1.5">Foto Profil Siswa (Opsional)</label>
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-xl border border-dark-200 bg-white flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_edit_photo_container">
+                    @if ($siswa->photo_url)
+                        <img src="{{ $siswa->photo_url }}" alt="{{ $siswa->nama }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-base font-bold text-dark-400">{{ strtoupper(substr($siswa->nama, 0, 1)) }}</span>
+                    @endif
+                </div>
+                <div class="flex-1">
+                    <input type="file" name="photo" id="photo_edit" accept="image/jpeg,image/png,image/webp"
+                        class="block w-full text-xs text-dark-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
+                        onchange="previewEditStudentPhoto(this)">
+                    <p class="text-[11px] text-dark-400 mt-1">Format: JPG, PNG, WebP. Maks 2MB.</p>
+                    @if ($siswa->photo_path)
+                        <label class="inline-flex items-center gap-1.5 mt-1.5 text-xs text-rose-600 cursor-pointer">
+                            <input type="checkbox" name="remove_photo" value="1" class="rounded border-dark-300 text-rose-600 focus:ring-rose-500">
+                            Hapus foto profil saat ini
+                        </label>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label for="nisn_edit" class="block text-xs font-medium text-dark-700 mb-1.5">NISN <span class="text-dark-400 font-normal">(10 digit)</span></label>
@@ -52,10 +79,10 @@
             </div>
 
             <div>
-                <label for="jurusan_edit" class="block text-xs font-medium text-dark-700 mb-1.5">Jurusan</label>
-                <select id="jurusan_edit"
+                <label for="jurusan_edit" class="block text-xs font-medium text-dark-700 mb-1.5">Jurusan (Program Keahlian) <span class="text-rose-500">*</span></label>
+                <select id="jurusan_edit" onchange="filterEditRombel()" required
                     class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                    <option value="">-- Semua Jurusan --</option>
+                    <option value="">-- Pilih Jurusan --</option>
                     @foreach($jurusans as $j)
                         <option value="{{ $j->id }}" {{ ($siswa->kelas->jurusan_id ?? '') == $j->id ? 'selected' : '' }}>
                             {{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}
@@ -64,13 +91,24 @@
                 </select>
             </div>
 
-            <div class="md:col-span-2">
-                <label for="kelas_id_edit" class="block text-xs font-medium text-dark-700 mb-1.5">Kelas <span class="text-rose-500">*</span></label>
+            <div>
+                <label for="tingkat_edit" class="block text-xs font-medium text-dark-700 mb-1.5">Tingkat Kelas <span class="text-rose-500">*</span></label>
+                <select id="tingkat_edit" onchange="filterEditRombel()" required
+                    class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                    <option value="">-- Pilih Tingkat --</option>
+                    <option value="10" {{ ($siswa->kelas->tingkat ?? 10) == 10 ? 'selected' : '' }}>Kelas 10</option>
+                    <option value="11" {{ ($siswa->kelas->tingkat ?? 0) == 11 ? 'selected' : '' }}>Kelas 11</option>
+                    <option value="12" {{ ($siswa->kelas->tingkat ?? 0) == 12 ? 'selected' : '' }}>Kelas 12</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="kelas_id_edit" class="block text-xs font-medium text-dark-700 mb-1.5">Rombongan Belajar (Rombel) <span class="text-rose-500">*</span></label>
                 <select name="kelas_id" id="kelas_id_edit" required
                     class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
                     @foreach($kelas as $k)
-                    <option value="{{ $k->id }}" data-jurusan="{{ $k->jurusan_id }}" {{ $siswa->kelas_id == $k->id ? 'selected' : '' }}>
-                        {{ $k->nama_kelas }} ({{ $k->jurusan->kode_jurusan ?? '-' }})
+                    <option value="{{ $k->id }}" data-jurusan="{{ $k->jurusan_id }}" data-tingkat="{{ $k->tingkat }}" {{ $siswa->kelas_id == $k->id ? 'selected' : '' }}>
+                        {{ $k->nama_kelas }} (Wali: {{ $k->wali_kelas }})
                     </option>
                     @endforeach
                 </select>
@@ -86,9 +124,18 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @php($parent = $siswa->orangtua->first())
-            <div><label class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali</label><input type="text" name="parent_name" value="{{ old('parent_name', $parent?->nama) }}" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm"></div>
-            <div><label class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp</label><input type="tel" name="parent_phone" value="{{ old('parent_phone', $parent?->telepon) }}" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-sm font-mono"></div>
-            <div class="md:col-span-2"><label class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap</label><textarea name="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm">{{ old('parent_address', $parent?->alamat) }}</textarea></div>
+            <div>
+                <label class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali <span class="text-rose-500">*</span></label>
+                <input type="text" name="parent_name" value="{{ old('parent_name', $parent?->nama) }}" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp <span class="text-rose-500">*</span></label>
+                <input type="tel" name="parent_phone" value="{{ old('parent_phone', $parent?->telepon) }}" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-sm font-mono">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap <span class="text-rose-500">*</span></label>
+                <textarea name="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm">{{ old('parent_address', $parent?->alamat) }}</textarea>
+            </div>
         </div>
     </div>
 
@@ -105,6 +152,10 @@
                     <span class="inline-flex items-center px-3 bg-dark-50 text-dark-500 text-sm border-r border-dark-200">
                         <i class='bx bx-user text-base'></i>
                     </span>
+                    @php
+                        $userEmail = $siswa->user->email ?? '';
+                        $currentUsername = str_contains($userEmail, '@') ? explode('@', $userEmail)[0] : $userEmail;
+                    @endphp
                     <input type="text" name="username" id="username_edit" value="{{ $currentUsername }}"
                         class="block w-full px-3 py-2 bg-white text-dark-800 text-sm focus:outline-none font-mono lowercase"
                         placeholder="username.siswa" required autocomplete="off">
@@ -145,29 +196,43 @@
 </form>
 
 <script>
-    (function() {
-        const jurusanSelect = document.getElementById('jurusan_edit');
-        const kelasSelect = document.getElementById('kelas_id_edit');
-        if (jurusanSelect && kelasSelect) {
-            jurusanSelect.addEventListener('change', function() {
-                const selectedJurusan = this.value;
-                Array.from(kelasSelect.options).forEach((opt) => {
-                    const optJurusan = opt.getAttribute('data-jurusan');
-                    if (!selectedJurusan || optJurusan === selectedJurusan) {
-                        opt.hidden = false;
-                        opt.disabled = false;
-                    } else {
-                        opt.hidden = true;
-                        opt.disabled = true;
-                    }
-                });
-                if (kelasSelect.selectedOptions[0] && kelasSelect.selectedOptions[0].disabled) {
-                    const firstVisible = Array.from(kelasSelect.options).find(o => !o.disabled);
-                    if (firstVisible) {
-                        kelasSelect.value = firstVisible.value;
-                    }
-                }
-            });
+    function previewEditStudentPhoto(input) {
+        const container = document.getElementById('preview_edit_photo_container');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-    })();
+    }
+
+    function filterEditRombel() {
+        const jurusanId = document.getElementById('jurusan_edit').value;
+        const tingkat = document.getElementById('tingkat_edit').value;
+        const kelasSelect = document.getElementById('kelas_id_edit');
+
+        Array.from(kelasSelect.options).forEach((opt) => {
+            const optJurusan = opt.getAttribute('data-jurusan');
+            const optTingkat = opt.getAttribute('data-tingkat');
+
+            const matchJurusan = !jurusanId || optJurusan === jurusanId;
+            const matchTingkat = !tingkat || optTingkat === tingkat;
+
+            if (matchJurusan && matchTingkat) {
+                opt.hidden = false;
+                opt.disabled = false;
+            } else {
+                opt.hidden = true;
+                opt.disabled = true;
+            }
+        });
+
+        if (kelasSelect.selectedOptions[0] && kelasSelect.selectedOptions[0].disabled) {
+            const firstAvailable = Array.from(kelasSelect.options).find(o => !o.disabled);
+            if (firstAvailable) {
+                kelasSelect.value = firstAvailable.value;
+            }
+        }
+    }
 </script>

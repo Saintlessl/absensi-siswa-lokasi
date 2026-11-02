@@ -118,8 +118,12 @@
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-dark-800">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                        {{ strtoupper(substr($s->nama, 0, 1)) }}
+                                    <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden">
+                                        @if ($s->photo_url)
+                                            <img src="{{ $s->photo_url }}" alt="{{ $s->nama }}" class="w-full h-full object-cover">
+                                        @else
+                                            {{ strtoupper(substr($s->nama, 0, 1)) }}
+                                        @endif
                                     </div>
                                     <div>
                                         <div class="font-bold text-dark-900">{{ $s->nama }} <span class="text-xs font-normal text-dark-400">({{ $s->jenis_kelamin }})</span></div>
@@ -221,7 +225,7 @@
 
                         {{-- Body --}}
                         <div class="px-6 py-5">
-                            <form action="{{ route('siswa.store') }}" method="POST" id="frmSiswa">
+                            <form action="{{ route('siswa.store') }}" method="POST" id="frmSiswa" enctype="multipart/form-data">
                                 @csrf
 
                                 {{-- Section A: Identitas Siswa --}}
@@ -230,6 +234,23 @@
                                         <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">1</div>
                                         <h4 class="text-sm font-semibold text-dark-800">Identitas Siswa</h4>
                                     </div>
+
+                                    {{-- Foto Profil Siswa --}}
+                                    <div class="mb-4 p-3 rounded-xl bg-dark-50/50 border border-dark-100">
+                                        <label class="block text-xs font-medium text-dark-700 mb-1.5">Foto Profil Siswa (Opsional)</label>
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-14 h-14 rounded-xl border border-dashed border-dark-300 bg-white flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_add_photo_container">
+                                                <i class='bx bx-user text-2xl text-dark-400'></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp"
+                                                    class="block w-full text-xs text-dark-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
+                                                    onchange="previewAddStudentPhoto(this)">
+                                                <p class="text-[11px] text-dark-400 mt-1">Format: JPG, PNG, WebP. Maks 2MB.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label for="nisn" class="block text-xs font-medium text-dark-700 mb-1.5">NISN <span class="text-dark-400 font-normal">(10 digit)</span></label>
@@ -273,24 +294,38 @@
                                                 <option value="P">Perempuan</option>
                                             </select>
                                         </div>
+
+                                        {{-- 3-Step Dependent Dropdown --}}
                                         <div>
-                                            <label for="modal_filter_jurusan" class="block text-xs font-medium text-dark-700 mb-1.5">Jurusan</label>
-                                            <select id="modal_filter_jurusan"
+                                            <label for="modal_filter_jurusan" class="block text-xs font-medium text-dark-700 mb-1.5">1. Jurusan (Program Keahlian) <span class="text-rose-500">*</span></label>
+                                            <select id="modal_filter_jurusan" required onchange="filterAddStudentRombel()"
                                                 class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                                <option value="">-- Semua Jurusan --</option>
+                                                <option value="">-- Pilih Jurusan --</option>
                                                 @foreach($jurusans as $j)
                                                     <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="md:col-span-2">
-                                            <label for="kelas_id" class="block text-xs font-medium text-dark-700 mb-1.5">Kelas <span class="text-rose-500">*</span></label>
-                                            <select name="kelas_id" id="kelas_id" required
+
+                                        <div>
+                                            <label for="modal_filter_tingkat" class="block text-xs font-medium text-dark-700 mb-1.5">2. Tingkat Kelas <span class="text-rose-500">*</span></label>
+                                            <select id="modal_filter_tingkat" required onchange="filterAddStudentRombel()"
                                                 class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                                <option value="">-- Pilih Kelas --</option>
+                                                <option value="">-- Pilih Tingkat --</option>
+                                                <option value="10">Kelas 10</option>
+                                                <option value="11">Kelas 11</option>
+                                                <option value="12">Kelas 12</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label for="kelas_id" class="block text-xs font-medium text-dark-700 mb-1.5">3. Rombel Belajar <span class="text-rose-500">*</span></label>
+                                            <select name="kelas_id" id="kelas_id" required
+                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono">
+                                                <option value="">-- Pilih Rombel --</option>
                                                 @foreach($kelas as $k)
-                                                    <option value="{{ $k->id }}" data-jurusan="{{ $k->jurusan_id }}">
-                                                        {{ $k->nama_kelas }} ({{ $k->jurusan->kode_jurusan ?? '-' }})
+                                                    <option value="{{ $k->id }}" data-jurusan="{{ $k->jurusan_id }}" data-tingkat="{{ $k->tingkat }}">
+                                                        {{ $k->nama_kelas }} (Wali: {{ $k->wali_kelas }})
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -567,6 +602,51 @@
                 closeModal('modal-editsiswa');
             }
         });
+
+        // Photo Preview for Add Student Modal
+        function previewAddStudentPhoto(input) {
+            const container = document.getElementById('preview_add_photo_container');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                container.innerHTML = `<i class='bx bx-user text-2xl text-dark-400'></i>`;
+            }
+        }
+
+        // 3-Step Dependent Dropdown (Jurusan + Tingkat -> Rombel)
+        function filterAddStudentRombel() {
+            const jurusanId = document.getElementById('modal_filter_jurusan').value;
+            const tingkat = document.getElementById('modal_filter_tingkat').value;
+            const rombelSelect = document.getElementById('kelas_id');
+            const options = rombelSelect.querySelectorAll('option');
+
+            options.forEach(opt => {
+                if (!opt.value) {
+                    opt.hidden = false;
+                    return;
+                }
+                const optJurusan = opt.getAttribute('data-jurusan');
+                const optTingkat = opt.getAttribute('data-tingkat');
+
+                const matchJurusan = !jurusanId || optJurusan === jurusanId;
+                const matchTingkat = !tingkat || optTingkat === tingkat;
+
+                if (matchJurusan && matchTingkat) {
+                    opt.hidden = false;
+                } else {
+                    opt.hidden = true;
+                }
+            });
+
+            const selectedOption = rombelSelect.options[rombelSelect.selectedIndex];
+            if (selectedOption && selectedOption.hidden) {
+                rombelSelect.value = "";
+            }
+        }
 
         const existingParent = document.getElementById('existing_orangtua_id');
         if (existingParent) {

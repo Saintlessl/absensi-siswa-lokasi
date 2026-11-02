@@ -46,6 +46,7 @@
                         <option value="">Semua Role</option>
                         <option value="superadmin" {{ $filter_role == 'superadmin' ? 'selected' : '' }}>Superadmin</option>
                         <option value="admin" {{ $filter_role == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="kaprog" {{ $filter_role == 'kaprog' ? 'selected' : '' }}>Kaprog</option>
                         <option value="guru" {{ $filter_role == 'guru' ? 'selected' : '' }}>Guru</option>
                         <option value="siswa" {{ $filter_role == 'siswa' ? 'selected' : '' }}>Siswa</option>
                         <option value="orangtua" {{ $filter_role == 'orangtua' ? 'selected' : '' }}>Orang Tua</option>
@@ -94,6 +95,7 @@
                                     $roleColors = [
                                         'superadmin' => 'bg-purple-50 text-purple-700 border border-purple-200',
                                         'admin' => 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+                                        'kaprog' => 'bg-violet-50 text-violet-700 border border-violet-200',
                                         'guru' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
                                         'siswa' => 'bg-amber-50 text-amber-700 border border-amber-200',
                                         'orangtua' => 'bg-rose-50 text-rose-700 border border-rose-200',
@@ -205,14 +207,26 @@
 
                                     <div>
                                         <label for="role" class="block text-sm font-medium text-dark-700 mb-1.5">Role Akses</label>
-                                        <select name="role" id="role" required
+                                        <select name="role" id="role" required onchange="toggleAddJurusanField(this.value)"
                                             class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
                                             <option value="">-- Pilih Role Akses --</option>
                                             <option value="superadmin">Super Administrator</option>
                                             <option value="admin">Administrator / Staf</option>
+                                            <option value="kaprog">Kepala Program Keahlian (KAPROG)</option>
                                             <option value="guru">Guru</option>
                                             <option value="siswa">Siswa</option>
                                             <option value="orangtua">Orang Tua</option>
+                                        </select>
+                                    </div>
+
+                                    <div id="wrapper_add_jurusan" class="hidden">
+                                        <label for="jurusan_id" class="block text-sm font-medium text-dark-700 mb-1.5">Jurusan Binaan (KAPROG) <span class="text-rose-500">*</span></label>
+                                        <select name="jurusan_id" id="jurusan_id"
+                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                                            <option value="">-- Pilih Jurusan --</option>
+                                            @foreach ($jurusans as $j)
+                                                <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
 
@@ -279,6 +293,34 @@
 
 @push('scripts')
     <script>
+        function toggleAddJurusanField(role) {
+            const wrapper = document.getElementById('wrapper_add_jurusan');
+            const select = document.getElementById('jurusan_id');
+            if (role === 'kaprog') {
+                wrapper.classList.remove('hidden');
+                select.required = true;
+            } else {
+                wrapper.classList.add('hidden');
+                select.required = false;
+                select.value = '';
+            }
+        }
+
+        function toggleEditJurusanField(role) {
+            const wrapper = document.getElementById('wrapper_edit_jurusan');
+            const select = document.getElementById('jurusan_id_edit');
+            if (!wrapper) return;
+            if (role === 'kaprog') {
+                wrapper.classList.remove('hidden');
+                if (select) select.required = true;
+            } else {
+                wrapper.classList.add('hidden');
+                if (select) {
+                    select.required = false;
+                    select.value = '';
+                }
+            }
+        }
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {

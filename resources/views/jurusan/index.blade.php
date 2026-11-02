@@ -6,14 +6,16 @@
 
 @section('breadcrumb')
     <li><i class='bx bx-chevron-right text-dark-400'></i></li>
+    <li><a href="{{ route('academic.index') }}" class="hover:text-primary-600 transition-colors">Akademik</a></li>
+    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
     <li class="text-primary-600 font-medium">Data Jurusan</li>
 @endsection
 
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Jurusan</h2>
-            <p class="text-sm text-dark-400 mt-1">Kelola data program keahlian yang ada di SMK.</p>
+            <h2 class="text-xl font-bold text-dark-800">Daftar Jurusan (Program Keahlian)</h2>
+            <p class="text-sm text-dark-400 mt-1">Kelola master program keahlian, logo, dan status keaktifan akademik.</p>
         </div>
         <button onclick="openModal('modal-inputjurusan')"
             class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 hover:-translate-y-0.5">
@@ -39,11 +41,19 @@
                             placeholder="Kode / Nama / Deskripsi Jurusan...">
                     </div>
                 </div>
+                <div class="w-full sm:w-48">
+                    <label class="block text-xs font-medium text-dark-600 mb-1">Status</label>
+                    <select name="status" class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                        <option value="">Semua Status</option>
+                        <option value="active" {{ ($status ?? '') === 'active' ? 'selected' : '' }}>Aktif Saja</option>
+                        <option value="inactive" {{ ($status ?? '') === 'inactive' ? 'selected' : '' }}>Nonaktif Saja</option>
+                    </select>
+                </div>
                 <button type="submit"
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
                     <i class='bx bx-filter-alt'></i> Filter
                 </button>
-                @if ($search)
+                @if ($search || $status)
                     <a href="{{ route('jurusan') }}"
                         class="px-4 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
                         Reset
@@ -57,11 +67,13 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">No</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-14 text-center">No</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">Logo</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Kode</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Jurusan</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Deskripsi</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Kelas</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Status</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Rombel</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Siswa</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">Aksi</th>
                     </tr>
@@ -80,18 +92,42 @@
                         @endphp
                         <tr class="hover:bg-dark-50/50 transition-colors duration-200">
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $jurusans->firstItem() + $loop->index }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="w-10 h-10 rounded-xl bg-dark-100 border border-dark-200 flex items-center justify-center overflow-hidden mx-auto">
+                                    @if ($j->logo_url)
+                                        <img src="{{ $j->logo_url }}" alt="{{ $j->kode_jurusan }}" class="w-full h-full object-cover">
+                                    @else
+                                        <span class="text-xs font-bold text-dark-500">{{ substr($j->kode_jurusan, 0, 2) }}</span>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-sm">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border {{ $badgeColor }}">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border font-mono {{ $badgeColor }}">
                                     {{ $j->kode_jurusan }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm font-semibold text-dark-800">{{ $j->nama_jurusan }}</td>
+                            <td class="px-6 py-4 text-sm font-semibold text-dark-800">
+                                <a href="{{ route('academic.major', $j) }}" class="hover:text-primary-600 transition-colors">
+                                    {{ $j->nama_jurusan }}
+                                </a>
+                            </td>
                             <td class="px-6 py-4 text-xs text-dark-500 max-w-xs truncate" title="{{ $j->deskripsi }}">
                                 {{ $j->deskripsi ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-center">
+                                @if ($j->is_active)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        Aktif
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-dark-100 text-dark-500 border border-dark-200">
+                                        Nonaktif
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm text-center">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-dark-100 text-dark-700">
-                                    {{ $j->kelas_count }} Kelas
+                                    {{ $j->kelas_count }} Rombel
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-center">
@@ -119,13 +155,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="9" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-dark-100 flex items-center justify-center text-dark-400 mb-3">
                                         <i class='bx bx-layer text-2xl'></i>
                                     </div>
-                                    <p class="text-sm font-medium text-dark-800">Tidak ada data jurusan</p>
-                                    <p class="text-xs text-dark-400 mt-1">Data belum ditambahkan atau filter tidak sesuai.</p>
+                                    <h3 class="text-sm font-semibold text-dark-800">Belum Ada Data Jurusan</h3>
+                                    <p class="text-xs text-dark-400 mt-1">Silakan tambahkan data program keahlian baru.</p>
                                 </div>
                             </td>
                         </tr>
@@ -136,7 +172,7 @@
 
         {{-- Pagination --}}
         @if ($jurusans->hasPages())
-            <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/20">
+            <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
                 {{ $jurusans->links() }}
             </div>
         @endif
@@ -161,9 +197,25 @@
                             </button>
                         </div>
                         <div class="px-6 py-5">
-                            <form action="{{ route('jurusan.store') }}" method="POST" id="formTambahJurusan">
+                            <form action="{{ route('jurusan.store') }}" method="POST" id="formTambahJurusan" enctype="multipart/form-data">
                                 @csrf
                                 <div class="space-y-4">
+                                    {{-- Logo upload --}}
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Logo Jurusan</label>
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-16 h-16 rounded-xl border border-dashed border-dark-300 bg-dark-50 flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_add_logo_container">
+                                                <i class='bx bx-image text-2xl text-dark-400'></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <input type="file" name="logo" id="logo_add" accept="image/jpeg,image/png,image/webp"
+                                                    class="block w-full text-xs text-dark-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
+                                                    onchange="previewAddLogo(this)">
+                                                <p class="text-[11px] text-dark-400 mt-1">Format: JPG, PNG, WebP. Maks 2MB.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label for="kode_jurusan" class="block text-sm font-medium text-dark-700 mb-1.5">
                                             Kode Jurusan <span class="text-rose-500">*</span>
@@ -173,7 +225,7 @@
                                                 <i class='bx bx-tag text-dark-400 text-lg'></i>
                                             </div>
                                             <input type="text" name="kode_jurusan" id="kode_jurusan"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 uppercase focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 uppercase focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200 font-mono font-bold"
                                                 placeholder="Contoh: PPLG, ANIMASI, TPFL, TO, BCF" required autocomplete="off">
                                         </div>
                                     </div>
@@ -197,6 +249,14 @@
                                         <textarea name="deskripsi" id="deskripsi" rows="3"
                                             class="block w-full p-3 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200 text-sm"
                                             placeholder="Deskripsi singkat tentang fokus keahlian jurusan ini..."></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Status Jurusan</label>
+                                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" name="is_active" value="1" checked class="rounded border-dark-300 text-primary-600 focus:ring-primary-500">
+                                            <span class="text-sm text-dark-700 font-medium">Aktif (Dapat dipilih saat membuat kelas dan siswa)</span>
+                                        </label>
                                     </div>
                                 </div>
 
@@ -258,6 +318,17 @@
             if (modal) {
                 modal.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        function previewAddLogo(input) {
+            const container = document.getElementById('preview_add_logo_container');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
 

@@ -21,6 +21,7 @@ class Siswa extends Model
         'jenis_kelamin',
         'kelas_id',
         'biometric_status'
+        ,'photo_path'
     ];
 
     public function kelas()
@@ -72,6 +73,8 @@ class Siswa extends Model
     {
         return $this->hasMany(WhatsappNotificationLog::class);
     }
+    public function enrollments() { return $this->hasMany(StudentEnrollment::class); }
+    public function activeEnrollment() { return $this->hasOne(StudentEnrollment::class)->where('is_active', true); }
 
     /**
      * Check if student is fully enrolled with a valid biometric template

@@ -17,6 +17,12 @@ class Jurusan extends Model
         'kode_jurusan',
         'nama_jurusan',
         'deskripsi',
+        'logo_path',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function kelas()
@@ -24,8 +30,26 @@ class Jurusan extends Model
         return $this->hasMany(Kelas::class);
     }
 
+    public function activeKelas()
+    {
+        return $this->hasMany(Kelas::class)->where('is_active', true);
+    }
+
     public function siswa()
     {
         return $this->hasManyThrough(Siswa::class, Kelas::class);
+    }
+
+    public function kaprogs()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function getLogoUrlAttribute()
+    {
+        if ($this->logo_path) {
+            return asset('storage/' . $this->logo_path);
+        }
+        return null;
     }
 }

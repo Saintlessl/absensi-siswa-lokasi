@@ -27,13 +27,27 @@
 
         <div>
             <label for="role_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Role Akses</label>
-            <select name="role" id="role_edit" required
+            <select name="role" id="role_edit" required onchange="toggleEditJurusanField(this.value)"
                 class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-white focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
                 <option value="superadmin" {{ $user->role == 'superadmin' ? 'selected' : '' }}>Super Administrator</option>
                 <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Administrator / Staf</option>
+                <option value="kaprog" {{ $user->role == 'kaprog' ? 'selected' : '' }}>Kepala Program Keahlian (KAPROG)</option>
                 <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
                 <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
                 <option value="orangtua" {{ $user->role == 'orangtua' ? 'selected' : '' }}>Orang Tua</option>
+            </select>
+        </div>
+
+        <div id="wrapper_edit_jurusan" class="{{ $user->role == 'kaprog' ? '' : 'hidden' }}">
+            <label for="jurusan_id_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Jurusan Binaan (KAPROG) <span class="text-rose-500">*</span></label>
+            <select name="jurusan_id" id="jurusan_id_edit"
+                class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-white focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                <option value="">-- Pilih Jurusan --</option>
+                @foreach ($jurusans as $j)
+                    <option value="{{ $j->id }}" {{ $user->jurusan_id == $j->id ? 'selected' : '' }}>
+                        {{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}
+                    </option>
+                @endforeach
             </select>
         </div>
 

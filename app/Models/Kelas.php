@@ -18,6 +18,7 @@ class Kelas extends Model
         'nama_kelas',
         'jumlah_siswa',
         'wali_kelas'
+        ,'tingkat','nomor_rombel','tahun_ajaran','is_active'
     ];
 
     public function jurusan()
@@ -34,4 +35,6 @@ class Kelas extends Model
     {
         return $this->hasMany(Jadwal::class);
     }
+    public function enrollments() { return $this->hasMany(StudentEnrollment::class); }
+    public function roomAssignments() { return $this->hasMany(RoomAssignment::class); }
 }

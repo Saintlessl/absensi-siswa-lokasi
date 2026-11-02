@@ -23,8 +23,9 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        $user = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->query());
-        return view('user.index', compact('user') + [
+        $user = $query->with('jurusan')->orderBy('created_at', 'desc')->paginate(10)->appends($request->query());
+        $jurusans = \App\Models\Jurusan::where('is_active', true)->orderBy('nama_jurusan')->get();
+        return view('user.index', compact('user', 'jurusans') + [
             'search' => $request->search ?? '',
             'filter_role' => $request->role ?? '',
         ]);
@@ -40,7 +41,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:superadmin,admin,guru,siswa,orangtua',
+            'role' => 'required|in:superadmin,admin,guru,siswa,orangtua,kaprog',
+            'jurusan_id' => 'required_if:role,kaprog|nullable|exists:jurusans,id',
         ]);
 
         User::create([
@@ -48,6 +50,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => \Hash::make($request->password),
             'role' => $request->role,
+            'jurusan_id' => $request->role === 'kaprog' ? $request->jurusan_id : null,
         ]);
 
         return redirect()->back()->with('success', 'Data User berhasil ditambahkan');
@@ -60,7 +63,8 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($request->id);
-        return view('user.edit', compact('user'));
+        $jurusans = \App\Models\Jurusan::where('is_active', true)->orderBy('nama_jurusan')->get();
+        return view('user.edit', compact('user', 'jurusans'));
     }
 
     public function update(Request $request, $id)
@@ -74,13 +78,15 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:superadmin,admin,guru,siswa,orangtua',
+            'role' => 'required|in:superadmin,admin,guru,siswa,orangtua,kaprog',
+            'jurusan_id' => 'required_if:role,kaprog|nullable|exists:jurusans,id',
         ]);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'jurusan_id' => $request->role === 'kaprog' ? $request->jurusan_id : null,
         ];
 
         if ($request->filled('password')) {
