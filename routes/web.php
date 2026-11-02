@@ -66,10 +66,6 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     // SUPERADMIN ONLY ROUTES (System Settings, User Management, Critical Actions)
     // =========================================================================
     Route::middleware(['role:superadmin'])->group(function () {
-        // Lokasi Sekolah & Radius Geofence GPS
-        Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('lokasi_sekolah');
-        Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('lokasi_sekolah.update');
-
         // Manajemen User (Kelola Akun Seluruh Role)
         Route::get('/user', [UserController::class, 'index'])->name('user');
         Route::post('/user', [UserController::class, 'store'])->name('user.store');
@@ -88,6 +84,10 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     // SUPERADMIN & ADMIN ROUTES (Master Data, Monitoring, QR Codes, Export)
     // =========================================================================
     Route::middleware(['role:superadmin,admin'])->group(function () {
+        // Lokasi Sekolah & Radius Geofence GPS
+        Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('lokasi_sekolah');
+        Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('lokasi_sekolah.update');
+
         // Dashboard Operations
         Route::post('/dashboard/absensi/{id}/update', [DashboardController::class, 'updateAbsensi'])->name('dashboard.absensi.update');
         Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export.pdf');

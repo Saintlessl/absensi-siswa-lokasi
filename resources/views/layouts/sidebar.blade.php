@@ -181,25 +181,25 @@
                                 <span class="sidebar-label transition-all duration-300">Manajemen User</span>
                             </a>
                         </li>
-
-                        {{-- Setting Lokasi (Superadmin Only) --}}
-                        <li>
-                            <a href="{{ Route::has('lokasi_sekolah') ? route('lokasi_sekolah') : '#' }}"
-                                class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('lokasi_sekolah.*') || request()->routeIs('lokasi_sekolah')
-                                      ? 'bg-purple-600/20 text-purple-400 menu-active'
-                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
-                                        {{ request()->routeIs('lokasi_sekolah.*') || request()->routeIs('lokasi_sekolah')
-                                            ? 'bg-purple-600/30 text-purple-400'
-                                            : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
-                                    <i class='bx bx-map-pin text-lg'></i>
-                                </div>
-                                <span class="sidebar-label transition-all duration-300">Setting Lokasi</span>
-                            </a>
-                        </li>
                     @endif
+
+                    {{-- Pengaturan Lokasi Sekolah (Superadmin & Admin) --}}
+                    <li>
+                        <a href="{{ Route::has('lokasi_sekolah') ? route('lokasi_sekolah') : '#' }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                              {{ request()->routeIs('lokasi_sekolah.*') || request()->routeIs('lokasi_sekolah')
+                                  ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                  : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                    {{ request()->routeIs('lokasi_sekolah.*') || request()->routeIs('lokasi_sekolah')
+                                        ? 'bg-primary-600/30 text-primary-400'
+                                        : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-map-pin text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Pengaturan Lokasi</span>
+                        </a>
+                    </li>
 
                     {{-- QR Code Kelas --}}
                     <li>

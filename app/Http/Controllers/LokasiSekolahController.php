@@ -9,8 +9,8 @@ class LokasiSekolahController extends Controller
 {
     public function index()
     {
-        if (\Illuminate\Support\Facades\Auth::user()->role !== 'superadmin') {
-            return redirect()->route('dashboard')->with('error', 'Akses ditolak: Pengaturan lokasi sekolah hanya dapat diakses oleh Superadmin.');
+        if (!in_array(\Illuminate\Support\Facades\Auth::user()->role, ['superadmin', 'admin'])) {
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak: Pengaturan lokasi sekolah hanya dapat diakses oleh Admin atau Superadmin.');
         }
 
         $lokasi = LokasiSekolah::first();
@@ -29,8 +29,8 @@ class LokasiSekolahController extends Controller
 
     public function update(Request $request)
     {
-        if (\Illuminate\Support\Facades\Auth::user()->role !== 'superadmin') {
-            return redirect()->route('dashboard')->with('error', 'Akses ditolak: Hanya Superadmin yang berwenang mengubah koordinat & radius lokasi sekolah.');
+        if (!in_array(\Illuminate\Support\Facades\Auth::user()->role, ['superadmin', 'admin'])) {
+            return redirect()->route('dashboard')->with('error', 'Akses ditolak: Hanya Admin atau Superadmin yang berwenang mengubah koordinat & radius lokasi sekolah.');
         }
 
         $lokasi = LokasiSekolah::first();
