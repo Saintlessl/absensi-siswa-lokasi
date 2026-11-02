@@ -39,11 +39,23 @@
                             placeholder="Nama Kelas / Wali Kelas...">
                     </div>
                 </div>
+                <div class="w-full sm:w-64">
+                    <label class="block text-xs font-medium text-dark-600 mb-1">Filter Jurusan</label>
+                    <select name="jurusan_id"
+                        class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                        <option value="">Semua Jurusan</option>
+                        @foreach ($jurusans as $j)
+                            <option value="{{ $j->id }}" {{ ($jurusan_id ?? '') == $j->id ? 'selected' : '' }}>
+                                {{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                 <button type="submit"
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
                     <i class='bx bx-filter-alt'></i> Filter
                 </button>
-                @if ($search)
+                @if ($search || ($jurusan_id ?? ''))
                     <a href="{{ route('kelas') }}"
                         class="px-4 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
                         Reset
@@ -60,6 +72,7 @@
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">
                             No</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Kelas</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Jurusan</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Jumlah Siswa</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Wali
                             Kelas
@@ -74,6 +87,25 @@
                         <tr class="hover:bg-dark-50/50 transition-colors duration-200">
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $kelas->firstItem() + $loop->index }}</td>
                             <td class="px-6 py-4 text-sm font-medium text-dark-800">{{ $s->nama_kelas }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                @if ($s->jurusan)
+                                    @php
+                                        $badgeColor = match(strtoupper($s->jurusan->kode_jurusan)) {
+                                            'PPLG' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
+                                            'ANIMASI' => 'bg-purple-100 text-purple-700 border-purple-200',
+                                            'TPFL' => 'bg-amber-100 text-amber-800 border-amber-200',
+                                            'TO' => 'bg-rose-100 text-rose-700 border-rose-200',
+                                            'BCF' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                            default => 'bg-blue-100 text-blue-700 border-blue-200',
+                                        };
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold border {{ $badgeColor }}">
+                                        {{ $s->jurusan->kode_jurusan }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-dark-400">-</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 text-sm font-medium text-dark-800">{{ $s->jumlah_siswa }} Siswa</td>
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $s->wali_kelas ?? '-' }}</td>
                             <td class="px-6 py-4 text-sm text-center">
@@ -97,7 +129,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-16 h-16 mb-4 rounded-full bg-dark-100 flex items-center justify-center">
                                         <i class='bx bx-building-house text-3xl text-dark-400'></i>
@@ -151,43 +183,57 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="nama_kelas"
-                                            class="block text-sm font-medium text-dark-700 mb-1.5">Kelas</label>
+                                            class="block text-sm font-medium text-dark-700 mb-1.5">Nama Kelas <span class="text-rose-500">*</span></label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                 <i class='bx bx-id-card text-dark-400 text-lg'></i>
                                             </div>
                                             <input type="text" name="nama_kelas" id="nama_kelas"
                                                 class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="nama Kelas" required autocomplete="off">
+                                                placeholder="Contoh: X PPLG 1" required autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="jurusan_id" class="block text-sm font-medium text-dark-700 mb-1.5">
+                                            Jurusan (Program Keahlian)
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class='bx bx-layer text-dark-400 text-lg'></i>
+                                            </div>
+                                            <select name="jurusan_id" id="jurusan_id"
+                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200 text-sm">
+                                                <option value="">-- Pilih Jurusan (Opsional) --</option>
+                                                @foreach ($jurusans as $j)
+                                                    <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     <div>
                                         <label for="jumlah_siswa" class="block text-sm font-medium text-dark-700 mb-1.5">
-                                            Jumlah Siswa</label>
+                                            Jumlah Siswa <span class="text-rose-500">*</span></label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-user text-dark-400 text-lg'></i>
+                                                <i class='bx bx-group text-dark-400 text-lg'></i>
                                             </div>
-                                            <input type="text" name="jumlah_siswa" id="jumlah_siswa"
+                                            <input type="number" name="jumlah_siswa" id="jumlah_siswa"
                                                 class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Jumlah Siswa" required autocomplete="off">
+                                                placeholder="Contoh: 36" required autocomplete="off">
                                         </div>
                                     </div>
                                     <div>
                                         <label for="wali_kelas" class="block text-sm font-medium text-dark-700 mb-1.5">
-                                            Wali Kelas</label>
+                                            Wali Kelas <span class="text-rose-500">*</span></label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-user text-dark-400 text-lg'></i>
+                                                <i class='bx bx-user-voice text-dark-400 text-lg'></i>
                                             </div>
                                             <input type="text" name="wali_kelas" id="wali_kelas"
                                                 class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Wali Kelas" required autocomplete="off">
+                                                placeholder="Nama Wali Kelas" required autocomplete="off">
                                         </div>
                                     </div>
-
-
-
                                 </div>
 
                                 {{-- Actions --}}

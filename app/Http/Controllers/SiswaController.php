@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SiswaExport;
+use App\Models\Jurusan;
+use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
-use App\Models\Kelas;
-use App\Exports\SiswaExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +17,7 @@ class SiswaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Siswa::with(['kelas', 'user']);
+        $query = Siswa::with(['kelas.jurusan', 'user']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -26,13 +27,25 @@ class SiswaController extends Controller
             });
         }
 
+        if ($request->filled('jurusan_id')) {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('jurusan_id', $request->jurusan_id);
+            });
+        }
+
         if ($request->filled('kelas_id')) {
             $query->where('kelas_id', $request->kelas_id);
         }
 
         $siswa = $query->orderBy('nama')->paginate(10)->appends($request->query());
-        $kelas = Kelas::all();
-        return view('siswa.index', compact('siswa', 'kelas') + ['search' => $request->search ?? '', 'kelas_id' => $request->kelas_id ?? '']);
+        $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
+        $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+
+        return view('siswa.index', compact('siswa', 'kelas', 'jurusans') + [
+            'search'     => $request->search ?? '',
+            'kelas_id'   => $request->kelas_id ?? '',
+            'jurusan_id' => $request->jurusan_id ?? '',
+        ]);
     }
 
     public function store(Request $request)
@@ -59,6 +72,7 @@ class SiswaController extends Controller
             'nama' => $request->nama,
             'jenis_kelamin' => $request->jenis_kelamin,
             'kelas_id' => $request->kelas_id,
+            'biometric_status' => 'not_enrolled',
         ]);
 
         return redirect()->back()->with('success', 'Data Siswa berhasil ditambahkan');

@@ -29,7 +29,8 @@
             <label for="role_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Role Akses</label>
             <select name="role" id="role_edit" required
                 class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-white focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Administrator</option>
+                <option value="superadmin" {{ $user->role == 'superadmin' ? 'selected' : '' }}>Super Administrator</option>
+                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Administrator / Staf</option>
                 <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
                 <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
                 <option value="orangtua" {{ $user->role == 'orangtua' ? 'selected' : '' }}>Orang Tua</option>

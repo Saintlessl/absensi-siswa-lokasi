@@ -57,7 +57,7 @@
                     class="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-dark-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-all duration-200">
                     {{-- Avatar --}}
                     <div
-                        class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md shadow-primary-500/20">
+                        class="w-9 h-9 rounded-xl {{ Auth::user()->role === 'superadmin' ? 'bg-gradient-to-br from-purple-600 to-indigo-700 shadow-purple-500/20' : 'bg-gradient-to-br from-primary-500 to-primary-700 shadow-primary-500/20' }} flex items-center justify-center shadow-md">
                         <span class="text-white text-sm font-bold">
                             {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                         </span>
@@ -67,8 +67,19 @@
                         <p class="text-sm font-semibold text-dark-700 leading-tight">
                             {{ Auth::user()->name ?? 'Admin' }}
                         </p>
-                        <p class="text-[11px] text-dark-400 leading-tight">{{ Auth::user()->role ?? 'Administrator' }}
-                        </p>
+                        <div class="mt-0.5">
+                            @if (Auth::user()->role === 'superadmin')
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                    Superadmin
+                                </span>
+                            @elseif (Auth::user()->role === 'admin')
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                    Admin
+                                </span>
+                            @else
+                                <span class="text-[11px] text-dark-400 capitalize">{{ Auth::user()->role }}</span>
+                            @endif
+                        </div>
                     </div>
                     {{-- Chevron --}}
                     <i

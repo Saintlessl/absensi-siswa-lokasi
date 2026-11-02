@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sistem Absensi Siswa - SMP IT Yapura">
-    <title>@yield('title', 'Absensi Siswa') — SMP IT Yapura</title>
+    <meta name="description" content="Sistem Absensi Siswa SMK Negeri">
+    <title>@yield('title', 'Absensi Siswa') — SMK Negeri</title>
 
     {{-- Google Fonts: Inter (Formal & Professional) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,7 +310,7 @@
             {{-- Footer --}}
             <footer class="border-t border-dark-200 bg-white/60 backdrop-blur-sm px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-dark-400">
-                    <p>&copy; {{ date('Y') }} Sistem Absensi - SMP IT Yapura.</p>
+                    <p>&copy; {{ date('Y') }} Sistem Absensi Siswa SMK Negeri.</p>
 
                 </div>
             </footer>

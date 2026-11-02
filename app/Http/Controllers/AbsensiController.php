@@ -5,15 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Absensi;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\Kelas;
+use App\Models\Jurusan;
 use App\Models\LokasiSekolah;
 use App\Models\OrangTua;
 use App\Models\Siswa;
+use App\Services\FaceBiometricService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AbsensiController extends Controller
 {
+    protected FaceBiometricService $biometricService;
+
+    public function __construct(FaceBiometricService $biometricService)
+    {
+        $this->biometricService = $biometricService;
+    }
 
     public function index()
     {
@@ -23,10 +35,10 @@ class AbsensiController extends Controller
         if ($user->role == 'orangtua') {
             $dataOrangTua = OrangTua::where('user_id', $user->id)->first();
             if ($dataOrangTua) {
-                $siswa = Siswa::with('kelas')->find($dataOrangTua->siswa_id);
+                $siswa = Siswa::with(['kelas.jurusan', 'faceBiometric'])->find($dataOrangTua->siswa_id);
             }
         } else {
-            $siswa = Siswa::with('kelas')->where('user_id', $user->id)->first();
+            $siswa = Siswa::with(['kelas.jurusan', 'faceBiometric'])->where('user_id', $user->id)->first();
         }
 
         if (!$siswa) {
@@ -42,41 +54,97 @@ class AbsensiController extends Controller
             ->whereDate('tanggal', date('Y-m-d'))
             ->first();
 
-        return view('absensi.index', compact('siswa', 'lokasiSekolah', 'absenHariIni'));
+        $isFaceRegistered = $siswa->isFaceRegistered();
+
+        return view('absensi.index', compact('siswa', 'lokasiSekolah', 'absenHariIni', 'isFaceRegistered'));
+    }
+
+    public function validateQr(Request $request)
+    {
+        $request->validate([
+            'qr_token' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $siswa = Siswa::with('kelas.jurusan')->where('user_id', $user->id)->first();
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Data siswa tidak ditemukan.'], 403);
+        }
+
+        $kelas = Kelas::with('jurusan')->where('qr_token', $request->qr_token)->first();
+        if (!$kelas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'QR Code tidak valid atau tidak terdaftar di sistem sekolah!'
+            ], 404);
+        }
+
+        if ($siswa->kelas_id != $kelas->id) {
+            $namaKelasSiswa = $siswa->kelas->nama_kelas ?? 'Kelas Terdaftar Anda';
+            return response()->json([
+                'success' => false,
+                'message' => "QR Code ini untuk {$kelas->nama_kelas}, sedangkan Anda terdaftar di {$namaKelasSiswa}!",
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "QR Code valid untuk {$kelas->nama_kelas}.",
+            'kelas' => [
+                'id' => $kelas->id,
+                'nama_kelas' => $kelas->nama_kelas,
+                'jurusan' => $kelas->jurusan->nama_jurusan ?? '-',
+            ]
+        ]);
     }
 
     public function store(Request $request)
     {
+        $request->validate([
+            'qr_token'          => 'required|string',
+            'foto'              => 'required|string',
+            'latitude'          => 'required',
+            'longitude'         => 'required',
+            'tipe'              => 'nullable|in:masuk,pulang',
+            'face_descriptor'   => 'required|array|size:128',
+            'face_descriptor.*' => 'numeric',
+            'challenge_token'   => 'required|string',
+            'liveness_proof'    => 'required|array',
+        ]);
+
         $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->first();
+        $siswa = Siswa::with(['kelas', 'faceBiometric'])->where('user_id', $user->id)->first();
 
         if (!$siswa) {
-            return response()->json(['success' => false, 'message' => 'Anda bukan siswa'], 403);
+            return response()->json(['success' => false, 'message' => 'Anda tidak terdaftar sebagai siswa.'], 403);
         }
 
+        $tipe = $request->tipe ?? 'masuk';
+
+        // 1. Validasi QR Code token
+        $kelas = Kelas::where('qr_token', $request->qr_token)->first();
+        if (!$kelas) {
+            return response()->json(['success' => false, 'message' => 'QR Code kelas tidak valid.'], 404);
+        }
+
+        if ($siswa->kelas_id != $kelas->id) {
+            $namaKelasSiswa = $siswa->kelas->nama_kelas ?? 'Kelas Anda';
+            return response()->json([
+                'success' => false,
+                'message' => "QR Code ini milik {$kelas->nama_kelas}, bukan {$namaKelasSiswa}!",
+            ], 422);
+        }
+
+        // 2. Validasi Geofencing Lokasi Sekolah
         $lokasiSekolah = LokasiSekolah::first();
         if (!$lokasiSekolah) {
-            return response()->json(['success' => false, 'message' => 'Lokasi sekolah belum diatur'], 500);
+            return response()->json(['success' => false, 'message' => 'Titik lokasi sekolah belum diatur oleh admin.'], 500);
         }
 
-        // Cek apakah sudah absen hari ini
-        $cekAbsen = Absensi::where('siswa_id', $siswa->id)
-            ->whereDate('tanggal', date('Y-m-d'))
-            ->exists();
+        $lat = (float) $request->latitude;
+        $lng = (float) $request->longitude;
 
-        if ($cekAbsen) {
-            return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absensi hari ini.'], 400);
-        }
-
-        $lat = $request->latitude;
-        $lng = $request->longitude;
-
-        if (!$lat || !$lng) {
-            return response()->json(['success' => false, 'message' => 'Lokasi Anda tidak terdeteksi.'], 400);
-        }
-
-        // Haversine formula backend validation
-        $earthRadius = 6371000; // in meters
+        $earthRadius = 6371000; // meter
         $latFrom = deg2rad($lokasiSekolah->latitude);
         $lonFrom = deg2rad($lokasiSekolah->longitude);
         $latTo = deg2rad($lat);
@@ -92,56 +160,219 @@ class AbsensiController extends Controller
         if ($distance > $lokasiSekolah->radius) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda berada di luar jangkauan lokasi sekolah (' . round($distance) . ' meter).'
+                'message' => 'Anda berada di luar radius sekolah (' . round($distance) . ' m dari sekolah, batas: ' . $lokasiSekolah->radius . ' m).'
             ], 400);
         }
 
-        Absensi::create([
-            'siswa_id' => $siswa->id,
-            'tanggal' => date('Y-m-d'),
-            'jam_masuk' => date('H:i:s'),
-            'status' => 'Hadir',
-            'keterangan' => 'Hadir',
-            'latitude' => $lat,
-            'longitude' => $lng,
-        ]);
+        // 3. AI Facial Verification & Anti-Spoofing (Liveness Check)
+        $verification = $this->biometricService->verify(
+            $siswa,
+            $request->face_descriptor,
+            $request->challenge_token,
+            $request->liveness_proof,
+            $request->ip(),
+            $request->userAgent(),
+            $tipe
+        );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Absensi berhasil tersimpan.'
-        ]);
+        if (!$verification['success']) {
+            return response()->json([
+                'success'    => false,
+                'status'     => $verification['status'],
+                'message'    => $verification['message'],
+                'confidence' => $verification['confidence'] ?? null,
+                'distance'   => $verification['distance'] ?? null
+            ], 422);
+        }
+
+        // 4. Simpan Foto Selfie Base64
+        $fotoData = $request->foto;
+        if (preg_match('/^data:image\/(\w+);base64,/', $fotoData, $type)) {
+            $fotoData = substr($fotoData, strpos($fotoData, ',') + 1);
+            $type = strtolower($type[1]); // jpg, png, jpeg
+            $fotoData = base64_decode($fotoData);
+
+            if ($fotoData === false) {
+                return response()->json(['success' => false, 'message' => 'Gagal memproses foto selfie.'], 400);
+            }
+        } else {
+            return response()->json(['success' => false, 'message' => 'Format foto selfie tidak valid.'], 400);
+        }
+
+        $now = Carbon::now();
+        $todayStr = $now->format('Y-m-d');
+
+        $absenHariIni = Absensi::where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', $todayStr)
+            ->first();
+
+        // 5. Proses Berdasarkan Tipe Absen (Waktu Server)
+        if ($tipe === 'pulang') {
+            // Syarat Pulang:
+            // - Harus sudah absen masuk
+            if (!$absenHariIni) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda belum melakukan absen masuk hari ini!'
+                ], 400);
+            }
+
+            // - Belum absen pulang
+            if ($absenHariIni->jam_pulang) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Anda sudah melakukan absen pulang hari ini pukul {$absenHariIni->jam_pulang}."
+                ], 400);
+            }
+
+            // - Waktu pulang minimal 14:55 WIB (5 menit sebelum jam 15:00)
+            $batasPulang = Carbon::today()->setTime(14, 55, 0);
+            if ($now->lt($batasPulang)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Belum waktunya absen pulang. Absen pulang dibuka mulai pukul 14:55 WIB (sekarang ' . $now->format('H:i') . ' WIB).'
+                ], 400);
+            }
+
+            $fileName = 'selfie_pulang_' . $siswa->id . '_' . $now->format('Ymd_His') . '.' . ($type ?? 'jpg');
+            Storage::disk('public')->put('selfie/' . $fileName, $fotoData);
+
+            $absenHariIni->update([
+                'jam_pulang'            => $now->format('H:i:s'),
+                'foto_pulang'           => 'selfie/' . $fileName,
+                'confidence_pulang'     => $verification['confidence'],
+                'liveness_score_pulang' => $verification['liveness_score'],
+                'latitude_pulang'       => $lat,
+                'longitude_pulang'      => $lng,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Absen pulang berhasil diverifikasi biometrik ({$verification['confidence']}%) pukul " . $now->format('H:i') . ' WIB. Selamat beristirahat!',
+                'data' => [
+                    'tipe' => 'pulang',
+                    'jam' => $now->format('H:i'),
+                    'confidence' => $verification['confidence']
+                ]
+            ]);
+
+        } else {
+            // Tipe: MASUK
+            if ($absenHariIni) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Anda sudah melakukan absen masuk hari ini pukul {$absenHariIni->jam_masuk}."
+                ], 400);
+            }
+
+            $batasMasuk = Carbon::today()->setTime(7, 15, 0);
+            $keteranganTerlambat = null;
+            $menitTerlambat = 0;
+            $keteranganStatus = 'Tepat Waktu';
+
+            if ($now->gt($batasMasuk)) {
+                $menitTerlambat = $batasMasuk->diffInMinutes($now);
+                $jam = intdiv($menitTerlambat, 60);
+                $sisaMenit = $menitTerlambat % 60;
+
+                if ($jam > 0 && $sisaMenit > 0) {
+                    $keteranganTerlambat = "Terlambat {$jam} jam {$sisaMenit} menit";
+                } elseif ($jam > 0) {
+                    $keteranganTerlambat = "Terlambat {$jam} jam";
+                } else {
+                    $keteranganTerlambat = "Terlambat {$sisaMenit} menit";
+                }
+                $keteranganStatus = $keteranganTerlambat;
+            }
+
+            $fileName = 'selfie_masuk_' . $siswa->id . '_' . $now->format('Ymd_His') . '.' . ($type ?? 'jpg');
+            Storage::disk('public')->put('selfie/' . $fileName, $fotoData);
+
+            $absensi = Absensi::create([
+                'siswa_id'              => $siswa->id,
+                'tanggal'               => $todayStr,
+                'jam_masuk'             => $now->format('H:i:s'),
+                'status'                => 'Hadir',
+                'keterangan'            => $keteranganStatus,
+                'keterangan_terlambat'  => $keteranganTerlambat,
+                'menit_terlambat'       => $menitTerlambat,
+                'foto_masuk'            => 'selfie/' . $fileName,
+                'confidence_masuk'      => $verification['confidence'],
+                'liveness_score_masuk'  => $verification['liveness_score'],
+                'is_verified_biometric' => true,
+                'latitude'              => $lat,
+                'longitude'             => $lng,
+            ]);
+
+            $pesanSukses = $keteranganTerlambat
+                ? "Absen masuk berhasil diverifikasi biometrik ({$verification['confidence']}%) pukul {$now->format('H:i')} WIB ({$keteranganTerlambat})."
+                : "Absen masuk berhasil! Wajah terverifikasi biometrik ({$verification['confidence']}%) tepat waktu pukul {$now->format('H:i')} WIB.";
+
+            return response()->json([
+                'success' => true,
+                'message' => $pesanSukses,
+                'data' => [
+                    'tipe' => 'masuk',
+                    'jam' => $now->format('H:i'),
+                    'confidence' => $verification['confidence'],
+                    'terlambat' => $keteranganTerlambat,
+                ]
+            ]);
+        }
     }
 
+    public function qrCodes(Request $request)
+    {
+        $user = Auth::user();
+        if (!in_array($user->role, ['superadmin', 'admin'])) {
+            return redirect()->route('dashboard')->with('error', 'Hanya Superadmin atau Admin yang dapat mengakses halaman QR Code.');
+        }
+
+        $query = Kelas::with(['jurusan', 'siswa']);
+
+        if ($request->filled('jurusan_id')) {
+            $query->where('jurusan_id', $request->jurusan_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('nama_kelas', 'LIKE', '%' . $search . '%');
+        }
+
+        $kelasList = $query->orderBy('nama_kelas')->get();
+        $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+
+        return view('absensi.qr-codes', compact('kelasList', 'jurusans') + [
+            'jurusan_id' => $request->jurusan_id ?? '',
+            'search'     => $request->search ?? ''
+        ]);
+    }
 
     public function riwayatKehadiran()
     {
         $user = Auth::user();
         $siswa = null;
 
-        // 1. Logika Penentuan Siswa (Siswa itu sendiri atau Anak dari Orang Tua)
         if ($user->role == 'orangtua') {
-            $dataOrangTua = \App\Models\OrangTua::where('user_id', $user->id)->first();
+            $dataOrangTua = OrangTua::where('user_id', $user->id)->first();
             if ($dataOrangTua) {
-                $siswa = \App\Models\Siswa::find($dataOrangTua->siswa_id);
+                $siswa = Siswa::find($dataOrangTua->siswa_id);
             }
         } else {
-            $siswa = \App\Models\Siswa::where('user_id', $user->id)->first();
+            $siswa = Siswa::where('user_id', $user->id)->first();
         }
 
         if (!$siswa) {
             return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan.');
         }
 
-        // 2. Ambil Riwayat Keseluruhan
         $riwayat = Absensi::where('siswa_id', $siswa->id)
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        // 3. Statistik Bulanan
         $bulanIni = date('m');
         $tahunIni = date('Y');
 
-        // Helper untuk query status
         $baseQuery = Absensi::where('siswa_id', $siswa->id)
             ->whereMonth('tanggal', $bulanIni)
             ->whereYear('tanggal', $tahunIni);
@@ -151,15 +382,13 @@ class AbsensiController extends Controller
         $sakitCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['sakit'])->count();
         $alpaCount  = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['alfa'])->count();
 
-        // 4. Perhitungan Hari Efektif (Menghindari Alpa manual yang tidak terinput)
-        $startDate = \Carbon\Carbon::now()->startOfMonth();
-        $endDate = \Carbon\Carbon::now();
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now();
         $hariEfektif = 0;
 
         $currentDate = $startDate->copy();
         while ($currentDate->lte($endDate)) {
-            // Asumsi hari minggu libur
-            if ($currentDate->dayOfWeek !== \Carbon\Carbon::SUNDAY) {
+            if ($currentDate->dayOfWeek !== Carbon::SUNDAY) {
                 $hariEfektif++;
             }
             $currentDate->addDay();
@@ -190,7 +419,6 @@ class AbsensiController extends Controller
             return redirect()->route('dashboard')->with('error', 'Data guru tidak ditemukan.');
         }
 
-        // Bahasa Indonesia Days Mapping
         $days = [
             'Sunday' => 'Minggu',
             'Monday' => 'Senin',
@@ -202,7 +430,6 @@ class AbsensiController extends Controller
         ];
         $hariIniStr = $days[date('l')];
 
-        // Cari jadwal mengajar guru ini HARI INI
         $jadwalHariIni = Jadwal::where('guru_id', $guru->id)
             ->where('hari', $hariIniStr)
             ->with('kelas')
@@ -210,7 +437,6 @@ class AbsensiController extends Controller
 
         $kelasIds = $jadwalHariIni->pluck('kelas_id')->unique();
 
-        // Ambil semua siswa di kelas tersebut berserta absensi HARI INI
         $siswas = Siswa::whereIn('kelas_id', $kelasIds)
             ->with(['kelas', 'absensi' => function ($q) {
                 $q->whereDate('tanggal', date('Y-m-d'));
@@ -224,8 +450,8 @@ class AbsensiController extends Controller
     public function updateHarian(Request $request)
     {
         $request->validate([
-            'siswa_id' => 'required|exists:siswas,id',
-            'status' => 'required|in:Hadir,Izin,Sakit,Alfa',
+            'siswa_id'   => 'required|exists:siswas,id',
+            'status'     => 'required|in:Hadir,Izin,Sakit,Alfa',
             'keterangan' => 'nullable|string'
         ]);
 
@@ -237,15 +463,15 @@ class AbsensiController extends Controller
 
         if ($absensi) {
             $absensi->update([
-                'status' => $request->status,
+                'status'     => $request->status,
                 'keterangan' => $request->keterangan ?? 'Diperbarui otomatis oleh Guru'
             ]);
         } else {
             Absensi::create([
-                'siswa_id' => $request->siswa_id,
-                'tanggal' => $tanggalInfo,
-                'jam_masuk' => date('H:i:s'),
-                'status' => $request->status,
+                'siswa_id'   => $request->siswa_id,
+                'tanggal'    => $tanggalInfo,
+                'jam_masuk'  => date('H:i:s'),
+                'status'     => $request->status,
                 'keterangan' => $request->keterangan ?? 'Ditambahkan otomatis oleh Guru',
             ]);
         }
@@ -268,16 +494,15 @@ class AbsensiController extends Controller
             ->orderBy('nama')
             ->get();
 
-        // Hitung hari efektif (kecuali Minggu) di bulan tersebut sampai hari ini atau akhir bulan
-        $startDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
         $endDate = ($bulan == date('m') && $tahun == date('Y'))
-            ? \Carbon\Carbon::now()
-            : \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+            ? Carbon::now()
+            : Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
 
         $hariEfektif = 0;
         $currentDate = $startDate->copy();
         while ($currentDate->lte($endDate)) {
-            if ($currentDate->dayOfWeek !== \Carbon\Carbon::SUNDAY) {
+            if ($currentDate->dayOfWeek !== Carbon::SUNDAY) {
                 $hariEfektif++;
             }
             $currentDate->addDay();
@@ -304,13 +529,12 @@ class AbsensiController extends Controller
             $rekapAll[] = [
                 'siswa' => $s,
                 'hadir' => $hadir,
-                'izin' => $izin,
+                'izin'  => $izin,
                 'sakit' => $sakit,
-                'alpa' => $alpa,
+                'alpa'  => $alpa,
             ];
         }
 
-        // Paginate array
         $page = $request->get('page', 1);
         $perPage = 10;
         $totalSiswa = count($rekapAll);
@@ -322,7 +546,7 @@ class AbsensiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
 
         return view('absensi.rekap-absensi', compact('rekap', 'bulan', 'tahun', 'namaBulan', 'hariEfektif', 'totalSiswa'));
     }
@@ -332,27 +556,24 @@ class AbsensiController extends Controller
         $bulan = $request->bulan ?? date('m');
         $tahun = $request->tahun ?? date('Y');
 
-        $kelasList = \App\Models\Kelas::withCount('siswa')->orderBy('nama_kelas')->get();
+        $kelasList = Kelas::withCount('siswa')->orderBy('nama_kelas')->get();
 
-        // Buat daftar tanggal efektif (kecuali Minggu)
-        $startDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
         $endDate = ($bulan == date('m') && $tahun == date('Y'))
-            ? \Carbon\Carbon::now()
-            : \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+            ? Carbon::now()
+            : Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
 
         $tanggalList = [];
         $currentDate = $startDate->copy();
         while ($currentDate->lte($endDate)) {
-            if ($currentDate->dayOfWeek !== \Carbon\Carbon::SUNDAY) {
+            if ($currentDate->dayOfWeek !== Carbon::SUNDAY) {
                 $tanggalList[] = $currentDate->format('Y-m-d');
             }
             $currentDate->addDay();
         }
 
-        // Urutkan tanggal terbaru di atas
         $tanggalList = array_reverse($tanggalList);
 
-        // Build rekap: tiap tanggal -> tiap kelas -> count status
         $rekapAll = [];
         foreach ($tanggalList as $tgl) {
             foreach ($kelasList as $kelas) {
@@ -376,18 +597,17 @@ class AbsensiController extends Controller
                 $alpa = $alfaDb + max(0, $totalSiswa - $tercatat);
 
                 $rekapAll[] = [
-                    'tanggal' => $tgl,
-                    'kelas' => $kelas->nama_kelas,
+                    'tanggal'     => $tgl,
+                    'kelas'       => $kelas->nama_kelas,
                     'total_siswa' => $totalSiswa,
-                    'hadir' => $hadir,
-                    'izin' => $izin,
-                    'sakit' => $sakit,
-                    'alpa' => $alpa,
+                    'hadir'       => $hadir,
+                    'izin'        => $izin,
+                    'sakit'       => $sakit,
+                    'alpa'        => $alpa,
                 ];
             }
         }
 
-        // Paginate array
         $page = $request->get('page', 1);
         $perPage = 10;
         $totalBaris = count($rekapAll);
@@ -399,7 +619,7 @@ class AbsensiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
 
         return view('absensi.rekap-kelas', compact('rekap', 'bulan', 'tahun', 'namaBulan', 'totalBaris'));
     }

@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $data = [];
 
-        if ($user->role === 'admin') {
+        if (in_array($user->role, ['superadmin', 'admin'])) {
             $data['totalSiswa'] = Siswa::count();
             $data['totalGuru'] = Guru::count();
             $data['totalKelas'] = Kelas::count();
@@ -120,7 +120,7 @@ class DashboardController extends Controller
             }
         }
         if ($user->role === 'siswa') {
-            $siswa = Siswa::where('user_id', $user->id)->first();
+            $siswa = Siswa::with(['kelas.jurusan', 'faceBiometric'])->where('user_id', $user->id)->first();
             $data['siswa'] = $siswa;
 
             if ($siswa) {
@@ -129,8 +129,42 @@ class DashboardController extends Controller
                     ->whereDate('tanggal', date('Y-m-d'))
                     ->first();
 
-                // Tambahkan data waktu untuk jam digital di view
-                $data['tanggalHariIni'] = \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y');
+                $bulan = $request->bulan ?? date('m');
+                $tahun = $request->tahun ?? date('Y');
+                $data['bulan'] = $bulan;
+                $data['tahun'] = $tahun;
+
+                // Rekap bulan ini
+                $hadirBulanIni = Absensi::where('siswa_id', $siswa->id)
+                    ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
+                    ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
+
+                $terlambatBulanIni = Absensi::where('siswa_id', $siswa->id)
+                    ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
+                    ->where('menit_terlambat', '>', 0)->count();
+
+                $izinBulanIni = Absensi::where('siswa_id', $siswa->id)
+                    ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
+                    ->whereRaw('LOWER(status) = ?', ['izin'])->count();
+
+                $sakitBulanIni = Absensi::where('siswa_id', $siswa->id)
+                    ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
+                    ->whereRaw('LOWER(status) = ?', ['sakit'])->count();
+
+                $data['statsSiswa'] = [
+                    'hadir'     => $hadirBulanIni,
+                    'terlambat' => $terlambatBulanIni,
+                    'izin'      => $izinBulanIni,
+                    'sakit'     => $sakitBulanIni,
+                ];
+
+                // Riwayat absensi terbaru
+                $data['riwayatSiswa'] = Absensi::where('siswa_id', $siswa->id)
+                    ->orderBy('tanggal', 'desc')
+                    ->limit(7)
+                    ->get();
+
+                $data['tanggalHariIni'] = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
             }
         }
         if ($user->role === 'guru') {
@@ -157,6 +191,10 @@ class DashboardController extends Controller
 
     public function deleteAbsensi($id)
     {
+        if (Auth::user()->role !== 'superadmin') {
+            return redirect()->back()->with('error', 'Akses ditolak: Hanya Superadmin yang memiliki izin untuk menghapus data riwayat absensi.');
+        }
+
         $absensi = Absensi::findOrFail($id);
         $absensi->delete();
 

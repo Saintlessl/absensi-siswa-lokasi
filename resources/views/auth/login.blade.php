@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Login - Absensi Siswa SMP IT Yapura">
-    <title>Login — Absensi Siswa SMP IT Yapura</title>
+    <meta name="description" content="Login - Absensi Siswa SMK Negeri">
+    <title>Login — Absensi Siswa SMK Negeri</title>
 
     {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -296,12 +296,12 @@
                     class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-2xl shadow-primary-500/30 mb-5 scale-in">
                     <img src="{{ asset('img/logo.png') }}" alt="">
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-black tracking-tight fade-in-up fade-in-up-delay-1">
-                    SMP IT Yapura
+                <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight fade-in-up fade-in-up-delay-1">
+                    SMK Negeri
                 </h1>
                 <p
                     class="text-primary-300/80 text-sm mt-2 max-w-xs mx-auto leading-relaxed fade-in-up fade-in-up-delay-2">
-                    Absensi Siswa SMP IT Yapura
+                    Absensi Siswa & Manajemen Kejuruan
                 </p>
                 <div class="flex items-center justify-center gap-2 mt-3 fade-in-up fade-in-up-delay-3">
                     <div class="w-8 h-px bg-primary-400/30"></div>
@@ -391,11 +391,11 @@
 
             {{-- Footer --}}
             <div class="text-center mt-8 space-y-2 fade-in-up fade-in-up-delay-5">
-                <p class="text-primary-300/50 text-xs">
-                    &copy; {{ date('Y') }} SPK SMART BPNT — Desa Piloliyanga
+                <p class="text-primary-300/60 text-xs">
+                    &copy; {{ date('Y') }} Sistem Absensi Siswa SMK Negeri
                 </p>
-                <p class="text-primary-300/30 text-[11px]">
-                    Sistem Pendukung Keputusan Menggunakan Metode SMART
+                <p class="text-primary-300/40 text-[11px]">
+                    PPLG &bull; Animasi &bull; TPFL &bull; TO &bull; BCF
                 </p>
             </div>
 

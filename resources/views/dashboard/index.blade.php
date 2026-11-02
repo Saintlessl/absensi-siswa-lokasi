@@ -2,7 +2,7 @@
 
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Absensi Siswa - SMP IT Yapura')
+@section('page-subtitle', 'Absensi Siswa & Manajemen Kejuruan SMK Negeri')
 
 @section('content')
 
@@ -27,7 +27,7 @@
                         Selamat Datang, {{ Auth::user()->name ?? 'User' }}! 👋
                     </h1>
                     <p class="text-primary-200 mt-1 text-sm sm:text-base max-w-xl">
-                        Sistem Absensi Siswa SMP IT Yapura
+                        Sistem Absensi Siswa SMK Negeri &bull; PPLG, Animasi, TPFL, TO, BCF
                     </p>
                 </div>
                 <div class="flex-shrink-0">
@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    @if (Auth::user()->role === 'admin')
+    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
         {{-- Statistics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {{-- Total Siswa --}}
@@ -255,15 +255,17 @@
                                             title="Edit">
                                             <i class='bx bx-edit-alt text-lg'></i>
                                         </button>
-                                        <form action="{{ route('dashboard.absensi.delete', $a->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            <button type="button"
-                                                class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors"
-                                                title="Hapus">
-                                                <i class='bx bx-trash text-lg'></i>
-                                            </button>
-                                        </form>
+                                        @if (Auth::user()->role === 'superadmin')
+                                            <form action="{{ route('dashboard.absensi.delete', $a->id) }}" method="POST"
+                                                class="inline">
+                                                @csrf
+                                                <button type="button"
+                                                    class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors"
+                                                    title="Hapus">
+                                                    <i class='bx bx-trash text-lg'></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -596,80 +598,239 @@
     @endif
     {{-- TAMPILAN KHUSUS SISWA --}}
     @if (Auth::user()->role === 'siswa' && isset($siswa))
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-            {{-- Card Waktu & Tanggal Realtime --}}
-            <div
-                class="glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col justify-center items-center text-center">
-                <div class="w-16 h-16 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
-                    <i class='bx bx-time-five text-3xl'></i>
+        {{-- Statistics Cards (Gaya Admin) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {{-- Status Hari Ini --}}
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Status Hari Ini</p>
+                        @if ($absenHariIni && $absenHariIni->jam_masuk)
+                            @if ($absenHariIni->menit_terlambat > 0)
+                                <h3 class="text-2xl font-bold text-amber-600 mt-2">Terlambat</h3>
+                                <p class="text-dark-400 text-xs mt-1">Masuk: {{ date('H:i', strtotime($absenHariIni->jam_masuk)) }} WIB</p>
+                            @else
+                                <h3 class="text-2xl font-bold text-emerald-600 mt-2">Hadir</h3>
+                                <p class="text-dark-400 text-xs mt-1">Masuk: {{ date('H:i', strtotime($absenHariIni->jam_masuk)) }} WIB</p>
+                            @endif
+                        @else
+                            <h3 class="text-2xl font-bold text-rose-600 mt-2">Belum Absen</h3>
+                            <p class="text-dark-400 text-xs mt-1">Batas masuk: 07:15 WIB</p>
+                        @endif
+                    </div>
+                    <div class="w-12 h-12 rounded-xl {{ $absenHariIni && $absenHariIni->jam_masuk ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white' : 'bg-gradient-to-br from-rose-500 to-rose-600 text-white' }} flex items-center justify-center shadow-lg shadow-primary-500/10">
+                        <i class='bx {{ $absenHariIni && $absenHariIni->jam_masuk ? 'bx-check-shield' : 'bx-time-five' }} text-2xl'></i>
+                    </div>
                 </div>
-                <h2 id="clock" class="text-4xl font-bold text-dark-800 tracking-tight">00:00:00</h2>
-                <p class="text-dark-500 font-medium mt-1">{{ $tanggalHariIni }}</p>
             </div>
 
-            {{-- Card Status Kehadiran Hari Ini --}}
-            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6">
-                <div class="flex items-center justify-between mb-6">
+            {{-- Hadir Bulan Ini --}}
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+                <div class="flex items-start justify-between">
                     <div>
-                        <h3 class="text-lg font-bold text-dark-800">Status Kehadiran Anda</h3>
-                        <p class="text-sm text-dark-500">Catatan sistem untuk hari ini</p>
+                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Hadir Bulan Ini</p>
+                        <h3 class="text-2xl font-bold text-dark-800 mt-2">{{ $statsSiswa['hadir'] ?? 0 }} Hari</h3>
+                        <p class="text-dark-400 text-xs mt-1">Periode {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
                     </div>
-                    <div
-                        class="px-4 py-2 rounded-xl bg-dark-50 border border-dark-100 text-xs font-bold text-dark-600 uppercase tracking-widest">
-                        {{ date('Y-m-d') }}
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
+                        <i class='bx bx-calendar-check text-2xl'></i>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Keterlambatan --}}
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Keterlambatan</p>
+                        <h3 class="text-2xl font-bold {{ ($statsSiswa['terlambat'] ?? 0) > 0 ? 'text-amber-600' : 'text-dark-800' }} mt-2">
+                            {{ $statsSiswa['terlambat'] ?? 0 }} Kali
+                        </h3>
+                        <p class="text-dark-400 text-xs mt-1">Bulan ini</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                        <i class='bx bx-alarm-exclamation text-2xl'></i>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Izin & Sakit --}}
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Izin & Sakit</p>
+                        <h3 class="text-2xl font-bold text-dark-800 mt-2">
+                            {{ ($statsSiswa['izin'] ?? 0) + ($statsSiswa['sakit'] ?? 0) }} Hari
+                        </h3>
+                        <p class="text-dark-400 text-xs mt-1">Izin: {{ $statsSiswa['izin'] ?? 0 }} &bull; Sakit: {{ $statsSiswa['sakit'] ?? 0 }}</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                        <i class='bx bx-file-blank text-2xl'></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Mid Section: Profil Siswa & Aksi Cepat --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {{-- Info Profil Siswa --}}
+            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 space-y-4">
+                <div class="flex items-center gap-3 pb-4 border-b border-dark-100">
+                    <div class="w-12 h-12 rounded-xl bg-primary-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-primary-500/20 flex-shrink-0">
+                        {{ strtoupper(substr($siswa->nama, 0, 1)) }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <h4 class="text-sm font-bold text-dark-900 truncate">{{ $siswa->nama }}</h4>
+                        <p class="text-xs text-dark-500">NIS: <span class="font-semibold text-dark-700">{{ $siswa->nis }}</span></p>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-center gap-6">
-                    @if ($absenHariIni)
-                        @php
-                            $status = strtolower($absenHariIni->status);
-                            $config = [
-                                'hadir' => [
-                                    'icon' => 'bx-check-shield',
-                                    'color' => 'emerald',
-                                    'label' => 'Sudah Absen (Hadir)',
-                                ],
-                                'izin' => ['icon' => 'bx-envelope', 'color' => 'blue', 'label' => 'Izin'],
-                                'sakit' => ['icon' => 'bx-plus-medical', 'color' => 'amber', 'label' => 'Sakit'],
-                                'alfa' => ['icon' => 'bx-x-circle', 'color' => 'rose', 'label' => 'Alfa'],
-                            ];
-                            $current = $config[$status] ?? $config['alfa'];
-                        @endphp
-
-                        <div
-                            class="w-20 h-20 rounded-2xl bg-{{ $current['color'] }}-100 text-{{ $current['color'] }}-600 flex items-center justify-center shadow-sm">
-                            <i class='bx {{ $current['icon'] }} text-4xl'></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span
-                                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-{{ $current['color'] }}-100 text-{{ $current['color'] }}-700 border border-{{ $current['color'] }}-200 uppercase">
-                                    {{ $current['label'] }}
-                                </span>
-                                <span class="text-sm font-mono text-dark-400">Pukul
-                                    {{ date('H:i', strtotime($absenHariIni->jam_masuk)) }}</span>
-                            </div>
-                            <h4 class="text-xl font-bold text-dark-800">Terima kasih atas kedisiplinan Anda.</h4>
-                            <p class="text-dark-500 text-sm italic">"Pendidikan adalah tiket ke masa depan."</p>
-                        </div>
-                    @else
-                        <div
-                            class="w-20 h-20 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center animate-pulse">
-                            <i class='bx bx-error-circle text-4xl'></i>
-                        </div>
-                        <div>
-                            <span
-                                class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 uppercase">
-                                Belum Absen
-                            </span>
-                            <h4 class="text-xl font-bold text-dark-800 mt-2">Anda belum melakukan absensi hari ini.</h4>
-                            <p class="text-dark-500 text-sm">Segera lakukan absensi melalui menu <strong>Absensi
-                                    Lokasi</strong> sebelum terlambat.</p>
-                        </div>
-                    @endif
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                        <span class="text-dark-400 block text-[11px]">Kelas</span>
+                        <span class="font-bold text-dark-800 mt-0.5 block">{{ $siswa->kelas->nama_kelas ?? '-' }}</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                        <span class="text-dark-400 block text-[11px]">Jurusan</span>
+                        <span class="font-bold text-dark-800 mt-0.5 block">{{ $siswa->kelas->jurusan->kode_jurusan ?? '-' }}</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                        <span class="text-dark-400 block text-[11px]">Jam Masuk Hari Ini</span>
+                        <span class="font-bold text-dark-800 mt-0.5 block">{{ $absenHariIni && $absenHariIni->jam_masuk ? date('H:i', strtotime($absenHariIni->jam_masuk)) . ' WIB' : '-' }}</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                        <span class="text-dark-400 block text-[11px]">Jam Pulang Hari Ini</span>
+                        <span class="font-bold text-dark-800 mt-0.5 block">{{ $absenHariIni && $absenHariIni->jam_pulang ? date('H:i', strtotime($absenHariIni->jam_pulang)) . ' WIB' : '-' }}</span>
+                    </div>
                 </div>
+            </div>
+
+            {{-- Action Card Presensi --}}
+            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-3 border-b border-dark-100 mb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-dark-800">Presensi Mandiri Siswa</h3>
+                            <p class="text-xs text-dark-500 mt-0.5">Sistem verifikasi QR Code kelas, biometrik wajah & radius GPS sekolah.</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                            <i class='bx bx-check-shield'></i> Biometrik Aktif
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-4">
+                        <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                            <span class="text-dark-400 block text-[11px]">Batas Masuk</span>
+                            <span class="font-bold text-dark-800 mt-0.5 block">07:15 WIB</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                            <span class="text-dark-400 block text-[11px]">Jam Buka Pulang</span>
+                            <span class="font-bold text-dark-800 mt-0.5 block">14:55 WIB (Jadwal 15:00)</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-dark-50 border border-dark-100">
+                            <span class="text-dark-400 block text-[11px]">Radius Presensi</span>
+                            <span class="font-bold text-dark-800 mt-0.5 block">Dalam Area Sekolah</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-dark-100">
+                    <span class="text-xs text-dark-500">
+                        {{ $tanggalHariIni }} &bull; <span id="clock" class="font-mono font-semibold text-dark-700">00:00:00</span>
+                    </span>
+                    <a href="{{ route('absensi') }}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <i class='bx bx-scan text-base'></i>
+                        <span>Buka Menu Absensi Sekarang</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tabel Riwayat Kehadiran Terbaru Siswa (Sama persis gaya tabel Admin) --}}
+        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-bold text-dark-800">Riwayat Presensi Terbaru Anda</h3>
+                    <p class="text-xs text-dark-500 mt-0.5">Catatan presensi terakhir yang tercatat di database sekolah.</p>
+                </div>
+                <a href="{{ route('riwayatkehadiran') }}" class="px-3.5 py-1.5 rounded-xl border border-dark-200 text-dark-600 hover:bg-dark-50 text-xs font-semibold transition-colors flex items-center gap-1">
+                    <span>Lihat Semua Riwayat</span>
+                    <i class='bx bx-chevron-right text-base'></i>
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-dark-50/50 border-b border-dark-200/50 text-xs font-semibold text-dark-500 uppercase tracking-wider">
+                            <th class="px-6 py-3.5 w-12 text-center">No</th>
+                            <th class="px-6 py-3.5">Tanggal</th>
+                            <th class="px-6 py-3.5 text-center">Jam Masuk</th>
+                            <th class="px-6 py-3.5 text-center">Jam Pulang</th>
+                            <th class="px-6 py-3.5 text-center">Status</th>
+                            <th class="px-6 py-3.5">Keterangan</th>
+                            <th class="px-6 py-3.5 text-center">Foto Selfie</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-dark-200/50 text-sm">
+                        @forelse ($riwayatSiswa ?? [] as $index => $r)
+                            <tr class="hover:bg-dark-50/50 transition-colors">
+                                <td class="px-6 py-3.5 text-center text-dark-400 text-xs font-medium">{{ $index + 1 }}</td>
+                                <td class="px-6 py-3.5 text-dark-800 font-medium text-xs">
+                                    {{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('l, d M Y') }}
+                                </td>
+                                <td class="px-6 py-3.5 text-center text-xs font-mono">
+                                    {{ $r->jam_masuk ? date('H:i', strtotime($r->jam_masuk)) . ' WIB' : '-' }}
+                                </td>
+                                <td class="px-6 py-3.5 text-center text-xs font-mono">
+                                    {{ $r->jam_pulang ? date('H:i', strtotime($r->jam_pulang)) . ' WIB' : '-' }}
+                                </td>
+                                <td class="px-6 py-3.5 text-center">
+                                    @php $st = strtolower($r->status); @endphp
+                                    @if ($st == 'hadir')
+                                        @if ($r->menit_terlambat > 0)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                                <i class='bx bx-time text-xs'></i> Terlambat
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <i class='bx bx-check text-xs'></i> Tepat Waktu
+                                            </span>
+                                        @endif
+                                    @elseif ($st == 'izin')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                            <i class='bx bx-envelope text-xs'></i> Izin
+                                        </span>
+                                    @elseif ($st == 'sakit')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                            <i class='bx bx-plus-medical text-xs'></i> Sakit
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                            <i class='bx bx-x text-xs'></i> Alfa
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-3.5 text-xs text-dark-500">
+                                    {{ $r->keterangan ?? ($r->keterangan_terlambat ?? '-') }}
+                                </td>
+                                <td class="px-6 py-3.5 text-center">
+                                    @if ($r->foto_masuk)
+                                        <img src="{{ asset('storage/' . $r->foto_masuk) }}" class="w-9 h-9 rounded-lg object-cover border border-dark-200 mx-auto shadow-sm">
+                                    @else
+                                        <span class="text-dark-300 text-xs">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-8 text-center text-dark-400 text-xs">
+                                    Belum ada catatan riwayat kehadiran bulan ini.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     @endif

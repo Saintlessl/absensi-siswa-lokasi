@@ -44,6 +44,7 @@
                     <select name="role"
                         class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
                         <option value="">Semua Role</option>
+                        <option value="superadmin" {{ $filter_role == 'superadmin' ? 'selected' : '' }}>Superadmin</option>
                         <option value="admin" {{ $filter_role == 'admin' ? 'selected' : '' }}>Admin</option>
                         <option value="guru" {{ $filter_role == 'guru' ? 'selected' : '' }}>Guru</option>
                         <option value="siswa" {{ $filter_role == 'siswa' ? 'selected' : '' }}>Siswa</option>
@@ -91,6 +92,7 @@
                             <td class="px-6 py-4 text-sm text-center">
                                 @php
                                     $roleColors = [
+                                        'superadmin' => 'bg-purple-50 text-purple-700 border border-purple-200',
                                         'admin' => 'bg-indigo-50 text-indigo-700 border border-indigo-200',
                                         'guru' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
                                         'siswa' => 'bg-amber-50 text-amber-700 border border-amber-200',
@@ -109,15 +111,21 @@
                                         title="Edit Data">
                                         <i class='bx bx-edit-alt text-lg'></i>
                                     </button>
-                                    <form action="{{ route('user.delete', ['id' => $u->id]) }}" method="POST"
-                                        class="inline">
-                                        @csrf
-                                        <button type="button"
-                                            class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 transition-colors duration-200"
-                                            title="Hapus Data">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
+                                    @if ($u->id !== Auth::id())
+                                        <form action="{{ route('user.delete', ['id' => $u->id]) }}" method="POST"
+                                            class="inline">
+                                            @csrf
+                                            <button type="button"
+                                                class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 transition-colors duration-200"
+                                                title="Hapus Data">
+                                                <i class='bx bx-trash text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-dark-300 bg-dark-100 cursor-not-allowed" title="Akun Anda Sendiri">
+                                            <i class='bx bx-lock-alt text-lg'></i>
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -200,7 +208,8 @@
                                         <select name="role" id="role" required
                                             class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
                                             <option value="">-- Pilih Role Akses --</option>
-                                            <option value="admin">Administrator</option>
+                                            <option value="superadmin">Super Administrator</option>
+                                            <option value="admin">Administrator / Staf</option>
                                             <option value="guru">Guru</option>
                                             <option value="siswa">Siswa</option>
                                             <option value="orangtua">Orang Tua</option>

@@ -52,6 +52,18 @@
                             placeholder="Nama / NIS...">
                     </div>
                 </div>
+                <div class="w-full sm:w-48">
+                    <label class="block text-xs font-medium text-dark-600 mb-1">Jurusan</label>
+                    <select name="jurusan_id"
+                        class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                        <option value="">Semua Jurusan</option>
+                        @foreach ($jurusans as $j)
+                            <option value="{{ $j->id }}" {{ ($jurusan_id ?? '') == $j->id ? 'selected' : '' }}>
+                                {{ $j->kode_jurusan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="w-full sm:w-44">
                     <label class="block text-xs font-medium text-dark-600 mb-1">Kelas</label>
                     <select name="kelas_id"
@@ -67,7 +79,7 @@
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
                     <i class='bx bx-filter-alt'></i> Filter
                 </button>
-                @if ($search || $kelas_id)
+                @if ($search || $kelas_id || ($jurusan_id ?? ''))
                     <a href="{{ route('siswa') }}"
                         class="px-4 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
                         Reset
@@ -106,7 +118,16 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $s->jenis_kelamin }}</td>
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $s->kelas->nama_kelas ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-center">
+                                <div class="inline-flex flex-col items-center gap-1">
+                                    <span class="font-medium text-dark-800">{{ $s->kelas->nama_kelas ?? '-' }}</span>
+                                    @if ($s->kelas && $s->kelas->jurusan)
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-100 text-dark-600">
+                                            {{ $s->kelas->jurusan->kode_jurusan }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-sm text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button onclick="editSiswa('{{ $s->id }}')"

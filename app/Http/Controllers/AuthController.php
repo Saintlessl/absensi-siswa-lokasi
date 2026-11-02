@@ -21,6 +21,16 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
+            $user = Auth::user();
+
+            // First Login Biometric Enrollment Check for Students
+            if ($user->role === 'siswa') {
+                $siswa = \App\Models\Siswa::where('user_id', $user->id)->first();
+                if ($siswa && !$siswa->isBiometricEnrolled()) {
+                    return redirect()->route('siswa.enrollment')
+                        ->with('info', 'Selamat datang! Anda diwajibkan melakukan registrasi biometrik wajah sebelum dapat menggunakan sistem.');
+                }
+            }
 
             return redirect()->route('dashboard');
         }

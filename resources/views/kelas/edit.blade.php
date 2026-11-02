@@ -2,7 +2,7 @@
     @csrf
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-            <label for="nama_kelas_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Nama Kelas</label>
+            <label for="nama_kelas_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Nama Kelas <span class="text-rose-500">*</span></label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class='bx bx-home-alt text-dark-400 text-lg'></i>
@@ -13,7 +13,24 @@
             </div>
         </div>
         <div>
-            <label for="jumlah_siswa_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Jumlah Siswa</label>
+            <label for="jurusan_id_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Jurusan (Program Keahlian)</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class='bx bx-layer text-dark-400 text-lg'></i>
+                </div>
+                <select name="jurusan_id" id="jurusan_id_edit"
+                    class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 text-sm">
+                    <option value="">-- Pilih Jurusan (Opsional) --</option>
+                    @foreach ($jurusans as $j)
+                        <option value="{{ $j->id }}" {{ $kelas->jurusan_id == $j->id ? 'selected' : '' }}>
+                            {{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div>
+            <label for="jumlah_siswa_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Jumlah Siswa <span class="text-rose-500">*</span></label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class='bx bx-group text-dark-400 text-lg'></i>
@@ -23,8 +40,8 @@
                     placeholder="Jumlah Siswa" required>
             </div>
         </div>
-        <div class="md:col-span-2">
-            <label for="wali_kelas_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Wali Kelas</label>
+        <div>
+            <label for="wali_kelas_edit" class="block text-sm font-medium text-dark-700 mb-1.5">Wali Kelas <span class="text-rose-500">*</span></label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class='bx bx-user-voice text-dark-400 text-lg'></i>
