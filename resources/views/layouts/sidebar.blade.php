@@ -311,6 +311,22 @@
                             <span class="sidebar-label transition-all duration-300">Riwayat Kehadiran</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('siswa.devices') }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('siswa.devices*')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('siswa.devices*')
+                                            ? 'bg-primary-600/30 text-primary-400'
+                                            : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-devices text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Perangkat Saya</span>
+                        </a>
+                    </li>
 
                 </ul>
             </div>
@@ -424,6 +440,22 @@
                                 <i class='bx bx-history text-lg'></i>
                             </div>
                             <span class="sidebar-label transition-all duration-300">Riwayat Kehadiran</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('siswa.devices') }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('siswa.devices*')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('siswa.devices*')
+                                            ? 'bg-primary-600/30 text-primary-400'
+                                            : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-devices text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Perangkat Saya</span>
                         </a>
                     </li>
                 </ul>

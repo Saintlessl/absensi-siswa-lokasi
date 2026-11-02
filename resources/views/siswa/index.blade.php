@@ -93,40 +93,59 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">
-                            No</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">NIS</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">L/P</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Kelas</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">
-                            Aksi</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-14 text-center">No</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Identitas (NIS / NISN)</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Lengkap & Akun</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Kelas & Jurusan</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Kontak Orang Tua (WA)</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-dark-200/50">
                     @forelse ($siswa as $s)
                         <tr class="hover:bg-dark-50/50 transition-colors duration-200">
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $siswa->firstItem() + $loop->index }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-800">{{ $s->nis }}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <div class="font-bold text-dark-800 font-mono">{{ $s->nis }}</div>
+                                <div class="text-[11px] text-dark-400">NISN: {{ $s->nisn ?? '-' }}</div>
+                            </td>
                             <td class="px-6 py-4 text-sm font-medium text-dark-800">
                                 <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
+                                    <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs flex-shrink-0">
                                         {{ strtoupper(substr($s->nama, 0, 1)) }}
                                     </div>
-                                    {{ $s->nama }}
+                                    <div>
+                                        <div class="font-bold text-dark-900">{{ $s->nama }} <span class="text-xs font-normal text-dark-400">({{ $s->jenis_kelamin }})</span></div>
+                                        <div class="text-[11px] text-primary-600 flex items-center gap-1 font-mono">
+                                            <i class='bx bx-envelope text-xs'></i> {{ $s->user->email ?? '-' }}
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $s->jenis_kelamin }}</td>
                             <td class="px-6 py-4 text-sm text-center">
                                 <div class="inline-flex flex-col items-center gap-1">
-                                    <span class="font-medium text-dark-800">{{ $s->kelas->nama_kelas ?? '-' }}</span>
+                                    <span class="font-bold text-dark-800">{{ $s->kelas->nama_kelas ?? '-' }}</span>
                                     @if ($s->kelas && $s->kelas->jurusan)
                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-100 text-dark-600">
                                             {{ $s->kelas->jurusan->kode_jurusan }}
                                         </span>
                                     @endif
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                @if($s->no_telp_orangtua)
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                                        <i class='bx bxl-whatsapp text-sm text-emerald-600'></i>
+                                        <span>{{ $s->no_telp_orangtua }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                        Belum diisi
+                                    </span>
+                                @endif
+                                @if($s->no_telp_siswa)
+                                    <div class="text-[11px] text-dark-400 mt-1">Siswa: {{ $s->no_telp_siswa }}</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-center">
                                 <div class="flex items-center justify-center gap-2">
@@ -200,91 +219,165 @@
                         <div class="px-6 py-5">
                             <form action="{{ route('siswa.store') }}" method="POST" id="frmSiswa">
                                 @csrf
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="nis" class="block text-sm font-medium text-dark-700 mb-1.5">NIS</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-id-card text-dark-400 text-lg'></i>
+
+                                {{-- Section A: Identitas Siswa --}}
+                                <div class="mb-5">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">1</div>
+                                        <h4 class="text-sm font-semibold text-dark-800">Identitas Siswa</h4>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="nisn" class="block text-xs font-medium text-dark-700 mb-1.5">NISN <span class="text-dark-400 font-normal">(10 digit)</span></label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class='bx bx-id-card text-dark-400 text-lg'></i>
+                                                </div>
+                                                <input type="text" name="nisn" id="nisn" maxlength="20"
+                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
+                                                    placeholder="Contoh: 0051234567" autocomplete="off">
                                             </div>
-                                            <input type="text" name="nis" id="nis"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="NIS" required autocomplete="off">
+                                        </div>
+                                        <div>
+                                            <label for="nis" class="block text-xs font-medium text-dark-700 mb-1.5">NIS <span class="text-rose-500">*</span></label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class='bx bx-badge-check text-dark-400 text-lg'></i>
+                                                </div>
+                                                <input type="text" name="nis" id="nis" maxlength="20"
+                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
+                                                    placeholder="Contoh: 21221001" required autocomplete="off">
+                                            </div>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label for="nama" class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class='bx bx-user text-dark-400 text-lg'></i>
+                                                </div>
+                                                <input type="text" name="nama" id="nama"
+                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+                                                    placeholder="Nama Lengkap Siswa" required autocomplete="off">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="jenis_kelamin" class="block text-xs font-medium text-dark-700 mb-1.5">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                                            <select name="jenis_kelamin" id="jenis_kelamin" required
+                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                                                <option value="">-- Pilih Jenis Kelamin --</option>
+                                                <option value="L">Laki-laki</option>
+                                                <option value="P">Perempuan</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="modal_filter_jurusan" class="block text-xs font-medium text-dark-700 mb-1.5">Jurusan</label>
+                                            <select id="modal_filter_jurusan"
+                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                                                <option value="">-- Semua Jurusan --</option>
+                                                @foreach($jurusans as $j)
+                                                    <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label for="kelas_id" class="block text-xs font-medium text-dark-700 mb-1.5">Kelas <span class="text-rose-500">*</span></label>
+                                            <select name="kelas_id" id="kelas_id" required
+                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                                                <option value="">-- Pilih Kelas --</option>
+                                                @foreach($kelas as $k)
+                                                    <option value="{{ $k->id }}" data-jurusan="{{ $k->jurusan_id }}">
+                                                        {{ $k->nama_kelas }} ({{ $k->jurusan->kode_jurusan ?? '-' }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label for="nama" class="block text-sm font-medium text-dark-700 mb-1.5">Nama Legkap</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-user text-dark-400 text-lg'></i>
+                                </div>
+
+                                {{-- Section B: Informasi Kontak --}}
+                                <div class="mb-5 pt-4 border-t border-dark-100">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">2</div>
+                                        <h4 class="text-sm font-semibold text-dark-800">Informasi Kontak & Notifikasi</h4>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="no_telp_siswa" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor Telepon Siswa <span class="text-dark-400 font-normal">(Opsional)</span></label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class='bx bx-phone text-dark-400 text-lg'></i>
+                                                </div>
+                                                <input type="tel" name="no_telp_siswa" id="no_telp_siswa"
+                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
+                                                    placeholder="08123456789" autocomplete="off">
                                             </div>
-                                            <input type="text" name="nama" id="nama"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Nama" required autocomplete="off">
+                                        </div>
+                                        <div>
+                                            <label for="no_telp_orangtua" class="block text-xs font-medium text-dark-700 mb-1.5">
+                                                No. Telepon / WA Orang Tua <span class="text-rose-500">*</span>
+                                            </label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class='bx bxl-whatsapp text-emerald-600 text-lg'></i>
+                                                </div>
+                                                <input type="tel" name="no_telp_orangtua" id="no_telp_orangtua" required
+                                                    class="block w-full pl-10 pr-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all font-mono"
+                                                    placeholder="081234567890" autocomplete="off">
+                                            </div>
+                                            <p class="text-[11px] text-emerald-700 mt-1 flex items-center gap-1">
+                                                <i class='bx bx-check-circle text-xs'></i>
+                                                Notifikasi otomatis presensi (masuk & pulang) akan dikirim ke nomor ini.
+                                            </p>
                                         </div>
                                     </div>
-                                    
-                                    <div>
-                                        <label for="jenis_kelamin" class="block text-sm font-medium text-dark-700 mb-1.5">Jenis Kelamin</label>
-                                        <select name="jenis_kelamin" id="jenis_kelamin" required
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="">-- Pilih Jenis Kelamin --</option>
-                                            <option value="L">Laki-laki</option>
-                                            <option value="P">Perempuan</option>
-                                        </select>
-                                    </div>
+                                </div>
 
-                                    <div>
-                                        <label for="kelas_id" class="block text-sm font-medium text-dark-700 mb-1.5">Kelas</label>
-                                        <select name="kelas_id" id="kelas_id" required
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="">-- Pilih Kelas --</option>
-                                            @foreach($kelas as $k)
-                                            <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
-                                            @endforeach
-                                        </select>
+                                {{-- Section C: Akun Siswa --}}
+                                <div class="mb-5 pt-4 border-t border-dark-100">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">3</div>
+                                        <h4 class="text-sm font-semibold text-dark-800">Akun Login Siswa (@myskanic.com)</h4>
                                     </div>
-
-                                    <div class="md:col-span-2 mt-2">
-                                        <hr class="border-dark-200 mb-4">
-                                        <h4 class="text-sm font-semibold text-dark-600 mb-4">Akun Login Siswa</h4>
-                                    </div>
-
-                                    <div>
-                                        <label for="email" class="block text-sm font-medium text-dark-700 mb-1.5">Email</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-envelope text-dark-400 text-lg'></i>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="username_input" class="block text-xs font-medium text-dark-700 mb-1.5">Username Siswa <span class="text-rose-500">*</span></label>
+                                            <div class="flex rounded-xl overflow-hidden border border-dark-200 focus-within:ring-2 focus-within:ring-primary-500/30 focus-within:border-primary-500 transition-all">
+                                                <span class="inline-flex items-center px-3 bg-dark-50 text-dark-500 text-sm border-r border-dark-200">
+                                                    <i class='bx bx-user text-base'></i>
+                                                </span>
+                                                <input type="text" name="username" id="username_input"
+                                                    class="block w-full px-3 py-2 bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none font-mono lowercase"
+                                                    placeholder="budi.santoso" required autocomplete="off">
+                                                <span class="inline-flex items-center px-3 bg-primary-50 text-primary-700 font-semibold text-xs border-l border-primary-100 select-none">
+                                                    @myskanic.com
+                                                </span>
                                             </div>
-                                            <input type="email" name="email" id="email"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Email" required autocomplete="off">
+                                            <p class="text-[11px] text-dark-500 mt-1">Hanya huruf kecil, angka, titik, strip.</p>
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <label for="password" class="block text-sm font-medium text-dark-700 mb-1.5">Password</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-lock-alt text-dark-400 text-lg'></i>
+                                        <div>
+                                            <label for="password" class="block text-xs font-medium text-dark-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
+                                            <div class="relative">
+                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <i class='bx bx-lock-alt text-dark-400 text-lg'></i>
+                                                </div>
+                                                <input type="password" name="password" id="password" minlength="6"
+                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+                                                    placeholder="Minimal 6 karakter" required autocomplete="off">
                                             </div>
-                                            <input type="password" name="password" id="password"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Password minimal 6 karakter" required autocomplete="off">
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Actions --}}
-                                <div class="mt-8 flex items-center justify-end gap-3">
+                                <div class="mt-6 pt-4 border-t border-dark-100 flex items-center justify-end gap-3">
                                     <button type="button" onclick="closeModal('modal-inputsiswa')"
-                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 hover:text-dark-800 font-medium transition-colors duration-200">
+                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 hover:text-dark-800 text-sm font-medium transition-colors duration-200">
                                         Batal
                                     </button>
                                     <button type="submit"
-                                        class="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 flex items-center gap-2">
+                                        class="px-5 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 flex items-center gap-2">
                                         <i class='bx bx-save text-lg'></i>
-                                        Simpan Data
+                                        Simpan Siswa
                                     </button>
                                 </div>
                             </form>
@@ -347,6 +440,28 @@
                 }
             }
         }
+
+        // Filter Kelas by Jurusan in Add Modal
+        document.getElementById('modal_filter_jurusan')?.addEventListener('change', function() {
+            const selectedJurusan = this.value;
+            const kelasSelect = document.getElementById('kelas_id');
+            if (!kelasSelect) return;
+
+            Array.from(kelasSelect.options).forEach((opt, idx) => {
+                if (idx === 0) return;
+                const optJurusan = opt.getAttribute('data-jurusan');
+                if (!selectedJurusan || optJurusan === selectedJurusan) {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                } else {
+                    opt.hidden = true;
+                    opt.disabled = true;
+                }
+            });
+            if (kelasSelect.selectedOptions[0] && kelasSelect.selectedOptions[0].disabled) {
+                kelasSelect.selectedIndex = 0;
+            }
+        });
 
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Exports\SiswaExport;
 use App\Models\Jurusan;
 use App\Models\Kelas;
+use App\Models\OrangTua;
 use App\Models\Siswa;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -50,73 +52,161 @@ class SiswaController extends Controller
 
     public function store(Request $request)
     {
+        // Enforce fixed domain @myskanic.com for student accounts
+        $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
+        if (str_contains($rawUsername, '@')) {
+            $rawUsername = explode('@', $rawUsername)[0];
+        }
+        $rawUsername = preg_replace('/[^a-z0-9._-]/', '', $rawUsername);
+
+        if (empty($rawUsername)) {
+            return back()->with('error', 'Username email siswa wajib diisi (hanya huruf, angka, titik, strip, underscore).')->withInput();
+        }
+
+        $finalEmail = $rawUsername . '@myskanic.com';
+        $request->merge([
+            'email'    => $finalEmail,
+            'username' => $rawUsername,
+        ]);
+
         $request->validate([
-            'nis' => 'required|unique:siswas,nis',
-            'nama' => 'required|string|max:255',
-            'jenis_kelamin' => 'required|in:L,P',
-            'kelas_id' => 'required|exists:kelas,id',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
+            'nisn'             => 'nullable|string|max:20|unique:siswas,nisn',
+            'nis'              => 'required|string|max:20|unique:siswas,nis',
+            'nama'             => 'required|string|max:255',
+            'jenis_kelamin'    => 'required|in:L,P',
+            'kelas_id'         => 'required|exists:kelas,id',
+            'no_telp_siswa'    => 'nullable|string|max:25',
+            'no_telp_orangtua' => 'required|string|max:25',
+            'email'            => 'required|email|unique:users,email',
+            'password'         => 'required|min:6',
+        ], [
+            'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
+            'no_telp_orangtua.required' => 'Nomor WhatsApp / telepon orang tua wajib diisi untuk notifikasi presensi.',
+            'nis.unique'                => 'NIS sudah terdaftar.',
+            'nisn.unique'               => 'NISN sudah terdaftar.',
         ]);
 
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'siswa',
-        ]);
+        DB::beginTransaction();
+        try {
+            $user = User::create([
+                'name'     => $request->nama,
+                'email'    => $finalEmail,
+                'password' => Hash::make($request->password),
+                'role'     => 'siswa',
+            ]);
 
-        Siswa::create([
-            'user_id' => $user->id,
-            'nis' => $request->nis,
-            'nama' => $request->nama,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'kelas_id' => $request->kelas_id,
-            'biometric_status' => 'not_enrolled',
-        ]);
+            $siswa = Siswa::create([
+                'user_id'          => $user->id,
+                'nisn'             => $request->nisn,
+                'nis'              => $request->nis,
+                'nama'             => $request->nama,
+                'jenis_kelamin'    => $request->jenis_kelamin,
+                'kelas_id'         => $request->kelas_id,
+                'no_telp_siswa'    => $request->no_telp_siswa,
+                'no_telp_orangtua' => $request->no_telp_orangtua,
+                'biometric_status' => 'not_enrolled',
+            ]);
 
-        return redirect()->back()->with('success', 'Data Siswa berhasil ditambahkan');
+            // Sync with orang_tuas table
+            OrangTua::updateOrCreate(
+                ['siswa_id' => $siswa->id],
+                [
+                    'nama'    => 'Orang Tua / Wali ' . $request->nama,
+                    'telepon' => $request->no_telp_orangtua,
+                    'alamat'  => '-',
+                ]
+            );
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data Siswa berhasil ditambahkan dengan akun ' . $finalEmail);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menambahkan data siswa: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function edit(Request $request)
     {
-        $siswa = Siswa::with('user')->findOrFail($request->id);
-        $kelas = Kelas::all();
-        return view('siswa.edit', compact('siswa', 'kelas'));
+        $siswa = Siswa::with(['user', 'kelas.jurusan'])->findOrFail($request->id);
+        $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
+        $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+        return view('siswa.edit', compact('siswa', 'kelas', 'jurusans'));
     }
 
     public function update(Request $request, $id)
     {
-        $siswa = Siswa::findOrFail($id);
-        
-        $request->validate([
-            'nis' => ['required', Rule::unique('siswas', 'nis')->ignore($siswa->id)],
-            'nama' => 'required|string|max:255',
-            'jenis_kelamin' => 'required|in:L,P',
-            'kelas_id' => 'required|exists:kelas,id',
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($siswa->user_id)],
-            'password' => 'nullable|min:6',
-        ]);
+        $siswa = Siswa::with('user')->findOrFail($id);
 
-        $userData = [
-            'name' => $request->nama,
-            'email' => $request->email,
-        ];
-        
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
+        // Enforce fixed domain @myskanic.com for student accounts
+        $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
+        if (str_contains($rawUsername, '@')) {
+            $rawUsername = explode('@', $rawUsername)[0];
+        }
+        $rawUsername = preg_replace('/[^a-z0-9._-]/', '', $rawUsername);
+
+        if (empty($rawUsername)) {
+            return back()->with('error', 'Username email siswa wajib diisi.')->withInput();
         }
 
-        $siswa->user->update($userData);
-
-        $siswa->update([
-            'nis' => $request->nis,
-            'nama' => $request->nama,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'kelas_id' => $request->kelas_id,
+        $finalEmail = $rawUsername . '@myskanic.com';
+        $request->merge([
+            'email'    => $finalEmail,
+            'username' => $rawUsername,
         ]);
 
-        return redirect()->back()->with('success', 'Data Siswa berhasil diperbarui');
+        $request->validate([
+            'nisn'             => ['nullable', 'string', 'max:20', Rule::unique('siswas', 'nisn')->ignore($siswa->id)],
+            'nis'              => ['required', 'string', 'max:20', Rule::unique('siswas', 'nis')->ignore($siswa->id)],
+            'nama'             => 'required|string|max:255',
+            'jenis_kelamin'    => 'required|in:L,P',
+            'kelas_id'         => 'required|exists:kelas,id',
+            'no_telp_siswa'    => 'nullable|string|max:25',
+            'no_telp_orangtua' => 'required|string|max:25',
+            'email'            => ['required', 'email', Rule::unique('users', 'email')->ignore($siswa->user_id)],
+            'password'         => 'nullable|min:6',
+        ], [
+            'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
+            'no_telp_orangtua.required' => 'Nomor WhatsApp / telepon orang tua wajib diisi untuk notifikasi presensi.',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $userData = [
+                'name'  => $request->nama,
+                'email' => $finalEmail,
+            ];
+
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            if ($siswa->user) {
+                $siswa->user->update($userData);
+            }
+
+            $siswa->update([
+                'nisn'             => $request->nisn,
+                'nis'              => $request->nis,
+                'nama'             => $request->nama,
+                'jenis_kelamin'    => $request->jenis_kelamin,
+                'kelas_id'         => $request->kelas_id,
+                'no_telp_siswa'    => $request->no_telp_siswa,
+                'no_telp_orangtua' => $request->no_telp_orangtua,
+            ]);
+
+            OrangTua::updateOrCreate(
+                ['siswa_id' => $siswa->id],
+                [
+                    'telepon' => $request->no_telp_orangtua,
+                ]
+            );
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data Siswa berhasil diperbarui');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui data siswa: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)

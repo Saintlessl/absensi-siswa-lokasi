@@ -324,26 +324,33 @@
                 <form action="{{ route('proseslogin') }}" method="POST" id="loginForm" class="space-y-5">
                     @csrf
 
-                    {{-- Email Input --}}
+                    {{-- Email / Username Input --}}
                     <div class="space-y-1.5">
                         <label for="email" class="block text-sm font-semibold text-dark-700">
-                            Alamat Email
+                            Email / Username Siswa
                         </label>
                         <div class="relative input-glow rounded-xl transition-all duration-200">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class='bx bx-envelope text-lg text-dark-400'></i>
+                                <i class='bx bx-user text-lg text-dark-400'></i>
                             </div>
-                            <input type="email" id="email" name="email" value="{{ old('email') }}" required
-                                autocomplete="email" autofocus
+                            <input type="text" id="email" name="email" value="{{ old('email') }}" required
+                                autocomplete="username email" autofocus
                                 class="w-full pl-11 pr-4 py-3.5 bg-dark-50/80 border border-dark-200 rounded-xl text-sm text-dark-800 placeholder-dark-400 focus:outline-none focus:border-primary-500 focus:bg-white transition-all duration-200"
-                                placeholder="contoh@email.com">
+                                placeholder="username atau nama@myskanic.com">
                         </div>
+                        <p class="text-[11px] text-dark-400 mt-1">Siswa dapat mengetik username saja atau email <strong>@myskanic.com</strong></p>
                         @error('email')
                             <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
                                 <i class='bx bx-error-circle'></i> {{ $message }}
                             </p>
                         @enderror
                     </div>
+
+                    {{-- Hidden Device Info --}}
+                    <input type="hidden" name="device_token" id="clientDeviceToken">
+                    <input type="hidden" name="device_name" id="clientDeviceName">
+                    <input type="hidden" name="platform" id="clientPlatform">
+                    <input type="hidden" name="browser" id="clientBrowser">
 
                     {{-- Password Input --}}
                     <div class="space-y-1.5">
@@ -419,6 +426,38 @@
                 toggleIcon.classList.add('bx-hide');
             }
         }
+
+        // Client Device Token & Specs Detection
+        document.addEventListener('DOMContentLoaded', function() {
+            let token = localStorage.getItem('myskanic_device_token');
+            if (!token) {
+                token = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localStorage.setItem('myskanic_device_token', token);
+            }
+            const tokenInput = document.getElementById('clientDeviceToken');
+            if (tokenInput) tokenInput.value = token;
+
+            let ua = navigator.userAgent;
+            let platform = 'Desktop';
+            if (/Android/i.test(ua)) platform = 'Android';
+            else if (/iPhone|iPad|iPod/i.test(ua)) platform = 'iOS';
+            else if (/Windows/i.test(ua)) platform = 'Windows';
+            else if (/Macintosh|Mac OS/i.test(ua)) platform = 'macOS';
+            else if (/Linux/i.test(ua)) platform = 'Linux';
+
+            let browser = 'Browser';
+            if (/Chrome/i.test(ua)) browser = 'Chrome';
+            else if (/Safari/i.test(ua)) browser = 'Safari';
+            else if (/Firefox/i.test(ua)) browser = 'Firefox';
+            else if (/Edge/i.test(ua)) browser = 'Edge';
+
+            const pInput = document.getElementById('clientPlatform');
+            const bInput = document.getElementById('clientBrowser');
+            const dInput = document.getElementById('clientDeviceName');
+            if (pInput) pInput.value = platform;
+            if (bInput) bInput.value = browser;
+            if (dInput) dInput.value = platform + ' - ' + browser;
+        });
 
         // Loading state on form submit
         document.getElementById('loginForm').addEventListener('submit', function() {

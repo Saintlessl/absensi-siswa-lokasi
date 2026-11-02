@@ -130,6 +130,38 @@ class FaceBiometricService
     }
 
     /**
+     * Generate challenge nonce for every-login face verification
+     */
+    public function generateLoginFaceChallenge(Siswa $siswa): array
+    {
+        $token = 'chl_lgn_' . Str::random(32);
+        $selected = [
+            [
+                'step'  => 1,
+                'type'  => 'front_facing',
+                'label' => 'Hadapkan wajah tepat ke kamera',
+                'hint'  => 'Posisikan wajah lurus di dalam bingkai oval'
+            ]
+        ];
+
+        $payload = [
+            'siswa_id'     => $siswa->id,
+            'challenges'   => $selected,
+            'session_type' => 'login',
+            'created_at'   => now()->timestamp,
+            'expires_at'   => now()->addMinutes(5)->timestamp,
+        ];
+
+        Cache::put('biometric_challenge_' . $token, $payload, 300);
+
+        return [
+            'token'      => $token,
+            'expires_in' => 300,
+            'challenges' => $selected
+        ];
+    }
+
+    /**
      * Verify Live Face Descriptor against Student's Registered Biometric Template
      */
     public function verify(

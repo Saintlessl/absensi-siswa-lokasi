@@ -317,32 +317,13 @@
                                 </div>
                             </div>
 
-                            {{-- STEP 2: VERIFIKASI BIOMETRIK WAJAH & LIVENESS DETECTION --}}
+                            {{-- STEP 2: FOTO SELFIE PRESENSI --}}
                             <div id="stepSection2" class="hidden space-y-4">
                                 <div class="text-center max-w-md mx-auto">
-                                    <h4 class="text-base font-bold text-dark-800">Langkah 2: AI Facial Verification & Liveness</h4>
+                                    <h4 class="text-base font-bold text-dark-800">Langkah 2: Foto Selfie Kehadiran</h4>
                                     <p class="text-xs text-dark-500 mt-1">
-                                        Posisikan wajah Anda di bingkai oval dan ikuti tantangan keaktifan (anti-spoofing).
+                                        Posisikan wajah Anda di dalam bingkai untuk pengambilan foto bukti kehadiran.
                                     </p>
-                                </div>
-
-                                {{-- Kartu Tantangan Liveness Realtime --}}
-                                <div id="challengeBox" class="max-w-sm mx-auto p-3.5 rounded-xl bg-dark-50 border border-dark-200">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[11px] font-semibold text-dark-500 uppercase tracking-wider flex items-center gap-1.5">
-                                            <i class='bx bx-shield-quarter text-sm text-primary-600'></i> Verifikasi Keaktifan Wajah
-                                        </span>
-                                        <span id="challengeCounter" class="text-[11px] font-semibold text-dark-500">Tantangan 1 dari 2</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div id="challengeIconWrapper" class="w-9 h-9 rounded-lg bg-primary-50 text-primary-700 border border-primary-200 flex items-center justify-center text-lg flex-shrink-0">
-                                            <i class='bx bx-show' id="challengeIcon"></i>
-                                        </div>
-                                        <div>
-                                            <p id="challengeInstruction" class="text-xs font-bold text-dark-900 leading-snug">Menyiapkan tantangan...</p>
-                                            <p id="challengeHint" class="text-[11px] text-dark-500 mt-0.5">Tatap kamera dengan jelas</p>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 {{-- Camera Viewport --}}
@@ -370,13 +351,6 @@
                                             </div>
                                         </div>
 
-                                        {{-- Model Loading Overlay --}}
-                                        <div id="biometricLoaderOverlay" class="absolute inset-0 bg-dark-950/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-20 transition-opacity">
-                                            <div class="w-10 h-10 rounded-full border-4 border-primary-500 border-t-transparent animate-spin mb-3"></div>
-                                            <p class="font-bold text-xs" id="biometricLoaderText">Memuat Model AI Biometrik...</p>
-                                            <p class="text-[11px] text-dark-400 mt-1 max-w-xs">Memeriksa kesiapan neural network pengenal wajah.</p>
-                                        </div>
-
                                         {{-- Camera Error Overlay --}}
                                         <div id="attendanceCameraErrorOverlay" class="hidden absolute inset-0 bg-dark-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-30">
                                             <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl mb-3 border border-rose-500/40">
@@ -395,10 +369,9 @@
                                     {{-- Real-time Status Alert --}}
                                     <div id="biometricStatusAlert" class="mt-3 p-3 rounded-xl bg-dark-50 border border-dark-200 text-xs text-dark-700 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <i class='bx bx-loader-alt bx-spin text-primary-600 text-base' id="biometricStatusIcon"></i>
-                                            <span id="biometricStatusMsg" class="font-medium">Menghubungkan ke kamera...</span>
+                                            <i class='bx bx-camera text-primary-600 text-base' id="biometricStatusIcon"></i>
+                                            <span id="biometricStatusMsg" class="font-medium">Posisikan wajah lalu klik tombol di bawah.</span>
                                         </div>
-                                        <span id="biometricScoreBadge" class="text-[11px] font-bold text-dark-500"></span>
                                     </div>
 
                                     {{-- Action buttons --}}
@@ -407,13 +380,14 @@
                                             <i class='bx bx-left-arrow-alt text-base'></i> Kembali
                                         </button>
 
-                                        <button type="button" id="btnRetryBiometric" onclick="restartBiometricVerification()" class="hidden px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold hover:bg-amber-100 flex items-center gap-1.5">
-                                            <i class='bx bx-refresh text-base'></i> Ulangi Verifikasi
+                                        <button type="button" id="btnCaptureSelfie" onclick="captureSelfieSnapshot()"
+                                            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold text-xs shadow-md shadow-primary-500/30 flex items-center gap-1.5 transition-all">
+                                            <i class='bx bx-camera text-base'></i>
+                                            <span>Ambil Foto Kehadiran</span>
                                         </button>
 
-                                        <button type="button" id="btnNextToStep3" onclick="goToStep(3)" disabled
-                                            class="px-6 py-2.5 rounded-xl bg-dark-200 text-dark-400 font-bold text-xs transition-all flex items-center gap-1.5 cursor-not-allowed">
-                                            <span>Lanjut ke Lokasi & Kirim</span>
+                                        <button type="button" id="btnNextToStep3" onclick="goToStep(3)" class="hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-500/30 flex items-center gap-1.5">
+                                            <span>Lanjut ke Lokasi</span>
                                             <i class='bx bx-right-arrow-alt text-base'></i>
                                         </button>
                                     </div>
@@ -745,104 +719,10 @@
         }
 
         // ===============================================
-        // STEP 2: AI BIOMETRIC VERIFICATION & LIVENESS
+        // STEP 2: FOTO SELFIE PRESENSI
         // ===============================================
         async function startBiometricStep() {
-            if (isLivenessPassed && liveFaceDescriptor) {
-                // Sudah lolos sebelumnya, aktifkan tombol
-                return;
-            }
-
-            // 1. Muat model jika belum
-            await loadFaceApiModels();
-
-            // 2. Minta tantangan (challenge) liveness dari backend
-            await requestLivenessChallenge();
-
-            // 3. Nyalakan kamera depan
             await startBiometricCamera();
-
-            // 4. Mulai loop deteksi keaktifan
-            startBiometricDetectionLoop();
-        }
-
-        async function loadFaceApiModels() {
-            if (isModelLoaded) return;
-            const loader = document.getElementById('biometricLoaderOverlay');
-            loader.classList.remove('hidden', 'opacity-0');
-
-            try {
-                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-                ]);
-                isModelLoaded = true;
-                loader.classList.add('opacity-0');
-                setTimeout(() => loader.classList.add('hidden'), 300);
-            } catch (err) {
-                console.error("Gagal memuat model face-api:", err);
-                document.getElementById('biometricLoaderText').textContent = "Gagal mengunduh model AI. Periksa koneksi internet.";
-            }
-        }
-
-        async function requestLivenessChallenge() {
-            try {
-                const res = await fetch("{{ route('absensi.challenge') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-                    }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    challengeToken = data.challenge_token;
-                    challengesList = data.challenges;
-                    currentChallengeIdx = 0;
-                    completedChallenges = [];
-                    challengeStartTime = Date.now();
-                    renderChallengeInstruction();
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal Menyiapkan Sesi',
-                        text: data.message || 'Tidak dapat memuat sesi tantangan biometrik.'
-                    });
-                }
-            } catch (e) {
-                console.error("Challenge request error:", e);
-            }
-        }
-
-        function renderChallengeInstruction() {
-            if (!challengesList || challengesList.length === 0) return;
-
-            const total = challengesList.length;
-            const cur = challengesList[currentChallengeIdx];
-            if (!cur) return;
-
-            document.getElementById('challengeCounter').textContent = `Tantangan ${currentChallengeIdx + 1} dari ${total}`;
-            document.getElementById('challengeInstruction').textContent = cur.label;
-            
-            const iconEl = document.getElementById('challengeIcon');
-            iconEl.className = `bx ${cur.icon || 'bx-scan'}`;
-
-            if (cur.type === 'blink') {
-                document.getElementById('challengeHint').textContent = "Kedipkan mata secara natural di depan kamera";
-            } else if (cur.type === 'smile') {
-                document.getElementById('challengeHint').textContent = "Tersenyumlah lebar hingga gigi/pipi tampak sedikit";
-            } else if (cur.type === 'turn_right') {
-                document.getElementById('challengeHint').textContent = "Tolehkan kepala sedikit ke kanan lalu kembali lurus";
-            } else if (cur.type === 'turn_left') {
-                document.getElementById('challengeHint').textContent = "Tolehkan kepala sedikit ke kiri lalu kembali lurus";
-            } else {
-                document.getElementById('challengeHint').textContent = "Ikuti gerakan panduan di layar";
-            }
-
-            challengeStartTime = Date.now();
-            blinkDetected = false;
         }
 
         async function startBiometricCamera() {
@@ -860,6 +740,7 @@
                     onReady: (stream, info) => {
                         if (errOverlay) errOverlay.classList.add('hidden');
                         cameraMediaStream = stream;
+                        document.getElementById('biometricStatusMsg').textContent = "Posisikan wajah lalu klik tombol Ambil Foto.";
                     },
                     onError: (errInfo) => {
                         if (errOverlay) {
@@ -879,7 +760,6 @@
         }
 
         function stopBiometricCamera() {
-            isDetectingBiometric = false;
             if (biometricCameraManager) {
                 biometricCameraManager.stop();
             }
@@ -889,203 +769,25 @@
             }
         }
 
-        function restartBiometricVerification() {
-            isLivenessPassed = false;
-            liveFaceDescriptor = null;
-            livenessProof = null;
-            selfieBase64 = null;
-            completedChallenges = [];
-            currentChallengeIdx = 0;
-
-            const guide = document.getElementById('biometricOvalGuide');
-            guide.className = 'face-oval-guide';
-            document.getElementById('biometricCameraWrapper').classList.remove('scanning');
-            document.getElementById('btnRetryBiometric').classList.add('hidden');
-
-            const btnNext = document.getElementById('btnNextToStep3');
-            btnNext.disabled = true;
-            btnNext.className = "px-6 py-2.5 rounded-xl bg-dark-200 text-dark-400 font-bold text-xs transition-all flex items-center gap-1.5 cursor-not-allowed";
-
-            requestLivenessChallenge().then(() => {
-                startBiometricDetectionLoop();
-            });
-        }
-
-        function startBiometricDetectionLoop() {
-            if (isDetectingBiometric) return;
-            isDetectingBiometric = true;
-
-            const video = document.getElementById('biometricVideo');
-            const guide = document.getElementById('biometricOvalGuide');
-            const wrapper = document.getElementById('biometricCameraWrapper');
-            const statusMsg = document.getElementById('biometricStatusMsg');
-            const statusIcon = document.getElementById('biometricStatusIcon');
-            const statusAlert = document.getElementById('biometricStatusAlert');
-
-            wrapper.classList.add('scanning');
-
-            const checkFrame = async () => {
-                if (!isDetectingBiometric || isLivenessPassed || video.paused || video.ended) {
-                    if (isDetectingBiometric && !isLivenessPassed) {
-                        requestAnimationFrame(checkFrame);
-                    }
-                    return;
-                }
-
-                try {
-                    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.55 });
-                    const detection = await faceapi.detectSingleFace(video, options)
-                        .withFaceLandmarks()
-                        .withFaceDescriptor();
-
-                    if (!detection) {
-                        guide.className = 'face-oval-guide guide-warning';
-                        statusMsg.textContent = "Wajah tidak terdeteksi. Posisikan wajah di dalam oval.";
-                        statusIcon.className = "bx bx-info-circle text-amber-600 text-base";
-                        statusAlert.className = "mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between";
-                        requestAnimationFrame(checkFrame);
-                        return;
-                    }
-
-                    const box = detection.detection.box;
-                    const videoW = video.videoWidth || 640;
-                    const faceRatio = box.width / videoW;
-
-                    if (faceRatio < 0.20) {
-                        guide.className = 'face-oval-guide guide-warning';
-                        statusMsg.textContent = "Dekatkan wajah sedikit ke kamera.";
-                        requestAnimationFrame(checkFrame);
-                        return;
-                    }
-
-                    if (faceRatio > 0.72) {
-                        guide.className = 'face-oval-guide guide-warning';
-                        statusMsg.textContent = "Jauhkan wajah sedikit dari kamera.";
-                        requestAnimationFrame(checkFrame);
-                        return;
-                    }
-
-                    guide.className = 'face-oval-guide guide-active';
-                    statusIcon.className = "bx bx-loader-alt bx-spin text-primary-600 text-base";
-                    statusAlert.className = "mt-3 p-3 rounded-xl bg-primary-50 border border-primary-200 text-xs text-primary-800 flex items-center justify-between";
-                    statusMsg.textContent = "Wajah terfokus. Silakan selesaikan tantangan di atas.";
-
-                    // Evaluasi Tantangan Liveness Aktif
-                    evaluateCurrentChallenge(detection);
-
-                } catch (e) {
-                    // ignore frame processing drop
-                }
-
-                if (isDetectingBiometric && !isLivenessPassed) {
-                    requestAnimationFrame(checkFrame);
-                }
-            };
-
-            requestAnimationFrame(checkFrame);
-        }
-
-        function calculateEAR(eye) {
-            // EAR = (||p2 - p6|| + ||p3 - p5||) / (2 * ||p1 - p4||)
-            const p1 = eye[0], p2 = eye[1], p3 = eye[2], p4 = eye[3], p5 = eye[4], p6 = eye[5];
-            const distV1 = Math.hypot(p2.x - p6.x, p2.y - p6.y);
-            const distV2 = Math.hypot(p3.x - p5.x, p3.y - p5.y);
-            const distH = Math.hypot(p1.x - p4.x, p1.y - p4.y);
-            return (distV1 + distV2) / (2.0 * (distH || 1));
-        }
-
-        function evaluateCurrentChallenge(detection) {
-            if (!challengesList || challengesList.length === 0) return;
-            const curChallenge = challengesList[currentChallengeIdx];
-            if (!curChallenge) return;
-
-            const landmarks = detection.landmarks;
-
-            if (curChallenge.type === 'blink') {
-                const leftEAR = calculateEAR(landmarks.getLeftEye());
-                const rightEAR = calculateEAR(landmarks.getRightEye());
-                const ear = (leftEAR + rightEAR) / 2.0;
-
-                // Mata tertutup jika EAR < 0.22
-                if (ear < 0.22 && !blinkDetected) {
-                    blinkDetected = true;
-                    eyeClosedStartTime = Date.now();
-                } else if (ear > 0.26 && blinkDetected) {
-                    // Mata terbuka kembali => Kedipan tuntas!
-                    const duration = Date.now() - eyeClosedStartTime;
-                    blinkDetected = false;
-                    onChallengePassed(curChallenge.type, Math.max(180, duration), detection);
-                }
-            } else if (curChallenge.type === 'smile') {
-                const mouth = landmarks.getMouth();
-                const mouthLeft = mouth[0];
-                const mouthRight = mouth[6];
-                const mouthTop = mouth[3];
-                const mouthBottom = mouth[9];
-                const mouthWidth = Math.hypot(mouthRight.x - mouthLeft.x, mouthRight.y - mouthLeft.y);
-                const mouthHeight = Math.hypot(mouthBottom.x - mouthTop.x, mouthBottom.y - mouthTop.y);
-                const ratio = mouthWidth / (mouthHeight || 1);
-
-                if (ratio > 2.75 || mouthWidth > 75) {
-                    const duration = Date.now() - challengeStartTime;
-                    if (duration >= 200) {
-                        onChallengePassed(curChallenge.type, duration, detection);
-                    }
-                }
-            } else if (curChallenge.type === 'turn_right' || curChallenge.type === 'turn_left') {
-                const nose = landmarks.getNose()[3];
-                const leftEye = landmarks.getLeftEye()[0];
-                const rightEye = landmarks.getRightEye()[3];
-                const dLeft = Math.abs(nose.x - leftEye.x);
-                const dRight = Math.abs(nose.x - rightEye.x);
-                const symmetry = Math.min(dLeft, dRight) / Math.max(dLeft, dRight);
-
-                if (symmetry < 0.40) {
-                    const duration = Date.now() - challengeStartTime;
-                    if (duration >= 220) {
-                        onChallengePassed(curChallenge.type, duration, detection);
-                    }
-                }
-            } else {
-                // Default fallback / nod
-                const duration = Date.now() - challengeStartTime;
-                if (duration >= 600) {
-                    onChallengePassed(curChallenge.type, duration, detection);
-                }
-            }
-        }
-
-        function onChallengePassed(challengeType, durationMs, detection) {
-            completedChallenges.push({
-                type: challengeType,
-                duration_ms: durationMs
-            });
-
-            currentChallengeIdx++;
-
-            if (currentChallengeIdx < challengesList.length) {
-                // Lanjut ke tantangan berikutnya
-                renderChallengeInstruction();
-            } else {
-                // SEMUA TANTANGAN LIVENESS SELESAI!
-                finishBiometricVerification(detection);
-            }
-        }
-
-        function finishBiometricVerification(detection) {
-            isLivenessPassed = true;
-            isDetectingBiometric = false;
-
+        function captureSelfieSnapshot() {
             const video = document.getElementById('biometricVideo');
             const canvas = document.getElementById('biometricCanvas');
             const guide = document.getElementById('biometricOvalGuide');
-            const wrapper = document.getElementById('biometricCameraWrapper');
             const statusMsg = document.getElementById('biometricStatusMsg');
             const statusIcon = document.getElementById('biometricStatusIcon');
             const statusAlert = document.getElementById('biometricStatusAlert');
+            const btnCapture = document.getElementById('btnCaptureSelfie');
             const btnNext = document.getElementById('btnNextToStep3');
 
-            // Tangkap foto snapshot dari video (mirror & optimal ratio)
+            if (!video || video.paused || video.ended) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Kamera Belum Aktif',
+                    text: 'Pastikan aliran kamera telah menyala sebelum mengambil foto.'
+                });
+                return;
+            }
+
             if (biometricCameraManager) {
                 selfieBase64 = biometricCameraManager.captureSnapshot(640, 480);
             } else {
@@ -1098,39 +800,25 @@
                 selfieBase64 = canvas.toDataURL('image/jpeg', 0.88);
             }
 
-            // Simpan live 128-d descriptor & liveness proof
-            liveFaceDescriptor = Array.from(detection.descriptor);
-            livenessProof = {
-                completed_challenges: completedChallenges,
-                liveness_score: 96.5
-            };
+            // Visual feedback
+            if (guide) guide.className = 'face-oval-guide guide-valid';
+            if (statusIcon) statusIcon.className = "bx bx-check-circle text-emerald-600 text-base";
+            if (statusAlert) statusAlert.className = "mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center justify-between";
+            if (statusMsg) statusMsg.textContent = "Foto kehadiran berhasil diambil!";
 
-            // Tampilkan visual sukses
-            wrapper.classList.remove('scanning');
-            guide.className = 'face-oval-guide guide-valid';
-            statusIcon.className = "bx bx-check-circle text-emerald-600 text-base";
-            statusAlert.className = "mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center justify-between";
-            statusMsg.textContent = "Verifikasi Wajah & Anti-Spoofing Berhasil!";
-
-            document.getElementById('challengeInstruction').textContent = "Keaktifan Terverifikasi";
-            document.getElementById('challengeHint').textContent = "Wajah asli terkonfirmasi bukan foto/rekaman";
-            document.getElementById('challengeIcon').className = "bx bx-check-shield text-emerald-600";
-            document.getElementById('challengeIconWrapper').className = "w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shadow-md";
-
-            // Pasang foto pada summary thumbnail step 3
             const thumb = document.getElementById('summarySelfieThumbnail');
             if (thumb) thumb.src = selfieBase64;
 
-            // Aktifkan tombol lanjut ke step 3
-            btnNext.disabled = false;
-            btnNext.className = "px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs shadow-md shadow-emerald-500/30 flex items-center gap-1.5 transition-all";
+            if (btnCapture) btnCapture.innerHTML = "<i class='bx bx-check text-base'></i> Foto Tersimpan (Klik untuk Ulangi)";
+            if (btnNext) {
+                btnNext.classList.remove('hidden');
+                btnNext.disabled = false;
+            }
 
-            document.getElementById('btnRetryBiometric').classList.remove('hidden');
-
-            // Auto advance ke step 3 setelah 600ms
+            // Auto advance ke step 3 setelah 450ms
             setTimeout(() => {
                 goToStep(3);
-            }, 600);
+            }, 450);
         }
 
         // ========================
@@ -1191,11 +879,11 @@
         }
 
         function submitAbsensi() {
-            if (!scannedQrToken || !selfieBase64 || !userLatitude || !userLongitude || !liveFaceDescriptor || !challengeToken) {
+            if (!scannedQrToken || !selfieBase64 || !userLatitude || !userLongitude) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Data Belum Lengkap',
-                    text: 'Pastikan QR Code, verifikasi wajah biometrik, dan lokasi GPS telah siap.',
+                    text: 'Pastikan QR Code, foto kehadiran, dan lokasi GPS telah siap.',
                 });
                 return;
             }
@@ -1203,7 +891,7 @@
             const btnSubmit = document.getElementById('btnSubmitAbsensi');
             const btnText = document.getElementById('btnSubmitText');
             btnSubmit.disabled = true;
-            btnText.innerHTML = "<i class='bx bx-loader-alt bx-spin mr-1'></i> Memverifikasi...";
+            btnText.innerHTML = "<i class='bx bx-loader-alt bx-spin mr-1'></i> Memproses Presensi...";
 
             fetch("{{ route('absensi.store') }}", {
                 method: "POST",
@@ -1216,10 +904,7 @@
                     foto: selfieBase64,
                     latitude: userLatitude,
                     longitude: userLongitude,
-                    tipe: selectedTipe,
-                    face_descriptor: liveFaceDescriptor,
-                    challenge_token: challengeToken,
-                    liveness_proof: livenessProof
+                    tipe: selectedTipe
                 })
             })
             .then(res => res.json())
@@ -1230,7 +915,7 @@
                         title: 'Presensi Berhasil!',
                         html: `
                             <p class="text-sm text-dark-600">${data.message}</p>
-                            ${data.confidence ? `<p class="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-50 py-1 px-2 rounded-lg inline-block">Kecocokan Wajah: ${data.confidence}%</p>` : ''}
+                            ${data.data?.whatsapp?.success ? `<p class="mt-2 text-xs font-semibold text-emerald-700 bg-emerald-50 py-1.5 px-2.5 rounded-lg inline-flex items-center gap-1.5"><i class='bx bxl-whatsapp text-sm'></i> Notifikasi WhatsApp Terkirim ke Orang Tua</p>` : ''}
                         `,
                         confirmButtonColor: '#2563eb'
                     }).then(() => {
@@ -1240,23 +925,11 @@
                     btnSubmit.disabled = false;
                     btnText.textContent = "Kirim Absensi";
 
-                    // Jika kegagalan verifikasi wajah atau liveness
-                    const isBiometricError = data.status === 'failed_match' || data.status === 'failed_liveness';
-
                     Swal.fire({
                         icon: 'error',
-                        title: isBiometricError ? 'Verifikasi Wajah Gagal!' : 'Gagal Absensi',
-                        html: `
-                            <p class="text-sm text-dark-600">${data.message}</p>
-                            ${data.confidence !== undefined && data.confidence !== null ? `<p class="mt-2 text-xs font-semibold text-rose-700 bg-rose-50 py-1 px-2 rounded-lg inline-block">Skor Kemiripan: ${data.confidence}% (Batas: 74%)</p>` : ''}
-                        `,
+                        title: 'Gagal Presensi',
+                        text: data.message || 'Terjadi kesalahan saat memproses presensi.',
                         confirmButtonColor: '#e11d48',
-                        confirmButtonText: isBiometricError ? 'Coba Lagi' : 'OK'
-                    }).then(() => {
-                        if (isBiometricError) {
-                            goToStep(2);
-                            restartBiometricVerification();
-                        }
                     });
                 }
             })
@@ -1266,7 +939,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Kesalahan Sistem',
-                    text: 'Terjadi kesalahan saat memproses verifikasi absensi. Coba beberapa saat lagi.',
+                    text: 'Terjadi kesalahan saat memproses presensi. Coba beberapa saat lagi.',
                 });
             });
         }

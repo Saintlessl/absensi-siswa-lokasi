@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\BiometricEnrollmentLog;
 use App\Models\Siswa;
+use App\Models\SiswaDevice;
 use App\Models\SiswaFaceBiometric;
 use App\Services\FaceBiometricService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class BiometricEnrollmentController extends Controller
 {
@@ -234,6 +237,27 @@ class BiometricEnrollmentController extends Controller
             $siswa->update([
                 'biometric_status' => 'enrolled'
             ]);
+
+            // Register First Device (Perangkat Pertama Default Utama)
+            $deviceToken = $request->device_token ?? Cookie::get('myskanic_device_token') ?? Str::random(40);
+            SiswaDevice::firstOrCreate(
+                [
+                    'siswa_id' => $siswa->id,
+                    'device_token' => $deviceToken,
+                ],
+                [
+                    'device_name'   => $request->device_label ?? 'Perangkat Utama Siswa',
+                    'platform'      => $request->device_type ?? 'Web',
+                    'browser'       => 'Browser',
+                    'ip_address'    => $request->ip(),
+                    'user_agent'    => $request->userAgent(),
+                    'is_primary'    => true,
+                    'is_active'     => true,
+                    'registered_at' => now(),
+                    'last_active_at'=> now(),
+                ]
+            );
+            Cookie::queue('myskanic_device_token', $deviceToken, 60 * 24 * 365);
 
             // Create Enrollment Log
             BiometricEnrollmentLog::create([

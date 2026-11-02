@@ -16,9 +16,12 @@ class Siswa extends Model
     protected $fillable = [
         'user_id',
         'nis',
+        'nisn',
         'nama',
         'jenis_kelamin',
         'kelas_id',
+        'no_telp_siswa',
+        'no_telp_orangtua',
         'biometric_status'
     ];
 
@@ -55,6 +58,21 @@ class Siswa extends Model
     public function enrollmentLogs()
     {
         return $this->hasMany(BiometricEnrollmentLog::class);
+    }
+
+    public function devices()
+    {
+        return $this->hasMany(SiswaDevice::class);
+    }
+
+    public function activeDevices()
+    {
+        return $this->hasMany(SiswaDevice::class)->where('is_active', true);
+    }
+
+    public function whatsappLogs()
+    {
+        return $this->hasMany(WhatsappNotificationLog::class);
     }
 
     /**

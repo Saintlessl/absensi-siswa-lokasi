@@ -4,12 +4,14 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BiometricEnrollmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\FaceBiometricController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\LoginBiometricController;
 use App\Http\Controllers\LokasiSekolahController;
 use App\Http\Controllers\OrangTuaController;
 use App\Http\Controllers\SiswaController;
@@ -29,6 +31,14 @@ Route::get('/home', function () {
 Route::middleware(['guest:web'])->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('login');
     Route::post('/proseslogin', [AuthController::class, 'proseslogin'])->name('proseslogin');
+
+    // =========================================================================
+    // 2FA BIOMETRIC FACE VERIFICATION ON EVERY LOGIN
+    // =========================================================================
+    Route::get('/login/verify-face', [LoginBiometricController::class, 'showVerifyFace'])->name('login.verify_face');
+    Route::post('/login/verify-face/challenge', [LoginBiometricController::class, 'challenge'])->name('login.verify_face.challenge');
+    Route::post('/login/verify-face/process', [LoginBiometricController::class, 'verify'])->name('login.verify_face.process');
+    Route::get('/login/verify-face/cancel', [LoginBiometricController::class, 'cancel'])->name('login.verify_face.cancel');
 });
 
 Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
@@ -138,6 +148,7 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/admin/biometrik-siswa/{id}/assisted-enroll/challenge', [FaceBiometricController::class, 'assistedChallenge'])->name('admin.biometrik.assisted_challenge');
         Route::post('/admin/biometrik-siswa/{id}/assisted-enroll/process', [FaceBiometricController::class, 'processAssistedEnroll'])->name('admin.biometrik.assisted_process');
         Route::post('/admin/biometrik-siswa/manual-override', [FaceBiometricController::class, 'manualOverride'])->name('admin.biometrik.override');
+        Route::post('/admin/biometrik-siswa/{id}/reset-devices', [DeviceController::class, 'adminResetDevices'])->name('admin.biometrik.reset_devices');
     });
 
     // =========================================================================
@@ -167,5 +178,9 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Izin / Sakit
         Route::get('/izin-siswa', [IzinController::class, 'index'])->name('izin');
         Route::post('/izin-siswa', [IzinController::class, 'store'])->name('izin.store');
+
+        // Manajemen Perangkat Siswa (Device Limit Max 2)
+        Route::get('/perangkat-saya', [DeviceController::class, 'index'])->name('siswa.devices');
+        Route::post('/perangkat-saya/revoke/{id}', [DeviceController::class, 'revoke'])->name('siswa.devices.revoke');
     });
 });

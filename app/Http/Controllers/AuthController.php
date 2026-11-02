@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Siswa;
+use App\Models\SiswaDevice;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -14,29 +18,87 @@ class AuthController extends Controller
 
     public function proseslogin(Request $request)
     {
+        // Support typing username only (e.g. "budi" -> "budi@myskanic.com")
+        $inputIdentifier = trim($request->input('email', ''));
+        if (!empty($inputIdentifier) && !str_contains($inputIdentifier, '@')) {
+            $inputIdentifier .= '@myskanic.com';
+        }
+        $request->merge(['email' => strtolower($inputIdentifier)]);
+
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->has('remember'))) {
+        // Validate credentials against users table
+        if (!Auth::validate($credentials)) {
+            return back()->with('error', 'Email atau password yang Anda masukkan salah!')
+                ->withInput($request->only('email', 'remember'));
+        }
+
+        $user = User::where('email', $credentials['email'])->first();
+
+        // 1. Non-student accounts (Superadmin, Admin, Guru, Orang Tua) log in directly
+        if ($user->role !== 'siswa') {
+            Auth::login($user, $request->has('remember'));
             $request->session()->regenerate();
-            $user = Auth::user();
-
-            // First Login Biometric Enrollment Check for Students
-            if ($user->role === 'siswa') {
-                $siswa = \App\Models\Siswa::where('user_id', $user->id)->first();
-                if ($siswa && !$siswa->isBiometricEnrolled()) {
-                    return redirect()->route('siswa.enrollment')
-                        ->with('info', 'Selamat datang! Anda diwajibkan melakukan registrasi biometrik wajah sebelum dapat menggunakan sistem.');
-                }
-            }
-
             return redirect()->route('dashboard');
         }
 
-        return back()->with('error', 'Email atau password yang Anda masukkan salah!')
-            ->withInput($request->only('email', 'remember'));
+        // 2. Student Account Authentication
+        $siswa = Siswa::with('faceBiometric')->where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return back()->with('error', 'Profil data siswa tidak ditemukan. Hubungi pihak sekolah.');
+        }
+
+        // Case A: Student has NOT completed First-Login Biometric Enrollment yet
+        if (!$siswa->isBiometricEnrolled()) {
+            Auth::login($user, $request->has('remember'));
+            $request->session()->regenerate();
+
+            return redirect()->route('siswa.enrollment')
+                ->with('info', 'Selamat datang! Anda diwajibkan melakukan pendaftaran biometrik wajah sebelum dapat menggunakan sistem.');
+        }
+
+        // Case B: Student is enrolled -> Check Device Limit (Max 2 devices)
+        $clientDeviceToken = $request->device_token ?? $request->cookie('myskanic_device_token');
+
+        $isDeviceRegistered = false;
+        if (!empty($clientDeviceToken)) {
+            $isDeviceRegistered = SiswaDevice::where('siswa_id', $siswa->id)
+                ->where('device_token', $clientDeviceToken)
+                ->where('is_active', true)
+                ->exists();
+        }
+
+        // If not recognized as an already-registered device, check available slots
+        if (!$isDeviceRegistered) {
+            $activeCount = SiswaDevice::where('siswa_id', $siswa->id)
+                ->where('is_active', true)
+                ->count();
+
+            if ($activeCount >= 2) {
+                return back()->with('error', 'Batas maksimal 2 perangkat aktif tercapai. Akun ini sudah terdaftar pada 2 perangkat. Silakan lepaskan salah satu perangkat lama atau hubungi administrator untuk mereset perangkat.')
+                    ->withInput($request->only('email'));
+            }
+        }
+
+        // Case C: Initiate 2FA Face Verification on Login
+        session([
+            'pending_biometric_login' => [
+                'user_id'      => $user->id,
+                'siswa_id'     => $siswa->id,
+                'device_token' => $clientDeviceToken ?? Str::random(40),
+                'device_name'  => $request->device_name,
+                'platform'     => $request->platform,
+                'browser'      => $request->browser,
+                'remember'     => $request->has('remember'),
+                'created_at'   => now()->timestamp,
+            ]
+        ]);
+
+        return redirect()->route('login.verify_face');
     }
 
     public function proseslogout(Request $request)
