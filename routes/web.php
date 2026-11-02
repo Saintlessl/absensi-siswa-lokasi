@@ -82,6 +82,27 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/admin/biometrik-siswa/{id}/reset', [FaceBiometricController::class, 'adminReset'])->name('admin.biometrik.reset');
     });
 
+    Route::middleware(['role:superadmin,admin,kaprog'])->group(function () {
+        // Data Siswa (Scoped for KAPROG)
+        Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa');
+        Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
+        Route::post('/siswa/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
+        Route::post('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
+        Route::post('/siswa/delete/{id}', [SiswaController::class, 'destroy'])->name('siswa.delete');
+        Route::get('/siswa/export-pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
+        Route::get('/siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
+
+        // Struktur Akademik & Ruangan
+        Route::get('/qr-codes', [AbsensiController::class, 'qrCodes'])->name('absensi.qrcodes');
+        Route::get('/struktur-akademik', [AcademicStructureController::class, 'index'])->name('academic.index');
+        Route::get('/struktur-akademik/{jurusan}', [AcademicStructureController::class, 'major'])->name('academic.major');
+        Route::get('/struktur-akademik/{jurusan}/tingkat/{tingkat}', [AcademicStructureController::class, 'level'])->name('academic.level');
+        Route::get('/struktur-akademik/rombel/{kelas}', [AcademicStructureController::class, 'roomClass'])->name('academic.class');
+        Route::get('/alokasi-ruangan', [RoomController::class, 'assignments'])->name('rooms.assignments');
+        Route::post('/alokasi-ruangan', [RoomController::class, 'storeAssignment'])->name('rooms.assignments.store');
+        Route::post('/alokasi-ruangan/{assignment}/delete', [RoomController::class, 'destroyAssignment'])->name('rooms.assignments.destroy');
+    });
+
     // =========================================================================
     // SUPERADMIN & ADMIN ROUTES (Master Data, Monitoring, QR Codes, Export)
     // =========================================================================
@@ -94,15 +115,6 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/dashboard/absensi/{id}/update', [DashboardController::class, 'updateAbsensi'])->name('dashboard.absensi.update');
         Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export.pdf');
         Route::get('/dashboard/export-excel', [DashboardController::class, 'exportExcel'])->name('dashboard.export.excel');
-
-        // Data Siswa
-        Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa');
-        Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
-        Route::post('/siswa/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
-        Route::post('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
-        Route::post('/siswa/delete/{id}', [SiswaController::class, 'destroy'])->name('siswa.delete');
-        Route::get('/siswa/export-pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
-        Route::get('/siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
 
         // Data Jurusan
         Route::get('/jurusan', [JurusanController::class, 'index'])->name('jurusan');
@@ -139,9 +151,7 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/orangtua/update/{id}', [OrangTuaController::class, 'update'])->name('orangtua.update');
         Route::post('/orangtua/delete/{id}', [OrangTuaController::class, 'destroy'])->name('orangtua.delete');
 
-        // QR Code Kelas
-        Route::get('/qr-codes', [AbsensiController::class, 'qrCodes'])->name('absensi.qrcodes');
-
+        // Ruangan Fisik
         Route::get('/ruangan', [RoomController::class, 'index'])->name('rooms.index');
         Route::post('/ruangan', [RoomController::class, 'store'])->name('rooms.store');
         Route::post('/ruangan/{room}', [RoomController::class, 'update'])->name('rooms.update');
@@ -151,16 +161,6 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Biometrik Actions (Superadmin & Admin)
         Route::post('/admin/biometrik-siswa/{id}/request-re-enroll', [FaceBiometricController::class, 'adminRequestReEnroll'])->name('admin.biometrik.re_enroll');
         Route::post('/admin/biometrik-siswa/{id}/toggle-suspend', [FaceBiometricController::class, 'adminToggleSuspend'])->name('admin.biometrik.toggle_suspend');
-    });
-
-    Route::middleware(['role:superadmin,admin,kaprog'])->group(function () {
-        Route::get('/struktur-akademik', [AcademicStructureController::class, 'index'])->name('academic.index');
-        Route::get('/struktur-akademik/{jurusan}', [AcademicStructureController::class, 'major'])->name('academic.major');
-        Route::get('/struktur-akademik/{jurusan}/tingkat/{tingkat}', [AcademicStructureController::class, 'level'])->name('academic.level');
-        Route::get('/struktur-akademik/rombel/{kelas}', [AcademicStructureController::class, 'roomClass'])->name('academic.class');
-        Route::get('/alokasi-ruangan', [RoomController::class, 'assignments'])->name('rooms.assignments');
-        Route::post('/alokasi-ruangan', [RoomController::class, 'storeAssignment'])->name('rooms.assignments.store');
-        Route::post('/alokasi-ruangan/{assignment}/delete', [RoomController::class, 'destroyAssignment'])->name('rooms.assignments.destroy');
     });
 
     // Pendaftaran Biometrik Terpandu Sekolah / Lab Komputer & Monitoring (Superadmin, Admin, Guru)
