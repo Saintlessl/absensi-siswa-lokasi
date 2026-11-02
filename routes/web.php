@@ -14,6 +14,7 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LoginBiometricController;
 use App\Http\Controllers\LokasiSekolahController;
 use App\Http\Controllers\OrangTuaController;
+use App\Http\Controllers\ParentActivationController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,9 @@ Route::middleware(['guest:web'])->group(function () {
     Route::post('/login/verify-face/process', [LoginBiometricController::class, 'verify'])->name('login.verify_face.process');
     Route::get('/login/verify-face/cancel', [LoginBiometricController::class, 'cancel'])->name('login.verify_face.cancel');
 });
+
+Route::get('/aktivasi-orang-tua/{token}', [ParentActivationController::class, 'show'])->name('parent.activate.show');
+Route::post('/aktivasi-orang-tua/{token}', [ParentActivationController::class, 'store'])->name('parent.activate.store');
 
 Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     // Shared Dashboard & Auth
@@ -164,7 +168,9 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     // =========================================================================
     // SISWA & ORANG TUA ROUTES (Absensi, Liveness, Riwayat, Izin)
     // =========================================================================
-    Route::middleware(['role:siswa,orangtua'])->group(function () {
+    // Parent accounts use the read-only dashboard; student-only attendance actions
+    // are deliberately unavailable to parent/guardian credentials.
+    Route::middleware(['role:siswa'])->group(function () {
         Route::get('/absensi-siswa', [AbsensiController::class, 'index'])->name('absensi');
         Route::post('/absensi-siswa/validate-qr', [AbsensiController::class, 'validateQr'])->name('absensi.validateqr');
         Route::post('/absensi-siswa/challenge', [FaceBiometricController::class, 'challenge'])->name('absensi.challenge');

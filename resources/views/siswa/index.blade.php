@@ -37,6 +37,13 @@
 @endsection
 
 @section('content')
+    @if (session('parent_activation_link'))
+        <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p class="font-semibold">Tautan aktivasi akun orang tua siap dibagikan melalui kanal yang aman.</p>
+            <p class="mt-1">Tautan ini hanya berlaku 7 hari dan tidak memuat password.</p>
+            <input class="mt-2 w-full rounded border border-amber-300 bg-white px-2 py-1 font-mono text-xs" readonly value="{{ session('parent_activation_link') }}" onclick="this.select()">
+        </div>
+    @endif
     <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
         {{-- Filter Bar --}}
         <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30">
@@ -133,18 +140,15 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm">
-                                @if($s->no_telp_orangtua)
+                                @if($s->orangtua->first()?->telepon)
                                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
                                         <i class='bx bxl-whatsapp text-sm text-emerald-600'></i>
-                                        <span>{{ $s->no_telp_orangtua }}</span>
+                                        <span>{{ $s->orangtua->first()->telepon }}</span>
                                     </div>
                                 @else
                                     <span class="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                                         Belum diisi
                                     </span>
-                                @endif
-                                @if($s->no_telp_siswa)
-                                    <div class="text-[11px] text-dark-400 mt-1">Siswa: {{ $s->no_telp_siswa }}</div>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-center">
@@ -294,43 +298,21 @@
                                     </div>
                                 </div>
 
-                                {{-- Section B: Informasi Kontak --}}
+                                {{-- Section B: Informasi Orang Tua/Wali --}}
                                 <div class="mb-5 pt-4 border-t border-dark-100">
                                     <div class="flex items-center gap-2 mb-3">
                                         <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">2</div>
-                                        <h4 class="text-sm font-semibold text-dark-800">Informasi Kontak & Notifikasi</h4>
+                                        <h4 class="text-sm font-semibold text-dark-800">Informasi Orang Tua / Wali</h4>
                                     </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="no_telp_siswa" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor Telepon Siswa <span class="text-dark-400 font-normal">(Opsional)</span></label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <i class='bx bx-phone text-dark-400 text-lg'></i>
-                                                </div>
-                                                <input type="tel" name="no_telp_siswa" id="no_telp_siswa"
-                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
-                                                    placeholder="08123456789" autocomplete="off">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="no_telp_orangtua" class="block text-xs font-medium text-dark-700 mb-1.5">
-                                                No. Telepon / WA Orang Tua <span class="text-rose-500">*</span>
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <i class='bx bxl-whatsapp text-emerald-600 text-lg'></i>
-                                                </div>
-                                                <input type="tel" name="no_telp_orangtua" id="no_telp_orangtua" required
-                                                    class="block w-full pl-10 pr-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all font-mono"
-                                                    placeholder="081234567890" autocomplete="off">
-                                            </div>
-                                            <p class="text-[11px] text-emerald-700 mt-1 flex items-center gap-1">
-                                                <i class='bx bx-check-circle text-xs'></i>
-                                                Notifikasi otomatis presensi (masuk & pulang) akan dikirim ke nomor ini.
-                                            </p>
-                                        </div>
+                                        <div><label for="parent_name" class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali <span class="text-rose-500">*</span></label><input type="text" name="parent_name" id="parent_name" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Nama lengkap orang tua/wali" autocomplete="off"></div>
+                                        <div><label for="parent_phone" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp <span class="text-rose-500">*</span></label><input type="tel" name="parent_phone" id="parent_phone" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono" placeholder="081234567890" autocomplete="off"></div>
+                                        <div class="md:col-span-2"><label for="parent_address" class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap <span class="text-rose-500">*</span></label><textarea name="parent_address" id="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Alamat lengkap orang tua/wali"></textarea><p class="mt-1 text-[11px] text-dark-500">Nomor disimpan dalam format internasional untuk notifikasi presensi.</p></div>
+                                        <div class="md:col-span-2 border-t border-dark-100 pt-3"><label for="existing_orangtua_id" class="block text-xs font-medium text-dark-700 mb-1.5">Atau hubungkan profil orang tua yang sudah diverifikasi</label><select name="existing_orangtua_id" id="existing_orangtua_id" class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm"><option value="">Buat profil orang tua baru</option>@foreach($orangTuaExisting as $ot)<option value="{{ $ot->id }}">{{ $ot->nama }} — {{ $ot->telepon }} ({{ $ot->siswa->pluck('nama')->join(', ') ?: 'belum terhubung' }})</option>@endforeach</select><label class="mt-2 flex items-start gap-2 text-xs text-dark-600"><input type="checkbox" name="confirm_existing_parent" value="1" class="mt-0.5"> Saya telah memverifikasi identitas orang tua/wali ini dan mengonfirmasi relasi baru.</label></div>
                                     </div>
                                 </div>
+
+                                <div class="mb-5 pt-4 border-t border-dark-100 text-sm text-dark-600"><p class="font-semibold text-dark-800">Akun Orang Tua</p><p class="mt-1">Akun dibuat otomatis. Orang tua menetapkan password sendiri lewat tautan aktivasi sekali pakai yang berlaku 7 hari.</p></div>
 
                                 {{-- Section C: Akun Siswa --}}
                                 <div class="mb-5 pt-4 border-t border-dark-100">
@@ -585,5 +567,17 @@
                 closeModal('modal-editsiswa');
             }
         });
+
+        const existingParent = document.getElementById('existing_orangtua_id');
+        if (existingParent) {
+            existingParent.addEventListener('change', function () {
+                const useExisting = !!this.value;
+                ['parent_name', 'parent_phone', 'parent_address'].forEach(id => {
+                    const field = document.getElementById(id);
+                    field.required = !useExisting;
+                    field.disabled = useExisting;
+                });
+            });
+        }
     </script>
 @endpush

@@ -32,31 +32,7 @@ class OrangTuaController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'telepon' => 'required|string|max:20',
-            'alamat' => 'nullable|string',
-            'siswa_id' => 'required|exists:siswas,id',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-        ]);
-
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'orangtua',
-        ]);
-
-        OrangTua::create([
-            'user_id' => $user->id,
-            'nama' => $request->nama,
-            'telepon' => $request->telepon,
-            'alamat' => $request->alamat,
-            'siswa_id' => $request->siswa_id,
-        ]);
-
-        return redirect()->back()->with('success', 'Data Orang Tua berhasil ditambahkan');
+        return redirect()->route('siswa')->with('error', 'Profil orang tua dibuat melalui Data Siswa agar relasinya selalu valid.');
     }
 
     public function edit(Request $request)
@@ -74,7 +50,6 @@ class OrangTuaController extends Controller
             'nama' => 'required|string|max:255',
             'telepon' => 'required|string|max:20',
             'alamat' => 'nullable|string',
-            'siswa_id' => 'required|exists:siswas,id',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($orang_tua->user_id)],
             'password' => 'nullable|min:6',
         ]);
@@ -94,7 +69,6 @@ class OrangTuaController extends Controller
             'nama' => $request->nama,
             'telepon' => $request->telepon,
             'alamat' => $request->alamat,
-            'siswa_id' => $request->siswa_id,
         ]);
 
         return redirect()->back()->with('success', 'Data Orang Tua berhasil diperbarui');

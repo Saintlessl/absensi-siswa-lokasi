@@ -17,7 +17,8 @@ class WhatsAppNotificationService
     public function sendAttendanceNotification(Siswa $siswa, Absensi $absensi, string $tipe = 'masuk'): array
     {
         // 1. Resolve Parent Phone Number
-        $rawPhone = $siswa->no_telp_orangtua ?? ($siswa->orangtua->telepon ?? null);
+        $parent = $siswa->orangtua()->orderBy('orang_tuas.id')->first();
+        $rawPhone = $parent?->telepon;
         $normalizedPhone = $this->normalizePhoneNumber($rawPhone);
 
         // 2. Format Message Content

@@ -55,8 +55,10 @@ class DashboardController extends Controller
         if ($user->role === 'orangtua') {
             $orangTua = \App\Models\OrangTua::where('user_id', $user->id)->first();
 
-            if ($orangTua && $orangTua->siswa_id) {
-                $siswa = Siswa::with('kelas')->find($orangTua->siswa_id);
+            if ($orangTua) {
+                // Only resolve students through the explicit pivot; never use a
+                // legacy foreign key to infer authorization.
+                $siswa = $orangTua->siswa()->with('kelas')->first();
                 $data['siswa'] = $siswa;
 
                 $bulan = $request->bulan ?? date('m');

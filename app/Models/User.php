@@ -40,6 +40,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(OrangTua::class);
     }
+    public function parentActivation()
+    {
+        return $this->hasOne(ParentAccountActivation::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

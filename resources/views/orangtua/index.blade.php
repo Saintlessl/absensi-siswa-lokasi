@@ -15,11 +15,7 @@
             <h2 class="text-xl font-bold text-dark-800">Daftar Orang Tua</h2>
             <p class="text-sm text-dark-400 mt-1">Kelola data orang tua yang terhubung dengan akun siswa.</p>
         </div>
-        <button onclick="openModal('modal-inputorangtua')"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 hover:-translate-y-0.5">
-            <i class='bx bx-plus text-lg'></i>
-            Tambah Data
-        </button>
+        <a href="{{ route('siswa') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors"><i class='bx bx-user-plus text-lg'></i> Tambah melalui Data Siswa</a>
     </div>
 @endsection
 
@@ -86,7 +82,7 @@
                                 <span
                                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
                                     <i class='bx bx-user text-sm'></i>
-                                    {{ $ot->siswa->nama ?? 'Tidak Diketahui' }}
+                                    {{ $ot->siswa->pluck('nama')->join(', ') ?: 'Belum terhubung' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-center">

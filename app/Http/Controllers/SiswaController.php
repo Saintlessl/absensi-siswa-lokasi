@@ -8,6 +8,7 @@ use App\Models\Kelas;
 use App\Models\OrangTua;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Services\ParentAccountService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,12 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaController extends Controller
 {
+    public function __construct(private ParentAccountService $parentAccounts)
+    {
+    }
     public function index(Request $request)
     {
-        $query = Siswa::with(['kelas.jurusan', 'user']);
+        $query = Siswa::with(['kelas.jurusan', 'user', 'orangtua']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -42,8 +46,9 @@ class SiswaController extends Controller
         $siswa = $query->orderBy('nama')->paginate(10)->appends($request->query());
         $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
         $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+        $orangTuaExisting = OrangTua::with('siswa')->orderBy('nama')->get();
 
-        return view('siswa.index', compact('siswa', 'kelas', 'jurusans') + [
+        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting') + [
             'search'     => $request->search ?? '',
             'kelas_id'   => $request->kelas_id ?? '',
             'jurusan_id' => $request->jurusan_id ?? '',
@@ -75,19 +80,27 @@ class SiswaController extends Controller
             'nama'             => 'required|string|max:255',
             'jenis_kelamin'    => 'required|in:L,P',
             'kelas_id'         => 'required|exists:kelas,id',
-            'no_telp_siswa'    => 'nullable|string|max:25',
-            'no_telp_orangtua' => 'required|string|max:25',
+            'parent_name'      => 'required_without:existing_orangtua_id|nullable|string|max:255',
+            'parent_phone'     => 'required_without:existing_orangtua_id|nullable|string|max:25',
+            'parent_address'   => 'required_without:existing_orangtua_id|nullable|string|max:2000',
+            'existing_orangtua_id' => 'nullable|exists:orang_tuas,id',
+            'confirm_existing_parent' => 'required_with:existing_orangtua_id|accepted',
             'email'            => 'required|email|unique:users,email',
             'password'         => 'required|min:6',
         ], [
             'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
-            'no_telp_orangtua.required' => 'Nomor WhatsApp / telepon orang tua wajib diisi untuk notifikasi presensi.',
+            'parent_phone.required_without' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
             'nis.unique'                => 'NIS sudah terdaftar.',
             'nisn.unique'               => 'NISN sudah terdaftar.',
         ]);
 
-        DB::beginTransaction();
         try {
+            $parentPhone = $request->filled('existing_orangtua_id') ? null : $this->normalizeIndonesianPhone($request->parent_phone);
+            if (!$request->filled('existing_orangtua_id') && !$parentPhone) {
+                return back()->withErrors(['parent_phone' => 'Nomor WhatsApp harus berupa nomor Indonesia yang valid.'])->withInput();
+            }
+
+            $activationLink = DB::transaction(function () use ($request, $finalEmail, $parentPhone) {
             $user = User::create([
                 'name'     => $request->nama,
                 'email'    => $finalEmail,
@@ -102,40 +115,53 @@ class SiswaController extends Controller
                 'nama'             => $request->nama,
                 'jenis_kelamin'    => $request->jenis_kelamin,
                 'kelas_id'         => $request->kelas_id,
-                'no_telp_siswa'    => $request->no_telp_siswa,
-                'no_telp_orangtua' => $request->no_telp_orangtua,
                 'biometric_status' => 'not_enrolled',
             ]);
 
-            // Sync with orang_tuas table
-            OrangTua::updateOrCreate(
-                ['siswa_id' => $siswa->id],
-                [
-                    'nama'    => 'Orang Tua / Wali ' . $request->nama,
-                    'telepon' => $request->no_telp_orangtua,
-                    'alamat'  => '-',
-                ]
-            );
+            if ($request->filled('existing_orangtua_id')) {
+                // A shared parent is only linked after an explicit admin confirmation;
+                // phone/name similarity is deliberately never used for auto-merging.
+                $siswa->orangtua()->attach($request->existing_orangtua_id);
+                return null;
+            }
 
-            DB::commit();
-            return redirect()->back()->with('success', 'Data Siswa berhasil ditambahkan dengan akun ' . $finalEmail);
+            $parentUser = $this->parentAccounts->createPendingAccount($request->parent_name, $parentPhone);
+            $parent = OrangTua::create([
+                'user_id' => $parentUser->id,
+                'nama' => $request->parent_name,
+                'telepon' => $parentPhone,
+                'alamat' => $request->parent_address,
+                // Legacy column is intentionally populated for old reports only.
+                'siswa_id' => $siswa->id,
+            ]);
+            $siswa->orangtua()->attach($parent->id);
+            return $this->parentAccounts->issueActivation($parentUser);
+            });
+
+            $message = 'Data siswa dan relasi orang tua berhasil disimpan.';
+            if ($activationLink) {
+                $message .= ' Akun orang tua menunggu aktivasi.';
+            }
+            return redirect()->back()->with('success', $message)->with('parent_activation_link', $activationLink);
         } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal menambahkan data siswa: ' . $e->getMessage())->withInput();
+            report($e);
+            return back()->with('error', 'Gagal menambahkan data siswa dan orang tua. Tidak ada data parsial yang disimpan.')->withInput();
         }
     }
 
     public function edit(Request $request)
     {
-        $siswa = Siswa::with(['user', 'kelas.jurusan'])->findOrFail($request->id);
+        $siswa = Siswa::with(['user', 'kelas.jurusan', 'orangtua.user'])->findOrFail($request->id);
         $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
         $jurusans = Jurusan::orderBy('kode_jurusan')->get();
-        return view('siswa.edit', compact('siswa', 'kelas', 'jurusans'));
+        $studentEmail = $siswa->user?->email ?? '';
+        $currentUsername = str_contains($studentEmail, '@') ? explode('@', $studentEmail)[0] : $studentEmail;
+        return view('siswa.edit', compact('siswa', 'kelas', 'jurusans', 'currentUsername'));
     }
 
     public function update(Request $request, $id)
     {
-        $siswa = Siswa::with('user')->findOrFail($id);
+        $siswa = Siswa::with(['user', 'orangtua'])->findOrFail($id);
 
         // Enforce fixed domain @myskanic.com for student accounts
         $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
@@ -160,17 +186,22 @@ class SiswaController extends Controller
             'nama'             => 'required|string|max:255',
             'jenis_kelamin'    => 'required|in:L,P',
             'kelas_id'         => 'required|exists:kelas,id',
-            'no_telp_siswa'    => 'nullable|string|max:25',
-            'no_telp_orangtua' => 'required|string|max:25',
+            'parent_name'      => 'required|string|max:255',
+            'parent_phone'     => 'required|string|max:25',
+            'parent_address'   => 'required|string|max:2000',
             'email'            => ['required', 'email', Rule::unique('users', 'email')->ignore($siswa->user_id)],
             'password'         => 'nullable|min:6',
         ], [
             'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
-            'no_telp_orangtua.required' => 'Nomor WhatsApp / telepon orang tua wajib diisi untuk notifikasi presensi.',
+            'parent_phone.required' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
         ]);
 
-        DB::beginTransaction();
         try {
+            $parentPhone = $this->normalizeIndonesianPhone($request->parent_phone);
+            if (!$parentPhone) {
+                return back()->withErrors(['parent_phone' => 'Nomor WhatsApp harus berupa nomor Indonesia yang valid.'])->withInput();
+            }
+            DB::transaction(function () use ($request, $siswa, $finalEmail, $parentPhone) {
             $userData = [
                 'name'  => $request->nama,
                 'email' => $finalEmail,
@@ -190,23 +221,27 @@ class SiswaController extends Controller
                 'nama'             => $request->nama,
                 'jenis_kelamin'    => $request->jenis_kelamin,
                 'kelas_id'         => $request->kelas_id,
-                'no_telp_siswa'    => $request->no_telp_siswa,
-                'no_telp_orangtua' => $request->no_telp_orangtua,
             ]);
 
-            OrangTua::updateOrCreate(
-                ['siswa_id' => $siswa->id],
-                [
-                    'telepon' => $request->no_telp_orangtua,
-                ]
-            );
-
-            DB::commit();
+            $parent = $siswa->orangtua->first();
+            if (!$parent) {
+                throw new \RuntimeException('Profil orang tua belum tersedia. Buat relasi melalui pengelolaan orang tua.');
+            }
+            $parent->update(['nama' => $request->parent_name, 'telepon' => $parentPhone, 'alamat' => $request->parent_address]);
+            });
             return redirect()->back()->with('success', 'Data Siswa berhasil diperbarui');
         } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal memperbarui data siswa: ' . $e->getMessage());
+            report($e);
+            return back()->with('error', 'Gagal memperbarui data siswa dan orang tua. Tidak ada perubahan parsial yang disimpan.');
         }
+    }
+
+    private function normalizeIndonesianPhone(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) $phone);
+        if (str_starts_with($digits, '0')) $digits = '62' . substr($digits, 1);
+        if (str_starts_with($digits, '8')) $digits = '62' . $digits;
+        return preg_match('/^628\d{8,11}$/', $digits) ? '+' . $digits : null;
     }
 
     public function destroy($id)

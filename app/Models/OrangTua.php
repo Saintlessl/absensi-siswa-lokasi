@@ -27,6 +27,6 @@ class OrangTua extends Model
 
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsToMany(Siswa::class, 'siswa_orang_tua')->withTimestamps();
     }
 }

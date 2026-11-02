@@ -20,8 +20,6 @@ class Siswa extends Model
         'nama',
         'jenis_kelamin',
         'kelas_id',
-        'no_telp_siswa',
-        'no_telp_orangtua',
         'biometric_status'
     ];
 
@@ -37,7 +35,7 @@ class Siswa extends Model
 
     public function orangtua()
     {
-        return $this->hasOne(OrangTua::class);
+        return $this->belongsToMany(OrangTua::class, 'siswa_orang_tua')->withTimestamps();
     }
 
     public function user()

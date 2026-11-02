@@ -78,41 +78,17 @@
         </div>
     </div>
 
-    {{-- Section B: Informasi Kontak --}}
+    {{-- Section B: Informasi Orang Tua/Wali --}}
     <div class="mb-5 pt-4 border-t border-dark-100">
         <div class="flex items-center gap-2 mb-3">
             <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">2</div>
-            <h4 class="text-sm font-semibold text-dark-800">Informasi Kontak & Notifikasi</h4>
+            <h4 class="text-sm font-semibold text-dark-800">Informasi Orang Tua / Wali</h4>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="no_telp_siswa_edit" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor Telepon Siswa <span class="text-dark-400 font-normal">(Opsional)</span></label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class='bx bx-phone text-dark-400 text-lg'></i>
-                    </div>
-                    <input type="tel" name="no_telp_siswa" id="no_telp_siswa_edit" value="{{ $siswa->no_telp_siswa }}"
-                        class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
-                        placeholder="08123456789" autocomplete="off">
-                </div>
-            </div>
-            <div>
-                <label for="no_telp_orangtua_edit" class="block text-xs font-medium text-dark-700 mb-1.5">
-                    No. Telepon / WA Orang Tua <span class="text-rose-500">*</span>
-                </label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class='bx bxl-whatsapp text-emerald-600 text-lg'></i>
-                    </div>
-                    <input type="tel" name="no_telp_orangtua" id="no_telp_orangtua_edit" value="{{ $siswa->no_telp_orangtua }}" required
-                        class="block w-full pl-10 pr-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all font-mono"
-                        placeholder="081234567890" autocomplete="off">
-                </div>
-                <p class="text-[11px] text-emerald-700 mt-1 flex items-center gap-1">
-                    <i class='bx bx-check-circle text-xs'></i>
-                    Digunakan untuk notifikasi WhatsApp presensi otomatis.
-                </p>
-            </div>
+            @php($parent = $siswa->orangtua->first())
+            <div><label class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali</label><input type="text" name="parent_name" value="{{ old('parent_name', $parent?->nama) }}" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm"></div>
+            <div><label class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp</label><input type="tel" name="parent_phone" value="{{ old('parent_phone', $parent?->telepon) }}" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-sm font-mono"></div>
+            <div class="md:col-span-2"><label class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap</label><textarea name="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm">{{ old('parent_address', $parent?->alamat) }}</textarea></div>
         </div>
     </div>
 
@@ -129,10 +105,6 @@
                     <span class="inline-flex items-center px-3 bg-dark-50 text-dark-500 text-sm border-r border-dark-200">
                         <i class='bx bx-user text-base'></i>
                     </span>
-                    @php
-                        $userEmail = $siswa->user->email ?? '';
-                        $currentUsername = str_contains($userEmail, '@') ? explode('@', $userEmail)[0] : $userEmail;
-                    @endphp
                     <input type="text" name="username" id="username_edit" value="{{ $currentUsername }}"
                         class="block w-full px-3 py-2 bg-white text-dark-800 text-sm focus:outline-none font-mono lowercase"
                         placeholder="username.siswa" required autocomplete="off">

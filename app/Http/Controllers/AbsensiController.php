@@ -40,7 +40,7 @@ class AbsensiController extends Controller
         if ($user->role == 'orangtua') {
             $dataOrangTua = OrangTua::where('user_id', $user->id)->first();
             if ($dataOrangTua) {
-                $siswa = Siswa::with(['kelas.jurusan', 'faceBiometric'])->find($dataOrangTua->siswa_id);
+                $siswa = $dataOrangTua->siswa()->with(['kelas.jurusan', 'faceBiometric'])->first();
             }
         } else {
             $siswa = Siswa::with(['kelas.jurusan', 'faceBiometric'])->where('user_id', $user->id)->first();
@@ -369,7 +369,7 @@ class AbsensiController extends Controller
         if ($user->role == 'orangtua') {
             $dataOrangTua = OrangTua::where('user_id', $user->id)->first();
             if ($dataOrangTua) {
-                $siswa = Siswa::find($dataOrangTua->siswa_id);
+                $siswa = $dataOrangTua->siswa()->first();
             }
         } else {
             $siswa = Siswa::where('user_id', $user->id)->first();
