@@ -16,6 +16,8 @@ use App\Http\Controllers\LokasiSekolahController;
 use App\Http\Controllers\OrangTuaController;
 use App\Http\Controllers\ParentActivationController;
 use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\TeacherActivationController;
+use App\Http\Controllers\TeacherViewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\AcademicStructureController;
@@ -46,6 +48,9 @@ Route::middleware(['guest:web'])->group(function () {
 
 Route::get('/aktivasi-orang-tua/{token}', [ParentActivationController::class, 'show'])->name('parent.activate.show');
 Route::post('/aktivasi-orang-tua/{token}', [ParentActivationController::class, 'store'])->name('parent.activate.store');
+
+Route::get('/aktivasi-guru/{token}', [TeacherActivationController::class, 'show'])->name('teacher.activate.show');
+Route::post('/aktivasi-guru/{token}', [TeacherActivationController::class, 'store'])->name('teacher.activate.store');
 
 Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     // Shared Dashboard & Auth
@@ -130,11 +135,21 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update');
         Route::post('/kelas/delete/{id}', [KelasController::class, 'destroy'])->name('kelas.delete');
 
-        // Data Guru
+        // Data Guru & Teacher Management Center
         Route::get('/guru', [GuruController::class, 'index'])->name('guru');
         Route::post('/guru', [GuruController::class, 'store'])->name('guru.store');
+        Route::get('/guru/beban-kerja', [GuruController::class, 'workload'])->name('guru.workload');
+        Route::get('/guru/{id}', [GuruController::class, 'show'])->name('guru.show');
         Route::post('/guru/edit', [GuruController::class, 'edit'])->name('guru.edit');
         Route::post('/guru/{id}', [GuruController::class, 'update'])->name('guru.update');
+        Route::post('/guru/{id}/status', [GuruController::class, 'updateStatus'])->name('guru.status');
+        Route::post('/guru/{id}/activation-link', [GuruController::class, 'regenerateActivation'])->name('guru.activation_link');
+        Route::post('/guru/{id}/assign-subject', [GuruController::class, 'assignSubject'])->name('guru.assign_subject');
+        Route::post('/guru/assignment-subject/{assignmentId}/delete', [GuruController::class, 'removeSubjectAssignment'])->name('guru.remove_subject_assignment');
+        Route::post('/guru/{id}/assign-homeroom', [GuruController::class, 'assignHomeroom'])->name('guru.assign_homeroom');
+        Route::post('/guru/assignment-homeroom/{assignmentId}/delete', [GuruController::class, 'removeHomeroomAssignment'])->name('guru.remove_homeroom_assignment');
+        Route::post('/guru/{id}/assign-kaprog', [GuruController::class, 'assignKaprog'])->name('guru.assign_kaprog');
+        Route::post('/guru/{id}/remove-kaprog', [GuruController::class, 'removeKaprog'])->name('guru.remove_kaprog');
         Route::post('/guru/delete/{id}', [GuruController::class, 'destroy'])->name('guru.delete');
 
         // Jadwal Pelajaran
@@ -174,13 +189,19 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     });
 
     // =========================================================================
-    // GURU ROUTES (Rekap Kelas, Absensi Harian)
+    // GURU ROUTES (Rekap Kelas, Absensi Harian, Personal Teaching & Homeroom)
     // =========================================================================
-    Route::middleware(['role:guru,superadmin,admin'])->group(function () {
+    Route::middleware(['role:guru,superadmin,admin,kaprog'])->group(function () {
         Route::get('/absensi-siswa/harian', [AbsensiController::class, 'absensiHarian'])->name('absensi.harian');
         Route::post('/absensi-siswa/harian/update', [AbsensiController::class, 'updateHarian'])->name('absensi.harian.update');
         Route::get('/rekap-absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekapabsensi');
         Route::get('/rekap-kelas', [AbsensiController::class, 'rekapPerKelas'])->name('rekapkelas');
+
+        // Personal Teaching & Homeroom View Routes
+        Route::get('/guru-jadwal-saya', [TeacherViewController::class, 'mySchedule'])->name('teacher.schedule');
+        Route::get('/guru-kelas', [TeacherViewController::class, 'myClasses'])->name('teacher.classes');
+        Route::get('/guru-kelas/{kelas}', [TeacherViewController::class, 'showClassStudents'])->name('teacher.class.students');
+        Route::get('/wali-kelas/monitoring', [TeacherViewController::class, 'homeroomMonitoring'])->name('homeroom.monitoring');
     });
 
     // =========================================================================

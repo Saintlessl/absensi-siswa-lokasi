@@ -38,6 +38,22 @@ class AuthController extends Controller
 
         $user = User::where('email', $credentials['email'])->first();
 
+        // Check Account Status (active, pending, suspended, deactivated)
+        if ($user->status === 'suspended') {
+            return back()->with('error', 'Akun Anda sedang ditangguhkan (suspended). Silakan hubungi pihak administrator sekolah.')
+                ->withInput($request->only('email'));
+        }
+
+        if ($user->status === 'deactivated') {
+            return back()->with('error', 'Akun Anda telah dinonaktifkan (deactivated). Akses ke aplikasi ditolak.')
+                ->withInput($request->only('email'));
+        }
+
+        if ($user->status === 'pending' && $user->role === 'guru') {
+            return back()->with('error', 'Akun guru Anda belum diaktifkan. Silakan periksa tautan aktivasi akun Anda atau hubungi administrator.')
+                ->withInput($request->only('email'));
+        }
+
         // 1. Non-student accounts (Superadmin, Admin, Guru, Orang Tua) log in directly
         if ($user->role !== 'siswa') {
             Auth::login($user, $request->has('remember'));

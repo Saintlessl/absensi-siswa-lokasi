@@ -834,109 +834,251 @@
             </div>
         </div>
     @endif
-    @if (Auth::user()->role === 'guru' && isset($guru))
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-            {{-- Card Waktu & Tanggal Realtime (Sama dengan style siswa) --}}
-            <div
-                class="glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col justify-center items-center text-center">
-                <div class="w-16 h-16 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
+    @if (in_array(Auth::user()->role, ['guru', 'kaprog']) && isset($guru))
+        {{-- Top Statistics & Teacher Profile Row --}}
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+            {{-- Clock & Realtime Date --}}
+            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col justify-center items-center text-center bg-white shadow-sm">
+                <div class="w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mb-3">
                     <i class='bx bx-time-five text-3xl'></i>
                 </div>
-                <h2 id="clock" class="text-4xl font-bold text-dark-800 tracking-tight">{{ $jamSekarang }}</h2>
-                <p class="text-dark-500 font-medium mt-1">{{ $tanggalHariIni }}</p>
+                <h2 id="clock" class="text-3xl font-black text-dark-900 tracking-tight">{{ $jamSekarang }}</h2>
+                <p class="text-dark-500 font-medium text-xs mt-1">{{ $tanggalHariIni }}</p>
             </div>
 
-            {{-- Card Detail Guru --}}
-            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6 flex items-center gap-6">
-                <div
-                    class="w-20 h-20 rounded-2xl bg-primary-100 text-primary-600 flex items-center justify-center shadow-sm shrink-0">
-                    <i class='bx bx-user-circle text-5xl'></i>
+            {{-- Teacher Profile Details --}}
+            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 bg-white shadow-sm">
+                <div class="relative w-16 h-16 rounded-2xl overflow-hidden bg-primary-100 flex-shrink-0 flex items-center justify-center text-primary-700 font-bold text-xl border-2 border-white shadow-sm">
+                    @if($guru->photo_path && file_exists(public_path('storage/' . $guru->photo_path)))
+                        <img src="{{ asset('storage/' . $guru->photo_path) }}" alt="{{ $guru->nama }}" class="w-full h-full object-cover">
+                    @else
+                        {{ strtoupper(substr($guru->nama, 0, 2)) }}
+                    @endif
                 </div>
-                <div>
-                    <span
-                        class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-700 border border-primary-200 uppercase tracking-wider">
-                        Profil Pengajar
-                    </span>
-                    <h4 class="text-2xl font-bold text-dark-800 mt-1">{{ $guru->nama }}</h4>
-                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-dark-500">
-                        <p class="flex items-center gap-1.5 text-sm">
-                            <i class='bx bx-id-card'></i> NIP: {{ $guru->nip }}
-                        </p>
-                        <p class="flex items-center gap-1.5 text-sm">
-                            <i class='bx bx-book-bookmark'></i> Guru {{ $guru->mapel }}
-                        </p>
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <h4 class="text-xl font-black text-dark-900">{{ $guru->nama }}</h4>
+                        @if($guru->status_kepegawaian)
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-primary-50 text-primary-700 border border-primary-200">
+                                {{ $guru->status_kepegawaian }}
+                            </span>
+                        @endif
                     </div>
+                    <p class="text-xs text-dark-500 mb-2">
+                        NIP: {{ $guru->nip ?? '-' }} &bull; NUPTK: {{ $guru->nuptk ?? '-' }}
+                    </p>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        @if($guru->activeHomeroomAssignment)
+                            <a href="{{ route('homeroom.monitoring') }}"
+                                class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-200 flex items-center gap-1 transition">
+                                <i class='bx bx-id-card'></i> Wali: {{ $guru->activeHomeroomAssignment->kelas->nama_kelas }}
+                            </a>
+                        @endif
+
+                        @if($guru->is_kaprog)
+                            <a href="{{ route('academic.index') }}"
+                                class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-200 flex items-center gap-1 transition">
+                                <i class='bx bx-award'></i> KAPROG {{ $guru->kaprog_jurusan->kode_jurusan ?? '' }}
+                            </a>
+                        @endif
+
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                            {{ $guru->activeSubjectAssignments->count() }} Mapel Diajar
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Workload Status Pill --}}
+            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 bg-white shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between text-dark-400 text-xs mb-1">
+                        <span class="font-bold uppercase tracking-wider text-[10px]">Beban Kerja Guru</span>
+                        <i class='bx bx-pie-chart-alt-2 text-primary-600 text-base'></i>
+                    </div>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-3xl font-black text-dark-900">{{ $workload['total_jp'] ?? 0 }}</span>
+                        <span class="text-xs text-dark-500 font-bold">JP / minggu</span>
+                    </div>
+                    <p class="text-[10px] text-dark-400 mt-0.5">Target Standar: 24 - 36 JP</p>
+                </div>
+                <div class="mt-3">
+                    <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold {{ ($workload['status_category'] ?? '') === 'optimal' ? 'bg-emerald-100 text-emerald-800' : (($workload['status_category'] ?? '') === 'underload' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800') }}">
+                        {{ $workload['status_label'] ?? 'Standar Terpenuhi' }}
+                    </span>
                 </div>
             </div>
         </div>
 
-        {{-- Jadwal Mengajar --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden shadow-sm">
-            <div class="p-6 border-b border-dark-100/50 flex items-center justify-between bg-dark-50/30">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                        <i class='bx bx-calendar-event text-xl'></i>
+        {{-- Main Dashboard Body: Schedules & Homeroom / KAPROG Widgets --}}
+        <div class="grid grid-cols-1 {{ isset($homeroomStats) || isset($kaprogJurusan) ? 'lg:grid-cols-3' : '' }} gap-6">
+            {{-- Today's Teaching Schedule --}}
+            <div class="{{ isset($homeroomStats) || isset($kaprogJurusan) ? 'lg:col-span-2' : '' }} glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+                <div class="p-5 border-b border-dark-100/60 flex items-center justify-between bg-dark-50/40">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                            <i class='bx bx-calendar-event'></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-dark-800">Jadwal Mengajar Hari Ini</h3>
+                            <p class="text-[11px] text-dark-400">Sinkronisasi ruangan fisik terkini dari sistem rolling ruangan</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-dark-800">Jadwal Mengajar Hari Ini</h3>
-                        <p class="text-xs text-dark-500">Menampilkan jadwal berdasarkan hari
-                            {{ \Carbon\Carbon::now()->locale('id')->dayName }}</p>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-xl bg-white border border-dark-200 text-xs font-bold text-dark-700">
+                            {{ count($jadwalHariIni) }} Sesi Hari Ini
+                        </span>
+                        <a href="{{ route('teacher.schedule') }}" class="text-xs text-primary-600 hover:text-primary-700 font-semibold">
+                            Lihat Semua
+                        </a>
                     </div>
                 </div>
-                <div
-                    class="px-4 py-2 rounded-xl bg-white border border-dark-100 text-xs font-bold text-dark-600 uppercase tracking-widest">
-                    {{ count($jadwalHariIni) }} Sesi
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-dark-50/60 border-b border-dark-100 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
+                                <th class="px-5 py-3.5">Waktu</th>
+                                <th class="px-5 py-3.5">Rombel</th>
+                                <th class="px-5 py-3.5">Mata Pelajaran</th>
+                                <th class="px-5 py-3.5">Ruangan Fisik</th>
+                                <th class="px-5 py-3.5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-dark-100/60">
+                            @forelse($jadwalHariIni as $j)
+                                <tr class="hover:bg-dark-50/30 transition">
+                                    <td class="px-5 py-4 font-mono font-bold text-dark-800">
+                                        {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }}
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <span class="font-bold text-primary-700">{{ $j->kelas->nama_kelas ?? '-' }}</span>
+                                        <p class="text-[10px] text-dark-400">{{ $j->kelas->jurusan->nama_jurusan ?? '' }}</p>
+                                    </td>
+                                    <td class="px-5 py-4 font-semibold text-dark-800">
+                                        {{ $j->mataPelajaran->nama_mapel ?? $j->mata_pelajaran }}
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        @if($j->live_room)
+                                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 w-max">
+                                                <i class='bx bx-building-house'></i>
+                                                {{ $j->live_room->name }}
+                                            </span>
+                                        @else
+                                            <span class="text-dark-400 italic text-[11px]">Belum Dialokasikan</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-4 text-right">
+                                        <a href="{{ route('teacher.class.students', $j->kelas_id) }}"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-xs transition">
+                                            <i class='bx bx-group'></i> Siswa
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-5 py-10 text-center text-dark-400">
+                                        <i class='bx bx-calendar-x text-3xl mb-1 text-dark-300'></i>
+                                        <p class="font-medium">Tidak ada jadwal mengajar untuk hari ini.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-dark-50/50">
-                            <th class="px-6 py-4 text-xs font-bold text-dark-400 uppercase tracking-wider">Jam</th>
-                            <th class="px-6 py-4 text-xs font-bold text-dark-400 uppercase tracking-wider">Kelas</th>
-                            <th class="px-6 py-4 text-xs font-bold text-dark-400 uppercase tracking-wider">Mata Pelajaran
-                            </th>
-                            <th class="px-6 py-4 text-xs font-bold text-dark-400 uppercase tracking-wider text-right">Aksi
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-dark-100/50">
-                        @forelse($jadwalHariIni as $j)
-                            <tr class="hover:bg-dark-50/30 transition-colors">
-                                <td class="px-6 py-4">
-                                    <span
-                                        class="px-3 py-1.5 rounded-lg bg-white border border-dark-100 text-sm font-semibold text-primary-600">
-                                        {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 font-bold text-dark-800">{{ $j->kelas->nama_kelas }}</td>
-                                <td class="px-6 py-4 text-dark-600">{{ $j->mata_pelajaran }}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('absensi.harian') }}"
-                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition-all shadow-sm shadow-primary-200">
-                                        <i class='bx bx-edit-alt'></i> Absensi
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <div
-                                            class="w-16 h-16 rounded-full bg-dark-50 text-dark-300 flex items-center justify-center mb-3">
-                                            <i class='bx bx-calendar-x text-3xl'></i>
-                                        </div>
-                                        <p class="text-dark-500 font-medium">Tidak ada jadwal mengajar untuk hari ini.</p>
+            {{-- Right Widgets: Homeroom / KAPROG Panels --}}
+            @if(isset($homeroomStats) || isset($kaprogJurusan))
+                <div class="space-y-6">
+                    {{-- Homeroom Monitoring Widget --}}
+                    @if(isset($homeroomStats))
+                        <div class="glass-card rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
+                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-dark-100">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-base font-bold">
+                                        <i class='bx bx-id-card'></i>
                                     </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-dark-800">Kelas Binaan: {{ $homeroomStats['kelas']->nama_kelas }}</h4>
+                                        <p class="text-[10px] text-dark-400">Presensi Hari Ini</p>
+                                    </div>
+                                </div>
+                                <a href="{{ route('homeroom.monitoring') }}" class="text-[11px] text-emerald-700 hover:underline font-bold">
+                                    Detail &rarr;
+                                </a>
+                            </div>
+
+                            {{-- Mini Counters --}}
+                            <div class="grid grid-cols-4 gap-2 mb-4 text-center">
+                                <div class="bg-emerald-50 rounded-xl p-2">
+                                    <span class="text-xs font-bold text-emerald-800 block">{{ $homeroomStats['hadir'] }}</span>
+                                    <span class="text-[9px] text-emerald-600">Hadir</span>
+                                </div>
+                                <div class="bg-amber-50 rounded-xl p-2">
+                                    <span class="text-xs font-bold text-amber-800 block">{{ $homeroomStats['terlambat'] }}</span>
+                                    <span class="text-[9px] text-amber-600">Telat</span>
+                                </div>
+                                <div class="bg-blue-50 rounded-xl p-2">
+                                    <span class="text-xs font-bold text-blue-800 block">{{ $homeroomStats['izin'] + $homeroomStats['sakit'] }}</span>
+                                    <span class="text-[9px] text-blue-600">Izin/Skt</span>
+                                </div>
+                                <div class="bg-rose-50 rounded-xl p-2">
+                                    <span class="text-xs font-bold text-rose-800 block">{{ $homeroomStats['belum_absen'] }}</span>
+                                    <span class="text-[9px] text-rose-600">Alpa</span>
+                                </div>
+                            </div>
+
+                            {{-- Attention Student Mini List --}}
+                            @if(count($homeroomStats['attention_students']) > 0)
+                                <div class="space-y-1.5">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-dark-400">Perhatian Wali Kelas:</p>
+                                    @foreach($homeroomStats['attention_students']->take(3) as $as)
+                                        <div class="p-2 bg-dark-50 rounded-lg flex items-center justify-between text-xs">
+                                            <span class="font-medium text-dark-800 truncate max-w-[150px]">{{ $as->nama }}</span>
+                                            <span class="text-[10px] text-rose-600 font-bold">Belum Presensi</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="mt-4 pt-3 border-t border-dark-100 flex items-center justify-between text-[11px]">
+                                <span class="text-dark-500">Notifikasi WA Ortu:</span>
+                                <span class="font-bold text-emerald-700 flex items-center gap-1">
+                                    <i class='bx bxl-whatsapp text-sm'></i> {{ $homeroomStats['wa_sent_count'] }} Terkirim
+                                </span>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- KAPROG Widget --}}
+                    @if(isset($kaprogJurusan))
+                        <div class="glass-card rounded-2xl border border-purple-200 bg-white p-5 shadow-sm">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+                                    <i class='bx bx-award'></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-purple-900">Program Keahlian {{ $kaprogJurusan->nama_jurusan }}</h4>
+                                    <p class="text-[10px] text-dark-400">{{ $kaprogJurusan->active_kelas_count ?? 0 }} Rombel Aktif</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 mt-3">
+                                <a href="{{ route('rooms.assignments') }}"
+                                    class="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition text-center">
+                                    <i class='bx bx-transfer'></i> Rolling Ruang
+                                </a>
+                                <a href="{{ route('academic.index') }}"
+                                    class="p-2.5 bg-dark-50 hover:bg-dark-100 text-dark-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition text-center">
+                                    <i class='bx bx-sitemap'></i> Akademik
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
         </div>
     @endif
 

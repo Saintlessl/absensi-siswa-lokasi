@@ -37,4 +37,7 @@ class Kelas extends Model
     }
     public function enrollments() { return $this->hasMany(StudentEnrollment::class); }
     public function roomAssignments() { return $this->hasMany(RoomAssignment::class); }
+    public function homeroomAssignments() { return $this->hasMany(HomeroomAssignment::class); }
+    public function activeHomeroom() { return $this->hasOne(HomeroomAssignment::class)->where('is_active', true)->with('guru'); }
+    public function subjectAssignments() { return $this->hasMany(TeacherSubjectAssignment::class); }
 }

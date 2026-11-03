@@ -73,17 +73,35 @@
                         <li>
                             <a href="{{ route('guru') }}"
                                 class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('guru*')
+                                      {{ request()->routeIs('guru') || (request()->routeIs('guru.*') && !request()->routeIs('guru.workload'))
                                           ? 'bg-primary-600/20 text-primary-400 menu-active'
                                           : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
                                 <div
                                     class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
-                                            {{ request()->routeIs('guru*')
+                                            {{ request()->routeIs('guru') || (request()->routeIs('guru.*') && !request()->routeIs('guru.workload'))
                                                 ? 'bg-primary-600/30 text-primary-400'
                                                 : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
                                     <i class='bx bx-user text-lg'></i>
                                 </div>
                                 <span class="sidebar-label transition-all duration-300">Data Guru</span>
+                            </a>
+                        </li>
+
+                        {{-- Beban Kerja Guru --}}
+                        <li>
+                            <a href="{{ route('guru.workload') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('guru.workload')
+                                          ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('guru.workload')
+                                                ? 'bg-primary-600/30 text-primary-400'
+                                                : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-pie-chart-alt-2 text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Beban Kerja Guru</span>
                             </a>
                         </li>
 
@@ -333,9 +351,110 @@
         {{-- GURU ROLE NAVIGATION                                            --}}
         {{-- ============================================================== --}}
         @if (Auth::user()->role === 'guru')
+            @php
+                $sidebarGuru = \App\Models\Guru::with(['activeHomeroomAssignment.kelas', 'user.jurusan'])->where('user_id', Auth::id())->first();
+            @endphp
+
+            {{-- 1. PEMBELAJARAN & JADWAL --}}
             <div class="mb-5">
                 <p class="sidebar-section-title px-3 mb-2 text-[10px] font-semibold text-dark-400 uppercase tracking-[0.15em]">
-                    PRESENSI & KELAS
+                    PEMBELAJARAN
+                </p>
+                <ul class="space-y-1 stagger-children">
+                    <li>
+                        <a href="{{ route('teacher.schedule') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('teacher.schedule')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('teacher.schedule') ? 'bg-primary-600/30 text-primary-400' : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-calendar-event text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Jadwal Mengajar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('teacher.classes') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('teacher.classes*') || request()->routeIs('teacher.class.*')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('teacher.classes*') || request()->routeIs('teacher.class.*') ? 'bg-primary-600/30 text-primary-400' : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-chalkboard text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Kelas yang Diajar</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            {{-- 2. WALI KELAS (Jika Guru Ditugaskan Sebagai Wali Kelas) --}}
+            @if($sidebarGuru && $sidebarGuru->is_homeroom)
+                <div class="mb-5">
+                    <p class="sidebar-section-title px-3 mb-2 text-[10px] font-semibold text-emerald-400 uppercase tracking-[0.15em] flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> WALI KELAS
+                    </p>
+                    <ul class="space-y-1 stagger-children">
+                        <li>
+                            <a href="{{ route('homeroom.monitoring') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('homeroom.monitoring')
+                                          ? 'bg-emerald-600/20 text-emerald-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('homeroom.monitoring') ? 'bg-emerald-600/30 text-emerald-400' : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-id-card text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Monitoring Kelas Binaan</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            @endif
+
+            {{-- 3. KEPALA PROGRAM KEAHLIAN (KAPROG) --}}
+            @if($sidebarGuru && $sidebarGuru->is_kaprog)
+                <div class="mb-5">
+                    <p class="sidebar-section-title px-3 mb-2 text-[10px] font-semibold text-purple-400 uppercase tracking-[0.15em] flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> KEPALA PROGRAM
+                    </p>
+                    <ul class="space-y-1 stagger-children">
+                        <li>
+                            <a href="{{ route('academic.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('academic.*')
+                                          ? 'bg-purple-600/20 text-purple-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('academic.*') ? 'bg-purple-600/30 text-purple-400' : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-sitemap text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Program Keahlian</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('rooms.assignments') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('rooms.assignments*')
+                                          ? 'bg-purple-600/20 text-purple-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('rooms.assignments*') ? 'bg-purple-600/30 text-purple-400' : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-transfer text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Rolling Ruangan</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            @endif
+
+            {{-- 4. PRESENSI & REKAP --}}
+            <div class="mb-5">
+                <p class="sidebar-section-title px-3 mb-2 text-[10px] font-semibold text-dark-400 uppercase tracking-[0.15em]">
+                    PRESENSI
                 </p>
                 <ul class="space-y-1 stagger-children">
                     <li>
@@ -360,18 +479,6 @@
                                 <i class='bx bx-clipboard text-lg'></i>
                             </div>
                             <span class="sidebar-label transition-all duration-300">Rekap Presensi</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('rekapkelas') }}"
-                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('rekapkelas')
-                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
-                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-dark-400 group-hover:text-white">
-                                <i class='bx bx-chalkboard text-lg'></i>
-                            </div>
-                            <span class="sidebar-label transition-all duration-300">Rekap Per Kelas</span>
                         </a>
                     </li>
                     <li>

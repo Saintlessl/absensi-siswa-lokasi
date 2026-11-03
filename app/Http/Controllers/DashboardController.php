@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\Guru;
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Exports\AbsensiExport;
@@ -169,8 +170,14 @@ class DashboardController extends Controller
                 $data['tanggalHariIni'] = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
             }
         }
-        if ($user->role === 'guru') {
-            $guru = \App\Models\Guru::where('user_id', $user->id)->first();
+        if (in_array($user->role, ['guru', 'kaprog'])) {
+            $guru = Guru::with([
+                'user.jurusan',
+                'activeHomeroomAssignment.kelas.jurusan',
+                'activeSubjectAssignments.mataPelajaran',
+                'activeSubjectAssignments.kelas.jurusan'
+            ])->where('user_id', $user->id)->first();
+
             $data['guru'] = $guru;
 
             if ($guru) {
@@ -178,14 +185,66 @@ class DashboardController extends Controller
                 $data['tanggalHariIni'] = $now->isoFormat('dddd, D MMMM Y');
                 $data['jamSekarang'] = $now->format('H:i');
 
-                // Ambil nama hari dalam Bahasa Indonesia untuk filter database
                 $hariIni = $now->locale('id')->dayName;
 
-                $data['jadwalHariIni'] = \App\Models\Jadwal::with('kelas')
-                    ->where('guru_id', $guru->id)
-                    ->where('hari', $hariIni)
-                    ->orderBy('jam_mulai', 'asc')
-                    ->get();
+                // 1. Live schedules for today with physical room resolution
+                $scheduleService = app(\App\Services\TeacherScheduleService::class);
+                $workloadService = app(\App\Services\TeacherWorkloadService::class);
+
+                $data['jadwalHariIni'] = $scheduleService->getTeacherSchedulesWithLiveRooms($guru, $hariIni, $now);
+                $data['workload'] = $workloadService->calculateWorkload($guru);
+
+                // 2. Homeroom Monitoring (if teacher is active Wali Kelas)
+                $activeHomeroom = $guru->activeHomeroomAssignment;
+                $data['activeHomeroom'] = $activeHomeroom;
+
+                if ($activeHomeroom) {
+                    $homeroomKelas = $activeHomeroom->kelas;
+                    $todayStr = $now->toDateString();
+
+                    $studentIds = Siswa::where('kelas_id', $homeroomKelas->id)->pluck('id');
+                    $totalHomeroomStudents = $studentIds->count();
+
+                    $todayAttendance = Absensi::whereIn('siswa_id', $studentIds)
+                        ->whereDate('tanggal', $todayStr)
+                        ->get();
+
+                    $hadirCount = $todayAttendance->where('status', 'Hadir')->count();
+                    $terlambatCount = $todayAttendance->where('menit_terlambat', '>', 0)->count();
+                    $izinCount = $todayAttendance->where('status', 'Izin')->count();
+                    $sakitCount = $todayAttendance->where('status', 'Sakit')->count();
+                    $belumAbsenCount = max(0, $totalHomeroomStudents - $todayAttendance->count());
+
+                    $attentionStudents = Siswa::where('kelas_id', $homeroomKelas->id)
+                        ->whereNotIn('id', $todayAttendance->where('status', 'Hadir')->pluck('siswa_id'))
+                        ->limit(6)
+                        ->get();
+
+                    $waSentCount = \App\Models\WhatsappNotificationLog::whereIn('siswa_id', $studentIds)
+                        ->whereDate('created_at', $todayStr)
+                        ->where('status', 'sent')
+                        ->count();
+
+                    $data['homeroomStats'] = [
+                        'kelas'              => $homeroomKelas,
+                        'total_students'     => $totalHomeroomStudents,
+                        'hadir'              => $hadirCount,
+                        'terlambat'          => $terlambatCount,
+                        'izin'               => $izinCount,
+                        'sakit'              => $sakitCount,
+                        'belum_absen'        => $belumAbsenCount,
+                        'attention_students' => $attentionStudents,
+                        'wa_sent_count'      => $waSentCount,
+                    ];
+                }
+
+                // 3. KAPROG Overview (if teacher is Head of Department)
+                $isKaprog = $guru->is_kaprog;
+                $data['isKaprog'] = $isKaprog;
+                if ($isKaprog && $guru->user->jurusan_id) {
+                    $jurusan = \App\Models\Jurusan::withCount(['activeKelas'])->find($guru->user->jurusan_id);
+                    $data['kaprogJurusan'] = $jurusan;
+                }
             }
         }
         return view('dashboard.index', $data);

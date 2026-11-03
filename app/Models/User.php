@@ -25,11 +25,17 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
         'jurusan_id',
     ];
     public function guru()
     {
         return $this->hasOne(Guru::class);
+    }
+
+    public function teacherActivation()
+    {
+        return $this->hasOne(TeacherAccountActivation::class);
     }
 
     public function siswa()
