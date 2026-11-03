@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class Guru extends Model
@@ -68,6 +71,18 @@ class Guru extends Model
             ->with(['kelas.jurusan']);
     }
 
+    public function kaprogAssignments(): HasMany
+    {
+        return $this->hasMany(KaprogAssignment::class, 'guru_id')->latest();
+    }
+
+    public function activeKaprogAssignment()
+    {
+        return $this->hasOne(KaprogAssignment::class, 'guru_id')
+            ->where('is_active', true)
+            ->with('jurusan');
+    }
+
     public function getPhotoUrlAttribute(): ?string
     {
         if ($this->photo_path && Storage::disk('public')->exists($this->photo_path)) {
@@ -89,7 +104,8 @@ class Guru extends Model
      */
     public function getIsKaprogAttribute(): bool
     {
-        return $this->user && ($this->user->role === 'kaprog' || !is_null($this->user->jurusan_id));
+        return ($this->user && ($this->user->role === 'kaprog' || !is_null($this->user->jurusan_id)))
+            || $this->kaprogAssignments()->where('is_active', true)->exists();
     }
 
     /**
@@ -97,6 +113,6 @@ class Guru extends Model
      */
     public function getKaprogJurusanAttribute()
     {
-        return $this->user?->jurusan;
+        return $this->activeKaprogAssignment?->jurusan ?? $this->user?->jurusan;
     }
 }

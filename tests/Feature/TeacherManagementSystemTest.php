@@ -161,14 +161,21 @@ class TeacherManagementSystemTest extends TestCase
         $guru1 = $t1['guru'];
         $guru2 = $t2['guru'];
 
-        // Assign subject to Guru 1
-        $subAssignment = $assignmentService->assignSubject(
+        // Assign subject to Guru 1 on 2 classes
+        $sub1 = $assignmentService->assignSubject(
             $guru1->id,
             $this->mapelCoding->id,
             $this->kelas10->id,
             '2026/2027'
         );
-        $this->assertInstanceOf(TeacherSubjectAssignment::class, $subAssignment);
+        $sub2 = $assignmentService->assignSubject(
+            $guru1->id,
+            $this->mapelCoding->id,
+            $this->kelas11->id,
+            '2026/2027'
+        );
+        $this->assertInstanceOf(TeacherSubjectAssignment::class, $sub1);
+        $this->assertEquals(2, $guru1->fresh()->activeSubjectAssignments->count());
 
         // Assign Guru 1 as Homeroom for Kelas 10
         $hr1 = $assignmentService->assignHomeroom($guru1->id, $this->kelas10->id, '2026/2027', 'SK No. 01');
@@ -183,10 +190,76 @@ class TeacherManagementSystemTest extends TestCase
         $this->assertTrue($hr2->is_active);
         $this->assertEquals($guru2->nama, $this->kelas10->fresh()->wali_kelas);
 
-        // Assign Guru 1 as KAPROG PPLG
-        $assignmentService->assignKaprog($guru1->id, $this->pplg->id);
+        // Assign Guru 1 as KAPROG PPLG with historical record
+        $kaprogAssignment = $assignmentService->assignKaprog($guru1->id, $this->pplg->id, '2026/2027', 'SK KAPROG PPLG');
         $this->assertTrue($guru1->fresh()->is_kaprog);
         $this->assertEquals($this->pplg->id, $guru1->user->fresh()->jurusan_id);
+        $this->assertDatabaseHas('kaprog_assignments', [
+            'guru_id'    => $guru1->id,
+            'jurusan_id' => $this->pplg->id,
+            'is_active'  => true,
+        ]);
+    }
+
+    public function test_store_teacher_with_mandatory_subject_and_additional_duties_workflow()
+    {
+        $response = $this->actingAs($this->superadmin)->post(route('guru.store'), [
+            'nama'               => 'Guru Multi Peran Test',
+            'nip'                => '199001012020011005',
+            'email'              => 'guru.multiperan@skanic.com',
+            'jenis_kelamin'      => 'L',
+            'status_kepegawaian' => 'PNS',
+            'password_mode'      => 'direct',
+            'password'           => 'PasswordAdmin123!',
+            // Mandatory subject and multiple classes
+            'mata_pelajaran_id'  => $this->mapelCoding->id,
+            'kelas_ids'          => [$this->kelas10->id, $this->kelas11->id],
+            'tahun_ajaran'       => '2026/2027',
+            // Additional Duties: Homeroom + KAPROG simultaneously
+            'is_homeroom'        => '1',
+            'homeroom_kelas_id'  => $this->kelas10->id,
+            'is_kaprog'          => '1',
+            'kaprog_jurusan_id'  => $this->pplg->id,
+        ]);
+
+        $user = User::where('email', 'guru.multiperan@skanic.com')->first();
+        $this->assertNotNull($user);
+        $guru = $user->guru;
+        $this->assertNotNull($guru);
+        $response->assertRedirect(route('guru.show', $guru->id));
+
+        // Verifications:
+        // 1. Mandatory subject assigned to both classes
+        $this->assertEquals(2, $guru->activeSubjectAssignments()->count());
+
+        // 2. Additional duty: Homeroom is active
+        $this->assertTrue($guru->is_homeroom);
+        $this->assertEquals($this->kelas10->id, $guru->activeHomeroomAssignment->kelas_id);
+        $this->assertEquals($guru->nama, $this->kelas10->fresh()->wali_kelas);
+
+        // 3. Additional duty: KAPROG is active
+        $this->assertTrue($guru->is_kaprog);
+        $this->assertEquals($this->pplg->id, $guru->user->jurusan_id);
+        $this->assertEquals($this->pplg->id, $guru->activeKaprogAssignment->jurusan_id);
+    }
+
+    public function test_cannot_remove_last_subject_assignment_of_active_teacher()
+    {
+        $accountService = app(TeacherAccountService::class);
+        $assignmentService = app(TeacherAssignmentService::class);
+
+        $t = $accountService->createTeacher([
+            'nama'          => 'Guru Tunggal Mapel Test',
+            'email'         => 'guru.tunggal@skanic.com',
+            'jenis_kelamin' => 'P',
+        ], 'Pass12345!', false);
+        $guru = $t['guru'];
+
+        $sub = $assignmentService->assignSubject($guru->id, $this->mapelCoding->id, $this->kelas10->id, '2026/2027');
+
+        // Trying to delete the only active subject assignment must throw ValidationException
+        $this->expectException(ValidationException::class);
+        $assignmentService->removeSubjectAssignment($sub->id);
     }
 
     public function test_schedule_conflict_validator_prevents_overlap()

@@ -122,7 +122,7 @@
                 </div>
             </div>
 
-            <div class="sm:col-span-3">
+            <div class="sm:col-span-2">
                 <label class="block text-xs font-medium text-dark-600 mb-1">Status Kepegawaian</label>
                 <select name="status_kepegawaian"
                     class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
@@ -146,12 +146,24 @@
                 </select>
             </div>
 
-            <div class="sm:col-span-3 flex items-center gap-2">
+            <div class="sm:col-span-3">
+                <label class="block text-xs font-medium text-dark-600 mb-1">Tanggung Jawab Tambahan</label>
+                <select name="additional_duty"
+                    class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                    <option value="">Semua Guru</option>
+                    <option value="homeroom" {{ ($additional_duty ?? '') == 'homeroom' ? 'selected' : '' }}>Dengan Tugas Wali Kelas</option>
+                    <option value="kaprog" {{ ($additional_duty ?? '') == 'kaprog' ? 'selected' : '' }}>Dengan Tugas KAPROG</option>
+                    <option value="both" {{ ($additional_duty ?? '') == 'both' ? 'selected' : '' }}>Wali Kelas & KAPROG Sekaligus</option>
+                    <option value="pure" {{ ($additional_duty ?? '') == 'pure' ? 'selected' : '' }}>Hanya Mengajar Mapel (Tanpa Tugas Tambahan)</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-2 flex items-center gap-2">
                 <button type="submit"
                     class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-1.5">
                     <i class='bx bx-filter-alt'></i> Filter
                 </button>
-                @if ($search || $status_kepegawaian || $status_akun || $assignment_type)
+                @if ($search || $status_kepegawaian || $status_akun || ($additional_duty ?? ''))
                     <a href="{{ route('guru') }}"
                         class="px-3 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition">
                         Reset
@@ -427,6 +439,116 @@
                     </div>
                 </div>
 
+                {{-- Section 3: Penugasan Mata Pelajaran Wajib (Subject Assignment) --}}
+                <div class="space-y-3 pt-3 border-t border-dark-100">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-dark-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class='bx bx-book-bookmark text-primary-600 text-sm'></i> 3. Penugasan Mata Pelajaran (Wajib)
+                        </h4>
+                        <span class="text-[10px] text-primary-700 bg-primary-50 px-2 py-0.5 rounded font-bold border border-primary-200">1 Guru Wajib Memiliki Mapel</span>
+                    </div>
+                    <p class="text-xs text-dark-500">Setiap guru profesional wajib memiliki mata pelajaran yang diampu. Menjadi wali kelas atau KAPROG tidak menggantikan tugas mengajar.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-dark-700 mb-1">Pilih Mata Pelajaran <span class="text-rose-500">*</span></label>
+                            <select name="mata_pelajaran_id" required
+                                class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
+                                <option value="">-- Pilih Mata Pelajaran --</option>
+                                @foreach($mataPelajarans as $mp)
+                                    <option value="{{ $mp->id }}">{{ $mp->nama_mapel }} ({{ $mp->kode_mapel }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-dark-700 mb-1">Tahun Ajaran <span class="text-rose-500">*</span></label>
+                            <input type="text" name="tahun_ajaran" value="2026/2027" required
+                                class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-dark-700">Rombongan Belajar yang Diajar <span class="text-rose-500">*</span></label>
+                            <div class="flex items-center gap-2 text-[11px]">
+                                <button type="button" onclick="selectAllClasses(true)" class="text-primary-600 hover:underline font-bold">Pilih Semua</button>
+                                <span>&bull;</span>
+                                <button type="button" onclick="selectAllClasses(false)" class="text-dark-500 hover:underline">Hapus Pilihan</button>
+                            </div>
+                        </div>
+                        <div class="max-h-36 overflow-y-auto border border-dark-200 rounded-xl p-2.5 bg-dark-50/40 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            @foreach($kelasList as $k)
+                                <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white text-xs text-dark-700 cursor-pointer transition">
+                                    <input type="checkbox" name="kelas_ids[]" value="{{ $k->id }}" class="class-checkbox rounded text-primary-600 focus:ring-primary-500">
+                                    <span class="font-medium truncate">{{ $k->nama_kelas }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="text-[10px] text-dark-400 mt-1">Pilih minimal 1 rombel yang diajar untuk mata pelajaran ini.</p>
+                    </div>
+                </div>
+
+                {{-- Section 4: Tanggung Jawab Tambahan (Additional Responsibilities - Opsional) --}}
+                <div class="space-y-3 pt-3 border-t border-dark-100">
+                    <div>
+                        <h4 class="text-xs font-bold text-dark-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class='bx bx-award text-purple-600 text-sm'></i> 4. Tanggung Jawab Tambahan (Opsional)
+                        </h4>
+                        <p class="text-xs text-dark-500 mt-0.5">Tanggung jawab tambahan berjalan berdampingan dan tidak menggantikan tugas mengajar mata pelajaran.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {{-- Tugas Tambahan 1: Wali Kelas --}}
+                        <div class="p-3 border border-dark-200 rounded-xl bg-white shadow-xs">
+                            <label class="flex items-start gap-2.5 cursor-pointer">
+                                <input type="checkbox" name="is_homeroom" value="1" id="check_is_homeroom" onchange="toggleHomeroomSelect(this.checked)"
+                                    class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500">
+                                <div>
+                                    <p class="text-xs font-bold text-dark-800">Tugaskan sebagai Wali Kelas</p>
+                                    <p class="text-[10px] text-dark-400">Guru bertanggung jawab membina satu rombel tertentu.</p>
+                                </div>
+                            </label>
+
+                            <div id="wrapper_homeroom_select" class="hidden mt-2.5 pt-2.5 border-t border-dark-100">
+                                <label class="block text-[11px] font-semibold text-dark-700 mb-1">Pilih Rombel Binaan <span class="text-rose-500">*</span></label>
+                                <select name="homeroom_kelas_id" id="field_homeroom_kelas_id"
+                                    class="w-full px-2.5 py-1.5 border border-dark-200 rounded-lg text-xs focus:ring-primary-500 focus:border-primary-500">
+                                    <option value="">-- Pilih Kelas Binaan --</option>
+                                    @foreach($kelasList as $k)
+                                        <option value="{{ $k->id }}">
+                                            {{ $k->nama_kelas }} ({{ $k->jurusan->singkatan ?? $k->jurusan->nama_jurusan }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Tugas Tambahan 2: KAPROG --}}
+                        <div class="p-3 border border-dark-200 rounded-xl bg-white shadow-xs">
+                            <label class="flex items-start gap-2.5 cursor-pointer">
+                                <input type="checkbox" name="is_kaprog" value="1" id="check_is_kaprog" onchange="toggleKaprogSelect(this.checked)"
+                                    class="mt-0.5 rounded text-purple-600 focus:ring-purple-500">
+                                <div>
+                                    <p class="text-xs font-bold text-dark-800">Tugaskan sebagai KAPROG</p>
+                                    <p class="text-[10px] text-dark-400">Kepala Program Keahlian membawahi satu jurusan.</p>
+                                </div>
+                            </label>
+
+                            <div id="wrapper_kaprog_select" class="hidden mt-2.5 pt-2.5 border-t border-dark-100">
+                                <label class="block text-[11px] font-semibold text-dark-700 mb-1">Pilih Program Keahlian <span class="text-rose-500">*</span></label>
+                                <select name="kaprog_jurusan_id" id="field_kaprog_jurusan_id"
+                                    class="w-full px-2.5 py-1.5 border border-dark-200 rounded-lg text-xs focus:ring-primary-500 focus:border-primary-500">
+                                    <option value="">-- Pilih Jurusan --</option>
+                                    @foreach($jurusans as $j)
+                                        <option value="{{ $j->id }}">{{ $j->nama_jurusan }} ({{ $j->kode_jurusan }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="pt-4 flex items-center justify-end gap-2 border-t border-dark-200">
                     <button type="button" onclick="closeModal('modal-inputguru')"
                         class="px-4 py-2 border border-dark-200 rounded-xl text-sm font-semibold text-dark-600 hover:bg-dark-50">Batal</button>
@@ -473,6 +595,36 @@
                 reader.readAsDataURL(input.files[0]);
             } else {
                 container.innerHTML = `<i class='bx bx-user text-3xl text-dark-300'></i>`;
+            }
+        }
+
+        function selectAllClasses(checked) {
+            document.querySelectorAll('.class-checkbox').forEach(cb => cb.checked = checked);
+        }
+
+        function toggleHomeroomSelect(checked) {
+            const wrap = document.getElementById('wrapper_homeroom_select');
+            const field = document.getElementById('field_homeroom_kelas_id');
+            if (checked) {
+                wrap.classList.remove('hidden');
+                field.required = true;
+            } else {
+                wrap.classList.add('hidden');
+                field.required = false;
+                field.value = '';
+            }
+        }
+
+        function toggleKaprogSelect(checked) {
+            const wrap = document.getElementById('wrapper_kaprog_select');
+            const field = document.getElementById('field_kaprog_jurusan_id');
+            if (checked) {
+                wrap.classList.remove('hidden');
+                field.required = true;
+            } else {
+                wrap.classList.add('hidden');
+                field.required = false;
+                field.value = '';
             }
         }
 

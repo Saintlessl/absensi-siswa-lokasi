@@ -13,6 +13,7 @@ use App\Services\TeacherScheduleService;
 use App\Services\TeacherWorkloadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class GuruController extends Controller
@@ -61,20 +62,26 @@ class GuruController extends Controller
             });
         }
 
-        if ($request->filled('assignment_type')) {
-            $type = $request->assignment_type;
-            if ($type === 'homeroom') {
-                $query->whereHas('homeroomAssignments', function ($q) {
-                    $q->where('is_active', true);
+        // Filter based on Additional Responsibilities (Every teacher is a subject teacher)
+        if ($request->filled('additional_duty') || $request->filled('assignment_type')) {
+            $duty = $request->additional_duty ?? $request->assignment_type;
+            if ($duty === 'homeroom') {
+                $query->whereHas('homeroomAssignments', fn($q) => $q->where('is_active', true));
+            } elseif ($duty === 'kaprog') {
+                $query->where(function ($q) {
+                    $q->whereHas('user', fn($uq) => $uq->whereNotNull('jurusan_id'))
+                      ->orWhereHas('kaprogAssignments', fn($kq) => $kq->where('is_active', true));
                 });
-            } elseif ($type === 'kaprog') {
-                $query->whereHas('user', function ($q) {
-                    $q->whereNotNull('jurusan_id');
-                });
-            } elseif ($type === 'subject') {
-                $query->whereHas('subjectAssignments', function ($q) {
-                    $q->where('is_active', true);
-                });
+            } elseif ($duty === 'both') {
+                $query->whereHas('homeroomAssignments', fn($q) => $q->where('is_active', true))
+                      ->where(function ($q) {
+                          $q->whereHas('user', fn($uq) => $uq->whereNotNull('jurusan_id'))
+                            ->orWhereHas('kaprogAssignments', fn($kq) => $kq->where('is_active', true));
+                      });
+            } elseif ($duty === 'pure' || $duty === 'subject') {
+                $query->whereDoesntHave('homeroomAssignments', fn($q) => $q->where('is_active', true))
+                      ->whereDoesntHave('kaprogAssignments', fn($q) => $q->where('is_active', true))
+                      ->whereHas('user', fn($q) => $q->whereNull('jurusan_id'));
             }
         }
 
@@ -103,12 +110,13 @@ class GuruController extends Controller
             'search'             => $request->search ?? '',
             'status_kepegawaian' => $request->status_kepegawaian ?? '',
             'status_akun'        => $request->status_akun ?? '',
+            'additional_duty'    => $request->additional_duty ?? $request->assignment_type ?? '',
             'assignment_type'    => $request->assignment_type ?? '',
         ]);
     }
 
     /**
-     * Store new teacher with integrated account and activation invitation option.
+     * Store new teacher with integrated account, mandatory subject assignment, and optional additional duties.
      */
     public function store(Request $request)
     {
@@ -124,18 +132,70 @@ class GuruController extends Controller
             'photo'              => 'nullable|image|mimes:jpeg,png,webp|max:2048',
             'password_mode'      => 'required|in:direct,invitation',
             'password'           => 'required_if:password_mode,direct|nullable|min:8',
+            // Mandatory Subject Assignment: Every teacher must have a subject assignment
+            'mata_pelajaran_id'  => 'required|exists:mata_pelajarans,id',
+            'kelas_ids'          => 'required|array|min:1',
+            'kelas_ids.*'        => 'exists:kelas,id',
+            'tahun_ajaran'       => 'nullable|string|max:20',
+            // Additional Responsibilities: Homeroom & KAPROG
+            'is_homeroom'        => 'nullable|in:0,1',
+            'homeroom_kelas_id'  => 'required_if:is_homeroom,1|nullable|exists:kelas,id',
+            'is_kaprog'          => 'nullable|in:0,1',
+            'kaprog_jurusan_id'  => 'required_if:is_kaprog,1|nullable|exists:jurusans,id',
         ]);
 
         $requiresActivation = $request->password_mode === 'invitation';
         $password = $request->password_mode === 'direct' ? $request->password : null;
+        $tahunAjaran = $request->tahun_ajaran ?? '2026/2027';
 
-        $result = $this->accountService->createTeacher(
-            $request->all(),
-            $password,
-            $requiresActivation
-        );
+        $mapel = MataPelajaran::findOrFail($request->mata_pelajaran_id);
 
-        $msg = "Data Guru {$result['guru']->nama} berhasil dibuat.";
+        $teacherData = $request->all();
+        $teacherData['mapel'] = $mapel->nama_mapel; // sync legacy string
+
+        $result = DB::transaction(function () use ($teacherData, $password, $requiresActivation, $request, $tahunAjaran) {
+            $created = $this->accountService->createTeacher(
+                $teacherData,
+                $password,
+                $requiresActivation
+            );
+
+            $guru = $created['guru'];
+
+            // 1. Assign mandatory subject to all selected classes
+            foreach ($request->kelas_ids as $kelasId) {
+                $this->assignmentService->assignSubject(
+                    $guru->id,
+                    (int) $request->mata_pelajaran_id,
+                    (int) $kelasId,
+                    $tahunAjaran
+                );
+            }
+
+            // 2. Assign optional Homeroom Responsibility
+            if ($request->input('is_homeroom') == 1 && $request->homeroom_kelas_id) {
+                $this->assignmentService->assignHomeroom(
+                    $guru->id,
+                    (int) $request->homeroom_kelas_id,
+                    $tahunAjaran,
+                    'Penugasan awal sebagai Wali Kelas'
+                );
+            }
+
+            // 3. Assign optional KAPROG Responsibility
+            if ($request->input('is_kaprog') == 1 && $request->kaprog_jurusan_id) {
+                $this->assignmentService->assignKaprog(
+                    $guru->id,
+                    (int) $request->kaprog_jurusan_id,
+                    $tahunAjaran,
+                    'Penugasan awal sebagai Kepala Program Keahlian (KAPROG)'
+                );
+            }
+
+            return $created;
+        });
+
+        $msg = "Data Guru {$result['guru']->nama} berhasil dibuat beserta penugasan mata pelajaran {$mapel->nama_mapel}.";
         if ($result['activation_url']) {
             session()->flash('activation_url', $result['activation_url']);
             $msg .= " Tautan aktivasi akun telah disiapkan.";
@@ -155,6 +215,8 @@ class GuruController extends Controller
             'subjectAssignments.kelas.jurusan',
             'homeroomAssignments.kelas.jurusan',
             'activeHomeroomAssignment.kelas.jurusan',
+            'kaprogAssignments.jurusan',
+            'activeKaprogAssignment.jurusan',
             'jadwal.mataPelajaran',
             'jadwal.kelas.jurusan',
             'jadwal.room'
@@ -249,16 +311,25 @@ class GuruController extends Controller
     {
         $request->validate([
             'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
-            'kelas_id'          => 'required|exists:kelas,id',
+            'kelas_id'          => 'nullable|exists:kelas,id',
+            'kelas_ids'         => 'nullable|array',
+            'kelas_ids.*'       => 'exists:kelas,id',
             'tahun_ajaran'      => 'required|string|max:20',
         ]);
 
-        $this->assignmentService->assignSubject(
-            (int) $id,
-            (int) $request->mata_pelajaran_id,
-            (int) $request->kelas_id,
-            $request->tahun_ajaran
-        );
+        $kelasIds = $request->kelas_ids ?? ($request->kelas_id ? [$request->kelas_id] : []);
+        if (empty($kelasIds)) {
+            return redirect()->back()->with('error', 'Pilih minimal satu rombongan belajar.');
+        }
+
+        foreach ($kelasIds as $kId) {
+            $this->assignmentService->assignSubject(
+                (int) $id,
+                (int) $request->mata_pelajaran_id,
+                (int) $kId,
+                $request->tahun_ajaran
+            );
+        }
 
         return redirect()->back()->with('success', 'Penugasan mata pelajaran berhasil ditambahkan.');
     }
@@ -268,8 +339,12 @@ class GuruController extends Controller
      */
     public function removeSubjectAssignment($assignmentId)
     {
-        $this->assignmentService->removeSubjectAssignment((int) $assignmentId);
-        return redirect()->back()->with('success', 'Penugasan mata pelajaran berhasil dihapus.');
+        try {
+            $this->assignmentService->removeSubjectAssignment((int) $assignmentId);
+            return redirect()->back()->with('success', 'Penugasan mata pelajaran berhasil dihapus.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -308,12 +383,19 @@ class GuruController extends Controller
     public function assignKaprog(Request $request, $id)
     {
         $request->validate([
-            'jurusan_id' => 'required|exists:jurusans,id',
+            'jurusan_id'   => 'required|exists:jurusans,id',
+            'tahun_ajaran' => 'nullable|string|max:20',
+            'catatan'      => 'nullable|string',
         ]);
 
-        $this->assignmentService->assignKaprog((int) $id, (int) $request->jurusan_id);
+        $this->assignmentService->assignKaprog(
+            (int) $id,
+            (int) $request->jurusan_id,
+            $request->tahun_ajaran ?? '2026/2027',
+            $request->catatan
+        );
 
-        return redirect()->back()->with('success', 'Penugasan Kepala Program Keahlian (KAPROG) berhasil disimpan.');
+        return redirect()->back()->with('success', 'Penugasan Kepala Program Keahlian (KAPROG) berhasil disimpan beserta riwayat historisnya.');
     }
 
     /**

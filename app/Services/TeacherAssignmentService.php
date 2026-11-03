@@ -49,10 +49,25 @@ class TeacherAssignmentService
 
     /**
      * Remove or deactivate a subject teaching assignment.
+     * Enforces requirement: Every active teacher must retain at least one valid subject assignment.
      */
     public function removeSubjectAssignment(int $assignmentId): void
     {
         $assignment = TeacherSubjectAssignment::findOrFail($assignmentId);
+        $guru = $assignment->guru;
+
+        if ($guru && $guru->is_active) {
+            $activeCount = TeacherSubjectAssignment::where('guru_id', $guru->id)
+                ->where('is_active', true)
+                ->count();
+
+            if ($activeCount <= 1) {
+                throw ValidationException::withMessages([
+                    'assignment' => ['Setiap guru aktif wajib memiliki minimal satu penugasan mata pelajaran yang valid. Silakan tambahkan mata pelajaran pengganti terlebih dahulu sebelum menghapus penugasan ini.'],
+                ]);
+            }
+        }
+
         $assignment->delete();
     }
 
@@ -123,11 +138,11 @@ class TeacherAssignmentService
     }
 
     /**
-     * Assign a teacher as Head of Department (KAPROG) for a major.
+     * Assign a teacher as Head of Department (KAPROG) for a major with historical tracking.
      */
-    public function assignKaprog(int $guruId, int $jurusanId): void
+    public function assignKaprog(int $guruId, int $jurusanId, string $tahunAjaran = '2026/2027', ?string $catatan = null): \App\Models\KaprogAssignment
     {
-        DB::transaction(function () use ($guruId, $jurusanId) {
+        return DB::transaction(function () use ($guruId, $jurusanId, $tahunAjaran, $catatan) {
             $guru = Guru::with('user')->findOrFail($guruId);
             $jurusan = Jurusan::findOrFail($jurusanId);
 
@@ -137,14 +152,40 @@ class TeacherAssignmentService
                 ]);
             }
 
-            // Remove existing KAPROG on this department
+            // 1. Deactivate existing active KAPROG assignment for this department
+            \App\Models\KaprogAssignment::where('jurusan_id', $jurusanId)
+                ->where('is_active', true)
+                ->update([
+                    'is_active' => false,
+                    'ends_on'   => Carbon::today(),
+                ]);
+
+            // 2. Deactivate existing active KAPROG assignment for this teacher
+            \App\Models\KaprogAssignment::where('guru_id', $guruId)
+                ->where('is_active', true)
+                ->update([
+                    'is_active' => false,
+                    'ends_on'   => Carbon::today(),
+                ]);
+
+            // 3. Remove existing KAPROG on this department in user table
             User::where('jurusan_id', $jurusanId)
                 ->where('id', '!=', $guru->user->id)
                 ->update(['jurusan_id' => null]);
 
-            // Assign KAPROG to this teacher's user
+            // 4. Assign KAPROG to this teacher's user
             $guru->user->update([
                 'jurusan_id' => $jurusanId,
+            ]);
+
+            // 5. Create new historical KAPROG assignment record
+            return \App\Models\KaprogAssignment::create([
+                'guru_id'      => $guruId,
+                'jurusan_id'   => $jurusanId,
+                'tahun_ajaran' => $tahunAjaran,
+                'starts_on'    => Carbon::today(),
+                'is_active'    => true,
+                'catatan'      => $catatan ?? "Penugasan KAPROG {$jurusan->nama_jurusan}",
             ]);
         });
     }
@@ -154,9 +195,19 @@ class TeacherAssignmentService
      */
     public function removeKaprog(int $guruId): void
     {
-        $guru = Guru::with('user')->findOrFail($guruId);
-        if ($guru->user) {
-            $guru->user->update(['jurusan_id' => null]);
-        }
+        DB::transaction(function () use ($guruId) {
+            $guru = Guru::with('user')->findOrFail($guruId);
+
+            \App\Models\KaprogAssignment::where('guru_id', $guruId)
+                ->where('is_active', true)
+                ->update([
+                    'is_active' => false,
+                    'ends_on'   => Carbon::today(),
+                ]);
+
+            if ($guru->user) {
+                $guru->user->update(['jurusan_id' => null]);
+            }
+        });
     }
 }
