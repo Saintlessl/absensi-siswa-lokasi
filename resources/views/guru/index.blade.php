@@ -218,9 +218,24 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <a href="{{ route('guru.show', $g->id) }}" class="font-bold text-dark-900 hover:text-primary-600 transition">
-                                            {{ $g->nama }}
-                                        </a>
+                                        <div class="flex items-center gap-1.5">
+                                            <a href="{{ route('guru.show', $g->id) }}" class="font-bold text-dark-900 hover:text-primary-600 transition">
+                                                {{ $g->nama }}
+                                            </a>
+                                            @if ($g->jenis_kelamin === 'L')
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Laki-laki">
+                                                    L
+                                                </span>
+                                            @elseif ($g->jenis_kelamin === 'P')
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-pink-50 text-pink-700 border border-pink-200" title="Perempuan">
+                                                    P
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Jenis kelamin belum diatur">
+                                                    <i class='bx bx-info-circle text-[11px]'></i> Belum diatur
+                                                </span>
+                                            @endif
+                                        </div>
                                         <div class="text-[11px] text-dark-400 flex items-center gap-1.5 mt-0.5">
                                             <span><i class='bx bx-envelope text-xs'></i> {{ $user->email ?? '-' }}</span>
                                             @if($g->telepon)

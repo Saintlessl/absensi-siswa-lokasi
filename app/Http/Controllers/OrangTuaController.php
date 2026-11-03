@@ -47,28 +47,33 @@ class OrangTuaController extends Controller
         $orang_tua = OrangTua::findOrFail($id);
         
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'telepon' => 'required|string|max:20',
-            'alamat' => 'nullable|string',
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($orang_tua->user_id)],
-            'password' => 'nullable|min:6',
+            'nama'          => 'required|string|max:255',
+            'jenis_kelamin' => 'required|in:L,P',
+            'telepon'       => 'required|string|max:20',
+            'alamat'        => 'nullable|string',
+            'email'         => ['required', 'email', Rule::unique('users', 'email')->ignore($orang_tua->user_id)],
+            'password'      => 'nullable|min:6',
         ]);
 
         $userData = [
-            'name' => $request->nama,
-            'email' => $request->email,
+            'name'          => $request->nama,
+            'email'         => $request->email,
+            'jenis_kelamin' => $request->jenis_kelamin,
         ];
         
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->password);
         }
 
-        $orang_tua->user->update($userData);
+        if ($orang_tua->user) {
+            $orang_tua->user->update($userData);
+        }
 
         $orang_tua->update([
-            'nama' => $request->nama,
-            'telepon' => $request->telepon,
-            'alamat' => $request->alamat,
+            'nama'          => $request->nama,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'telepon'       => $request->telepon,
+            'alamat'        => $request->alamat,
         ]);
 
         return redirect()->back()->with('success', 'Data Orang Tua berhasil diperbarui');

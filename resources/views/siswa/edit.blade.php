@@ -129,6 +129,14 @@
                 <input type="text" name="parent_name" value="{{ old('parent_name', $parent?->nama) }}" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm">
             </div>
             <div>
+                <label class="block text-xs font-medium text-dark-700 mb-1.5">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                <select name="parent_jenis_kelamin" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm">
+                    <option value="">-- Pilih Jenis Kelamin --</option>
+                    <option value="L" {{ old('parent_jenis_kelamin', $parent?->jenis_kelamin) === 'L' ? 'selected' : '' }}>Laki-laki</option>
+                    <option value="P" {{ old('parent_jenis_kelamin', $parent?->jenis_kelamin) === 'P' ? 'selected' : '' }}>Perempuan</option>
+                </select>
+            </div>
+            <div>
                 <label class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp <span class="text-rose-500">*</span></label>
                 <input type="tel" name="parent_phone" value="{{ old('parent_phone', $parent?->telepon) }}" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-sm font-mono">
             </div>

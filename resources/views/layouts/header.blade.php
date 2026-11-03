@@ -65,7 +65,7 @@
                     {{-- User Info --}}
                     <div class="hidden sm:block text-left">
                         <p class="text-sm font-semibold text-dark-700 leading-tight">
-                            {{ Auth::user()->name ?? 'Admin' }}
+                            {{ Auth::user()->salutation_name ?? Auth::user()->name ?? 'Pengguna' }}
                         </p>
                         <div class="mt-0.5">
                             @if (Auth::user()->role === 'superadmin')
@@ -91,7 +91,7 @@
                     class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl shadow-dark-900/10 border border-dark-100 overflow-hidden">
                     {{-- Dropdown Header --}}
                     <div class="px-5 py-4 bg-gradient-to-r from-primary-600 to-primary-700">
-                        <p class="text-white font-semibold text-sm">{{ Auth::user()->name ?? 'Admin' }}</p>
+                        <p class="text-white font-semibold text-sm">{{ Auth::user()->salutation_name ?? Auth::user()->name ?? 'Pengguna' }}</p>
                         <p class="text-primary-200 text-xs mt-0.5">{{ Auth::user()->email ?? 'admin@spk.com' }}</p>
                     </div>
 

@@ -57,6 +57,8 @@
                             No</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Orang Tua
                         </th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Jenis Kelamin
+                        </th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Telepon</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Siswa Terkait
                         </th>
@@ -76,6 +78,21 @@
                                     </div>
                                     <p>{{ $ot->nama }}</p>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-center">
+                                @if ($ot->jenis_kelamin === 'L')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Laki-laki
+                                    </span>
+                                @elseif ($ot->jenis_kelamin === 'P')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-200">
+                                        Perempuan
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200" title="Informasi jenis kelamin belum diatur">
+                                        <i class='bx bx-info-circle text-xs'></i> Belum diatur
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-dark-600">{{ $ot->telepon }}</td>
                             <td class="px-6 py-4 text-sm text-dark-600">

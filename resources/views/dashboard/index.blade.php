@@ -24,7 +24,7 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 class="text-white text-xl sm:text-2xl font-bold tracking-tight">
-                        Selamat Datang, {{ Auth::user()->name ?? 'User' }}! 👋
+                        {{ Auth::user()->welcome_greeting }} 👋
                     </h1>
                     <p class="text-primary-200 mt-1 text-sm sm:text-base max-w-xl">
                         Sistem Absensi Siswa SMK Negeri &bull; PPLG, Animasi, TPFL, TO, BCF

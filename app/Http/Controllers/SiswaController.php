@@ -106,11 +106,12 @@ class SiswaController extends Controller
             'jenis_kelamin'    => 'required|in:L,P',
             'kelas_id'         => 'required|exists:kelas,id',
             'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'parent_name'      => 'required_without:existing_orangtua_id|nullable|string|max:255',
-            'parent_phone'     => 'required_without:existing_orangtua_id|nullable|string|max:25',
-            'parent_address'   => 'required_without:existing_orangtua_id|nullable|string|max:2000',
+            'parent_name'          => 'required_without:existing_orangtua_id|nullable|string|max:255',
+            'parent_jenis_kelamin' => 'required_without:existing_orangtua_id|nullable|in:L,P',
+            'parent_phone'         => 'required_without:existing_orangtua_id|nullable|string|max:25',
+            'parent_address'       => 'required_without:existing_orangtua_id|nullable|string|max:2000',
             'existing_orangtua_id' => 'nullable|exists:orang_tuas,id',
-            'confirm_existing_parent' => 'required_with:existing_orangtua_id|accepted',
+            'confirm_existing_parent' => $request->filled('existing_orangtua_id') ? 'required|accepted' : 'nullable',
             'email'            => 'required|email|unique:users,email',
             'password'         => 'required|min:6',
         ], [
@@ -168,14 +169,15 @@ class SiswaController extends Controller
                 return null;
             }
 
-            $parentUser = $this->parentAccounts->createPendingAccount($request->parent_name, $parentPhone);
+            $parentUser = $this->parentAccounts->createPendingAccount($request->parent_name, $parentPhone, $request->parent_jenis_kelamin);
             $parent = OrangTua::create([
-                'user_id' => $parentUser->id,
-                'nama' => $request->parent_name,
-                'telepon' => $parentPhone,
-                'alamat' => $request->parent_address,
+                'user_id'       => $parentUser->id,
+                'nama'          => $request->parent_name,
+                'jenis_kelamin' => $request->parent_jenis_kelamin,
+                'telepon'       => $parentPhone,
+                'alamat'        => $request->parent_address,
                 // Legacy column is intentionally populated for old reports only.
-                'siswa_id' => $siswa->id,
+                'siswa_id'      => $siswa->id,
             ]);
             $siswa->orangtua()->attach($parent->id);
             return $this->parentAccounts->issueActivation($parentUser);
@@ -230,9 +232,10 @@ class SiswaController extends Controller
             'jenis_kelamin'    => 'required|in:L,P',
             'kelas_id'         => 'required|exists:kelas,id',
             'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'parent_name'      => 'required|string|max:255',
-            'parent_phone'     => 'required|string|max:25',
-            'parent_address'   => 'required|string|max:2000',
+            'parent_name'          => 'required|string|max:255',
+            'parent_jenis_kelamin' => 'nullable|in:L,P',
+            'parent_phone'         => 'required|string|max:25',
+            'parent_address'       => 'required|string|max:2000',
             'email'            => ['required', 'email', Rule::unique('users', 'email')->ignore($siswa->user_id)],
             'password'         => 'nullable|min:6',
         ], [
@@ -303,7 +306,18 @@ class SiswaController extends Controller
             if (!$parent) {
                 throw new \RuntimeException('Profil orang tua belum tersedia. Buat relasi melalui pengelolaan orang tua.');
             }
-            $parent->update(['nama' => $request->parent_name, 'telepon' => $parentPhone, 'alamat' => $request->parent_address]);
+            $parentData = [
+                'nama'    => $request->parent_name,
+                'telepon' => $parentPhone,
+                'alamat'  => $request->parent_address,
+            ];
+            if ($request->filled('parent_jenis_kelamin')) {
+                $parentData['jenis_kelamin'] = $request->parent_jenis_kelamin;
+                if ($parent->user) {
+                    $parent->user->update(['jenis_kelamin' => $request->parent_jenis_kelamin]);
+                }
+            }
+            $parent->update($parentData);
             });
             return redirect()->back()->with('success', 'Data Siswa berhasil diperbarui');
         } catch (\Throwable $e) {

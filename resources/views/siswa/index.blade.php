@@ -126,7 +126,16 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-dark-900">{{ $s->nama }} <span class="text-xs font-normal text-dark-400">({{ $s->jenis_kelamin }})</span></div>
+                                        <div class="font-bold text-dark-900">
+                                            {{ $s->nama }}
+                                            @if ($s->jenis_kelamin === 'L')
+                                                <span class="text-xs font-semibold text-blue-600">(L)</span>
+                                            @elseif ($s->jenis_kelamin === 'P')
+                                                <span class="text-xs font-semibold text-pink-600">(P)</span>
+                                            @else
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Jenis kelamin belum diatur">Belum diatur</span>
+                                            @endif
+                                        </div>
                                         <div class="text-[11px] text-primary-600 flex items-center gap-1 font-mono">
                                             <i class='bx bx-envelope text-xs'></i> {{ $s->user->email ?? '-' }}
                                         </div>
@@ -340,9 +349,27 @@
                                         <h4 class="text-sm font-semibold text-dark-800">Informasi Orang Tua / Wali</h4>
                                     </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div><label for="parent_name" class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali <span class="text-rose-500">*</span></label><input type="text" name="parent_name" id="parent_name" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Nama lengkap orang tua/wali" autocomplete="off"></div>
-                                        <div><label for="parent_phone" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp <span class="text-rose-500">*</span></label><input type="tel" name="parent_phone" id="parent_phone" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono" placeholder="081234567890" autocomplete="off"></div>
-                                        <div class="md:col-span-2"><label for="parent_address" class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap <span class="text-rose-500">*</span></label><textarea name="parent_address" id="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Alamat lengkap orang tua/wali"></textarea><p class="mt-1 text-[11px] text-dark-500">Nomor disimpan dalam format internasional untuk notifikasi presensi.</p></div>
+                                        <div>
+                                            <label for="parent_name" class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="parent_name" id="parent_name" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Nama lengkap orang tua/wali" autocomplete="off">
+                                        </div>
+                                        <div>
+                                            <label for="parent_jenis_kelamin" class="block text-xs font-medium text-dark-700 mb-1.5">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                                            <select name="parent_jenis_kelamin" id="parent_jenis_kelamin" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30">
+                                                <option value="">-- Pilih Jenis Kelamin --</option>
+                                                <option value="L">Laki-laki</option>
+                                                <option value="P">Perempuan</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="parent_phone" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp <span class="text-rose-500">*</span></label>
+                                            <input type="tel" name="parent_phone" id="parent_phone" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono" placeholder="081234567890" autocomplete="off">
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label for="parent_address" class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap <span class="text-rose-500">*</span></label>
+                                            <textarea name="parent_address" id="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Alamat lengkap orang tua/wali"></textarea>
+                                            <p class="mt-1 text-[11px] text-dark-500">Nomor disimpan dalam format internasional untuk notifikasi presensi.</p>
+                                        </div>
                                         <div class="md:col-span-2 border-t border-dark-100 pt-3"><label for="existing_orangtua_id" class="block text-xs font-medium text-dark-700 mb-1.5">Atau hubungkan profil orang tua yang sudah diverifikasi</label><select name="existing_orangtua_id" id="existing_orangtua_id" class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm"><option value="">Buat profil orang tua baru</option>@foreach($orangTuaExisting as $ot)<option value="{{ $ot->id }}">{{ $ot->nama }} — {{ $ot->telepon }} ({{ $ot->siswa->pluck('nama')->join(', ') ?: 'belum terhubung' }})</option>@endforeach</select><label class="mt-2 flex items-start gap-2 text-xs text-dark-600"><input type="checkbox" name="confirm_existing_parent" value="1" class="mt-0.5"> Saya telah memverifikasi identitas orang tua/wali ini dan mengonfirmasi relasi baru.</label></div>
                                     </div>
                                 </div>
@@ -652,7 +679,7 @@
         if (existingParent) {
             existingParent.addEventListener('change', function () {
                 const useExisting = !!this.value;
-                ['parent_name', 'parent_phone', 'parent_address'].forEach(id => {
+                ['parent_name', 'parent_jenis_kelamin', 'parent_phone', 'parent_address'].forEach(id => {
                     const field = document.getElementById(id);
                     field.required = !useExisting;
                     field.disabled = useExisting;

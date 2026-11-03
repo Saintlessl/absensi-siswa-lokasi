@@ -92,4 +92,19 @@ class Siswa extends Model
     {
         return $this->isBiometricEnrolled();
     }
+
+    public function getGenderLabelAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getGenderLabel($this->jenis_kelamin);
+    }
+
+    public function getSalutationAttribute(): string
+    {
+        return '';
+    }
+
+    public function getSalutationNameAttribute(): string
+    {
+        return $this->nama;
+    }
 }

@@ -22,7 +22,7 @@
                         {{ strtoupper(substr($user->name, 0, 2)) }}
                     </div>
                 </div>
-                <h3 class="text-lg font-bold text-dark-800">{{ $user->name }}</h3>
+                <h3 class="text-lg font-bold text-dark-800">{{ $user->salutation_name ?? $user->name }}</h3>
                 <p class="text-sm text-dark-500 mt-1">{{ $user->email }}</p>
 
                 <div class="mt-3">
@@ -59,6 +59,27 @@
                             <p class="text-[11px] text-dark-400 uppercase tracking-wider font-semibold">Bergabung</p>
                             <p class="text-dark-800 font-medium">
                                 {{ $user->created_at->isoFormat('D MMMM Y') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm">
+                        <div
+                            class="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <i class='bx bx-user-pin'></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-dark-400 uppercase tracking-wider font-semibold">Jenis Kelamin</p>
+                            <p class="text-dark-800 font-medium">
+                                @if($user->effective_gender)
+                                    <span class="inline-flex items-center gap-1">
+                                        {{ $user->effective_gender_label }}
+                                        <span class="text-xs text-dark-400">({{ $user->effective_gender }})</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                        Belum diatur
+                                    </span>
+                                @endif
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -106,6 +127,19 @@
                                         required>
                                 </div>
                                 @error('email')
+                                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="jenis_kelamin"
+                                    class="block text-sm font-medium text-dark-700 mb-1.5">Jenis Kelamin</label>
+                                <select name="jenis_kelamin" id="jenis_kelamin" required
+                                    class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="L" {{ old('jenis_kelamin', $user->effective_gender) === 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="P" {{ old('jenis_kelamin', $user->effective_gender) === 'P' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                                @error('jenis_kelamin')
                                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                                 @enderror
                             </div>

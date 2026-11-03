@@ -14,10 +14,32 @@ class OrangTua extends Model
     protected $fillable = [
         'user_id',
         'nama',
+        'jenis_kelamin',
         'telepon',
         'alamat',
         'siswa_id'
     ];
+
+    public function getGenderLabelAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getGenderLabel($this->jenis_kelamin);
+    }
+
+    public function getSalutationAttribute(): string
+    {
+        if ($this->jenis_kelamin === 'L') {
+            return 'Bapak';
+        }
+        if ($this->jenis_kelamin === 'P') {
+            return 'Ibu';
+        }
+        return '';
+    }
+
+    public function getSalutationNameAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->forOrangTua($this);
+    }
 
 
     public function user()

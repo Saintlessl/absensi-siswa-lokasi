@@ -58,7 +58,7 @@ class AuthController extends Controller
         if ($user->role !== 'siswa') {
             Auth::login($user, $request->has('remember'));
             $request->session()->regenerate();
-            return redirect()->route('dashboard');
+            return redirect()->route('dashboard')->with('success', 'Selamat datang kembali, ' . $user->salutation_name . '!');
         }
 
         // 2. Student Account Authentication

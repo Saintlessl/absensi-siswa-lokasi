@@ -604,7 +604,7 @@
                 {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
             </div>
             <div class="sidebar-logo-text overflow-hidden flex-1 min-w-0 transition-all duration-300">
-                <p class="text-white text-xs font-bold truncate">{{ Auth::user()->name ?? 'User' }}</p>
+                <p class="text-white text-xs font-bold truncate">{{ Auth::user()->salutation_name ?? Auth::user()->name ?? 'User' }}</p>
                 <div class="mt-0.5">
                     @if (Auth::user()->role === 'superadmin')
                         <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">

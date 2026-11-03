@@ -73,6 +73,7 @@
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">No</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Akun</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Jenis Kelamin</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Role Akses</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">Aksi</th>
                     </tr>
@@ -90,6 +91,21 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-dark-600">{{ $u->email }}</td>
+                            <td class="px-6 py-4 text-sm text-center">
+                                @if ($u->effective_gender === 'L')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        Laki-laki
+                                    </span>
+                                @elseif ($u->effective_gender === 'P')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-200">
+                                        Perempuan
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200" title="Informasi jenis kelamin belum diatur">
+                                        <i class='bx bx-info-circle text-xs'></i> Belum diatur
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 text-sm text-center">
                                 @php
                                     $roleColors = [
@@ -203,6 +219,16 @@
                                                 class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
                                                 placeholder="email@sekolah.com" required autocomplete="off">
                                         </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="jenis_kelamin" class="block text-sm font-medium text-dark-700 mb-1.5">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                                        <select name="jenis_kelamin" id="jenis_kelamin" required
+                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                                            <option value="">-- Pilih Jenis Kelamin --</option>
+                                            <option value="L">Laki-laki</option>
+                                            <option value="P">Perempuan</option>
+                                        </select>
                                     </div>
 
                                     <div>

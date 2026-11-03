@@ -38,19 +38,21 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:superadmin,admin,guru,siswa,orangtua,kaprog',
-            'jurusan_id' => 'required_if:role,kaprog|nullable|exists:jurusans,id',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:users',
+            'password'      => 'required|string|min:6',
+            'role'          => 'required|in:superadmin,admin,guru,siswa,orangtua,kaprog',
+            'jenis_kelamin' => 'required|in:L,P',
+            'jurusan_id'    => 'required_if:role,kaprog|nullable|exists:jurusans,id',
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => \Hash::make($request->password),
-            'role' => $request->role,
-            'jurusan_id' => $request->role === 'kaprog' ? $request->jurusan_id : null,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password'      => \Hash::make($request->password),
+            'role'          => $request->role,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'jurusan_id'    => $request->role === 'kaprog' ? $request->jurusan_id : null,
         ]);
 
         return redirect()->back()->with('success', 'Data User berhasil ditambahkan');
@@ -76,17 +78,19 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:superadmin,admin,guru,siswa,orangtua,kaprog',
-            'jurusan_id' => 'required_if:role,kaprog|nullable|exists:jurusans,id',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role'          => 'required|in:superadmin,admin,guru,siswa,orangtua,kaprog',
+            'jenis_kelamin' => 'required|in:L,P',
+            'jurusan_id'    => 'required_if:role,kaprog|nullable|exists:jurusans,id',
         ]);
 
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'jurusan_id' => $request->role === 'kaprog' ? $request->jurusan_id : null,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'role'          => $request->role,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'jurusan_id'    => $request->role === 'kaprog' ? $request->jurusan_id : null,
         ];
 
         if ($request->filled('password')) {
@@ -95,6 +99,15 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
+        // Sync with linked profile if present
+        if ($user->guru) {
+            $user->guru->update(['jenis_kelamin' => $request->jenis_kelamin]);
+        } elseif ($user->orangTua) {
+            $user->orangTua->update(['jenis_kelamin' => $request->jenis_kelamin]);
+        } elseif ($user->siswa) {
+            $user->siswa->update(['jenis_kelamin' => $request->jenis_kelamin]);
+        }
 
         return redirect()->back()->with('success', 'Data User berhasil diperbarui');
     }
@@ -131,14 +144,31 @@ class UserController extends Controller
         $user = \Illuminate\Support\Facades\Auth::user();
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'jenis_kelamin' => 'nullable|in:L,P',
         ]);
 
-        $user->update([
-            'name' => $request->name,
+        $updateData = [
+            'name'  => $request->name,
             'email' => $request->email,
-        ]);
+        ];
+
+        if ($request->filled('jenis_kelamin')) {
+            $updateData['jenis_kelamin'] = $request->jenis_kelamin;
+        }
+
+        $user->update($updateData);
+
+        if ($request->filled('jenis_kelamin')) {
+            if ($user->guru) {
+                $user->guru->update(['jenis_kelamin' => $request->jenis_kelamin]);
+            } elseif ($user->orangTua) {
+                $user->orangTua->update(['jenis_kelamin' => $request->jenis_kelamin]);
+            } elseif ($user->siswa) {
+                $user->siswa->update(['jenis_kelamin' => $request->jenis_kelamin]);
+            }
+        }
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
     }

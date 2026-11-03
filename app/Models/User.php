@@ -27,6 +27,7 @@ class User extends Authenticatable
         'role',
         'status',
         'jurusan_id',
+        'jenis_kelamin',
     ];
     public function guru()
     {
@@ -52,6 +53,34 @@ class User extends Authenticatable
         return $this->hasOne(ParentAccountActivation::class);
     }
     public function jurusan() { return $this->belongsTo(Jurusan::class); }
+
+    /**
+     * Salutation and Gender Helpers via SalutationService
+     */
+    public function getEffectiveGenderAttribute(): ?string
+    {
+        return app(\App\Services\SalutationService::class)->resolveGender($this);
+    }
+
+    public function getEffectiveGenderLabelAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getGenderLabel($this->effective_gender);
+    }
+
+    public function getSalutationAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getHonorific($this);
+    }
+
+    public function getSalutationNameAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getSalutationName($this);
+    }
+
+    public function getWelcomeGreetingAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getWelcomeGreeting($this, true);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

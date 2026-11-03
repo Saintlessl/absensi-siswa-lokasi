@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class ParentAccountService
 {
-    public function createPendingAccount(string $name, string $phone): User
+    public function createPendingAccount(string $name, string $phone, ?string $gender = null): User
     {
         // This internal address is never exposed as a credential or derived password.
         // The parent sets their own password through the one-time activation flow.
@@ -18,6 +18,7 @@ class ParentAccountService
             'email' => 'wali.' . preg_replace('/\D/', '', $phone) . '.' . Str::lower(Str::random(8)) . '@myskanic.com',
             'password' => Hash::make(Str::random(64)),
             'role' => 'orangtua',
+            'jenis_kelamin' => $gender,
         ]);
     }
 

@@ -24,11 +24,12 @@ class TeacherAccountService
 
             // 1. Create User
             $user = User::create([
-                'name'     => $data['nama'],
-                'email'    => $data['email'],
-                'password' => !empty($password) ? Hash::make($password) : Hash::make(Str::random(32)),
-                'role'     => 'guru',
-                'status'   => $status,
+                'name'          => $data['nama'],
+                'email'         => $data['email'],
+                'password'      => !empty($password) ? Hash::make($password) : Hash::make(Str::random(32)),
+                'role'          => 'guru',
+                'status'        => $status,
+                'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
             ]);
 
             // 2. Handle Photo Upload

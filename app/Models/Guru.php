@@ -115,4 +115,25 @@ class Guru extends Model
     {
         return $this->activeKaprogAssignment?->jurusan ?? $this->user?->jurusan;
     }
+
+    public function getGenderLabelAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->getGenderLabel($this->jenis_kelamin);
+    }
+
+    public function getSalutationAttribute(): string
+    {
+        if ($this->jenis_kelamin === 'L') {
+            return 'Pak';
+        }
+        if ($this->jenis_kelamin === 'P') {
+            return 'Bu';
+        }
+        return '';
+    }
+
+    public function getSalutationNameAttribute(): string
+    {
+        return app(\App\Services\SalutationService::class)->forGuru($this);
+    }
 }
