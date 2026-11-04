@@ -101,11 +101,14 @@ class Guru extends Model
 
     /**
      * Check if teacher is currently a KAPROG
+     *
+     * Relies on the historical assignment table only. Previously this also
+     * treated any users.jurusan_id as a KAPROG marker, which over-counted
+     * kaprog teachers in the workload report.
      */
     public function getIsKaprogAttribute(): bool
     {
-        return ($this->user && ($this->user->role === 'kaprog' || !is_null($this->user->jurusan_id)))
-            || $this->kaprogAssignments()->where('is_active', true)->exists();
+        return $this->kaprogAssignments()->where('is_active', true)->exists();
     }
 
     /**
