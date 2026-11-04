@@ -14,71 +14,70 @@ class GenerateAlpaDaily extends Command
      *
      * @var string
      */
-    protected $signature = 'absensi:generate-alpa';
+    protected $signature = 'absensi:generate-alpa {--date= : Tanggal tunggal (Y-m-d) yang akan diproses}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate status Alpa otomatis untuk siswa yang tidak absen pada hari ini (Kecuali Minggu) atau dalam rentang bulan ini';
+    protected $description = 'Generate status Alpa otomatis untuk siswa tanpa rekam kehadiran pada hari kerja yang sudah selesai';
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
-        $this->info('Mulai pengecekan Alpa harian...');
+        // Only fully-elapsed working days are eligible. The previous version
+        // looped from the 1st of the month through *today*, so a morning run
+        // marked every student who had not checked in yet as alpa, and granted
+        // alfa to every earlier weekday including holidays.
+        $target = $this->option('date')
+            ? Carbon::parse($this->option('date'))->startOfDay()
+            : Carbon::yesterday()->startOfDay();
 
-        // Kita bisa atur dari tanggal 1 di bulan ini, sampai ke hari ini
-        $startDate = Carbon::now()->startOfMonth();
-        $endDate = Carbon::now(); // Sampai batas hari ini
+        if ($target->isSunday()) {
+            $this->info("Tanggal {$target->toDateString()} adalah hari Minggu, tidak ada alpa yang dibuat.");
+            return self::SUCCESS;
+        }
 
-        $siswas = Siswa::all();
+        if ($target->isFuture()) {
+            $this->warn('Tidak dapat membuat alpa untuk tanggal yang belum berjalan.');
+            return self::FAILURE;
+        }
+
+        $tanggalStr = $target->toDateString();
+        $this->info("Memproses alpa untuk tanggal {$tanggalStr}...");
+
         $insertedCount = 0;
+        $skipped = 0;
+
+        // Skip students who already have a record that day. Filtering in SQL
+        // replaces the previous day-by-day loop (one query per student per day).
+        $siswas = Siswa::query()
+            ->whereDoesntHave('absensi', fn ($q) => $q->whereDate('tanggal', $tanggalStr))
+            ->get();
 
         foreach ($siswas as $siswa) {
-            // Loop dari awal bulan sampai hari ini
-            $currentDate = $startDate->copy();
-            
-            while ($currentDate->lte($endDate)) {
-                // Lewati hari Minggu (dayOfWeek 0)
-                if ($currentDate->dayOfWeek == Carbon::SUNDAY) {
-                    $currentDate->addDay();
-                    continue;
-                }
-
-                $tanggalStr = $currentDate->format('Y-m-d');
-
-                // Cek apakah siswa ini sudah punya data (hadir/izin/sakit/alfa) di tanggal ini
-                $hasRecord = Absensi::where('siswa_id', $siswa->id)
-                                    ->whereDate('tanggal', $tanggalStr)
-                                    ->exists();
-
-                // Jika belum ada rekam sama sekali, kita inject 'alfa'
-                if (!$hasRecord) {
-                    try {
-                        Absensi::create([
-                            'siswa_id' => $siswa->id,
-                            'tanggal' => $tanggalStr,
-                            'jam_masuk' => null,
-                            'status' => 'alfa',
-                            'keterangan' => 'Sistem Alpa Otomatis (Tidak ada rekam kehadiran)',
-                            'latitude' => null,
-                            'longitude' => null,
-                        ]);
-                        $insertedCount++;
-                    } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-                        // A concurrent run (or a manual submission) already created
-                        // this row; UNIQUE(siswa_id, tanggal) keeps it idempotent.
-                        continue;
-                    }
-                }
-
-                $currentDate->addDay();
+            try {
+                Absensi::create([
+                    'siswa_id'   => $siswa->id,
+                    'tanggal'    => $tanggalStr,
+                    'jam_masuk'  => null,
+                    'status'     => 'alfa',
+                    'keterangan' => 'Sistem Alpa Otomatis (Tidak ada rekam kehadiran)',
+                    'latitude'   => null,
+                    'longitude'  => null,
+                ]);
+                $insertedCount++;
+            } catch (UniqueConstraintViolationException $e) {
+                // UNIQUE(siswa_id, tanggal) — another process got there first.
+                $skipped++;
             }
         }
 
-        $this->info("Berhasil! Menambahkan $insertedCount rekam Alpa otomatis.");
+        $this->info("Selesai. {$insertedCount} rekam alpa dibuat, {$skipped} dilewati (sudah ada).");
+
+        return self::SUCCESS;
     }
 }
