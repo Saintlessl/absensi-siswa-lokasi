@@ -192,9 +192,32 @@ class SiswaController extends Controller
         }
     }
 
+    /**
+     * Ensure the acting user may manage this student record.
+     *
+     * KAPROG is scoped to their own jurusan; other roles are validated by the
+     * route middleware. Without this, a kaprog could edit, move or delete a
+     * student belonging to a different major simply by supplying that id.
+     */
+    private function assertCanManageSiswa(Siswa $siswa): void
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'kaprog') {
+            return;
+        }
+
+        $siswaJurusanId = $siswa->kelas?->jurusan_id;
+
+        if (!$user->jurusan_id || (int) $siswaJurusanId !== (int) $user->jurusan_id) {
+            abort(403, 'Akses ditolak: siswa ini bukan bagian dari jurusan Anda.');
+        }
+    }
+
     public function edit(Request $request)
     {
         $siswa = Siswa::with(['user', 'kelas.jurusan', 'orangtua.user'])->findOrFail($request->id);
+        $this->assertCanManageSiswa($siswa);
         $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
         $jurusans = Jurusan::orderBy('kode_jurusan')->get();
         $studentEmail = $siswa->user?->email ?? '';
@@ -204,7 +227,8 @@ class SiswaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $siswa = Siswa::with(['user', 'orangtua'])->findOrFail($id);
+        $siswa = Siswa::with(['user', 'orangtua', 'kelas'])->findOrFail($id);
+        $this->assertCanManageSiswa($siswa);
 
         // Enforce fixed domain @myskanic.com for student accounts
         $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
@@ -322,7 +346,8 @@ class SiswaController extends Controller
 
     public function destroy($id)
     {
-        $siswa = Siswa::findOrFail($id);
+        $siswa = Siswa::with('kelas')->findOrFail($id);
+        $this->assertCanManageSiswa($siswa);
         if ($siswa->user) {
             $siswa->user->delete(); // This should cascade and delete Siswa as well based on migration
         } else {
