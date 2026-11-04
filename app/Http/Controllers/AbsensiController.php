@@ -527,6 +527,40 @@ class AbsensiController extends Controller
             'keterangan' => 'nullable|string'
         ]);
 
+        $user = Auth::user();
+
+        // Non-superadmin must be scoped to the classes they are allowed to manage:
+        //  - guru  : classes taught (Jadwal) + homeroom class (activeHomeroomAssignment)
+        //  - kaprog: additionally every class inside their own jurusan
+        //  - admin : unrestricted within the school (same as superadmin below)
+        if (!in_array($user->role, ['superadmin', 'admin'])) {
+            $guru = Guru::with(['activeHomeroomAssignment', 'activeSubjectAssignments'])
+                ->where('user_id', $user->id)
+                ->first();
+
+            $allowedClassIds = collect();
+
+            if ($guru) {
+                $allowedClassIds = $guru->activeSubjectAssignments->pluck('kelas_id')
+                    ->merge($guru->activeJadwal()->pluck('kelas_id'))
+                    ->merge($guru->activeHomeroomAssignment ? collect([$guru->activeHomeroomAssignment->kelas_id]) : collect())
+                    ->unique();
+            }
+
+            // Kaprog: allowed to manage every class inside their jurusan.
+            if ($user->role === 'kaprog' && $user->jurusan_id) {
+                $allowedClassIds = $allowedClassIds->merge(
+                    Kelas::where('jurusan_id', $user->jurusan_id)->pluck('id')
+                )->unique();
+            }
+
+            $siswa = Siswa::find($request->siswa_id);
+
+            if (!$siswa || !$siswa->kelas_id || !$allowedClassIds->contains($siswa->kelas_id)) {
+                return redirect()->back()->with('error', 'Akses ditolak: Anda tidak memiliki wewenang untuk mengubah absensi siswa ini.');
+            }
+        }
+
         $tanggalInfo = date('Y-m-d');
 
         $absensi = Absensi::where('siswa_id', $request->siswa_id)
