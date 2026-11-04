@@ -334,7 +334,7 @@ class AbsensiController extends Controller
             $fileName = 'selfie_masuk_' . $siswa->id . '_' . $now->format('Ymd_His') . '.' . ($type ?? 'jpg');
             Storage::disk('public')->put('selfie/' . $fileName, $fotoData);
 
-            $absensi = Absensi::create([
+            $absensi = $this->createAttendanceOnce([
                 'siswa_id'              => $siswa->id,
                 'room_id'               => $assignment?->room_id,
                 'tanggal'               => $todayStr,
@@ -350,6 +350,15 @@ class AbsensiController extends Controller
                 'latitude'              => $lat,
                 'longitude'             => $lng,
             ]);
+
+            if (!$absensi) {
+                // Lost a race against a concurrent submission; the unique
+                // index (siswa_id, tanggal) rejected the duplicate insert.
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Absen masuk hari ini sudah tercatat. Muat ulang halaman untuk melihat status terbaru.',
+                ], 409);
+            }
 
             // Kirim Notifikasi WhatsApp Otomatis ke Orang Tua
             $waResult = $this->whatsAppService->sendAttendanceNotification($siswa, $absensi, 'masuk');
@@ -370,6 +379,24 @@ class AbsensiController extends Controller
                     'whatsapp' => $waResult
                 ]
             ]);
+        }
+    }
+
+    /**
+     * Insert a daily attendance row, tolerating a lost race.
+     *
+     * The absensis table carries UNIQUE(siswa_id, tanggal). Two concurrent
+     * submissions (double tap, network retry) can both pass the pre-check and
+     * reach this point; the unique index then rejects the second insert. We
+     * swallow that specific violation and return null so the caller can tell
+     * the student the record already exists instead of surfacing a 500.
+     */
+    private function createAttendanceOnce(array $attributes): ?Absensi
+    {
+        try {
+            return Absensi::create($attributes);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return null;
         }
     }
 
@@ -573,7 +600,9 @@ class AbsensiController extends Controller
                 'keterangan' => $request->keterangan ?? 'Diperbarui otomatis oleh Guru'
             ]);
         } else {
-            Absensi::create([
+            // Unique(siswa_id, tanggal) may reject this when another request
+            // inserted the row between the pre-check and here.
+            $this->createAttendanceOnce([
                 'siswa_id'   => $request->siswa_id,
                 'tanggal'    => $tanggalInfo,
                 'jam_masuk'  => date('H:i:s'),

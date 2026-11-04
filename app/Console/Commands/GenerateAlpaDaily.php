@@ -57,16 +57,22 @@ class GenerateAlpaDaily extends Command
 
                 // Jika belum ada rekam sama sekali, kita inject 'alfa'
                 if (!$hasRecord) {
-                    Absensi::create([
-                        'siswa_id' => $siswa->id,
-                        'tanggal' => $tanggalStr,
-                        'jam_masuk' => null,
-                        'status' => 'alfa',
-                        'keterangan' => 'Sistem Alpa Otomatis (Tidak ada rekam kehadiran)',
-                        'latitude' => null,
-                        'longitude' => null,
-                    ]);
-                    $insertedCount++;
+                    try {
+                        Absensi::create([
+                            'siswa_id' => $siswa->id,
+                            'tanggal' => $tanggalStr,
+                            'jam_masuk' => null,
+                            'status' => 'alfa',
+                            'keterangan' => 'Sistem Alpa Otomatis (Tidak ada rekam kehadiran)',
+                            'latitude' => null,
+                            'longitude' => null,
+                        ]);
+                        $insertedCount++;
+                    } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                        // A concurrent run (or a manual submission) already created
+                        // this row; UNIQUE(siswa_id, tanggal) keeps it idempotent.
+                        continue;
+                    }
                 }
 
                 $currentDate->addDay();
