@@ -14,17 +14,27 @@ class SiswaExport implements FromCollection, WithHeadings, WithMapping, WithStyl
 {
     protected $search;
     protected $kelasId;
+    protected $user;
     protected $rowNumber = 0;
 
-    public function __construct($search = '', $kelasId = '')
+    public function __construct($search = '', $kelasId = '', $user = null)
     {
         $this->search = $search;
         $this->kelasId = $kelasId;
+        $this->user = $user;
     }
 
     public function collection()
     {
         $query = Siswa::with(['kelas', 'user']);
+
+        // BUG-018: apply the same kaprog scoping as the on-screen listing, so a
+        // department head cannot export students from other departments.
+        if ($this->user && $this->user->role === 'kaprog') {
+            $query->whereHas('kelas', function ($q) {
+                $q->where('jurusan_id', $this->user->jurusan_id);
+            });
+        }
 
         if ($this->search) {
             $search = $this->search;

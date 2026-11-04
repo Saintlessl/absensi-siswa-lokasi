@@ -362,7 +362,7 @@ class SiswaController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $query = Siswa::with(['kelas', 'user']);
+        $query = $this->scopedSiswaQuery();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -395,9 +395,29 @@ class SiswaController extends Controller
      */
     public function exportExcel(Request $request)
     {
+        // BUG-018: exports used to build their own unscoped query, so a kaprog
+        // could download every student in the school even though the on-screen
+        // list was correctly restricted to their own major.
         return Excel::download(
-            new SiswaExport($request->search ?? '', $request->kelas_id ?? ''),
+            new SiswaExport($request->search ?? '', $request->kelas_id ?? '', Auth::user()),
             'Data_Siswa.xlsx'
         );
+    }
+
+    /**
+     * Base query for student listings, restricted to the acting kaprog's major.
+     */
+    private function scopedSiswaQuery()
+    {
+        $user = Auth::user();
+        $query = Siswa::with(['kelas.jurusan', 'user']);
+
+        if ($user && $user->role === 'kaprog') {
+            $query->whereHas('kelas', function ($q) use ($user) {
+                $q->where('jurusan_id', $user->jurusan_id);
+            });
+        }
+
+        return $query;
     }
 }
