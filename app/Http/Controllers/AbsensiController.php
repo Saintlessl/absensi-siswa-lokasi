@@ -66,6 +66,33 @@ class AbsensiController extends Controller
         return view('absensi.index', compact('siswa', 'lokasiSekolah', 'absenHariIni', 'isFaceRegistered'));
     }
 
+    /**
+     * Issue an anti-replay challenge nonce for attendance face verification.
+     * The descriptor returned by the client is matched against the stored
+     * template at AbsensiController::store().
+     */
+    public function attendanceChallenge()
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Identitas siswa tidak ditemukan.'
+            ], 403);
+        }
+
+        $challenge = $this->biometricService->generateAttendanceChallenge($siswa);
+
+        return response()->json([
+            'success'         => true,
+            'challenge_token' => $challenge['token'],
+            'challenges'      => $challenge['challenges'],
+            'expires_in'      => $challenge['expires_in'],
+        ]);
+    }
+
     public function validateQr(Request $request)
     {
         $request->validate([
@@ -114,9 +141,11 @@ class AbsensiController extends Controller
             'latitude'          => 'required',
             'longitude'         => 'required',
             'tipe'              => 'nullable|in:masuk,pulang',
-            'face_descriptor'   => 'nullable|array',
-            'challenge_token'   => 'nullable|string',
-            'liveness_proof'    => 'nullable|array',
+            'face_descriptor'   => 'required|array|size:128',
+            'face_descriptor.*' => 'numeric',
+            'challenge_token'   => 'required|string',
+            'liveness_proof'    => 'required|array',
+            'liveness_proof.completed_challenges' => 'required|array|min:1',
         ]);
 
         $user = Auth::user();
@@ -172,24 +201,28 @@ class AbsensiController extends Controller
             ], 400);
         }
 
-        // 3. Verifikasi Biometrik (Opsional jika dikirim, karena siswa sudah diverifikasi wajah saat login)
-        $confidence = 98.0;
-        $livenessScore = 98.0;
-        if ($request->filled('face_descriptor') && $request->filled('challenge_token') && is_array($request->face_descriptor)) {
-            $verification = $this->biometricService->verify(
-                $siswa,
-                $request->face_descriptor,
-                $request->challenge_token,
-                $request->liveness_proof ?? [],
-                $request->ip(),
-                $request->userAgent(),
-                $tipe
-            );
-            if ($verification['success']) {
-                $confidence = $verification['confidence'] ?? 98.0;
-                $livenessScore = $verification['liveness_score'] ?? 98.0;
-            }
+        // 3. Verifikasi Biometrik WAJIB — anti titip absen.
+        //    Tanpa verifikasi wajah yang cocok, presensi ditolak.
+        $verification = $this->biometricService->verify(
+            $siswa,
+            $request->face_descriptor,
+            $request->challenge_token,
+            $request->liveness_proof ?? [],
+            $request->ip(),
+            $request->userAgent(),
+            $tipe
+        );
+
+        if (!$verification['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $verification['message'] ?? 'Verifikasi wajah gagal. Presensi tidak dicatat.',
+            ], 422);
         }
+
+        $confidence = (float) ($verification['confidence'] ?? 0.0);
+        $livenessScore = (float) ($verification['liveness_score'] ?? 0.0);
+        $isBiometricVerified = true;
 
         // 4. Simpan Foto Selfie Base64
         $fotoData = $request->foto;
@@ -313,7 +346,7 @@ class AbsensiController extends Controller
                 'foto_masuk'            => 'selfie/' . $fileName,
                 'confidence_masuk'      => $confidence,
                 'liveness_score_masuk'  => $livenessScore,
-                'is_verified_biometric' => true,
+                'is_verified_biometric' => $isBiometricVerified,
                 'latitude'              => $lat,
                 'longitude'             => $lng,
             ]);

@@ -213,6 +213,7 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::get('/absensi-siswa', [AbsensiController::class, 'index'])->name('absensi');
         Route::post('/absensi-siswa/validate-qr', [AbsensiController::class, 'validateQr'])->name('absensi.validateqr');
         Route::post('/absensi-siswa/challenge', [FaceBiometricController::class, 'challenge'])->name('absensi.challenge');
+        Route::post('/absensi-siswa/attendance-challenge', [AbsensiController::class, 'attendanceChallenge'])->name('absensi.attendance_challenge');
         Route::post('/absensi-siswa/store', [AbsensiController::class, 'store'])->name('absensi.store');
         Route::get('/riwayat-kehadiran', [AbsensiController::class, 'riwayatKehadiran'])->name('riwayatkehadiran');
 
