@@ -44,7 +44,7 @@ class AcademicAndRoomSystemTest extends TestCase
 
         $this->kelas10 = Kelas::firstOrCreate(
             ['nama_kelas' => '10 PPLG 1'],
-            ['jurusan_id' => $this->pplg->id, 'tingkat' => '10', 'nomor_rombel' => '1', 'tahun_ajaran' => '2026/2027', 'qr_token' => 'token-k10']
+            ['jurusan_id' => $this->pplg->id, 'tingkat' => '10', 'nomor_rombel' => '1', 'tahun_ajaran' => '2026/2027', 'qr_token' => 'token-k10', 'jumlah_siswa' => 30]
         );
 
         $this->room1 = Room::firstOrCreate(
@@ -106,7 +106,7 @@ class AcademicAndRoomSystemTest extends TestCase
         // Attempt overlapping assignment on same room with another class
         $kelas2 = Kelas::firstOrCreate(
             ['nama_kelas' => '10 PPLG 2'],
-            ['jurusan_id' => $this->pplg->id, 'tingkat' => '10', 'nomor_rombel' => '2', 'tahun_ajaran' => '2026/2027', 'qr_token' => 'token-k10-2']
+            ['jurusan_id' => $this->pplg->id, 'tingkat' => '10', 'nomor_rombel' => '2', 'tahun_ajaran' => '2026/2027', 'qr_token' => 'token-k10-2', 'jumlah_siswa' => 30]
         );
 
         $this->expectException(\Illuminate\Validation\ValidationException::class);
@@ -130,7 +130,7 @@ class AcademicAndRoomSystemTest extends TestCase
 
         $kelasAnimasi = Kelas::firstOrCreate(
             ['nama_kelas' => '10 ANIMASI 1'],
-            ['jurusan_id' => $animasi->id, 'tingkat' => '10', 'nomor_rombel' => '1', 'tahun_ajaran' => '2026/2027', 'qr_token' => 'token-ani1']
+            ['jurusan_id' => $animasi->id, 'tingkat' => '10', 'nomor_rombel' => '1', 'tahun_ajaran' => '2026/2027', 'qr_token' => 'token-ani1', 'jumlah_siswa' => 30]
         );
 
         // Kaprog PPLG tries to allocate room to Animasi class
