@@ -209,14 +209,21 @@ class DashboardController extends Controller
                         ->whereDate('tanggal', $todayStr)
                         ->get();
 
-                    $hadirCount = $todayAttendance->where('status', 'Hadir')->count();
+                    // Absensi status is stored lowercase ('hadir' etc.) but some writers use
+                    // capitalised values; compare case-insensitively so izin/sakit
+                    // are not silently counted as alpa.
+                    $hadirCount = $todayAttendance->filter(fn ($a) => strtolower((string) $a->status) === 'hadir')->count();
                     $terlambatCount = $todayAttendance->where('menit_terlambat', '>', 0)->count();
-                    $izinCount = $todayAttendance->where('status', 'Izin')->count();
-                    $sakitCount = $todayAttendance->where('status', 'Sakit')->count();
+                    $izinCount = $todayAttendance->filter(fn ($a) => strtolower((string) $a->status) === 'izin')->count();
+                    $sakitCount = $todayAttendance->filter(fn ($a) => strtolower((string) $a->status) === 'sakit')->count();
                     $belumAbsenCount = max(0, $totalHomeroomStudents - $todayAttendance->count());
 
+                    $hadirStudentIds = $todayAttendance
+                        ->filter(fn ($a) => strtolower((string) $a->status) === 'hadir')
+                        ->pluck('siswa_id');
+
                     $attentionStudents = Siswa::where('kelas_id', $homeroomKelas->id)
-                        ->whereNotIn('id', $todayAttendance->where('status', 'Hadir')->pluck('siswa_id'))
+                        ->whereNotIn('id', $hadirStudentIds)
                         ->limit(6)
                         ->get();
 

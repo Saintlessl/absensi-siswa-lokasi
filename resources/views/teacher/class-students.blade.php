@@ -95,7 +95,7 @@
                                 </span>
                             </td>
                             <td class="px-5 py-4 font-mono text-dark-600">
-                                {{ $s->no_telp ?? $s->telepon ?? '-' }}
+                                {{ $s->no_telp_siswa ?? $s->no_telp_orangtua ?? '-' }}
                             </td>
                             <td class="px-5 py-4">
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">

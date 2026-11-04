@@ -82,7 +82,7 @@
     @php
         $problemStudents = $students->filter(function($s) use ($attendanceRecords) {
             $rec = $attendanceRecords->get($s->id);
-            return !$rec || $rec->status === 'Alfa' || $rec->menit_terlambat > 0;
+            return !$rec || strtolower((string) $rec->status) === 'alfa' || $rec->menit_terlambat > 0;
         });
     @endphp
 
@@ -115,10 +115,10 @@
                                     </span>
                                 @endif
                             </div>
-                            <p class="text-[10px] text-dark-400">NIS: {{ $ps->nis }} &bull; HP: {{ $ps->no_telp ?? '-' }}</p>
+                            <p class="text-[10px] text-dark-400">NIS: {{ $ps->nis }} &bull; HP: {{ $ps->no_telp_orangtua ?? $ps->no_telp_siswa ?? '-' }}</p>
                         </div>
                         <div class="pt-2 mt-2 border-t border-dark-100 flex items-center justify-between text-[10px]">
-                            <span class="text-dark-500">Ortu: {{ $ps->orangtua->nama ?? '-' }}</span>
+                            <span class="text-dark-500">Ortu: {{ $ps->orangtua->first()?->nama ?? '-' }}</span>
                             @if($waLog)
                                 <span class="text-emerald-600 font-bold flex items-center gap-1">
                                     <i class='bx bxl-whatsapp text-xs'></i> WA Terkirim
@@ -177,15 +177,15 @@
                             <td class="px-5 py-3.5 font-mono text-dark-600">{{ $s->nis }}</td>
                             <td class="px-5 py-3.5">
                                 @if($rec)
-                                    @if($rec->status === 'Hadir')
+                                    @if(strtolower((string) $rec->status) === 'hadir')
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                             Hadir
                                         </span>
-                                    @elseif($rec->status === 'Izin')
+                                    @elseif(strtolower((string) $rec->status) === 'izin')
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
                                             Izin
                                         </span>
-                                    @elseif($rec->status === 'Sakit')
+                                    @elseif(strtolower((string) $rec->status) === 'sakit')
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
                                             Sakit
                                         </span>
@@ -216,8 +216,8 @@
                                 @endif
                             </td>
                             <td class="px-5 py-3.5">
-                                <span class="font-medium text-dark-800 block text-[11px]">{{ $s->orangtua->nama ?? '-' }}</span>
-                                <span class="font-mono text-[10px] text-dark-400">{{ $s->orangtua->telepon ?? '-' }}</span>
+                                <span class="font-medium text-dark-800 block text-[11px]">{{ $s->orangtua->first()?->nama ?? '-' }}</span>
+                                <span class="font-mono text-[10px] text-dark-400">{{ $s->orangtua->first()?->telepon ?? '-' }}</span>
                             </td>
                             <td class="px-5 py-3.5">
                                 @if($wa)
