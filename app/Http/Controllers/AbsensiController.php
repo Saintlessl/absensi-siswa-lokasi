@@ -137,7 +137,9 @@ class AbsensiController extends Controller
     {
         $request->validate([
             'qr_token'          => 'required|string',
-            'foto'              => 'required|string',
+            // ~2 MB cap on the base64 payload; without it a student could post
+            // hundreds of megabytes of base64 and fill the disk.
+            'foto'              => 'required|string|max:2800000',
             'latitude'          => 'required',
             'longitude'         => 'required',
             'tipe'              => 'nullable|in:masuk,pulang',
