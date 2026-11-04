@@ -32,7 +32,6 @@
             <form action="{{ route('guru.delete', $guru->id) }}" method="POST"
                 onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru beserta akun autentikasinya? Tindakan ini tidak dapat dibatalkan.')">
                 @csrf
-                @method('DELETE')
                 <button type="submit"
                     class="inline-flex items-center gap-2 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-xl transition">
                     <i class='bx bx-trash text-base'></i>
@@ -265,7 +264,6 @@
 
             <form action="{{ route('guru.update', $guru->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
-                @method('PUT')
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
@@ -358,7 +356,6 @@
 
                     <form action="{{ route('guru.status', $guru->id) }}" method="POST" class="space-y-4">
                         @csrf
-                        @method('PUT')
 
                         <div>
                             <label class="block text-xs font-semibold text-dark-700 mb-2">Pilih Status Akun:</label>
@@ -420,7 +417,6 @@
 
                         <form action="{{ route('guru.update', $guru->id) }}" method="POST" class="space-y-3">
                             @csrf
-                            @method('PUT')
                             <input type="hidden" name="nama" value="{{ $guru->nama }}">
                             <input type="hidden" name="email" value="{{ $guru->user?->email }}">
                             <input type="hidden" name="jenis_kelamin" value="{{ $guru->jenis_kelamin }}">
@@ -444,7 +440,7 @@
                         <h3 class="text-base font-bold text-dark-800 mb-1">Undangan Aktivasi Mandiri</h3>
                         <p class="text-xs text-dark-400 mb-4">Buat tautan undangan aman agar guru dapat mengatur kata sandi secara mandiri (berlaku 72 jam).</p>
 
-                        <form action="{{ route('guru.aktivasi.regenerate', $guru->id) }}" method="POST">
+                        <form action="{{ route('guru.activation_link', $guru->id) }}" method="POST">
                             @csrf
                             <button type="submit"
                                 class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition">
@@ -510,10 +506,9 @@
                                         </span>
                                     </td>
                                     <td class="px-5 py-4 text-right">
-                                        <form action="{{ route('guru.removeSubject', $sa->id) }}" method="POST"
+                                        <form action="{{ route('guru.remove_subject_assignment', $sa->id) }}" method="POST"
                                             onsubmit="return confirm('Apakah Anda yakin ingin melepaskan penugasan mapel ini dari guru?')">
                                             @csrf
-                                            @method('DELETE')
                                             <button type="submit" class="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-800 font-semibold hover:bg-rose-50 rounded-lg transition">
                                                 <i class='bx bx-trash'></i> Lepas
                                             </button>
@@ -555,10 +550,9 @@
                             </p>
                         </div>
                     </div>
-                    <form action="{{ route('guru.removeHomeroom', $guru->activeHomeroomAssignment->id) }}" method="POST"
+                    <form action="{{ route('guru.remove_homeroom_assignment', $guru->activeHomeroomAssignment->id) }}" method="POST"
                         onsubmit="return confirm('Lepaskan tugas wali kelas dari rombel ini? Riwayat penugasan akan tetap tersimpan.')">
                         @csrf
-                        @method('DELETE')
                         <button type="submit"
                             class="px-4 py-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition shadow-sm">
                             <i class='bx bx-x-circle'></i> Lepaskan Tugas Wali Kelas
@@ -582,7 +576,7 @@
                 <h3 class="text-base font-bold text-dark-800 mb-1">Tugaskan Sebagai Wali Kelas</h3>
                 <p class="text-xs text-dark-400 mb-4">Menetapkan rombel binaan baru akan otomatis menonaktifkan penugasan wali kelas sebelumnya dengan tetap menjaga rekam jejak histori.</p>
 
-                <form action="{{ route('guru.assignHomeroom', $guru->id) }}" method="POST" class="space-y-4">
+                <form action="{{ route('guru.assign_homeroom', $guru->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -682,10 +676,9 @@
                             </p>
                         </div>
                     </div>
-                    <form action="{{ route('guru.removeKaprog', $guru->id) }}" method="POST"
+                    <form action="{{ route('guru.remove_kaprog', $guru->id) }}" method="POST"
                         onsubmit="return confirm('Lepaskan jabatan Kepala Program Keahlian (KAPROG) dari guru ini?')">
                         @csrf
-                        @method('DELETE')
                         <button type="submit"
                             class="px-4 py-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition shadow-sm">
                             <i class='bx bx-x-circle'></i> Lepaskan Jabatan KAPROG
@@ -708,7 +701,7 @@
                     <h3 class="text-base font-bold text-dark-800 mb-1">Tugaskan Sebagai Kepala Program Keahlian (KAPROG)</h3>
                     <p class="text-xs text-dark-400 mb-4">Menjadikan guru ini sebagai pimpinan program keahlian. Tugas KAPROG berjalan berdampingan dengan tugas mengajar mata pelajaran.</p>
 
-                    <form action="{{ route('guru.assignKaprog', $guru->id) }}" method="POST" class="space-y-4">
+                    <form action="{{ route('guru.assign_kaprog', $guru->id) }}" method="POST" class="space-y-4">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -924,7 +917,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('guru.assignSubject', $guru->id) }}" method="POST" class="space-y-4">
+            <form action="{{ route('guru.assign_subject', $guru->id) }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
                     <label class="block text-xs font-semibold text-dark-700 mb-1.5">Mata Pelajaran *</label>
