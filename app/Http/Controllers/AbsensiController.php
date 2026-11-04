@@ -484,16 +484,11 @@ class AbsensiController extends Controller
         $alpaCount  = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['alfa'])->count();
 
         $startDate = Carbon::now()->startOfMonth();
-        $endDate = Carbon::now();
-        $hariEfektif = 0;
-
-        $currentDate = $startDate->copy();
-        while ($currentDate->lte($endDate)) {
-            if ($currentDate->dayOfWeek !== Carbon::SUNDAY) {
-                $hariEfektif++;
-            }
-            $currentDate->addDay();
-        }
+        // BUG-011: today is still in progress, so it must not count as an
+        // effective day — otherwise every student who has not checked in yet
+        // is reported as alpa.
+        $endDate = Carbon::yesterday()->endOfDay();
+        $hariEfektif = $this->countEffectiveDays($startDate, $endDate);
 
         $totalTercatat = $hadirCount + $izinCount + $sakitCount + $alpaCount;
         $calculatedAlpa = max(0, $hariEfektif - $totalTercatat);
@@ -621,58 +616,36 @@ class AbsensiController extends Controller
         $bulan = $request->bulan ?? date('m');
         $tahun = $request->tahun ?? date('Y');
 
-        $siswas = Siswa::with('kelas')
-            ->orderByDesc(
-                Absensi::selectRaw('MAX(tanggal)')
-                    ->whereColumn('siswa_id', 'siswas.id')
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-            )
-            ->orderBy('nama')
-            ->get();
-
         $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
-        $endDate = ($bulan == date('m') && $tahun == date('Y'))
-            ? Carbon::now()
-            : Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+        $endDate = $this->recapEndDate($bulan, $tahun);
 
-        $hariEfektif = 0;
-        $currentDate = $startDate->copy();
-        while ($currentDate->lte($endDate)) {
-            if ($currentDate->dayOfWeek !== Carbon::SUNDAY) {
-                $hariEfektif++;
-            }
-            $currentDate->addDay();
-        }
+        // BUG-015/016: previously this ran 4 COUNT queries per student plus a
+        // correlated MAX(tanggal) subquery in the ORDER BY — ~4.000 queries and
+        // a full scan for a 1.000-student school. Now one grouped aggregate
+        // feeds every row, and the date range is sargable (BETWEEN on the
+        // indexed tanggal column instead of MONTH()/YEAR()).
+        $counts = $this->attendanceCountsByStudent($startDate->copy()->startOfDay(), $endDate->copy()->endOfDay());
+        $hariEfektif = $this->countEffectiveDays($startDate, $endDate);
+
+        $siswas = Siswa::with('kelas')->orderBy('nama')->get();
 
         $rekapAll = [];
         foreach ($siswas as $s) {
-            $hadir = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
-            $izin = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['izin'])->count();
-            $sakit = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['sakit'])->count();
-            $alfaDb = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['alfa'])->count();
+            $row = $counts[$s->id] ?? ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alfa' => 0];
 
-            $totalTercatat = $hadir + $izin + $sakit + $alfaDb;
-            $alpa = $alfaDb + max(0, $hariEfektif - $totalTercatat);
+            $totalTercatat = $row['hadir'] + $row['izin'] + $row['sakit'] + $row['alfa'];
+            $alpa = $row['alfa'] + max(0, $hariEfektif - $totalTercatat);
 
             $rekapAll[] = [
                 'siswa' => $s,
-                'hadir' => $hadir,
-                'izin'  => $izin,
-                'sakit' => $sakit,
+                'hadir' => $row['hadir'],
+                'izin'  => $row['izin'],
+                'sakit' => $row['sakit'],
                 'alpa'  => $alpa,
             ];
         }
 
-        $page = $request->get('page', 1);
+        $page = (int) $request->get('page', 1);
         $perPage = 10;
         $totalSiswa = count($rekapAll);
         $rekap = new LengthAwarePaginator(
@@ -688,6 +661,79 @@ class AbsensiController extends Controller
         return view('absensi.rekap-absensi', compact('rekap', 'bulan', 'tahun', 'namaBulan', 'hariEfektif', 'totalSiswa'));
     }
 
+    /**
+     * Aggregate attendance counts per student inside a date range.
+     *
+     * Returns [siswa_id => ['hadir' => n, 'izin' => n, 'sakit' => n, 'alfa' => n]].
+     * One query total instead of four per student.
+     */
+    private function attendanceCountsByStudent(Carbon $from, Carbon $to): array
+    {
+        $rows = Absensi::query()
+            ->whereBetween('tanggal', [$from->toDateString(), $to->toDateString()])
+            ->selectRaw('siswa_id, LOWER(status) as status_norm, COUNT(*) as total')
+            ->groupBy('siswa_id', 'status_norm')
+            ->get();
+
+        $counts = [];
+
+        foreach ($rows as $row) {
+            $counts[$row->siswa_id][$row->status_norm] = (int) $row->total;
+        }
+
+        // Normalise so callers always get all four keys.
+        foreach ($counts as $id => $row) {
+            $counts[$id] = [
+                'hadir' => $row['hadir'] ?? 0,
+                'izin'  => $row['izin'] ?? 0,
+                'sakit' => $row['sakit'] ?? 0,
+                'alfa'  => $row['alfa'] ?? 0,
+            ];
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Inclusive end date for a recap period.
+     *
+     * For the current month the recap stops at yesterday, because today is
+     * still in progress and would otherwise count not-yet-arrived students
+     * as alpa (BUG-011). Past/future months use the full month.
+     */
+    private function recapEndDate($bulan, $tahun): Carbon
+    {
+        $monthStart = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+
+        if ($monthStart->isSameMonth(Carbon::now())) {
+            return Carbon::yesterday()->endOfDay();
+        }
+
+        return $monthStart->copy()->endOfMonth();
+    }
+
+    /**
+     * Count working days (excludes Sunday) between two dates, inclusive.
+     */
+    private function countEffectiveDays(Carbon $from, Carbon $to): int
+    {
+        if ($from->gt($to)) {
+            return 0;
+        }
+
+        $days = 0;
+        $cursor = $from->copy()->startOfDay();
+
+        while ($cursor->lte($to)) {
+            if ($cursor->dayOfWeek !== Carbon::SUNDAY) {
+                $days++;
+            }
+            $cursor->addDay();
+        }
+
+        return $days;
+    }
+
     public function rekapPerKelas(Request $request)
     {
         $bulan = $request->bulan ?? date('m');
@@ -696,9 +742,7 @@ class AbsensiController extends Controller
         $kelasList = Kelas::withCount('siswa')->orderBy('nama_kelas')->get();
 
         $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
-        $endDate = ($bulan == date('m') && $tahun == date('Y'))
-            ? Carbon::now()
-            : Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+        $endDate = $this->recapEndDate($bulan, $tahun);
 
         $tanggalList = [];
         $currentDate = $startDate->copy();
@@ -711,24 +755,39 @@ class AbsensiController extends Controller
 
         $tanggalList = array_reverse($tanggalList);
 
+        // BUG-015: this used to run 5 queries per (date x class) cell — roughly
+        // 26 working days x 35 classes x 5 = 4.551 queries for a single page.
+        // Now: three flat queries (class sizes, per-cell status counts, which
+        // students have any record) and the pivoting happens in PHP.
+        $totalSiswaPerKelas = $kelasList->pluck('siswa_count', 'id');
+
+        $statusCounts = Absensi::query()
+            ->join('siswas', 'siswas.id', '=', 'absensis.siswa_id')
+            ->whereBetween('absensis.tanggal', [$startDate->toDateString(), $endDate->toDateString()])
+            ->selectRaw('siswas.kelas_id as kelas_id, absensis.tanggal as tanggal, LOWER(absensis.status) as status_norm, COUNT(*) as total')
+            ->groupBy('siswas.kelas_id', 'absensis.tanggal', 'status_norm')
+            ->get();
+
+        // [kelas_id][Y-m-d][status] => count
+        $pivot = [];
+        foreach ($statusCounts as $row) {
+            $dateKey = $row->tanggal instanceof \DateTimeInterface
+                ? $row->tanggal->format('Y-m-d')
+                : substr((string) $row->tanggal, 0, 10);
+
+            $pivot[$row->kelas_id][$dateKey][$row->status_norm] = (int) $row->total;
+        }
+
         $rekapAll = [];
         foreach ($tanggalList as $tgl) {
             foreach ($kelasList as $kelas) {
-                $siswaIds = Siswa::where('kelas_id', $kelas->id)->pluck('id');
-                $totalSiswa = $siswaIds->count();
+                $totalSiswa = (int) ($totalSiswaPerKelas[$kelas->id] ?? 0);
+                $row = $pivot[$kelas->id][$tgl] ?? [];
 
-                $hadir = Absensi::whereIn('siswa_id', $siswaIds)
-                    ->whereDate('tanggal', $tgl)
-                    ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
-                $izin = Absensi::whereIn('siswa_id', $siswaIds)
-                    ->whereDate('tanggal', $tgl)
-                    ->whereRaw('LOWER(status) = ?', ['izin'])->count();
-                $sakit = Absensi::whereIn('siswa_id', $siswaIds)
-                    ->whereDate('tanggal', $tgl)
-                    ->whereRaw('LOWER(status) = ?', ['sakit'])->count();
-                $alfaDb = Absensi::whereIn('siswa_id', $siswaIds)
-                    ->whereDate('tanggal', $tgl)
-                    ->whereRaw('LOWER(status) = ?', ['alfa'])->count();
+                $hadir = $row['hadir'] ?? 0;
+                $izin  = $row['izin'] ?? 0;
+                $sakit = $row['sakit'] ?? 0;
+                $alfaDb = $row['alfa'] ?? 0;
 
                 $tercatat = $hadir + $izin + $sakit + $alfaDb;
                 $alpa = $alfaDb + max(0, $totalSiswa - $tercatat);
@@ -745,7 +804,7 @@ class AbsensiController extends Controller
             }
         }
 
-        $page = $request->get('page', 1);
+        $page = (int) $request->get('page', 1);
         $perPage = 10;
         $totalBaris = count($rekapAll);
         $rekap = new LengthAwarePaginator(
