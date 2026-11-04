@@ -172,11 +172,21 @@ class FaceBiometricController extends Controller
         $querySiswa = Siswa::with(['kelas.jurusan', 'faceBiometric', 'user']);
 
         if ($user->role === 'guru') {
-            $guruRecord = \App\Models\Guru::where('user_id', $user->id)->first();
+            // Kelas has no guru_id column; homeroom ownership lives in the
+            // homeroom_assignments history table. The old query threw a SQL
+            // error ("Unknown column kelas.guru_id") and 500'd the whole panel.
+            $guruRecord = Guru::with(['activeHomeroomAssignment', 'activeSubjectAssignments'])
+                ->where('user_id', $user->id)
+                ->first();
+
             if ($guruRecord) {
-                $kelasWali = Kelas::where('guru_id', $guruRecord->id)->pluck('id');
-                if ($kelasWali->isNotEmpty() && !$request->filled('kelas_id')) {
-                    $querySiswa->whereIn('kelas_id', $kelasWali);
+                $kelasAmpu = $guruRecord->activeSubjectAssignments->pluck('kelas_id')
+                    ->merge($guruRecord->activeJadwal()->pluck('kelas_id'))
+                    ->merge($guruRecord->activeHomeroomAssignment ? collect([$guruRecord->activeHomeroomAssignment->kelas_id]) : collect())
+                    ->unique();
+
+                if ($kelasAmpu->isNotEmpty() && !$request->filled('kelas_id')) {
+                    $querySiswa->whereIn('kelas_id', $kelasAmpu);
                 }
             }
         }

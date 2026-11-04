@@ -131,4 +131,13 @@ class BiometricScopeTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_guru_can_open_biometric_panel_without_sql_error()
+    {
+        // Regression: the panel queried Kelas::where('guru_id', ...) but kelas
+        // has no guru_id column, so every guru opening it received HTTP 500.
+        $response = $this->actingAs($this->teacher)->get(route('admin.biometrik'));
+
+        $response->assertStatus(200);
+    }
 }
