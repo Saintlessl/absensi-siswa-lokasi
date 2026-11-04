@@ -250,7 +250,7 @@
                                 <td class="px-6 py-3.5 text-center">
                                     <div class="flex items-center justify-center gap-2">
                                         <button type="button"
-                                            onclick="openEditAbsensi({{ $a->id }}, '{{ $a->status }}', '{{ addslashes($a->keterangan) }}')"
+                                            onclick='openEditAbsensi({{ $a->id }}, @js($a->status), @js($a->keterangan))'
                                             class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
                                             title="Edit">
                                             <i class='bx bx-edit-alt text-lg'></i>

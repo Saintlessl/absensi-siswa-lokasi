@@ -12,7 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // BUG: the alpa generator existed but was never registered here, so no
+        // automatic alfa was ever created. Runs after the school day closes and
+        // only covers the previous working day (see GenerateAlpaDaily).
+        $schedule->command('absensi:generate-alpa')
+            ->dailyAt('16:00')
+            ->timezone('Asia/Jakarta')
+            ->withoutOverlapping();
     }
 
     /**

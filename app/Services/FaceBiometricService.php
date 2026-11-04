@@ -134,7 +134,27 @@ class FaceBiometricService
      */
     public function generateLoginFaceChallenge(Siswa $siswa): array
     {
-        $token = 'chl_lgn_' . Str::random(32);
+        return $this->generateSinglePoseChallenge($siswa, 'login', 300);
+    }
+
+    /**
+     * Generate challenge nonce for attendance face verification.
+     *
+     * Attendance uses a single front-facing pose because the student is
+     * already authenticated by the login 2FA; the goal here is to prove that
+     * the person submitting the QR + GPS is the enrolled account holder.
+     */
+    public function generateAttendanceChallenge(Siswa $siswa): array
+    {
+        return $this->generateSinglePoseChallenge($siswa, 'masuk', 300);
+    }
+
+    /**
+     * Build a one-pose (front facing) challenge payload stored in cache.
+     */
+    protected function generateSinglePoseChallenge(Siswa $siswa, string $sessionType, int $ttlSeconds): array
+    {
+        $token = 'chl_' . $sessionType . '_' . Str::random(32);
         $selected = [
             [
                 'step'  => 1,
@@ -147,16 +167,16 @@ class FaceBiometricService
         $payload = [
             'siswa_id'     => $siswa->id,
             'challenges'   => $selected,
-            'session_type' => 'login',
+            'session_type' => $sessionType,
             'created_at'   => now()->timestamp,
-            'expires_at'   => now()->addMinutes(5)->timestamp,
+            'expires_at'   => now()->addSeconds($ttlSeconds)->timestamp,
         ];
 
-        Cache::put('biometric_challenge_' . $token, $payload, 300);
+        Cache::put('biometric_challenge_' . $token, $payload, $ttlSeconds);
 
         return [
             'token'      => $token,
-            'expires_in' => 300,
+            'expires_in' => $ttlSeconds,
             'challenges' => $selected
         ];
     }

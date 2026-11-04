@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\AbsensiVerificationLog;
+use App\Models\Guru;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\SiswaFaceBiometric;
+use App\Models\User;
 use App\Services\FaceBiometricService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -170,11 +172,21 @@ class FaceBiometricController extends Controller
         $querySiswa = Siswa::with(['kelas.jurusan', 'faceBiometric', 'user']);
 
         if ($user->role === 'guru') {
-            $guruRecord = \App\Models\Guru::where('user_id', $user->id)->first();
+            // Kelas has no guru_id column; homeroom ownership lives in the
+            // homeroom_assignments history table. The old query threw a SQL
+            // error ("Unknown column kelas.guru_id") and 500'd the whole panel.
+            $guruRecord = Guru::with(['activeHomeroomAssignment', 'activeSubjectAssignments'])
+                ->where('user_id', $user->id)
+                ->first();
+
             if ($guruRecord) {
-                $kelasWali = Kelas::where('guru_id', $guruRecord->id)->pluck('id');
-                if ($kelasWali->isNotEmpty() && !$request->filled('kelas_id')) {
-                    $querySiswa->whereIn('kelas_id', $kelasWali);
+                $kelasAmpu = $guruRecord->activeSubjectAssignments->pluck('kelas_id')
+                    ->merge($guruRecord->activeJadwal()->pluck('kelas_id'))
+                    ->merge($guruRecord->activeHomeroomAssignment ? collect([$guruRecord->activeHomeroomAssignment->kelas_id]) : collect())
+                    ->unique();
+
+                if ($kelasAmpu->isNotEmpty() && !$request->filled('kelas_id')) {
+                    $querySiswa->whereIn('kelas_id', $kelasAmpu);
                 }
             }
         }
@@ -397,6 +409,12 @@ class FaceBiometricController extends Controller
         ]);
 
         $siswa = Siswa::findOrFail($request->siswa_id);
+
+        // BUG-008: this endpoint had no scope at all — any guru could write
+        // attendance for any student in the school, and the audit log recorded
+        // a fabricated 100.0 confidence for it.
+        $this->assertCanManageStudentBiometric($user, $siswa);
+
         $todayStr = today()->format('Y-m-d');
         $now = Carbon::now();
 
@@ -447,6 +465,39 @@ class FaceBiometricController extends Controller
     }
 
     /**
+     * Guard biometric write endpoints for the guru role.
+     *
+     * BUG-007: any guru could call assisted-enroll for any student id and
+     * overwrite that student's face template with their own face, which then
+     * passes that student's login 2FA — a full account takeover. Guru access is
+     * now limited to students in classes they actually teach or manage.
+     * Superadmin/admin remain unrestricted (they already hold the reset power).
+     */
+    private function assertCanManageStudentBiometric(User $user, Siswa $siswa): void
+    {
+        if ($user->role !== 'guru') {
+            return;
+        }
+
+        $guru = Guru::with(['activeHomeroomAssignment', 'activeSubjectAssignments'])
+            ->where('user_id', $user->id)
+            ->first();
+
+        abort_unless($guru, 403, 'Akses ditolak: profil guru tidak ditemukan.');
+
+        $allowedClassIds = $guru->activeSubjectAssignments->pluck('kelas_id')
+            ->merge($guru->activeJadwal()->pluck('kelas_id'))
+            ->merge($guru->activeHomeroomAssignment ? collect([$guru->activeHomeroomAssignment->kelas_id]) : collect())
+            ->unique();
+
+        abort_unless(
+            $siswa->kelas_id && $allowedClassIds->contains($siswa->kelas_id),
+            403,
+            'Akses ditolak: siswa ini bukan bagian dari kelas yang Anda ampu.'
+        );
+    }
+
+    /**
      * Admin/Guru: Assisted Enrollment using School Lab PC / School Device
      */
     public function assistedEnroll($siswaId)
@@ -457,6 +508,7 @@ class FaceBiometricController extends Controller
         }
 
         $siswa = Siswa::with(['kelas.jurusan', 'faceBiometric'])->findOrFail($siswaId);
+        $this->assertCanManageStudentBiometric($user, $siswa);
 
         return view('absensi.assisted-enroll', compact('siswa', 'user'));
     }
@@ -472,6 +524,8 @@ class FaceBiometricController extends Controller
         }
 
         $siswa = Siswa::findOrFail($siswaId);
+        $this->assertCanManageStudentBiometric($user, $siswa);
+
         $challenge = $this->biometricService->generateChallenge($siswa);
 
         return response()->json([
@@ -500,6 +554,7 @@ class FaceBiometricController extends Controller
         ]);
 
         $siswa = Siswa::findOrFail($siswaId);
+        $this->assertCanManageStudentBiometric($user, $siswa);
 
         // 1. Verify Challenge Token
         $cacheKey = 'biometric_challenge_' . $request->challenge_token;

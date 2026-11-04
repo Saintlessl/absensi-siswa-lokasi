@@ -167,16 +167,21 @@ class TeacherViewController extends Controller
         foreach ($students as $s) {
             $record = $attendanceRecords->get($s->id);
             if ($record) {
-                if ($record->status === 'Hadir') {
+                // Status may be persisted as 'hadir' or 'Hadir' depending on the
+                // writer; compare case-insensitively so izin/sakit are not
+                // silently counted as alpa.
+                $status = strtolower((string) $record->status);
+
+                if ($status === 'hadir') {
                     $hadirCount++;
                     if ($record->menit_terlambat > 0) {
                         $terlambatCount++;
                     }
-                } elseif ($record->status === 'Izin') {
+                } elseif ($status === 'izin') {
                     $izinCount++;
-                } elseif ($record->status === 'Sakit') {
+                } elseif ($status === 'sakit') {
                     $sakitCount++;
-                } elseif ($record->status === 'Alfa') {
+                } elseif ($status === 'alfa') {
                     $alpaCount++;
                 }
             } else {

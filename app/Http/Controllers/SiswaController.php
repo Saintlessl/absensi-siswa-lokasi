@@ -194,9 +194,32 @@ class SiswaController extends Controller
         }
     }
 
+    /**
+     * Ensure the acting user may manage this student record.
+     *
+     * KAPROG is scoped to their own jurusan; other roles are validated by the
+     * route middleware. Without this, a kaprog could edit, move or delete a
+     * student belonging to a different major simply by supplying that id.
+     */
+    private function assertCanManageSiswa(Siswa $siswa): void
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'kaprog') {
+            return;
+        }
+
+        $siswaJurusanId = $siswa->kelas?->jurusan_id;
+
+        if (!$user->jurusan_id || (int) $siswaJurusanId !== (int) $user->jurusan_id) {
+            abort(403, 'Akses ditolak: siswa ini bukan bagian dari jurusan Anda.');
+        }
+    }
+
     public function edit(Request $request)
     {
         $siswa = Siswa::with(['user', 'kelas.jurusan', 'orangtua.user'])->findOrFail($request->id);
+        $this->assertCanManageSiswa($siswa);
         $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
         $jurusans = Jurusan::orderBy('kode_jurusan')->get();
         $studentEmail = $siswa->user?->email ?? '';
@@ -206,7 +229,8 @@ class SiswaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $siswa = Siswa::with(['user', 'orangtua'])->findOrFail($id);
+        $siswa = Siswa::with(['user', 'orangtua', 'kelas'])->findOrFail($id);
+        $this->assertCanManageSiswa($siswa);
 
         // Enforce fixed domain @myskanic.com for student accounts
         $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
@@ -336,7 +360,8 @@ class SiswaController extends Controller
 
     public function destroy($id)
     {
-        $siswa = Siswa::findOrFail($id);
+        $siswa = Siswa::with('kelas')->findOrFail($id);
+        $this->assertCanManageSiswa($siswa);
         if ($siswa->user) {
             $siswa->user->delete(); // This should cascade and delete Siswa as well based on migration
         } else {
@@ -351,7 +376,7 @@ class SiswaController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $query = Siswa::with(['kelas', 'user']);
+        $query = $this->scopedSiswaQuery();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -384,9 +409,29 @@ class SiswaController extends Controller
      */
     public function exportExcel(Request $request)
     {
+        // BUG-018: exports used to build their own unscoped query, so a kaprog
+        // could download every student in the school even though the on-screen
+        // list was correctly restricted to their own major.
         return Excel::download(
-            new SiswaExport($request->search ?? '', $request->kelas_id ?? ''),
+            new SiswaExport($request->search ?? '', $request->kelas_id ?? '', Auth::user()),
             'Data_Siswa.xlsx'
         );
+    }
+
+    /**
+     * Base query for student listings, restricted to the acting kaprog's major.
+     */
+    private function scopedSiswaQuery()
+    {
+        $user = Auth::user();
+        $query = Siswa::with(['kelas.jurusan', 'user']);
+
+        if ($user && $user->role === 'kaprog') {
+            $query->whereHas('kelas', function ($q) use ($user) {
+                $q->where('jurusan_id', $user->jurusan_id);
+            });
+        }
+
+        return $query;
     }
 }

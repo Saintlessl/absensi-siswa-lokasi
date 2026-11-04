@@ -22,7 +22,23 @@ class Siswa extends Model
         'kelas_id',
         'biometric_status'
         ,'photo_path'
+        ,'no_telp_siswa'
+        ,'no_telp_orangtua'
     ];
+
+    /**
+     * Public URL for the student's photo, mirroring Guru::getPhotoUrlAttribute.
+     * Views already reference $siswa->photo_url; without this accessor the
+     * attribute was always null and photos never rendered.
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if ($this->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->photo_path)) {
+            return asset('storage/' . $this->photo_path);
+        }
+
+        return null;
+    }
 
     public function kelas()
     {

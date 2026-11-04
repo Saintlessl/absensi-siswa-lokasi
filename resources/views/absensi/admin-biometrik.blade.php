@@ -213,7 +213,7 @@
                                             {{-- Minta Re-Enroll (Admin & Superadmin) --}}
                                             @if ($s->faceBiometric && $s->biometric_status === 'enrolled')
                                                 <form action="{{ route('admin.biometrik.re_enroll', ['id' => $s->id]) }}" method="POST" class="inline"
-                                                    onsubmit="return confirm('Minta siswa {{ addslashes($s->nama) }} untuk mendaftarkan ulang wajahnya saat login berikutnya?');">
+                                                    onsubmit="return confirm(@js('Minta siswa ' . $s->nama . ' untuk mendaftarkan ulang wajahnya saat login berikutnya?'));">
                                                     @csrf
                                                     <button type="submit" title="Minta Registrasi Ulang Wajah"
                                                         class="p-2 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100 transition-colors">
@@ -247,7 +247,7 @@
                                             @endif
 
                                             {{-- Presensi Manual Fallback --}}
-                                            <button type="button" onclick="openManualOverrideModal({{ $s->id }}, '{{ addslashes($s->nama) }}')"
+                                            <button type="button" onclick='openManualOverrideModal({{ $s->id }}, @js($s->nama))'
                                                 title="Presensi Manual (Kasus Darurat/Disabilitas)"
                                                 class="p-2 rounded-lg text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors">
                                                 <i class='bx bx-edit text-base'></i>

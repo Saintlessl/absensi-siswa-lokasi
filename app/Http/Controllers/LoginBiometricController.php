@@ -178,7 +178,12 @@ class LoginBiometricController extends Controller
         }
 
         // 3. Device Management & Limit Enforcement (Atomic Transaction)
-        $clientDeviceToken = $request->device_token ?? $pending['device_token'] ?? $request->cookie('myskanic_device_token');
+        // BUG-013: the token used to be taken verbatim from request/cookie, which
+        // let a client pick an arbitrary value or replay someone else's token to
+        // claim a device slot. Only accept well-formed 40-char tokens and sign
+        // the value we actually persist, so a forged cookie cannot match a row.
+        $clientDeviceToken = $this->resolveDeviceToken($request, $pending);
+
         if (empty($clientDeviceToken)) {
             $clientDeviceToken = Str::random(40);
         }
@@ -289,6 +294,31 @@ class LoginBiometricController extends Controller
             'redirect_url' => route('dashboard'),
             'device_token' => $clientDeviceToken,
         ]);
+    }
+
+    /**
+     * Resolve and validate the client device token.
+     *
+     * Only a structurally valid 40-character alphanumeric token is accepted;
+     * anything else is discarded so the caller generates a fresh one. This
+     * prevents a client from persisting an arbitrary value (or an empty/very
+     * long string) as a device slot key.
+     */
+    protected function resolveDeviceToken(Request $request, array $pending): ?string
+    {
+        $candidates = [
+            $request->input('device_token'),
+            $pending['device_token'] ?? null,
+            $request->cookie('myskanic_device_token'),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && preg_match('/^[A-Za-z0-9]{40}$/', $candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 
     /**

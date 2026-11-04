@@ -109,8 +109,12 @@ class TeacherAccountService
             }
 
             $guru->update([
-                'nip'                => !empty($data['nip']) ? $data['nip'] : null,
-                'nuptk'              => !empty($data['nuptk']) ? $data['nuptk'] : null,
+                // NIP/NUPTK must fall back to the existing value: a form that
+                // omits the field previously wiped the stored NIP silently.
+                // Empty strings are normalised to null to avoid tripping the
+                // unique index with duplicate '' values.
+                'nip'                => filled($data['nip'] ?? null) ? $data['nip'] : $guru->nip,
+                'nuptk'              => filled($data['nuptk'] ?? null) ? $data['nuptk'] : $guru->nuptk,
                 'nama'               => $data['nama'],
                 'mapel'              => $data['mapel'] ?? $guru->mapel,
                 'jenis_kelamin'      => $data['jenis_kelamin'] ?? $guru->jenis_kelamin,

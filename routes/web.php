@@ -35,14 +35,24 @@ Route::get('/home', function () {
 
 Route::middleware(['guest:web'])->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('login');
-    Route::post('/proseslogin', [AuthController::class, 'proseslogin'])->name('proseslogin');
+
+    // BUG-012: login had no throttling at all, allowing unlimited password
+    // guessing. 5 attempts per minute per IP+email is generous for a human and
+    // hostile to brute force.
+    Route::post('/proseslogin', [AuthController::class, 'proseslogin'])
+        ->middleware('throttle:5,1')
+        ->name('proseslogin');
 
     // =========================================================================
     // 2FA BIOMETRIC FACE VERIFICATION ON EVERY LOGIN
     // =========================================================================
     Route::get('/login/verify-face', [LoginBiometricController::class, 'showVerifyFace'])->name('login.verify_face');
-    Route::post('/login/verify-face/challenge', [LoginBiometricController::class, 'challenge'])->name('login.verify_face.challenge');
-    Route::post('/login/verify-face/process', [LoginBiometricController::class, 'verify'])->name('login.verify_face.process');
+    Route::post('/login/verify-face/challenge', [LoginBiometricController::class, 'challenge'])
+        ->middleware('throttle:10,1')
+        ->name('login.verify_face.challenge');
+    Route::post('/login/verify-face/process', [LoginBiometricController::class, 'verify'])
+        ->middleware('throttle:10,1')
+        ->name('login.verify_face.process');
     Route::get('/login/verify-face/cancel', [LoginBiometricController::class, 'cancel'])->name('login.verify_face.cancel');
 });
 
@@ -213,6 +223,7 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::get('/absensi-siswa', [AbsensiController::class, 'index'])->name('absensi');
         Route::post('/absensi-siswa/validate-qr', [AbsensiController::class, 'validateQr'])->name('absensi.validateqr');
         Route::post('/absensi-siswa/challenge', [FaceBiometricController::class, 'challenge'])->name('absensi.challenge');
+        Route::post('/absensi-siswa/attendance-challenge', [AbsensiController::class, 'attendanceChallenge'])->name('absensi.attendance_challenge');
         Route::post('/absensi-siswa/store', [AbsensiController::class, 'store'])->name('absensi.store');
         Route::get('/riwayat-kehadiran', [AbsensiController::class, 'riwayatKehadiran'])->name('riwayatkehadiran');
 
