@@ -146,6 +146,8 @@ class WhatsAppNotificationService
 
         // Default: Masuk
         $waktu = $absensi->jam_masuk ? Carbon::parse($absensi->jam_masuk)->format('H:i') . ' WIB' : Carbon::now()->format('H:i') . ' WIB';
+        $isLate = ($absensi->menit_terlambat > 0) || !empty($absensi->keterangan_terlambat);
+        $statusStr = $isLate ? "Terlambat ({$absensi->menit_terlambat} menit)" : "Tepat Waktu";
 
         return "*NOTIFIKASI PRESENSI MASUK*\n\n"
             . "Yth. Orang Tua/Wali dari {$namaSiswa},\n\n"
@@ -155,7 +157,8 @@ class WhatsAppNotificationService
             . "Kelas: {$namaKelas}\n"
             . "Jurusan: {$namaJurusan}\n"
             . "Tanggal: {$tanggalFormatted}\n"
-            . "Waktu: {$waktu}\n\n"
+            . "Waktu: {$waktu}\n"
+            . "Status: {$statusStr}\n\n"
             . "Informasi ini merupakan pemberitahuan otomatis dari sistem presensi sekolah.";
     }
 

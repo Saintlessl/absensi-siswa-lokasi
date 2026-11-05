@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CounselingSession;
 use App\Models\DisciplineCategory;
 use App\Models\DisciplineRecord;
+use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
@@ -23,9 +24,9 @@ class DisciplineCounselingController extends Controller
         $user = Auth::user();
         $query = DisciplineRecord::with(['siswa.kelas', 'category', 'recordedBy']);
 
-        // Scoping for Homeroom / Kaprog
+        // Scoping for Kaprog
         if ($user->role === 'kaprog' && $user->jurusan_id) {
-            $query->whereHas('siswa', function ($q) use ($user) {
+            $query->whereHas('siswa.kelas', function ($q) use ($user) {
                 $q->where('jurusan_id', $user->jurusan_id);
             });
         }
@@ -154,12 +155,17 @@ class DisciplineCounselingController extends Controller
         $query = CounselingSession::with(['siswa.kelas', 'guruBk']);
 
         if ($user->role === 'guru') {
-            // Check if user is BK or Homeroom
-            $query->where(function ($q) use ($user) {
-                $q->where('guru_bk_id', $user->id)
-                  ->orWhereHas('siswa.kelas', function ($kq) use ($user) {
-                      $kq->where('wali_kelas_id', $user->id);
-                  });
+            // Check if user is BK counselor or active homeroom teacher of the student
+            $guru = Guru::where('user_id', $user->id)->first();
+            $homeroomClassId = $guru?->activeHomeroomAssignment?->kelas_id;
+
+            $query->where(function ($q) use ($user, $homeroomClassId) {
+                $q->where('guru_bk_id', $user->id);
+                if ($homeroomClassId) {
+                    $q->orWhereHas('siswa', function ($sq) use ($homeroomClassId) {
+                        $sq->where('kelas_id', $homeroomClassId);
+                    });
+                }
             });
         }
 

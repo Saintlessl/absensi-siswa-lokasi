@@ -164,6 +164,15 @@ class PortfolioController extends Controller
 
         $portfolio = StudentPortfolio::with('siswa.user')->findOrFail($id);
 
+        $user = Auth::user();
+        if ($user->role === 'kaprog' && $user->jurusan_id) {
+            abort_unless(
+                (int) $portfolio->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: Anda hanya dapat mengurasi portofolio dari program keahlian Anda.'
+            );
+        }
+
         $portfolio->update([
             'status'           => $request->status,
             'moderation_notes' => $request->moderation_notes,

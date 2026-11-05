@@ -12,6 +12,7 @@ use App\Models\OrangTua;
 use App\Models\Room;
 use App\Models\Siswa;
 use App\Services\FaceBiometricService;
+use App\Services\InAppNotificationService;
 use App\Services\WhatsAppNotificationService;
 use App\Services\RoomAssignmentService;
 use Carbon\Carbon;
@@ -25,13 +26,16 @@ class AbsensiController extends Controller
 {
     protected FaceBiometricService $biometricService;
     protected WhatsAppNotificationService $whatsAppService;
+    protected InAppNotificationService $inAppNotificationService;
 
     public function __construct(
         FaceBiometricService $biometricService,
-        WhatsAppNotificationService $whatsAppService
+        WhatsAppNotificationService $whatsAppService,
+        ?InAppNotificationService $inAppNotificationService = null
     ) {
         $this->biometricService = $biometricService;
         $this->whatsAppService = $whatsAppService;
+        $this->inAppNotificationService = $inAppNotificationService ?? app(InAppNotificationService::class);
     }
 
     public function index()
@@ -291,8 +295,13 @@ class AbsensiController extends Controller
                 'longitude_pulang'      => $lng,
             ]);
 
-            // Kirim Notifikasi WhatsApp Otomatis ke Orang Tua
+            // Kirim Notifikasi WhatsApp & In-App Otomatis ke Orang Tua
             $waResult = $this->whatsAppService->sendAttendanceNotification($siswa, $absenHariIni, 'pulang');
+            try {
+                $this->inAppNotificationService->notifyAttendanceRecorded($absenHariIni, 'pulang');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("In-app notification error on check-out: " . $e->getMessage());
+            }
 
             $waNotice = $waResult['success'] ? ' Notifikasi WhatsApp otomatis telah dikirim ke orang tua.' : '';
 
@@ -367,8 +376,13 @@ class AbsensiController extends Controller
                 ], 409);
             }
 
-            // Kirim Notifikasi WhatsApp Otomatis ke Orang Tua
+            // Kirim Notifikasi WhatsApp & In-App Otomatis ke Orang Tua
             $waResult = $this->whatsAppService->sendAttendanceNotification($siswa, $absensi, 'masuk');
+            try {
+                $this->inAppNotificationService->notifyAttendanceRecorded($absensi, 'masuk');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("In-app notification error on check-in: " . $e->getMessage());
+            }
             $waNotice = $waResult['success'] ? ' Notifikasi WhatsApp otomatis telah dikirim ke orang tua.' : '';
 
             $pesanSukses = $keteranganTerlambat

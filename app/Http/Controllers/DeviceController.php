@@ -68,7 +68,23 @@ class DeviceController extends Controller
      */
     public function adminResetDevices(Request $request, $siswaId)
     {
-        $siswa = Siswa::findOrFail($siswaId);
+        $siswa = Siswa::with('kelas')->findOrFail($siswaId);
+
+        $user = Auth::user();
+        if ($user && $user->role === 'guru') {
+            $guru = \App\Models\Guru::with(['activeHomeroomAssignment', 'activeSubjectAssignments'])
+                ->where('user_id', $user->id)
+                ->first();
+            if ($guru) {
+                $allowedClassIds = $guru->activeSubjectAssignments->pluck('kelas_id')
+                    ->merge($guru->activeJadwal()->pluck('kelas_id'))
+                    ->merge($guru->activeHomeroomAssignment ? collect([$guru->activeHomeroomAssignment->kelas_id]) : collect())
+                    ->unique();
+                abort_unless($siswa->kelas_id && $allowedClassIds->contains($siswa->kelas_id), 403, 'Akses ditolak: Anda tidak mengajar siswa ini.');
+            }
+        } elseif ($user && $user->role === 'kaprog' && $user->jurusan_id) {
+            abort_unless($siswa->kelas && (int)$siswa->kelas->jurusan_id === (int)$user->jurusan_id, 403, 'Akses ditolak: Siswa ini bukan dari jurusan Anda.');
+        }
 
         $revokedCount = SiswaDevice::where('siswa_id', $siswa->id)
             ->where('is_active', true)

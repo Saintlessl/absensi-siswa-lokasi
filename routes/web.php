@@ -212,8 +212,8 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/admin/whatsapp-logs/{id}/retry', [WhatsAppLogController::class, 'retry'])->name('admin.whatsapp.retry');
     });
 
-    // Pendaftaran Biometrik Terpandu Sekolah / Lab Komputer & Monitoring (Superadmin, Admin, Guru)
-    Route::middleware(['role:superadmin,admin,guru'])->group(function () {
+    // Pendaftaran Biometrik Terpandu Sekolah / Lab Komputer & Monitoring (Superadmin, Admin, Kaprog, Guru)
+    Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
         Route::get('/admin/biometrik-siswa', [FaceBiometricController::class, 'adminIndex'])->name('admin.biometrik');
         Route::get('/admin/biometrik-siswa/{id}/assisted-enroll', [FaceBiometricController::class, 'assistedEnroll'])->name('admin.biometrik.assisted_enroll');
         Route::post('/admin/biometrik-siswa/{id}/assisted-enroll/challenge', [FaceBiometricController::class, 'assistedChallenge'])->name('admin.biometrik.assisted_challenge');
@@ -300,55 +300,82 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     Route::delete('/notifikasi/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     // =========================================================================
-    // INVENTARIS & PEMINJAMAN ALAT BENGKEL/LAB (Semua Role Berhak Meminjam)
+    // INVENTARIS & PEMINJAMAN ALAT BENGKEL/LAB
     // =========================================================================
+    // Katalog alat & daftar peminjaman pribadi (Semua pengguna terotentikasi)
     Route::get('/inventaris', [InventoryController::class, 'index'])->name('inventory.index');
-    Route::get('/inventaris/buat', [InventoryController::class, 'create'])->name('inventory.create');
-    Route::post('/inventaris', [InventoryController::class, 'store'])->name('inventory.store');
-    Route::get('/inventaris/{id}', [InventoryController::class, 'show'])->name('inventory.show');
-    Route::delete('/inventaris/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
-
     Route::get('/peminjaman-alat', [InventoryController::class, 'borrowingsIndex'])->name('inventory.borrowings');
     Route::post('/peminjaman-alat/ajukan', [InventoryController::class, 'requestBorrow'])->name('inventory.borrow.request');
-    Route::post('/peminjaman-alat/{id}/approve', [InventoryController::class, 'approveBorrow'])->name('inventory.borrow.approve');
-    Route::post('/peminjaman-alat/{id}/return', [InventoryController::class, 'returnItem'])->name('inventory.borrow.return');
+
+    // Manajemen Aset & Verifikasi Peminjaman/Pengembalian (Superadmin, Admin, Kaprog, Guru)
+    Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
+        Route::get('/inventaris/buat', [InventoryController::class, 'create'])->name('inventory.create');
+        Route::post('/inventaris', [InventoryController::class, 'store'])->name('inventory.store');
+        Route::delete('/inventaris/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+        Route::post('/peminjaman-alat/{id}/approve', [InventoryController::class, 'approveBorrow'])->name('inventory.borrow.approve');
+        Route::post('/peminjaman-alat/{id}/return', [InventoryController::class, 'returnItem'])->name('inventory.borrow.return');
+    });
+
+    // Detail Aset (Ditempatkan setelah /inventaris/buat untuk mencegah routing collision {id}='buat')
+    Route::get('/inventaris/{id}', [InventoryController::class, 'show'])->name('inventory.show');
 
     // =========================================================================
     // PKL / PRAKTIK KERJA LAPANGAN & MAGANG INDUSTRI
     // =========================================================================
-    Route::get('/pkl/mitra-industri', [PklController::class, 'partnersIndex'])->name('pkl.partners.index');
-    Route::post('/pkl/mitra-industri', [PklController::class, 'partnerStore'])->name('pkl.partners.store');
-    Route::get('/pkl/penempatan', [PklController::class, 'placementsIndex'])->name('pkl.placements.index');
-    Route::post('/pkl/penempatan', [PklController::class, 'placementStore'])->name('pkl.placements.store');
-    Route::get('/pkl/monitoring', [PklController::class, 'monitoringDashboard'])->name('pkl.monitoring');
-    Route::get('/pkl/verifikasi-logbook', [PklController::class, 'advisorLogbookIndex'])->name('pkl.advisor.logbooks');
-    Route::post('/pkl/logbook/{id}/review', [PklController::class, 'advisorLogbookReview'])->name('pkl.advisor.review');
+    // Pengelolaan Mitra, Penempatan & Monitoring (Superadmin, Admin, Kaprog, Guru Pembimbing)
+    Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
+        Route::get('/pkl/mitra-industri', [PklController::class, 'partnersIndex'])->name('pkl.partners.index');
+        Route::post('/pkl/mitra-industri', [PklController::class, 'partnerStore'])->name('pkl.partners.store');
+        Route::get('/pkl/penempatan', [PklController::class, 'placementsIndex'])->name('pkl.placements.index');
+        Route::post('/pkl/penempatan', [PklController::class, 'placementStore'])->name('pkl.placements.store');
+        Route::get('/pkl/monitoring', [PklController::class, 'monitoringDashboard'])->name('pkl.monitoring');
+        Route::get('/pkl/verifikasi-logbook', [PklController::class, 'advisorLogbookIndex'])->name('pkl.advisor.logbooks');
+        Route::post('/pkl/logbook/{id}/review', [PklController::class, 'advisorLogbookReview'])->name('pkl.advisor.review');
+    });
 
-    // Student PKL Portal
-    Route::get('/pkl/portal-siswa', [PklController::class, 'studentPortal'])->name('pkl.student.portal');
-    Route::post('/pkl/presensi', [PklController::class, 'studentCheckIn'])->name('pkl.student.checkin');
-    Route::post('/pkl/logbook', [PklController::class, 'studentLogbookStore'])->name('pkl.student.logbook');
+    // Portal PKL Siswa (Khusus Siswa yang melaksanakan PKL)
+    Route::middleware(['role:siswa'])->group(function () {
+        Route::get('/pkl/portal-siswa', [PklController::class, 'studentPortal'])->name('pkl.student.portal');
+        Route::post('/pkl/presensi', [PklController::class, 'studentCheckIn'])->name('pkl.student.checkin');
+        Route::post('/pkl/logbook', [PklController::class, 'studentLogbookStore'])->name('pkl.student.logbook');
+    });
 
     // =========================================================================
     // KEDISIPLINAN & BIMBINGAN KONSELING (BK)
     // =========================================================================
-    Route::get('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineIndex'])->name('discipline.index');
-    Route::post('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineStore'])->name('discipline.store');
-    Route::post('/kedisiplinan/{id}/status', [DisciplineCounselingController::class, 'disciplineUpdateStatus'])->name('discipline.status');
+    // Pencatatan Pelanggaran/Prestasi & Sesi Konseling BK (Superadmin, Admin, Kaprog, Guru)
+    Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
+        Route::get('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineIndex'])->name('discipline.index');
+        Route::post('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineStore'])->name('discipline.store');
+        Route::post('/kedisiplinan/{id}/status', [DisciplineCounselingController::class, 'disciplineUpdateStatus'])->name('discipline.status');
+        Route::get('/konseling-bk', [DisciplineCounselingController::class, 'counselingIndex'])->name('counseling.index');
+        Route::post('/konseling-bk', [DisciplineCounselingController::class, 'counselingStore'])->name('counseling.store');
+    });
 
-    Route::get('/konseling-bk', [DisciplineCounselingController::class, 'counselingIndex'])->name('counseling.index');
-    Route::post('/konseling-bk', [DisciplineCounselingController::class, 'counselingStore'])->name('counseling.store');
-
-    Route::get('/rekor-kedisiplinan-siswa', [DisciplineCounselingController::class, 'studentPortal'])->name('discipline.student.portal');
+    // Rekor Poin Kedisiplinan & Prestasi Siswa (Siswa & Orang Tua)
+    Route::middleware(['role:siswa,orangtua'])->group(function () {
+        Route::get('/rekor-kedisiplinan-siswa', [DisciplineCounselingController::class, 'studentPortal'])->name('discipline.student.portal');
+    });
 
     // =========================================================================
     // ETALASE KARYA & TEACHING FACTORY (TeFa)
     // =========================================================================
+    // Galeri Showcase Publik/Internal (Semua Pengguna Terotentikasi)
     Route::get('/etalase-karya', [PortfolioController::class, 'index'])->name('portfolio.index');
-    Route::get('/etalase-karya/karya-saya', [PortfolioController::class, 'studentIndex'])->name('portfolio.student.index');
-    Route::post('/etalase-karya', [PortfolioController::class, 'store'])->name('portfolio.store');
-    Route::get('/etalase-karya/kurasi', [PortfolioController::class, 'moderationIndex'])->name('portfolio.moderation');
-    Route::post('/etalase-karya/{id}/kurasi', [PortfolioController::class, 'moderate'])->name('portfolio.moderate');
+
+    // Pengajuan Karya Proyek Siswa (Khusus Siswa)
+    Route::middleware(['role:siswa'])->group(function () {
+        Route::get('/etalase-karya/karya-saya', [PortfolioController::class, 'studentIndex'])->name('portfolio.student.index');
+        Route::post('/etalase-karya', [PortfolioController::class, 'store'])->name('portfolio.store');
+    });
+
+    // Kurasi & Moderasi Portofolio TeFa (Superadmin, Admin, Kaprog, Guru)
+    Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
+        Route::get('/etalase-karya/kurasi', [PortfolioController::class, 'moderationIndex'])->name('portfolio.moderation');
+        Route::post('/etalase-karya/{id}/kurasi', [PortfolioController::class, 'moderate'])->name('portfolio.moderate');
+    });
+
+    // Detail Portofolio (Ditempatkan di akhir setelah /karya-saya dan /kurasi untuk mencegah slug collision)
     Route::get('/etalase-karya/{slug}', [PortfolioController::class, 'show'])->name('portfolio.show');
 
     // =========================================================================

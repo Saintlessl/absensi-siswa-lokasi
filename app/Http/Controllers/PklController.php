@@ -100,7 +100,7 @@ class PklController extends Controller
         $query = PklPlacement::with(['siswa.kelas', 'partner', 'guruPembimbing']);
 
         if ($user->role === 'kaprog' && $user->jurusan_id) {
-            $query->whereHas('siswa', function ($q) use ($user) {
+            $query->whereHas('siswa.kelas', function ($q) use ($user) {
                 $q->where('jurusan_id', $user->jurusan_id);
             });
         } elseif ($user->role === 'guru') {
@@ -330,7 +330,7 @@ class PklController extends Controller
                 $q->where('guru_pembimbing_id', $user->id);
             });
         } elseif ($user->role === 'kaprog' && $user->jurusan_id) {
-            $query->whereHas('placement.siswa', function ($q) use ($user) {
+            $query->whereHas('placement.siswa.kelas', function ($q) use ($user) {
                 $q->where('jurusan_id', $user->jurusan_id);
             });
         }
@@ -354,7 +354,25 @@ class PklController extends Controller
             'catatan_guru' => 'nullable|string|max:500',
         ]);
 
-        $logbook = PklLogbook::with(['placement.siswa.user'])->findOrFail($id);
+        $logbook = PklLogbook::with(['placement.siswa.kelas', 'placement.siswa.user'])->findOrFail($id);
+
+        // Security Authorization Check:
+        // Guru may only review logbooks for students they are assigned to advise.
+        // Kaprog may only review logbooks for students in their department.
+        $user = Auth::user();
+        if ($user->role === 'guru') {
+            abort_unless(
+                $logbook->placement && (int) $logbook->placement->guru_pembimbing_id === (int) $user->id,
+                403,
+                'Akses ditolak: Anda bukan guru pembimbing yang ditugaskan untuk siswa ini.'
+            );
+        } elseif ($user->role === 'kaprog' && $user->jurusan_id) {
+            abort_unless(
+                $logbook->placement?->siswa?->kelas && (int) $logbook->placement->siswa->kelas->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: Siswa ini bukan dari jurusan yang Anda kepalai.'
+            );
+        }
 
         $logbook->update([
             'status'       => $request->status,

@@ -143,8 +143,9 @@ class InAppNotificationService
         }
 
         $waktu = $tipe === 'masuk' ? $absensi->jam_masuk : $absensi->jam_pulang;
-        $statusStr = $absensi->status === 'terlambat' ? 'TERLAMBAT' : 'TEPAT WAKTU';
-        $icon = $absensi->status === 'terlambat' ? 'bx-time-five' : 'bx-fingerprint';
+        $isLate = ($absensi->menit_terlambat > 0) || !empty($absensi->keterangan_terlambat) || ($absensi->status === 'terlambat');
+        $statusStr = $isLate ? 'TERLAMBAT' : 'TEPAT WAKTU';
+        $icon = $isLate ? 'bx-time-five' : 'bx-fingerprint';
 
         $title = "Presensi " . ucfirst($tipe) . " Tercatat ({$statusStr})";
         $message = "Presensi {$tipe} berhasil dicatat pada pukul {$waktu} ({$statusStr}).";

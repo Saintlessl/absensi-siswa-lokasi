@@ -162,7 +162,7 @@ class FaceBiometricController extends Controller
     public function adminIndex(Request $request)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['superadmin', 'admin', 'guru'])) {
+        if (!in_array($user->role, ['superadmin', 'admin', 'kaprog', 'guru'])) {
             return redirect()->route('dashboard')->with('error', 'Akses ditolak: Anda tidak memiliki wewenang untuk mengakses panel biometrik.');
         }
 
@@ -171,7 +171,11 @@ class FaceBiometricController extends Controller
         // Query Students with Biometric Status
         $querySiswa = Siswa::with(['kelas.jurusan', 'faceBiometric', 'user']);
 
-        if ($user->role === 'guru') {
+        if ($user->role === 'kaprog' && $user->jurusan_id) {
+            $querySiswa->whereHas('kelas', function ($q) use ($user) {
+                $q->where('jurusan_id', $user->jurusan_id);
+            });
+        } elseif ($user->role === 'guru') {
             // Kelas has no guru_id column; homeroom ownership lives in the
             // homeroom_assignments history table. The old query threw a SQL
             // error ("Unknown column kelas.guru_id") and 500'd the whole panel.
@@ -397,8 +401,8 @@ class FaceBiometricController extends Controller
     public function manualOverride(Request $request)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['superadmin', 'admin', 'guru'])) {
-            return redirect()->back()->with('error', 'Hanya Superadmin, Admin, atau Guru yang dapat melakukan presensi manual.');
+        if (!in_array($user->role, ['superadmin', 'admin', 'kaprog', 'guru'])) {
+            return redirect()->back()->with('error', 'Hanya Superadmin, Admin, Kaprog, atau Guru yang dapat melakukan presensi manual.');
         }
 
         $request->validate([
@@ -475,6 +479,15 @@ class FaceBiometricController extends Controller
      */
     private function assertCanManageStudentBiometric(User $user, Siswa $siswa): void
     {
+        if ($user->role === 'kaprog') {
+            abort_unless(
+                $user->jurusan_id && $siswa->kelas && (int) $siswa->kelas->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: siswa ini bukan bagian dari jurusan yang Anda kepalai.'
+            );
+            return;
+        }
+
         if ($user->role !== 'guru') {
             return;
         }
@@ -503,7 +516,7 @@ class FaceBiometricController extends Controller
     public function assistedEnroll($siswaId)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['superadmin', 'admin', 'guru'])) {
+        if (!in_array($user->role, ['superadmin', 'admin', 'kaprog', 'guru'])) {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }
 
@@ -519,7 +532,7 @@ class FaceBiometricController extends Controller
     public function assistedChallenge($siswaId)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['superadmin', 'admin', 'guru'])) {
+        if (!in_array($user->role, ['superadmin', 'admin', 'kaprog', 'guru'])) {
             return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         }
 
@@ -540,7 +553,7 @@ class FaceBiometricController extends Controller
     public function processAssistedEnroll(Request $request, $siswaId)
     {
         $user = Auth::user();
-        if (!in_array($user->role, ['superadmin', 'admin', 'guru'])) {
+        if (!in_array($user->role, ['superadmin', 'admin', 'kaprog', 'guru'])) {
             return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         }
 

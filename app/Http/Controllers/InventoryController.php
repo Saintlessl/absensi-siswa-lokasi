@@ -190,6 +190,15 @@ class InventoryController extends Controller
         $borrowing = InventoryBorrowing::with(['item', 'user'])->findOrFail($id);
         $item = $borrowing->item;
 
+        $user = Auth::user();
+        if ($user->role === 'kaprog' && $user->jurusan_id && $item->jurusan_id) {
+            abort_unless(
+                (int) $item->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: Anda hanya berwenang memproses peralatan dari program keahlian Anda.'
+            );
+        }
+
         if ($borrowing->status !== 'pending') {
             return back()->with('error', 'Peminjaman ini sudah diproses sebelumnya.');
         }
@@ -239,6 +248,15 @@ class InventoryController extends Controller
         $borrowing = InventoryBorrowing::with(['item', 'user'])->findOrFail($id);
         $item = $borrowing->item;
 
+        $user = Auth::user();
+        if ($user->role === 'kaprog' && $user->jurusan_id && $item->jurusan_id) {
+            abort_unless(
+                (int) $item->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: Anda hanya berwenang memproses peralatan dari program keahlian Anda.'
+            );
+        }
+
         if ($borrowing->status !== 'borrowed' && $borrowing->status !== 'approved') {
             return back()->with('error', 'Status peminjaman ini tidak valid untuk diproses pengembalian.');
         }
@@ -287,6 +305,15 @@ class InventoryController extends Controller
     public function destroy($id)
     {
         $item = InventoryItem::findOrFail($id);
+
+        $user = Auth::user();
+        if ($user->role === 'kaprog' && $user->jurusan_id && $item->jurusan_id) {
+            abort_unless(
+                (int) $item->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: Anda hanya berwenang menghapus peralatan dari program keahlian Anda.'
+            );
+        }
 
         if ($item->borrowings()->whereIn('status', ['pending', 'borrowed', 'approved'])->exists()) {
             return back()->with('error', 'Tidak dapat menghapus alat yang masih dalam status peminjaman aktif.');

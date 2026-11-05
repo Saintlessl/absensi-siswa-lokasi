@@ -334,8 +334,8 @@
 
         {{-- Scrollable Container --}}
         <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-start sm:items-center justify-center p-3 sm:p-6 text-center">
-                <div class="relative transform overflow-hidden rounded-2xl sm:rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-2xl max-h-[92vh] flex flex-col border border-dark-200 fade-in my-auto">
+            <div class="flex min-h-full items-start justify-center p-3 sm:p-6 sm:py-10 text-center">
+                <div class="relative transform overflow-hidden rounded-2xl sm:rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-2xl max-h-[86vh] flex flex-col border border-dark-200 fade-in">
                     {{-- Header (Pinned) --}}
                     <div class="px-6 py-4 border-b border-dark-200 flex items-center justify-between bg-dark-50/70 flex-shrink-0">
                         <div>
@@ -609,10 +609,16 @@
             if (modal) {
                 modal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
-                const scrollBody = document.getElementById('modal_guru_scroll_body');
-                if (scrollBody) {
-                    scrollBody.scrollTop = 0;
-                }
+                setTimeout(() => {
+                    const scrollBody = document.getElementById('modal_guru_scroll_body');
+                    if (scrollBody) {
+                        scrollBody.scrollTop = 0;
+                    }
+                    const outerScroll = modal.querySelector('.overflow-y-auto');
+                    if (outerScroll) {
+                        outerScroll.scrollTop = 0;
+                    }
+                }, 20);
             }
         }
 
