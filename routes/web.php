@@ -262,3 +262,16 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/persetujuan-izin/{id}/reject', [IzinApprovalController::class, 'reject'])->name('izin.reject');
     });
 });
+
+if (app()->environment('local')) {
+    Route::get('/dev-login', function (\Illuminate\Http\Request $request) {
+        $role = $request->query('role', 'admin');
+        if ($role === 'kaprog') {
+            $user = \App\Models\User::where('role', 'kaprog')->first() ?? \App\Models\User::where('role', 'admin')->first();
+        } else {
+            $user = \App\Models\User::where('role', 'admin')->first();
+        }
+        \Illuminate\Support\Facades\Auth::login($user);
+        return redirect()->route('dashboard');
+    });
+}

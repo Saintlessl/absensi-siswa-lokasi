@@ -262,9 +262,9 @@
     @stack('styles')
 </head>
 
-<body class="font-inter bg-dark-50 text-dark-800 antialiased">
+<body class="font-inter bg-[#003FA9] text-dark-800 antialiased min-h-screen">
 
-    <div id="app" class="flex min-h-screen">
+    <div id="app" class="flex min-h-screen bg-[#003FA9]">
 
         {{-- Sidebar Overlay (Mobile) --}}
         <div id="sidebar-overlay" class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm z-40 hidden lg:hidden"
@@ -275,47 +275,50 @@
         @include('layouts.sidebar')
 
         {{-- Main Content Area --}}
-        <div id="main-content" class="flex-1 lg:ml-[272px] content-transition min-h-screen flex flex-col">
+        <div id="main-content" class="flex-1 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003FA9]">
 
-            {{-- Header --}}
-            @include('layouts.header')
+            {{-- Floating Rounded Container --}}
+            <div class="flex-1 bg-[#E2EDFF] rounded-[26px] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl">
 
-            {{-- Page Content --}}
-            <main class="flex-1 p-4 sm:p-6 lg:p-8">
-                {{-- Breadcrumb --}}
-                @hasSection('breadcrumb')
-                    <nav class="mb-6 fade-in" aria-label="Breadcrumb">
-                        <ol class="flex items-center gap-2 text-sm text-dark-500">
-                            <li class="flex items-center gap-1">
-                                <i class='bx bx-home text-base'></i>
-                                <a href="{{ route('dashboard') }}"
-                                    class="hover:text-primary-600 transition-colors">Dashboard</a>
-                            </li>
-                            @yield('breadcrumb')
-                        </ol>
-                    </nav>
-                @endif
+                {{-- Header --}}
+                @include('layouts.header')
 
-                {{-- Page Header --}}
-                @hasSection('page-header')
-                    <div class="mb-8 fade-in">
-                        @yield('page-header')
+                {{-- Page Content --}}
+                <main class="flex-1 px-4 sm:px-8 pb-8 pt-1">
+                    {{-- Breadcrumb --}}
+                    @hasSection('breadcrumb')
+                        <nav class="mb-5 fade-in" aria-label="Breadcrumb">
+                            <ol class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium">
+                                <li class="flex items-center gap-1">
+                                    <i class='bx bx-home text-base'></i>
+                                    <a href="{{ route('dashboard') }}"
+                                        class="hover:text-[#0052CC] transition-colors">Dashboard</a>
+                                </li>
+                                @yield('breadcrumb')
+                            </ol>
+                        </nav>
+                    @endif
+
+                    {{-- Page Header --}}
+                    @hasSection('page-header')
+                        <div class="mb-6 fade-in">
+                            @yield('page-header')
+                        </div>
+                    @endif
+
+                    {{-- Main Content --}}
+                    <div class="fade-in" style="animation-delay: 0.1s;">
+                        @yield('content')
                     </div>
-                @endif
+                </main>
 
-                {{-- Main Content --}}
-                <div class="fade-in" style="animation-delay: 0.1s;">
-                    @yield('content')
-                </div>
-            </main>
-
-            {{-- Footer --}}
-            <footer class="border-t border-dark-200 bg-white/60 backdrop-blur-sm px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-dark-400">
-                    <p>&copy; {{ date('Y') }} Sistem Absensi Siswa SMK Negeri.</p>
-
-                </div>
-            </footer>
+                {{-- Footer --}}
+                <footer class="border-t border-blue-200/50 bg-white/40 px-6 sm:px-8 py-3.5">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 font-medium">
+                        <p>&copy; {{ date('Y') }} Sistem Absensi Siswa SMK Negeri &bull; MySkanic</p>
+                    </div>
+                </footer>
+            </div>
         </div>
     </div>
 

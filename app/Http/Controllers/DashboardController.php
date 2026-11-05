@@ -20,25 +20,57 @@ class DashboardController extends Controller
         $user = Auth::user();
         $data = [];
 
-        if (in_array($user->role, ['superadmin', 'admin'])) {
-            $data['totalSiswa'] = Siswa::count();
-            $data['totalGuru'] = Guru::count();
-            $data['totalKelas'] = Kelas::count();
-
-            // Absensi hari ini
-            $data['hadirHariIni'] = Absensi::whereDate('tanggal', date('Y-m-d'))
-                ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
-
-            // Filter
+        if (in_array($user->role, ['superadmin', 'admin', 'kaprog'])) {
             $bulan = $request->bulan ?? date('m');
             $tahun = $request->tahun ?? date('Y');
             $search = $request->search ?? '';
 
-            $query = Absensi::with('siswa.kelas')
-                ->whereMonth('tanggal', $bulan)
-                ->whereYear('tanggal', $tahun)
-                ->orderBy('tanggal', 'desc')
-                ->orderBy('id', 'desc');
+            if ($user->role === 'kaprog') {
+                $guru = Guru::where('user_id', $user->id)->first();
+                $jurusanId = $guru ? $guru->user->jurusan_id : null;
+
+                if ($jurusanId) {
+                    $data['totalSiswa'] = Siswa::whereHas('kelas', fn($q) => $q->where('jurusan_id', $jurusanId))->count();
+                    $data['totalGuru'] = Guru::whereHas('user', fn($q) => $q->where('jurusan_id', $jurusanId))->count() ?: Guru::count();
+                    $data['totalKelas'] = Kelas::where('jurusan_id', $jurusanId)->count();
+                    $data['hadirHariIni'] = Absensi::whereDate('tanggal', date('Y-m-d'))
+                        ->whereHas('siswa.kelas', fn($q) => $q->where('jurusan_id', $jurusanId))
+                        ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
+
+                    $query = Absensi::with('siswa.kelas')
+                        ->whereHas('siswa.kelas', fn($q) => $q->where('jurusan_id', $jurusanId))
+                        ->whereMonth('tanggal', $bulan)
+                        ->whereYear('tanggal', $tahun)
+                        ->orderBy('tanggal', 'desc')
+                        ->orderBy('id', 'desc');
+                } else {
+                    $data['totalSiswa'] = Siswa::count();
+                    $data['totalGuru'] = Guru::count();
+                    $data['totalKelas'] = Kelas::count();
+                    $data['hadirHariIni'] = Absensi::whereDate('tanggal', date('Y-m-d'))
+                        ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
+
+                    $query = Absensi::with('siswa.kelas')
+                        ->whereMonth('tanggal', $bulan)
+                        ->whereYear('tanggal', $tahun)
+                        ->orderBy('tanggal', 'desc')
+                        ->orderBy('id', 'desc');
+                }
+            } else {
+                $data['totalSiswa'] = Siswa::count();
+                $data['totalGuru'] = Guru::count();
+                $data['totalKelas'] = Kelas::count();
+
+                // Absensi hari ini
+                $data['hadirHariIni'] = Absensi::whereDate('tanggal', date('Y-m-d'))
+                    ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
+
+                $query = Absensi::with('siswa.kelas')
+                    ->whereMonth('tanggal', $bulan)
+                    ->whereYear('tanggal', $tahun)
+                    ->orderBy('tanggal', 'desc')
+                    ->orderBy('id', 'desc');
+            }
 
             if ($search) {
                 $query->whereHas('siswa', function ($q) use ($search) {
@@ -290,6 +322,7 @@ class DashboardController extends Controller
      */
     public function exportPdf(Request $request)
     {
+        $user = Auth::user();
         $bulan = $request->bulan ?? date('m');
         $tahun = $request->tahun ?? date('Y');
         $search = $request->search ?? '';
@@ -299,6 +332,13 @@ class DashboardController extends Controller
             ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->orderBy('id', 'desc');
+
+        if ($user && $user->role === 'kaprog') {
+            $guru = Guru::where('user_id', $user->id)->first();
+            if ($guru && $guru->user->jurusan_id) {
+                $query->whereHas('siswa.kelas', fn($q) => $q->where('jurusan_id', $guru->user->jurusan_id));
+            }
+        }
 
         if ($search) {
             $query->whereHas('siswa', function ($q) use ($search) {

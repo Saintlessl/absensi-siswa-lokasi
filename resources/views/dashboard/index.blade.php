@@ -2,267 +2,254 @@
 
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Absensi Siswa & Manajemen Kejuruan SMK Negeri')
+@section('page-subtitle', 'Absensi Siswa & Manajemen Sekolah')
 
 @section('content')
 
     {{-- Welcome Banner --}}
-    <div
-        class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 p-6 sm:p-8 mb-8 shadow-lg shadow-primary-500/20">
-        <div class="absolute top-0 right-0 w-64 h-64 opacity-10">
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="80" stroke="white" stroke-width="2" />
-                <circle cx="100" cy="100" r="60" stroke="white" stroke-width="2" />
-                <circle cx="100" cy="100" r="40" stroke="white" stroke-width="2" />
-                <circle cx="100" cy="100" r="20" stroke="white" stroke-width="2" />
-            </svg>
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0052CC] via-[#0055D4] to-[#0A47B8] p-7 sm:p-9 mb-6 shadow-md">
+        {{-- Batik Megamendung Overlay --}}
+        <div class="absolute right-0 top-0 bottom-0 h-full w-full sm:w-[50%] pointer-events-none overflow-hidden flex justify-end">
+            <img src="{{ asset('img/batik-megamendung.png') }}" alt="Batik"
+                 class="h-full w-auto max-w-none object-cover object-right"
+                 style="mix-blend-mode: screen; opacity: 0.35;">
         </div>
-        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-        <div class="absolute -top-10 -left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
 
-        <div class="relative z-10">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-white text-xl sm:text-2xl font-bold tracking-tight">
-                        {{ Auth::user()->welcome_greeting }} 👋
-                    </h1>
-                    <p class="text-primary-200 mt-1 text-sm sm:text-base max-w-xl">
-                        Sistem Absensi Siswa SMK Negeri &bull; PPLG, Animasi, TPFL, TO, BCF
-                    </p>
-                </div>
-                <div class="flex-shrink-0">
-                    <div class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                        <p class="text-primary-200 text-[11px] font-medium uppercase tracking-wider">Tanggal Hari Ini</p>
-                        <p class="text-white font-semibold text-sm mt-0.5">
-                            {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+        {{-- Content inside Banner --}}
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+                <h1 class="text-white text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+                    {{ Auth::user()->welcome_greeting }}
+                </h1>
+                <p class="text-white/80 mt-2 text-xs sm:text-sm max-w-xl leading-relaxed">
+                    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+                        Pantau kehadiran, kelola data siswa, dan administrasi kesiswaan dalam satu dashboard.
+                    @elseif (Auth::user()->role === 'kaprog')
+                        Pantau kehadiran, kelola program keahlian, dan administrasi kesiswaan dalam satu dashboard.
+                    @elseif (Auth::user()->role === 'guru')
+                        Pantau jadwal mengajar, kehadiran siswa, dan administrasi kelas dalam satu dashboard.
+                    @elseif (Auth::user()->role === 'siswa')
+                        Pantau riwayat absensi, jam masuk-pulang, dan informasi akademik Anda.
+                    @elseif (Auth::user()->role === 'orangtua')
+                        Pantau kehadiran dan kedisiplinan putra/putri Anda secara real-time.
+                    @else
+                        Pantau kehadiran dan administrasi kesiswaan dalam satu dashboard.
+                    @endif
+                </p>
+            </div>
+
+            {{-- Digital Clock Widget --}}
+            <div class="flex-shrink-0 self-start sm:self-auto">
+                <div class="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-6 py-3 min-w-[155px] text-center shadow-inner">
+                    <div id="banner-clock-time" class="text-white font-extrabold text-3xl sm:text-4xl tracking-tight leading-none font-mono">
+                        {{ date('H.i') }}
+                    </div>
+                    <div id="banner-clock-date" class="text-white/85 text-xs font-medium mt-1.5 whitespace-nowrap">
+                        {{ \Carbon\Carbon::now()->isoFormat('dddd, DD MMM Y') }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
-        {{-- Statistics Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+    @if (in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog']))
+        {{-- Statistics Cards (4 Cards horizontal row) --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
             {{-- Total Siswa --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift group border border-dark-200/50">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Total Siswa</p>
-                        <h3 class="text-3xl font-bold text-dark-800 mt-2">{{ $totalSiswa }}</h3>
-                        <p class="text-dark-400 text-xs mt-1">Siswa terdaftar</p>
-                    </div>
-                    <div
-                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-200">
-                        <i class='bx bx-user text-white text-2xl'></i>
-                    </div>
+            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL SISWA</p>
+                    <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $totalSiswa ?? 0 }}</h3>
+                    <p class="text-xs text-slate-400 mt-1 font-normal">Siswa terdaftar</p>
+                </div>
+                <div class="flex-shrink-0 text-[#0052CC]">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                 </div>
             </div>
 
             {{-- Total Guru --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift group border border-dark-200/50">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Total Guru</p>
-                        <h3 class="text-3xl font-bold text-dark-800 mt-2">{{ $totalGuru }}</h3>
-                        <p class="text-dark-400 text-xs mt-1">Guru aktif</p>
-                    </div>
-                    <div
-                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 group-hover:scale-110 transition-transform duration-200">
-                        <i class='bx bx-chalkboard text-white text-2xl'></i>
-                    </div>
+            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL GURU</p>
+                    <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $totalGuru ?? 0 }}</h3>
+                    <p class="text-xs text-slate-400 mt-1 font-normal">Guru aktif</p>
+                </div>
+                <div class="flex-shrink-0 text-[#0052CC]">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                 </div>
             </div>
 
             {{-- Total Kelas --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift group border border-dark-200/50">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Total Kelas</p>
-                        <h3 class="text-3xl font-bold text-dark-800 mt-2">{{ $totalKelas }}</h3>
-                        <p class="text-dark-400 text-xs mt-1">Kelas tersedia</p>
-                    </div>
-                    <div
-                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 transition-transform duration-200">
-                        <i class='bx bx-building-house text-white text-2xl'></i>
-                    </div>
+            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL KELAS</p>
+                    <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $totalKelas ?? 0 }}</h3>
+                    <p class="text-xs text-slate-400 mt-1 font-normal">Kelas Tersedia</p>
+                </div>
+                <div class="flex-shrink-0 text-[#0052CC]">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
                 </div>
             </div>
 
             {{-- Hadir Hari Ini --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift group border border-dark-200/50">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Hadir Hari Ini</p>
-                        <h3 class="text-3xl font-bold text-dark-800 mt-2">{{ $hadirHariIni }}</h3>
-                        <p class="text-dark-400 text-xs mt-1">Siswa sudah absen</p>
-                    </div>
-                    <div
-                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:scale-110 transition-transform duration-200">
-                        <i class='bx bx-check-shield text-white text-2xl'></i>
-                    </div>
+            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">HADIR HARI INI</p>
+                    <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $hadirHariIni ?? 0 }}</h3>
+                    <p class="text-xs text-slate-400 mt-1 font-normal">Siswa sudah absen</p>
+                </div>
+                <div class="flex-shrink-0 text-[#0052CC]">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
                 </div>
             </div>
         </div>
 
-        {{-- Rekap Absensi Table --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
-            {{-- Header + Filter --}}
-            <div class="px-6 py-5 border-b border-dark-100 bg-dark-50/30">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-dark-800">Rekap Absensi Siswa</h3>
-                        <p class="text-sm text-dark-500 mt-1">Seluruh data kehadiran siswa</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('dashboard.export.pdf', ['bulan' => $bulan, 'tahun' => $tahun, 'search' => $search]) }}"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-lg shadow-rose-500/25 hover:shadow-rose-500/35 transition-all duration-200 hover:-translate-y-0.5"
-                            target="_blank">
-                            <i class='bx bxs-file-pdf text-base'></i>
-                            Cetak PDF
-                        </a>
-                        <a href="{{ route('dashboard.export.excel', ['bulan' => $bulan, 'tahun' => $tahun, 'search' => $search]) }}"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/35 transition-all duration-200 hover:-translate-y-0.5">
-                            <i class='bx bxs-file text-base'></i>
-                            Export Excel
-                        </a>
-                    </div>
+        {{-- Rekap Absensi Siswa Section --}}
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-blue-100/60 shadow-sm mb-6">
+            {{-- Header + Action Buttons --}}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+                <div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Rekap Absensi Siswa</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Seluruh data kehadiran siswa</p>
                 </div>
-
-                <form action="{{ route('dashboard') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">
-                    <div class="flex-1 w-full">
-                        <label class="block text-xs font-medium text-dark-600 mb-1">Cari Siswa</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class='bx bx-search text-dark-400'></i>
-                            </div>
-                            <input type="text" name="search" value="{{ $search }}"
-                                class="block w-full pl-9 pr-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                                placeholder="Nama / NIS...">
-                        </div>
-                    </div>
-                    <div class="w-full sm:w-40">
-                        <label class="block text-xs font-medium text-dark-600 mb-1">Bulan</label>
-                        <select name="bulan"
-                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                            @for ($i = 1; $i <= 12; $i++)
-                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}"
-                                    {{ $bulan == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::createFromDate(null, $i, 1)->isoFormat('MMMM') }}
-                                </option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div class="w-full sm:w-28">
-                        <label class="block text-xs font-medium text-dark-600 mb-1">Tahun</label>
-                        <select name="tahun"
-                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                            @for ($y = date('Y'); $y >= date('Y') - 3; $y--)
-                                <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>
-                                    {{ $y }}
-                                </option>
-                            @endfor
-                        </select>
-                    </div>
-                    <button type="submit"
-                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
-                        <i class='bx bx-filter-alt'></i> Filter
-                    </button>
-                </form>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('dashboard.export.pdf', ['bulan' => $bulan, 'tahun' => $tahun, 'search' => $search]) }}"
+                       target="_blank"
+                       class="px-5 py-2.5 bg-[#0052CC] hover:bg-[#0047B8] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition flex items-center gap-1.5">
+                        Cetak PDF
+                    </a>
+                    <a href="{{ route('dashboard.export.excel', ['bulan' => $bulan, 'tahun' => $tahun, 'search' => $search]) }}"
+                       class="px-5 py-2.5 bg-[#0052CC] hover:bg-[#0047B8] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition flex items-center gap-1.5">
+                        Export Excel
+                    </a>
+                </div>
             </div>
 
-            {{-- Table --}}
-            <div class="overflow-x-auto custom-scrollbar">
+            {{-- Filter Toolbar --}}
+            <form action="{{ route('dashboard') }}" method="GET" class="mt-2 mb-6 flex flex-col sm:flex-row items-end gap-3.5">
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Cari Siswa</label>
+                    <div class="relative">
+                        <i class='bx bx-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg'></i>
+                        <input type="text" name="search" value="{{ $search }}"
+                               placeholder="Nama / NIS..."
+                               class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0052CC]/20 focus:border-[#0052CC] transition">
+                    </div>
+                </div>
+                <div class="w-full sm:w-44">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Bulan</label>
+                    <select name="bulan"
+                            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0052CC]/20 focus:border-[#0052CC] transition">
+                        @for ($i = 1; $i <= 12; $i++)
+                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}"
+                                {{ $bulan == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::createFromDate(null, $i, 1)->isoFormat('MMMM') }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="w-full sm:w-32">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tahun</label>
+                    <select name="tahun"
+                            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0052CC]/20 focus:border-[#0052CC] transition">
+                        @for ($y = date('Y'); $y >= date('Y') - 3; $y--)
+                            <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>
+                                {{ $y }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <button type="submit"
+                        class="w-full sm:w-auto px-6 py-2.5 bg-[#0052CC] hover:bg-[#0047B8] text-white text-sm font-semibold rounded-xl shadow-xs transition flex items-center justify-center gap-2 whitespace-nowrap self-end">
+                    <i class='bx bx-filter-alt text-base'></i> Filter
+                </button>
+            </form>
+
+            {{-- Attendance Table --}}
+            <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-12 text-center">
-                                No</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">NIS / Nama
-                            </th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">
-                                Kelas</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">
-                                Status</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Keterangan
-                            </th>
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">
-                                Aksi</th>
+                        <tr class="border-b border-slate-200 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3.5 px-4 text-center w-12">NO</th>
+                            <th class="py-3.5 px-4">TANGGAL</th>
+                            <th class="py-3.5 px-4">NIS/NAMA</th>
+                            <th class="py-3.5 px-4 text-center">KELAS</th>
+                            <th class="py-3.5 px-4 text-center">STATUS</th>
+                            <th class="py-3.5 px-4">KETERANGAN</th>
+                            <th class="py-3.5 px-4 text-center w-28">AKSI</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-dark-200/50">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($absensi as $a)
-                            <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                                <td class="px-6 py-3.5 text-sm text-dark-600 text-center">
-                                    {{ $absensi->firstItem() + $loop->index }}</td>
-                                <td class="px-6 py-3.5 text-sm text-dark-800">
+                            <tr class="hover:bg-blue-50/30 transition-colors">
+                                <td class="py-3.5 px-4 text-center text-slate-500 text-xs font-semibold">
+                                    {{ $absensi->firstItem() + $loop->index }}
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-800 font-medium whitespace-nowrap text-xs">
                                     {{ \Carbon\Carbon::parse($a->tanggal)->isoFormat('D MMM Y') }}
                                 </td>
-                                <td class="px-6 py-3.5">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="flex-shrink-0 w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xs uppercase">
+                                <td class="py-3.5 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-[#0052CC] font-bold text-xs flex items-center justify-center flex-shrink-0 uppercase">
                                             {{ substr($a->siswa->nama ?? '?', 0, 1) }}
                                         </div>
-                                        <div>
-                                            <p class="text-sm font-bold text-dark-800">{{ $a->siswa->nama ?? '-' }}</p>
-                                            <p class="text-xs text-dark-500 font-mono">{{ $a->siswa->nis ?? '-' }}</p>
+                                        <div class="min-w-0">
+                                            <p class="font-bold text-slate-900 text-xs truncate">{{ $a->siswa->nama ?? '-' }}</p>
+                                            <p class="text-[11px] text-slate-400 font-mono">{{ $a->siswa->nis ?? '-' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200">
+                                <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                    <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-[#0052CC] border border-blue-200">
                                         {{ $a->siswa->kelas->nama_kelas ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
+                                <td class="py-3.5 px-4 text-center whitespace-nowrap">
                                     @php $st = strtolower($a->status); @endphp
                                     @if ($st == 'hadir')
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <i class='bx bx-check-shield'></i> Hadir
                                         </span>
                                     @elseif($st == 'izin')
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
                                             <i class='bx bx-envelope'></i> Izin
                                         </span>
                                     @elseif($st == 'sakit')
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                             <i class='bx bx-plus-medical'></i> Sakit
                                         </span>
                                     @else
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
                                             <i class='bx bx-x-circle'></i> Alfa
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-3.5 text-sm text-dark-600 max-w-[150px] truncate"
-                                    title="{{ $a->keterangan }}">
+                                <td class="py-3.5 px-4 text-xs text-slate-600 max-w-[160px] truncate" title="{{ $a->keterangan }}">
                                     {{ $a->keterangan ?? '-' }}
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
-                                    <div class="flex items-center justify-center gap-2">
+                                <td class="py-3.5 px-4 text-center">
+                                    <div class="flex items-center justify-center gap-1.5">
                                         <button type="button"
-                                            onclick='openEditAbsensi({{ $a->id }}, @js($a->status), @js($a->keterangan))'
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
-                                            title="Edit">
-                                            <i class='bx bx-edit-alt text-lg'></i>
+                                                onclick='openEditAbsensi({{ $a->id }}, @js($a->status), @js($a->keterangan))'
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#0052CC] bg-blue-50 hover:bg-blue-100 transition"
+                                                title="Edit">
+                                            <i class='bx bx-edit-alt text-base'></i>
                                         </button>
                                         @if (Auth::user()->role === 'superadmin')
-                                            <form action="{{ route('dashboard.absensi.delete', $a->id) }}" method="POST"
-                                                class="inline">
+                                            <form action="{{ route('dashboard.absensi.delete', $a->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 <button type="button"
-                                                    class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors"
-                                                    title="Hapus">
-                                                    <i class='bx bx-trash text-lg'></i>
+                                                        class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition"
+                                                        title="Hapus">
+                                                    <i class='bx bx-trash text-base'></i>
                                                 </button>
                                             </form>
                                         @endif
@@ -271,16 +258,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <div
-                                            class="w-16 h-16 mb-4 rounded-full bg-dark-100 flex items-center justify-center">
-                                            <i class='bx bx-folder-open text-3xl text-dark-400'></i>
-                                        </div>
-                                        <h3 class="text-sm font-medium text-dark-900">Tidak ada data</h3>
-                                        <p class="mt-1 text-sm text-dark-500">Belum ada catatan absensi pada periode ini.
-                                        </p>
-                                    </div>
+                                <td colspan="7" class="py-12 text-center text-slate-400">
+                                    <i class='bx bx-folder-open text-4xl mb-2 text-slate-300'></i>
+                                    <p class="text-sm font-semibold text-slate-700">Tidak ada data</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Belum ada catatan absensi pada periode ini.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -288,72 +269,14 @@
                 </table>
             </div>
 
-            {{-- Pagination --}}
             @if ($absensi->hasPages())
-                <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+                <div class="pt-5 mt-4 border-t border-slate-100">
                     {{ $absensi->links() }}
                 </div>
             @endif
         </div>
-
-        {{-- Modal Edit Absensi --}}
-        @push('modals')
-            <div id="modal-editabsensi-dash" class="fixed inset-0 z-[60] hidden">
-                <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
-                    onclick="closeModal('modal-editabsensi-dash')"></div>
-                <div class="fixed inset-0 z-10 overflow-y-auto">
-                    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                        <div
-                            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md fade-in">
-                            <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                                <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                    <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
-                                    Edit Absensi
-                                </h3>
-                                <button type="button" onclick="closeModal('modal-editabsensi-dash')"
-                                    class="text-dark-400 hover:text-dark-600 transition-colors">
-                                    <i class='bx bx-x text-2xl'></i>
-                                </button>
-                            </div>
-                            <div class="px-6 py-5">
-                                <form id="formEditAbsensiDash" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Status
-                                            Kehadiran</label>
-                                        <select name="status" id="dash_edit_status" required
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="Hadir">Hadir</option>
-                                            <option value="Izin">Izin</option>
-                                            <option value="Sakit">Sakit</option>
-                                            <option value="Alfa">Alfa</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Keterangan
-                                            (Opsional)</label>
-                                        <textarea name="keterangan" id="dash_edit_keterangan" rows="3"
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                            placeholder="Ketik alasan perubahan..."></textarea>
-                                    </div>
-                                    <div class="mt-6 flex items-center justify-end gap-3">
-                                        <button type="button" onclick="closeModal('modal-editabsensi-dash')"
-                                            class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 font-medium transition-colors">
-                                            Batal
-                                        </button>
-                                        <button type="submit"
-                                            class="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-500/30 transition-all flex items-center gap-2">
-                                            <i class='bx bx-save text-lg'></i> Simpan
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endpush
     @endif
+
 
     @if (Auth::user()->role === 'orangtua' && isset($siswa))
         {{-- Info Anak --}}
@@ -596,6 +519,7 @@
             </div>
         </div>
     @endif
+
     {{-- TAMPILAN KHUSUS SISWA --}}
     @if (Auth::user()->role === 'siswa' && isset($siswa))
         {{-- Statistics Cards (Gaya Admin) --}}
@@ -834,6 +758,8 @@
             </div>
         </div>
     @endif
+    
+
     @if (in_array(Auth::user()->role, ['guru', 'kaprog']) && isset($guru))
         {{-- Top Statistics & Teacher Profile Row --}}
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
@@ -1082,17 +1008,80 @@
         </div>
     @endif
 
+
+
 @endsection
+
+@push('modals')
+            <div id="modal-editabsensi-dash" class="fixed inset-0 z-[60] hidden">
+                <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+                    onclick="closeModal('modal-editabsensi-dash')"></div>
+                <div class="fixed inset-0 z-10 overflow-y-auto">
+                    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                        <div
+                            class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md fade-in">
+                            <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
+                                    <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
+                                    Edit Absensi
+                                </h3>
+                                <button type="button" onclick="closeModal('modal-editabsensi-dash')"
+                                    class="text-dark-400 hover:text-dark-600 transition-colors">
+                                    <i class='bx bx-x text-2xl'></i>
+                                </button>
+                            </div>
+                            <div class="px-6 py-5">
+                                <form id="formEditAbsensiDash" method="POST">
+                                    @csrf
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Status
+                                            Kehadiran</label>
+                                        <select name="status" id="dash_edit_status" required
+                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                                            <option value="Hadir">Hadir</option>
+                                            <option value="Izin">Izin</option>
+                                            <option value="Sakit">Sakit</option>
+                                            <option value="Alfa">Alfa</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Keterangan
+                                            (Opsional)</label>
+                                        <textarea name="keterangan" id="dash_edit_keterangan" rows="3"
+                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                                            placeholder="Ketik alasan perubahan..."></textarea>
+                                    </div>
+                                    <div class="mt-6 flex items-center justify-end gap-3">
+                                        <button type="button" onclick="closeModal('modal-editabsensi-dash')"
+                                            class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 font-medium transition-colors">
+                                            Batal
+                                        </button>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-500/30 transition-all flex items-center gap-2">
+                                            <i class='bx bx-save text-lg'></i> Simpan
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endpush
 
 @push('scripts')
     <script>
-        function updateClock() {
+        function updateBannerClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = hours + ':' + minutes;
+            const timeEl = document.getElementById('banner-clock-time');
+            if (timeEl) {
+                timeEl.textContent = `${hours}.${minutes}`;
+            }
         }
-        setInterval(updateClock, 1000);
+        setInterval(updateBannerClock, 1000);
+        updateBannerClock();
 
         function updateClock() {
             const now = new Date();
