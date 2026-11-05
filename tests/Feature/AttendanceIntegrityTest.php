@@ -87,7 +87,7 @@ class AttendanceIntegrityTest extends TestCase
         );
 
         // Geofence that contains the coordinate used by the tests.
-        LokasiSekolah::firstOrCreate(
+        LokasiSekolah::updateOrCreate(
             ['id' => 1],
             ['latitude' => -0.5, 'longitude' => 123.0, 'radius' => 500]
         );
