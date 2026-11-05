@@ -18,12 +18,42 @@ class AuthController extends Controller
 
     public function proseslogin(Request $request)
     {
-        // Support typing username only (e.g. "budi" -> "budi@myskanic.com")
-        $inputIdentifier = trim($request->input('email', ''));
-        if (!empty($inputIdentifier) && !str_contains($inputIdentifier, '@')) {
-            $inputIdentifier .= '@myskanic.com';
+        $rawInput = trim($request->input('email', ''));
+        $resolvedEmail = strtolower($rawInput);
+
+        // Smart Identifier Resolution
+        $existing = User::where('email', $resolvedEmail)->first();
+
+        if (!$existing && !empty($rawInput)) {
+            if (!str_contains($rawInput, '@')) {
+                $targetRole = strtolower($rawInput);
+                if ($targetRole === 'ortu') {
+                    $targetRole = 'orangtua';
+                }
+
+                $roleMatch = User::where('role', $targetRole)->first();
+                if ($roleMatch) {
+                    $resolvedEmail = $roleMatch->email;
+                } else {
+                    $prefixMatch = User::where('email', 'like', $rawInput . '%')->first()
+                        ?? User::where('email', 'like', '%' . $rawInput . '%')->first();
+                    if ($prefixMatch) {
+                        $resolvedEmail = $prefixMatch->email;
+                    } else {
+                        $resolvedEmail = strtolower($rawInput) . '@myskanic.com';
+                    }
+                }
+            } else {
+                $local = explode('@', $rawInput)[0];
+                $localMatch = User::where('email', 'like', $local . '@%')->first()
+                    ?? User::where('email', 'like', $local . '%')->first();
+                if ($localMatch) {
+                    $resolvedEmail = $localMatch->email;
+                }
+            }
         }
-        $request->merge(['email' => strtolower($inputIdentifier)]);
+
+        $request->merge(['email' => $resolvedEmail]);
 
         $credentials = $request->validate([
             'email'    => ['required', 'email'],

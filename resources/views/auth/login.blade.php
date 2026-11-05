@@ -394,6 +394,39 @@
                     </button>
                 </form>
 
+                {{-- Quick Role Selector (Bantuan Kredensial Akun) --}}
+                <div class="mt-6 pt-5 border-t border-dark-100 text-center">
+                    <p class="text-[11px] font-semibold text-dark-400 uppercase tracking-wider mb-2.5">
+                        Pilih Cepat Akun Demo (Password: <code class="text-primary-600 font-bold">password</code>)
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-1.5">
+                        <button type="button" onclick="fillDemo('admin@gmail.com', 'password')"
+                            class="px-2.5 py-1 text-xs rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition border border-blue-200 cursor-pointer">
+                            Admin
+                        </button>
+                        <button type="button" onclick="fillDemo('superadmin@gmail.com', 'password')"
+                            class="px-2.5 py-1 text-xs rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium transition border border-indigo-200 cursor-pointer">
+                            Superadmin
+                        </button>
+                        <button type="button" onclick="fillDemo('kaprog.pplg@gmail.com', 'password')"
+                            class="px-2.5 py-1 text-xs rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 font-medium transition border border-purple-200 cursor-pointer">
+                            Kaprog
+                        </button>
+                        <button type="button" onclick="fillDemo('guru.budi@gmail.com', 'password')"
+                            class="px-2.5 py-1 text-xs rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium transition border border-emerald-200 cursor-pointer">
+                            Guru
+                        </button>
+                        <button type="button" onclick="fillDemo('siswa.rizki@gmail.com', 'password')"
+                            class="px-2.5 py-1 text-xs rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium transition border border-amber-200 cursor-pointer">
+                            Siswa
+                        </button>
+                        <button type="button" onclick="fillDemo('ortu.rizki@gmail.com', 'password')"
+                            class="px-2.5 py-1 text-xs rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium transition border border-slate-300 cursor-pointer">
+                            Orang Tua
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
             {{-- Footer --}}
@@ -411,6 +444,14 @@
 
     {{-- Scripts --}}
     <script>
+        // Fill demo credentials
+        function fillDemo(email, password) {
+            const emailInput = document.getElementById('email');
+            const passInput = document.getElementById('password');
+            if (emailInput) emailInput.value = email;
+            if (passInput) passInput.value = password;
+        }
+
         // Toggle password visibility
         function togglePassword() {
             const passwordInput = document.getElementById('password');
