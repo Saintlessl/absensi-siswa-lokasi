@@ -718,7 +718,8 @@ class AbsensiController extends Controller
     }
 
     /**
-     * Count working days (excludes Sunday) between two dates, inclusive.
+     * Count working days (excludes Sunday and any day registered as a
+     * non-effective day in the academic calendar) between two dates, inclusive.
      */
     private function countEffectiveDays(Carbon $from, Carbon $to): int
     {
@@ -726,13 +727,23 @@ class AbsensiController extends Controller
             return 0;
         }
 
+        // Fetch the whole range's non-effective days once instead of querying
+        // per day.
+        $nonEffective = \App\Models\AcademicCalendarDay::nonEffectiveWithin(
+            $from->toDateString(),
+            $to->toDateString()
+        );
+
         $days = 0;
         $cursor = $from->copy()->startOfDay();
 
         while ($cursor->lte($to)) {
-            if ($cursor->dayOfWeek !== Carbon::SUNDAY) {
+            $key = $cursor->format('Y-m-d');
+
+            if ($cursor->dayOfWeek !== Carbon::SUNDAY && !isset($nonEffective[$key])) {
                 $days++;
             }
+
             $cursor->addDay();
         }
 

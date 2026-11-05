@@ -36,8 +36,8 @@ class GenerateAlpaDaily extends Command
             ? Carbon::parse($this->option('date'))->startOfDay()
             : Carbon::yesterday()->startOfDay();
 
-        if ($target->isSunday()) {
-            $this->info("Tanggal {$target->toDateString()} adalah hari Minggu, tidak ada alpa yang dibuat.");
+        if ($target->isSunday() || \App\Models\AcademicCalendarDay::isNonEffective($target->toDateString())) {
+            $this->info("Tanggal {$target->toDateString()} adalah hari non-efektif, tidak ada alpa yang dibuat.");
             return self::SUCCESS;
         }
 
