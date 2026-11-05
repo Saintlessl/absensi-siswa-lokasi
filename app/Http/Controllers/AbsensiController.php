@@ -266,12 +266,15 @@ class AbsensiController extends Controller
                 ], 400);
             }
 
-            // - Waktu pulang minimal 14:55 WIB (5 menit sebelum jam 15:00)
-            $batasPulang = Carbon::today()->setTime(14, 55, 0);
+            // - Waktu pulang mengikuti pengaturan sekolah (default 14:55 WIB)
+            $jamPulangSetting = \App\Models\SchoolSetting::value('jam_pulang', '14:55');
+            [$jamPulangH, $jamPulangM] = array_pad(array_map('intval', explode(':', $jamPulangSetting)), 2, 0);
+            $batasPulang = Carbon::today()->setTime($jamPulangH, $jamPulangM, 0);
             if ($now->lt($batasPulang)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Belum waktunya absen pulang. Absen pulang dibuka mulai pukul 14:55 WIB (sekarang ' . $now->format('H:i') . ' WIB).'
+                    'message' => 'Belum waktunya absen pulang. Absen pulang dibuka mulai pukul '
+                        . $batasPulang->format('H:i') . ' WIB (sekarang ' . $now->format('H:i') . ' WIB).'
                 ], 400);
             }
 
@@ -313,7 +316,9 @@ class AbsensiController extends Controller
                 ], 400);
             }
 
-            $batasMasuk = Carbon::today()->setTime(7, 15, 0);
+            $jamMasukSetting = \App\Models\SchoolSetting::value('jam_masuk', '07:15');
+            [$jamMasukH, $jamMasukM] = array_pad(array_map('intval', explode(':', $jamMasukSetting)), 2, 0);
+            $batasMasuk = Carbon::today()->setTime($jamMasukH, $jamMasukM, 0);
             $keteranganTerlambat = null;
             $menitTerlambat = 0;
             $keteranganStatus = 'Tepat Waktu';

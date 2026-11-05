@@ -287,6 +287,60 @@
                 </p>
                 <ul class="space-y-1 stagger-children">
                     @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+                        {{-- Pengaturan Sekolah --}}
+                        <li>
+                            <a href="{{ route('settings.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('settings.*')
+                                          ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('settings.*')
+                                                ? 'bg-primary-600/30 text-primary-400'
+                                                : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-cog text-lg'></i>
+                                </div>
+                                <span>Pengaturan Sekolah</span>
+                            </a>
+                        </li>
+
+                        {{-- Kalender Akademik --}}
+                        <li>
+                            <a href="{{ route('academic_calendar.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('academic_calendar.*')
+                                          ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('academic_calendar.*')
+                                                ? 'bg-primary-600/30 text-primary-400'
+                                                : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-calendar-x text-lg'></i>
+                                </div>
+                                <span>Kalender Akademik</span>
+                            </a>
+                        </li>
+
+                        {{-- Persetujuan Izin --}}
+                        <li>
+                            <a href="{{ route('izin.approval') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('izin.approval')
+                                          ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                          : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('izin.approval')
+                                                ? 'bg-primary-600/30 text-primary-400'
+                                                : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                    <i class='bx bx-task text-lg'></i>
+                                </div>
+                                <span>Persetujuan Izin</span>
+                            </a>
+                        </li>
+
                         {{-- Data Ruangan --}}
                         <li>
                             <a href="{{ route('rooms.index') }}"
@@ -354,6 +408,25 @@
             @php
                 $sidebarGuru = \App\Models\Guru::with(['activeHomeroomAssignment.kelas', 'user.jurusan'])->where('user_id', Auth::id())->first();
             @endphp
+
+            {{-- Persetujuan Izin --}}
+            <div class="mb-5">
+                <ul class="space-y-1 stagger-children">
+                    <li>
+                        <a href="{{ route('izin.approval') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('izin.approval')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('izin.approval') ? 'bg-primary-600/30 text-primary-400' : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-task text-lg'></i>
+                            </div>
+                            <span>Persetujuan Izin</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
             {{-- 1. PEMBELAJARAN & JADWAL --}}
             <div class="mb-5">

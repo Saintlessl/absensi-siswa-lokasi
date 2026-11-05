@@ -8,6 +8,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\FaceBiometricController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\IzinController;
+use App\Http\Controllers\IzinApprovalController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\KelasController;
@@ -21,6 +22,8 @@ use App\Http\Controllers\TeacherViewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\AcademicStructureController;
+use App\Http\Controllers\SchoolSettingController;
+use App\Http\Controllers\AcademicCalendarController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -125,6 +128,15 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Lokasi Sekolah & Radius Geofence GPS
         Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('lokasi_sekolah');
         Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('lokasi_sekolah.update');
+
+        // Pengaturan Sekolah (jam masuk / jam pulang) & Kalender Akademik
+        Route::get('/pengaturan-sekolah', [SchoolSettingController::class, 'index'])->name('settings.index');
+        Route::post('/pengaturan-sekolah', [SchoolSettingController::class, 'update'])->name('settings.update');
+
+        Route::get('/kalender-akademik', [AcademicCalendarController::class, 'index'])->name('academic_calendar.index');
+        Route::post('/kalender-akademik', [AcademicCalendarController::class, 'store'])->name('academic_calendar.store');
+        Route::post('/kalender-akademik/{id}/toggle', [AcademicCalendarController::class, 'toggle'])->name('academic_calendar.toggle');
+        Route::post('/kalender-akademik/{id}/delete', [AcademicCalendarController::class, 'destroy'])->name('academic_calendar.destroy');
 
         // Dashboard Operations
         Route::post('/dashboard/absensi/{id}/update', [DashboardController::class, 'updateAbsensi'])->name('dashboard.absensi.update');
@@ -234,9 +246,19 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Izin / Sakit
         Route::get('/izin-siswa', [IzinController::class, 'index'])->name('izin');
         Route::post('/izin-siswa', [IzinController::class, 'store'])->name('izin.store');
+        Route::post('/izin-siswa/{id}/cancel', [IzinController::class, 'cancel'])->name('izin.cancel');
 
         // Manajemen Perangkat Siswa (Device Limit Max 2)
         Route::get('/perangkat-saya', [DeviceController::class, 'index'])->name('siswa.devices');
         Route::post('/perangkat-saya/revoke/{id}', [DeviceController::class, 'revoke'])->name('siswa.devices.revoke');
+    });
+
+    // =========================================================================
+    // PERSETUJUAN IZIN (Admin, Kaprog, Wali Kelas / Guru)
+    // =========================================================================
+    Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
+        Route::get('/persetujuan-izin', [IzinApprovalController::class, 'index'])->name('izin.approval');
+        Route::post('/persetujuan-izin/{id}/approve', [IzinApprovalController::class, 'approve'])->name('izin.approve');
+        Route::post('/persetujuan-izin/{id}/reject', [IzinApprovalController::class, 'reject'])->name('izin.reject');
     });
 });
