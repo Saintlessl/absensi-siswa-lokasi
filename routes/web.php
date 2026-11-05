@@ -24,6 +24,14 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\AcademicStructureController;
 use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\AcademicCalendarController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\WhatsAppLogController;
+use App\Http\Controllers\TeachingJournalController;
+use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\PklController;
+use App\Http\Controllers\DisciplineCounselingController;
+use App\Http\Controllers\PortfolioController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -198,6 +206,10 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Biometrik Actions (Superadmin & Admin)
         Route::post('/admin/biometrik-siswa/{id}/request-re-enroll', [FaceBiometricController::class, 'adminRequestReEnroll'])->name('admin.biometrik.re_enroll');
         Route::post('/admin/biometrik-siswa/{id}/toggle-suspend', [FaceBiometricController::class, 'adminToggleSuspend'])->name('admin.biometrik.toggle_suspend');
+
+        // Monitoring WhatsApp Gateway
+        Route::get('/admin/whatsapp-logs', [WhatsAppLogController::class, 'index'])->name('admin.whatsapp.logs');
+        Route::post('/admin/whatsapp-logs/{id}/retry', [WhatsAppLogController::class, 'retry'])->name('admin.whatsapp.retry');
     });
 
     // Pendaftaran Biometrik Terpandu Sekolah / Lab Komputer & Monitoring (Superadmin, Admin, Guru)
@@ -224,6 +236,23 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::get('/guru-kelas', [TeacherViewController::class, 'myClasses'])->name('teacher.classes');
         Route::get('/guru-kelas/{kelas}', [TeacherViewController::class, 'showClassStudents'])->name('teacher.class.students');
         Route::get('/wali-kelas/monitoring', [TeacherViewController::class, 'homeroomMonitoring'])->name('homeroom.monitoring');
+
+        // Jurnal Mengajar Harian Guru & Presensi Sesi Mapel
+        Route::get('/jurnal-mengajar', [TeachingJournalController::class, 'index'])->name('jurnal.index');
+        Route::get('/jurnal-mengajar/tambah', [TeachingJournalController::class, 'create'])->name('jurnal.create');
+        Route::post('/jurnal-mengajar', [TeachingJournalController::class, 'store'])->name('jurnal.store');
+        Route::get('/jurnal-mengajar/{id}', [TeachingJournalController::class, 'show'])->name('jurnal.show');
+        Route::delete('/jurnal-mengajar/{id}', [TeachingJournalController::class, 'destroy'])->name('jurnal.destroy');
+        Route::get('/monitoring-jurnal', [TeachingJournalController::class, 'adminMonitoring'])->name('jurnal.monitoring');
+
+        // Buku Nilai & Penilaian Akademik (Gradebook)
+        Route::get('/buku-nilai', [AssessmentController::class, 'index'])->name('gradebook.index');
+        Route::get('/buku-nilai/buat', [AssessmentController::class, 'create'])->name('gradebook.create');
+        Route::post('/buku-nilai', [AssessmentController::class, 'store'])->name('gradebook.store');
+        Route::get('/buku-nilai/{id}/input', [AssessmentController::class, 'inputScores'])->name('gradebook.input');
+        Route::post('/buku-nilai/{id}/input', [AssessmentController::class, 'saveScores'])->name('gradebook.save');
+        Route::post('/buku-nilai/{id}/publish', [AssessmentController::class, 'publish'])->name('gradebook.publish');
+        Route::delete('/buku-nilai/{id}', [AssessmentController::class, 'destroy'])->name('gradebook.destroy');
     });
 
     // =========================================================================
@@ -251,7 +280,76 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Manajemen Perangkat Siswa (Device Limit Max 2)
         Route::get('/perangkat-saya', [DeviceController::class, 'index'])->name('siswa.devices');
         Route::post('/perangkat-saya/revoke/{id}', [DeviceController::class, 'revoke'])->name('siswa.devices.revoke');
+
+        // Nilai Akademik Siswa
+        Route::get('/nilai-saya', [AssessmentController::class, 'studentGradebook'])->name('gradebook.student');
     });
+
+    Route::middleware(['role:orangtua'])->group(function () {
+        Route::get('/nilai-anak', [AssessmentController::class, 'parentGradebook'])->name('gradebook.parent');
+    });
+
+    // =========================================================================
+    // IN-APP NOTIFICATION CENTER (All Authenticated Users)
+    // =========================================================================
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifikasi/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread');
+    Route::post('/notifikasi/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark_read');
+    Route::post('/notifikasi/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark_all_read');
+    Route::post('/notifikasi/clear-read', [NotificationController::class, 'clearRead'])->name('notifications.clear_read');
+    Route::delete('/notifikasi/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    // =========================================================================
+    // INVENTARIS & PEMINJAMAN ALAT BENGKEL/LAB (Semua Role Berhak Meminjam)
+    // =========================================================================
+    Route::get('/inventaris', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventaris/buat', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('/inventaris', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('/inventaris/{id}', [InventoryController::class, 'show'])->name('inventory.show');
+    Route::delete('/inventaris/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+
+    Route::get('/peminjaman-alat', [InventoryController::class, 'borrowingsIndex'])->name('inventory.borrowings');
+    Route::post('/peminjaman-alat/ajukan', [InventoryController::class, 'requestBorrow'])->name('inventory.borrow.request');
+    Route::post('/peminjaman-alat/{id}/approve', [InventoryController::class, 'approveBorrow'])->name('inventory.borrow.approve');
+    Route::post('/peminjaman-alat/{id}/return', [InventoryController::class, 'returnItem'])->name('inventory.borrow.return');
+
+    // =========================================================================
+    // PKL / PRAKTIK KERJA LAPANGAN & MAGANG INDUSTRI
+    // =========================================================================
+    Route::get('/pkl/mitra-industri', [PklController::class, 'partnersIndex'])->name('pkl.partners.index');
+    Route::post('/pkl/mitra-industri', [PklController::class, 'partnerStore'])->name('pkl.partners.store');
+    Route::get('/pkl/penempatan', [PklController::class, 'placementsIndex'])->name('pkl.placements.index');
+    Route::post('/pkl/penempatan', [PklController::class, 'placementStore'])->name('pkl.placements.store');
+    Route::get('/pkl/monitoring', [PklController::class, 'monitoringDashboard'])->name('pkl.monitoring');
+    Route::get('/pkl/verifikasi-logbook', [PklController::class, 'advisorLogbookIndex'])->name('pkl.advisor.logbooks');
+    Route::post('/pkl/logbook/{id}/review', [PklController::class, 'advisorLogbookReview'])->name('pkl.advisor.review');
+
+    // Student PKL Portal
+    Route::get('/pkl/portal-siswa', [PklController::class, 'studentPortal'])->name('pkl.student.portal');
+    Route::post('/pkl/presensi', [PklController::class, 'studentCheckIn'])->name('pkl.student.checkin');
+    Route::post('/pkl/logbook', [PklController::class, 'studentLogbookStore'])->name('pkl.student.logbook');
+
+    // =========================================================================
+    // KEDISIPLINAN & BIMBINGAN KONSELING (BK)
+    // =========================================================================
+    Route::get('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineIndex'])->name('discipline.index');
+    Route::post('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineStore'])->name('discipline.store');
+    Route::post('/kedisiplinan/{id}/status', [DisciplineCounselingController::class, 'disciplineUpdateStatus'])->name('discipline.status');
+
+    Route::get('/konseling-bk', [DisciplineCounselingController::class, 'counselingIndex'])->name('counseling.index');
+    Route::post('/konseling-bk', [DisciplineCounselingController::class, 'counselingStore'])->name('counseling.store');
+
+    Route::get('/rekor-kedisiplinan-siswa', [DisciplineCounselingController::class, 'studentPortal'])->name('discipline.student.portal');
+
+    // =========================================================================
+    // ETALASE KARYA & TEACHING FACTORY (TeFa)
+    // =========================================================================
+    Route::get('/etalase-karya', [PortfolioController::class, 'index'])->name('portfolio.index');
+    Route::get('/etalase-karya/karya-saya', [PortfolioController::class, 'studentIndex'])->name('portfolio.student.index');
+    Route::post('/etalase-karya', [PortfolioController::class, 'store'])->name('portfolio.store');
+    Route::get('/etalase-karya/kurasi', [PortfolioController::class, 'moderationIndex'])->name('portfolio.moderation');
+    Route::post('/etalase-karya/{id}/kurasi', [PortfolioController::class, 'moderate'])->name('portfolio.moderate');
+    Route::get('/etalase-karya/{slug}', [PortfolioController::class, 'show'])->name('portfolio.show');
 
     // =========================================================================
     // PERSETUJUAN IZIN (Admin, Kaprog, Wali Kelas / Guru)

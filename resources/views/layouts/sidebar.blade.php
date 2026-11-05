@@ -124,6 +124,78 @@
                                 <span class="sidebar-label transition-all duration-300">Data Orang Tua</span>
                             </a>
                         </li>
+
+                        {{-- Inventaris Alat Bengkel/Lab --}}
+                        <li>
+                            <a href="{{ route('inventory.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('inventory.*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('inventory.*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-wrench text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Inventaris Alat</span>
+                            </a>
+                        </li>
+
+                        {{-- Mitra DU/DI --}}
+                        <li>
+                            <a href="{{ route('pkl.partners.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('pkl.partners*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('pkl.partners*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-briefcase text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Mitra DU/DI</span>
+                            </a>
+                        </li>
+
+                        {{-- Penempatan PKL --}}
+                        <li>
+                            <a href="{{ route('pkl.placements.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('pkl.placements*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('pkl.placements*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-group text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Penempatan PKL</span>
+                            </a>
+                        </li>
+
+                        {{-- Kedisiplinan & BK --}}
+                        <li>
+                            <a href="{{ route('discipline.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('discipline.*') || request()->routeIs('counseling.*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('discipline.*') || request()->routeIs('counseling.*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-shield-quarter text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Kedisiplinan & BK</span>
+                            </a>
+                        </li>
                     @endif
                 </ul>
             </div>
@@ -217,6 +289,62 @@
                             <span class="sidebar-label transition-all duration-300">Alokasi Ruangan</span>
                         </a>
                     </li>
+
+                    @if (in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog']))
+                        {{-- Monitoring Jurnal Guru --}}
+                        <li>
+                            <a href="{{ route('jurnal.monitoring') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('jurnal.monitoring*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('jurnal.monitoring*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-book-content text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Monitoring Jurnal</span>
+                            </a>
+                        </li>
+
+                        {{-- Monitoring PKL & Industri --}}
+                        <li>
+                            <a href="{{ route('pkl.monitoring') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('pkl.monitoring*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('pkl.monitoring*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-line-chart text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Monitoring PKL</span>
+                            </a>
+                        </li>
+
+                        {{-- Etalase Karya & TeFa --}}
+                        <li>
+                            <a href="{{ route('portfolio.index') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('portfolio.*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('portfolio.*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bx-bulb text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Etalase Karya & TeFa</span>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
 
@@ -279,6 +407,26 @@
                             <span class="sidebar-label transition-all duration-300">Rekap Presensi</span>
                         </a>
                     </li>
+
+                    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+                        {{-- Log Notifikasi WhatsApp --}}
+                        <li>
+                            <a href="{{ route('admin.whatsapp.logs') }}"
+                                class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                      {{ request()->routeIs('admin.whatsapp*')
+                                          ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                            {{ request()->routeIs('admin.whatsapp*')
+                                                ? 'bg-blue-50 text-[#0052CC]'
+                                                : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                    <i class='bx bxl-whatsapp text-lg'></i>
+                                </div>
+                                <span class="sidebar-label transition-all duration-300">Gateway WhatsApp</span>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
 
@@ -462,6 +610,45 @@
                             <span class="sidebar-label transition-all duration-300">Kelas yang Diajar</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('jurnal.index') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('jurnal.*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('jurnal.*') ? 'bg-blue-50 text-[#0052CC]' : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                <i class='bx bx-book-reader text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Jurnal Mengajar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('gradebook.index') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('gradebook.*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('gradebook.*') ? 'bg-blue-50 text-[#0052CC]' : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                <i class='bx bx-edit text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Buku Nilai</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('pkl.advisor.logbooks') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('pkl.advisor*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('pkl.advisor*') ? 'bg-blue-50 text-[#0052CC]' : 'bg-white/10 text-blue-200 group-hover:bg-white/15 group-hover:text-white' }}">
+                                <i class='bx bx-check-shield text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Bimbingan PKL</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
@@ -630,6 +817,30 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('gradebook.parent') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('gradebook.parent*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-blue-200 group-hover:bg-white/15 group-hover:text-white">
+                                <i class='bx bx-award text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Nilai Akademik Anak</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('discipline.student.portal') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('discipline.student*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-blue-200 group-hover:bg-white/15 group-hover:text-white">
+                                <i class='bx bx-shield-quarter text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Kedisiplinan & Prestasi Anak</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('siswa.devices') }}"
                             class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
                                   {{ request()->routeIs('siswa.devices*')
@@ -639,6 +850,54 @@
                                 <i class='bx bx-devices text-lg'></i>
                             </div>
                             <span class="sidebar-label transition-all duration-300">Perangkat Saya</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('gradebook.student') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('gradebook.student*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-blue-200 group-hover:bg-white/15 group-hover:text-white">
+                                <i class='bx bx-award text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Nilai Akademik</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('pkl.student.portal') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('pkl.student*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-blue-200 group-hover:bg-white/15 group-hover:text-white">
+                                <i class='bx bx-buildings text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Portal PKL & Magang</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('discipline.student.portal') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('discipline.student*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-blue-200 group-hover:bg-white/15 group-hover:text-white">
+                                <i class='bx bx-shield-quarter text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Kedisiplinan & Prestasi</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('portfolio.student.index') }}"
+                            class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('portfolio.student*')
+                                      ? 'bg-white text-[#0052CC] font-bold rounded-full shadow-sm'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-blue-200 group-hover:bg-white/15 group-hover:text-white">
+                                <i class='bx bx-palette text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Portofolio & TeFa</span>
                         </a>
                     </li>
                 </ul>

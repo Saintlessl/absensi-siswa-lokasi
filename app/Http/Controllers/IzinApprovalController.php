@@ -88,6 +88,12 @@ class IzinApprovalController extends Controller
             );
         });
 
+        try {
+            app(\App\Services\InAppNotificationService::class)->notifyLeaveStatusUpdated($izin, 'approved', Auth::user()->name);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Notification failed for izin {$izin->id} approval: " . $e->getMessage());
+        }
+
         return back()->with('success', "Pengajuan {$izin->jenis} {$izin->siswa->nama} disetujui.");
     }
 
@@ -111,6 +117,12 @@ class IzinApprovalController extends Controller
             'decided_by'        => Auth::id(),
             'decided_at'        => now(),
         ]);
+
+        try {
+            app(\App\Services\InAppNotificationService::class)->notifyLeaveStatusUpdated($izin, 'rejected', Auth::user()->name);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Notification failed for izin {$izin->id} rejection: " . $e->getMessage());
+        }
 
         return back()->with('success', "Pengajuan {$izin->jenis} {$izin->siswa->nama} ditolak.");
     }

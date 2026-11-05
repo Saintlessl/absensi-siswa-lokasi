@@ -60,10 +60,9 @@ class WhatsAppNotificationService
             ];
         }
 
-        // 4. Create Initial Pending Log
-        $provider = config('services.whatsapp.provider', env('WHATSAPP_PROVIDER', 'fonnte'));
-        $token = config('services.whatsapp.token', env('WHATSAPP_API_TOKEN', ''));
-        $apiUrl = config('services.whatsapp.url', env('WHATSAPP_API_URL', 'https://api.fonnte.com/send'));
+        // 4. Create Initial Pending Log with Gateway Adapter
+        $gateway = \App\Services\WhatsApp\WhatsAppGatewayManager::create();
+        $provider = $gateway->getProviderName();
 
         $log = WhatsappNotificationLog::create([
             'absensi_id'   => $absensi->id,
@@ -75,80 +74,25 @@ class WhatsAppNotificationService
             'provider'     => $provider,
         ]);
 
-        // 5. Send via Selected Provider
+        // 5. Send via Adapter
         try {
-            // Simulation / Log driver if token is empty or provider is explicitly 'log'
-            if ($provider === 'log' || empty($token)) {
-                Log::info("[WhatsApp Simulation] Sent {$tipe} notification to {$normalizedPhone}:\n{$message}");
+            $result = $gateway->send($normalizedPhone, $message, [
+                'absensi_id' => $absensi->id,
+                'siswa_id'   => $siswa->id,
+                'tipe'       => $tipe,
+            ]);
 
-                $log->update([
-                    'status'           => 'sent',
-                    'sent_at'          => now(),
-                    'response_payload' => json_encode([
-                        'mode'    => 'simulation',
-                        'notice'  => 'Terkirim via log driver (Isi WHATSAPP_API_TOKEN di .env untuk pengiriman nyata).',
-                        'target'  => $normalizedPhone,
-                    ]),
-                ]);
-
-                return [
-                    'success' => true,
-                    'status'  => 'sent',
-                    'message' => 'Notifikasi WhatsApp berhasil dikirim (mode simulasi/log).',
-                    'log_id'  => $log->id,
-                ];
-            }
-
-            // Real Provider: Fonnte API
-            if ($provider === 'fonnte') {
-                $response = Http::timeout(10)
-                    ->withHeaders([
-                        'Authorization' => $token,
-                    ])
-                    ->post($apiUrl, [
-                        'target'      => $normalizedPhone,
-                        'message'     => $message,
-                        'countryCode' => '62',
-                    ]);
-
-                $resBody = $response->json();
-                $isOk = $response->successful() && ($resBody['status'] ?? false) == true;
-
-                $log->update([
-                    'status'           => $isOk ? 'sent' : 'failed',
-                    'sent_at'          => $isOk ? now() : null,
-                    'response_payload' => json_encode($resBody),
-                    'error_message'    => $isOk ? null : ($resBody['reason'] ?? 'Gagal mengirim pesan dari gateway WhatsApp'),
-                ]);
-
-                return [
-                    'success' => $isOk,
-                    'status'  => $isOk ? 'sent' : 'failed',
-                    'message' => $isOk ? 'Notifikasi WhatsApp berhasil dikirim ke orang tua.' : 'Gagal mengirim WhatsApp.',
-                    'log_id'  => $log->id,
-                ];
-            }
-
-            // Generic / Other HTTP Provider
-            $response = Http::timeout(10)
-                ->withHeaders(['Authorization' => "Bearer {$token}"])
-                ->post($apiUrl, [
-                    'phone'   => $normalizedPhone,
-                    'message' => $message,
-                ]);
-
-            $isOk = $response->successful();
             $log->update([
-                'status'           => $isOk ? 'sent' : 'failed',
-                'sent_at'          => $isOk ? now() : null,
-                'response_payload' => $response->body(),
-                'error_message'    => $isOk ? null : 'HTTP ' . $response->status(),
+                'status'           => $result['status'],
+                'sent_at'          => $result['success'] ? now() : null,
+                'response_payload' => is_array($result['response']) ? json_encode($result['response']) : (string) $result['response'],
+                'error_message'    => $result['error'],
             ]);
 
             return [
-                'success' => $isOk,
-                'status'  => $isOk ? 'sent' : 'failed',
-                'message' => $isOk ? 'Notifikasi WhatsApp berhasil dikirim.' : 'Gateway WhatsApp merespons error.',
+                'success' => $result['success'],
+                'status'  => $result['status'],
+                'message' => $result['success'] ? 'Notifikasi WhatsApp berhasil dikirim.' : ($result['error'] ?? 'Gagal mengirim WhatsApp.'),
                 'log_id'  => $log->id,
             ];
 
@@ -163,7 +107,7 @@ class WhatsAppNotificationService
             return [
                 'success' => false,
                 'status'  => 'failed',
-                'message' => 'Terjadi kendala jaringan saat menghubungi gateway WhatsApp.',
+                'message' => 'Terjadi kendala saat menghubungi gateway WhatsApp.',
                 'log_id'  => $log->id,
             ];
         }

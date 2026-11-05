@@ -71,13 +71,19 @@ class IzinController extends Controller
             return redirect()->back()->with('error', 'Pengajuan izin untuk tanggal tersebut sudah ada.');
         }
 
-        Izin::create([
+        $izin = Izin::create([
             'siswa_id'   => $siswa->id,
             'tanggal'    => $request->tanggal,
             'jenis'      => $request->jenis,
             'keterangan' => $request->keterangan,
             'status'     => 'pending',
         ]);
+
+        try {
+            app(\App\Services\InAppNotificationService::class)->notifyLeaveRequested($izin);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Notification failed for izin {$izin->id}: " . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Pengajuan ' . ucfirst($request->jenis) . ' terkirim dan menunggu persetujuan.');
     }
