@@ -45,11 +45,11 @@
                             
                             {{-- Tanggal --}}
                             <div>
-                                <label class="block text-sm font-medium text-dark-700 mb-2">Tanggal Pengajuan</label>
-                                <div class="w-full px-4 py-3 bg-dark-50 border border-dark-100 rounded-xl text-dark-500 font-medium cursor-not-allowed flex items-center gap-2">
-                                    <i class='bx bx-calendar text-dark-400'></i>
-                                    {{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}
-                                </div>
+                                <label for="tanggal" class="block text-sm font-medium text-dark-700 mb-2">Tanggal Pengajuan <span class="text-rose-500">*</span></label>
+                                <input type="date" name="tanggal" id="tanggal" required
+                                    value="{{ old('tanggal', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}"
+                                    class="block w-full px-4 py-3 border border-dark-200 rounded-xl bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                                @error('tanggal')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
                             </div>
                             
                             {{-- Kategori --}}
@@ -57,7 +57,7 @@
                                 <label class="block text-sm font-medium text-dark-700 mb-2">Pilih Kategori <span class="text-rose-500">*</span></label>
                                 <div class="grid grid-cols-2 gap-4">
                                     <label class="relative cursor-pointer group">
-                                        <input type="radio" name="status" value="izin" class="peer sr-only" required>
+                                        <input type="radio" name="jenis" value="izin" class="peer sr-only" required>
                                         <div class="p-4 rounded-xl border-2 border-dark-200 bg-white hover:bg-dark-50 peer-checked:border-primary-500 peer-checked:bg-primary-50/50 transition-all duration-200 text-center">
                                             <i class='bx bx-envelope text-3xl text-dark-400 peer-checked:text-primary-500 mb-2 transition-colors duration-200 block'></i>
                                             <span class="font-bold text-dark-700 peer-checked:text-primary-700 transition-colors duration-200">Keperluan (Izin)</span>
@@ -65,7 +65,7 @@
                                     </label>
                                     
                                     <label class="relative cursor-pointer group">
-                                        <input type="radio" name="status" value="sakit" class="peer sr-only" required>
+                                        <input type="radio" name="jenis" value="sakit" class="peer sr-only" required>
                                         <div class="p-4 rounded-xl border-2 border-dark-200 bg-white hover:bg-dark-50 peer-checked:border-rose-500 peer-checked:bg-rose-50/50 transition-all duration-200 text-center">
                                             <i class='bx bx-plus-medical text-3xl text-dark-400 peer-checked:text-rose-500 mb-2 transition-colors duration-200 block'></i>
                                             <span class="font-bold text-dark-700 peer-checked:text-rose-700 transition-colors duration-200">Sakit</span>
@@ -82,7 +82,7 @@
                                         class="block w-full px-4 py-3 border border-dark-200 rounded-xl bg-white focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
                                         placeholder="Berikan alasan kenapa Anda tidak dapat masuk ke sekolah hari ini..."></textarea>
                                 </div>
-                                <p class="text-xs text-dark-400 mt-2">Maksimal 255 karakter.</p>
+                                <p class="text-xs text-dark-400 mt-2">Maksimal 500 karakter.</p>
                             </div>
 
                             {{-- Submit --}}
@@ -141,6 +141,46 @@
                 </ul>
             </div>
 
+            {{-- Riwayat Pengajuan --}}
+            <div class="glass-card rounded-2xl border border-dark-200/50 p-6">
+                <h4 class="text-sm font-bold text-dark-800 mb-4 flex items-center gap-2">
+                    <i class='bx bx-history text-primary-600 text-lg'></i> Riwayat Pengajuan
+                </h4>
+
+                @if(($riwayat ?? collect())->isEmpty())
+                    <p class="text-xs text-dark-400">Belum ada pengajuan.</p>
+                @else
+                    <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                        @foreach($riwayat as $r)
+                            <div class="p-3 rounded-xl border border-dark-100 bg-dark-50/40">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs font-mono font-semibold text-dark-700">{{ $r->tanggal->translatedFormat('d M Y') }}</span>
+                                    @if($r->status === 'pending')
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">MENUNGGU</span>
+                                    @elseif($r->status === 'approved')
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">DISETUJUI</span>
+                                    @else
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">DITOLAK</span>
+                                    @endif
+                                </div>
+                                <p class="text-[11px] text-dark-600 mt-1">{{ ucfirst($r->jenis) }} &bull; {{ \Illuminate\Support\Str::limit($r->keterangan, 60) }}</p>
+                                @if($r->keputusan_catatan)
+                                    <p class="text-[10px] text-dark-400 mt-1 italic">Catatan: {{ $r->keputusan_catatan }}</p>
+                                @endif
+                                @if($r->status === 'pending')
+                                    <form action="{{ route('izin.cancel', $r->id) }}" method="POST" class="mt-2">
+                                        @csrf
+                                        <button type="submit" class="text-[10px] font-semibold text-rose-600 hover:text-rose-800">
+                                            <i class='bx bx-x-circle'></i> Batalkan
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
         </div>
 
     </div>
@@ -152,7 +192,7 @@
         const form = document.getElementById('frmIzin');
         if(form) {
             form.addEventListener('submit', function(e) {
-                const statusElems = document.getElementsByName('status');
+                const statusElems = document.getElementsByName('jenis');
                 let isChecked = false;
                 for (var i = 0; i < statusElems.length; i++) {
                     if (statusElems[i].checked) {
