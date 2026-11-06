@@ -55,29 +55,44 @@ class IzinController extends Controller
             'keterangan' => 'required|string|max:500',
         ]);
 
-        $cekAbsen = Absensi::where('siswa_id', $siswa->id)
-            ->whereDate('tanggal', $request->tanggal)
-            ->exists();
+        // Race-safe: unique (siswa_id, tanggal) on absensis and izins means a
+        // concurrent double-submit would otherwise surface as a raw 500.
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($siswa, $request) {
+                $cekAbsen = Absensi::where('siswa_id', $siswa->id)
+                    ->whereDate('tanggal', $request->tanggal)
+                    ->lockForUpdate()
+                    ->exists();
 
-        if ($cekAbsen) {
-            return redirect()->back()->with('error', 'Anda sudah memiliki rekam kehadiran pada tanggal tersebut.');
+                if ($cekAbsen) {
+                    throw new \RuntimeException('Kehadiran sudah tercatat untuk tanggal tersebut.');
+                }
+
+                $existsPending = Izin::where('siswa_id', $siswa->id)
+                    ->whereDate('tanggal', $request->tanggal)
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($existsPending) {
+                    throw new \RuntimeException('Pengajuan izin untuk tanggal tersebut sudah ada.');
+                }
+
+                Izin::create([
+                    'siswa_id'   => $siswa->id,
+                    'tanggal'    => $request->tanggal,
+                    'jenis'      => $request->jenis,
+                    'keterangan' => $request->keterangan,
+                    'status'     => 'pending',
+                ]);
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', 'Pengajuan untuk tanggal tersebut sudah ada.');
         }
-
-        $existsPending = Izin::where('siswa_id', $siswa->id)
+        $izin = Izin::where('siswa_id', $siswa->id)
             ->whereDate('tanggal', $request->tanggal)
-            ->exists();
-
-        if ($existsPending) {
-            return redirect()->back()->with('error', 'Pengajuan izin untuk tanggal tersebut sudah ada.');
-        }
-
-        $izin = Izin::create([
-            'siswa_id'   => $siswa->id,
-            'tanggal'    => $request->tanggal,
-            'jenis'      => $request->jenis,
-            'keterangan' => $request->keterangan,
-            'status'     => 'pending',
-        ]);
+            ->first();
 
         try {
             app(\App\Services\InAppNotificationService::class)->notifyLeaveRequested($izin);
