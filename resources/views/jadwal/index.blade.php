@@ -141,154 +141,34 @@
     </div>
 
     @push('modals')
-        {{-- Modal Tambah jadwal --}}
-        <div id="modal-inputjadwal" class="fixed inset-0 z-[60] hidden">
-            {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
-                onclick="closeModal('modal-inputjadwal')"></div>
+        {{-- Modal Tambah jadwal (Wizard) --}}
+        @include('jadwal.modal-wizard')
 
-            {{-- Modal Panel --}}
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
-                        {{-- Header --}}
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-calendar-plus text-primary-600 text-xl'></i>
-                                Tambah Data Jadwal Pelajaran
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-inputjadwal')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
-                        </div>
-
-                        {{-- Body --}}
-                        <div class="px-6 py-5">
-                            <form action="{{ route('jadwal.store') }}" method="POST" id="frmJadwal">
-                                @csrf
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {{-- Pilih Guru --}}
-                                    <div>
-                                        <label for="guru_id" class="block text-sm font-medium text-dark-700 mb-1.5">Guru
-                                            Pengajar</label>
-                                        <select name="guru_id" id="guru_id" required onchange="updateMapel()"
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="" data-mapel="">-- Pilih Guru --</option>
-                                            @foreach ($guru as $g)
-                                                {{-- Simpan data mapel di atribut data-mapel --}}
-                                                <option value="{{ $g->id }}" data-mapel="{{ $g->mapel }}">
-                                                    {{ $g->nama }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    {{-- Mata Pelajaran (Otomatis terisi) --}}
-                                    <div class="md:col-span-2">
-                                        <label for="mata_pelajaran" class="block text-sm font-medium text-dark-700 mb-1.5">Mata
-                                            Pelajaran</label>
-                                        <input type="text" name="mata_pelajaran" id="mata_pelajaran" required readonly
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-100 text-dark-500 focus:outline-none cursor-not-allowed transition-all duration-200"
-                                            placeholder="Pilih guru terlebih dahulu">
-                                    </div>
-
-                                    {{-- Pilih Kelas --}}
-                                    <div>
-                                        <label for="kelas_id"
-                                            class="block text-sm font-medium text-dark-700 mb-1.5">Kelas</label>
-                                        <select name="kelas_id" id="kelas_id" required
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="">-- Pilih Kelas --</option>
-                                            @foreach ($kelas as $k)
-                                                <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    {{-- Hari --}}
-                                    <div>
-                                        <label for="hari"
-                                            class="block text-sm font-medium text-dark-700 mb-1.5">Hari</label>
-                                        <select name="hari" id="hari" required
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="">-- Pilih Hari --</option>
-                                            <option value="Senin">Senin</option>
-                                            <option value="Selasa">Selasa</option>
-                                            <option value="Rabu">Rabu</option>
-                                            <option value="Kamis">Kamis</option>
-                                            <option value="Jumat">Jumat</option>
-                                            <option value="Sabtu">Sabtu</option>
-                                        </select>
-                                    </div>
-
-                                    {{-- Jam Mulai --}}
-                                    <div>
-                                        <label for="jam_mulai" class="block text-sm font-medium text-dark-700 mb-1.5">Jam
-                                            Mulai</label>
-                                        <div class="relative">
-                                            <input type="text" name="jam_mulai" id="jam_mulai" placeholder="--:--"
-                                                readonly class="timepicker block w-full px-3 py-2.5 border ...">
-                                        </div>
-                                        <p class="mt-1 text-xs text-dark-400">*Format 24 Jam (Contoh: 07:30, 14:00)</p>
-                                    </div>
-
-                                    {{-- Jam Selesai --}}
-                                    <div>
-                                        <label for="jam_selesai" class="block text-sm font-medium text-dark-700 mb-1.5">Jam
-                                            Selesai</label>
-                                        <div class="relative">
-                                            <input type="text" name="jam_selesai" id="jam_selesai" placeholder="--:--"
-                                                readonly class="timepicker block w-full px-3 py-2.5 border ...">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Actions --}}
-                                <div class="mt-8 flex items-center justify-end gap-3">
-                                    <button type="button" onclick="closeModal('modal-inputjadwal')"
-                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 hover:text-dark-800 font-medium transition-colors duration-200">
-                                        Batal
-                                    </button>
-                                    <button type="submit"
-                                        class="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg transition-all duration-200 flex items-center gap-2">
-                                        <i class='bx bx-save text-lg'></i>
-                                        Simpan Jadwal
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal Edit jadwal --}}
-        <div id="modal-editjadwal" class="fixed inset-0 z-[60] hidden">
-            {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+        {{-- Modal Edit Jadwal (Exact Design System) --}}
+        <div id="modal-editjadwal" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editjadwal')"></div>
-
-            {{-- Modal Panel --}}
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
-                        {{-- Header --}}
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
-                                Edit Data Jadwal
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-editjadwal')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Jadwal Pelajaran</h2>
+                            <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                                Perbarui Mapel, Guru Pengajar, Kelas & Waktu
+                            </span>
                         </div>
+                        <button type="button" onclick="closeModal('modal-editjadwal')"
+                            class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
 
-                        {{-- Body (Loaded via AJAX) --}}
-                        <div class="px-6 py-5" id="loadeditform">
-
+                    {{-- Body (Loaded via AJAX) --}}
+                    <div id="loadeditform">
+                        <div class="text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#003FA9] border-t-transparent"></div>
+                            <p class="text-xs text-slate-500 mt-2">Memuat formulir...</p>
                         </div>
                     </div>
                 </div>

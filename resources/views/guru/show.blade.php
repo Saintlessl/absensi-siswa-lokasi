@@ -907,66 +907,83 @@
         </div>
     </div>
 
-    {{-- Modal Tambah Penugasan Mapel --}}
-    <div id="modal-add-subject" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-900/50 backdrop-blur-sm hidden">
-        <div class="glass-card rounded-2xl border border-dark-200/50 bg-white w-full max-w-lg p-6 shadow-xl">
-            <div class="flex items-center justify-between border-b border-dark-100 pb-4 mb-4">
-                <h3 class="text-base font-bold text-dark-800">Tugaskan Mata Pelajaran Baru</h3>
-                <button type="button" onclick="closeModal('modal-add-subject')" class="text-dark-400 hover:text-dark-600">
-                    <i class='bx bx-x text-2xl'></i>
-                </button>
-            </div>
-
-            <form action="{{ route('guru.assign_subject', $guru->id) }}" method="POST" class="space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-xs font-semibold text-dark-700 mb-1.5">Mata Pelajaran *</label>
-                    <select name="mata_pelajaran_id" required
-                        class="w-full text-xs rounded-xl border-dark-200 bg-white px-3 py-2.5 text-dark-800 focus:border-primary-500 focus:ring-primary-500">
-                        <option value="">-- Pilih Mata Pelajaran --</option>
-                        @foreach($mataPelajarans as $mp)
-                            <option value="{{ $mp->id }}">{{ $mp->nama_mapel }} ({{ $mp->kode_mapel }})</option>
-                        @endforeach
-                    </select>
+    {{-- Modal Tambah Penugasan Mapel (Exact Design System) --}}
+    <div id="modal-add-subject" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onclick="closeModal('modal-add-subject')"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+            <div class="relative w-full max-w-lg rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Tugaskan Mapel Baru</h2>
+                        <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                            Atur Penugasan Mengajar Guru
+                        </span>
+                    </div>
+                    <button type="button" onclick="closeModal('modal-add-subject')"
+                        class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
+                <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
 
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-semibold text-dark-700">Rombongan Belajar (Kelas) *</label>
-                        <div class="flex items-center gap-2 text-[11px]">
-                            <button type="button" onclick="document.querySelectorAll('.add-subject-cb').forEach(cb => cb.checked = true)" class="text-primary-600 hover:underline font-bold">Pilih Semua</button>
-                            <span>&bull;</span>
-                            <button type="button" onclick="document.querySelectorAll('.add-subject-cb').forEach(cb => cb.checked = false)" class="text-dark-500 hover:underline">Hapus</button>
+                <form action="{{ route('guru.assign_subject', $guru->id) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Mata Pelajaran <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <select name="mata_pelajaran_id" required
+                                class="w-full px-4 pr-8 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none cursor-pointer">
+                                <option value="">-- Pilih Mata Pelajaran --</option>
+                                @foreach($mataPelajarans as $mp)
+                                    <option value="{{ $mp->id }}">{{ $mp->nama_mapel }} ({{ $mp->kode_mapel }})</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
                         </div>
                     </div>
-                    <div class="max-h-36 overflow-y-auto border border-dark-200 rounded-xl p-2.5 bg-dark-50/40 grid grid-cols-2 gap-2">
-                        @foreach($kelasList as $k)
-                            <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white text-xs text-dark-700 cursor-pointer transition">
-                                <input type="checkbox" name="kelas_ids[]" value="{{ $k->id }}" class="add-subject-cb rounded text-primary-600 focus:ring-primary-500">
-                                <span class="font-medium truncate">{{ $k->nama_kelas }}</span>
-                            </label>
-                        @endforeach
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-sm font-semibold text-slate-700">Rombongan Belajar (Kelas) <span class="text-rose-500">*</span></label>
+                            <div class="flex items-center gap-2 text-xs">
+                                <button type="button" onclick="document.querySelectorAll('.add-subject-cb').forEach(cb => cb.checked = true)" class="text-[#003FA9] hover:underline font-bold">Pilih Semua</button>
+                                <span class="text-slate-400">&bull;</span>
+                                <button type="button" onclick="document.querySelectorAll('.add-subject-cb').forEach(cb => cb.checked = false)" class="text-slate-500 hover:underline">Hapus</button>
+                            </div>
+                        </div>
+                        <div class="max-h-40 overflow-y-auto border border-blue-200/60 rounded-xl p-3 bg-white/70 grid grid-cols-2 gap-2 shadow-inner">
+                            @foreach($kelasList as $k)
+                                <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-50/80 text-xs text-slate-800 cursor-pointer transition">
+                                    <input type="checkbox" name="kelas_ids[]" value="{{ $k->id }}" class="add-subject-cb rounded text-[#003FA9] focus:ring-[#003FA9]">
+                                    <span class="font-medium truncate">{{ $k->nama_kelas }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1">Pilih satu atau beberapa rombel yang akan diajar.</p>
                     </div>
-                    <p class="text-[10px] text-dark-400 mt-1">Pilih satu atau beberapa rombel yang akan diajar.</p>
-                </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-dark-700 mb-1.5">Tahun Ajaran *</label>
-                    <input type="text" name="tahun_ajaran" value="{{ $tahunAjaran }}" required
-                        class="w-full text-xs rounded-xl border-dark-200 bg-white px-3 py-2.5 text-dark-800 focus:border-primary-500 focus:ring-primary-500">
-                </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Tahun Ajaran <span class="text-rose-500">*</span></label>
+                        <input type="text" name="tahun_ajaran" value="{{ $tahunAjaran }}" required
+                            class="w-full px-4 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition font-medium">
+                    </div>
 
-                <div class="flex justify-end gap-2 pt-3 border-t border-dark-100">
-                    <button type="button" onclick="closeModal('modal-add-subject')"
-                        class="px-4 py-2 border border-dark-200 bg-white hover:bg-dark-50 text-dark-700 rounded-xl text-xs font-semibold transition">
-                        Batal
-                    </button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold transition">
-                        Simpan Penugasan
-                    </button>
-                </div>
-            </form>
+                    <div class="pt-4 flex items-center justify-end gap-3 border-t border-[#D8E6FC]">
+                        <button type="button" onclick="closeModal('modal-add-subject')"
+                            class="px-5 py-2.5 rounded-xl bg-[#E2EDFF] hover:bg-[#d4e4fc] text-[#003FA9] font-bold text-sm transition">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#003FA9] hover:bg-[#00338d] text-white font-bold text-sm shadow-md shadow-blue-500/20 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Simpan Penugasan
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 @endsection

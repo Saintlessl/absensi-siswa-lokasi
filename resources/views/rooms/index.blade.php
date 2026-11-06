@@ -247,147 +247,147 @@
         @endif
     </div>
 
-    {{-- Modal Tambah Ruangan --}}
-    <div id="modal-addroom" class="fixed inset-0 z-50 hidden bg-dark-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-dark-200">
-            <div class="px-6 py-4 border-b border-dark-200 flex items-center justify-between">
-                <h3 class="font-bold text-dark-900 text-base">Tambah Ruangan Baru</h3>
-                <button type="button" onclick="closeModal('modal-addroom')" class="text-dark-400 hover:text-dark-600"><i class='bx bx-x text-2xl'></i></button>
-            </div>
-            <form action="{{ route('rooms.store') }}" method="POST" class="p-6 space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Nama Ruangan <span class="text-rose-500">*</span></label>
-                    <input type="text" name="name" required placeholder="Contoh: Ruangan 201, Lab Komputer 1"
-                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Kode Ruangan <span class="text-rose-500">*</span></label>
-                        <input type="text" name="code" required placeholder="Contoh: R-201, LAB-01"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Kapasitas (Siswa)</label>
-                        <input type="number" name="capacity" min="1" placeholder="36"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Gedung / Wilayah</label>
-                        <input type="text" name="building" placeholder="Contoh: Gedung A, Lantai 2"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Jenis / Tipe</label>
-                        <input type="text" name="type" placeholder="Contoh: Ruang Teori, Lab, Bengkel"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Deskripsi / Fasilitas (Opsional)</label>
-                    <textarea name="description" rows="2" placeholder="Fasilitas AC, Projector, Smart TV, dsb."
-                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"></textarea>
-                </div>
-                <div class="flex items-center gap-2 pt-1">
-                    <input type="checkbox" name="is_active" id="add_is_active" value="1" checked
-                        class="w-4 h-4 text-primary-600 rounded border-dark-300 focus:ring-primary-500">
-                    <label for="add_is_active" class="text-xs font-semibold text-dark-700">Ruangan Aktif untuk Presensi</label>
-                </div>
-                <div class="pt-4 flex items-center justify-end gap-2 border-t border-dark-200">
-                    <button type="button" onclick="closeModal('modal-addroom')"
-                        class="px-4 py-2 border border-dark-200 rounded-xl text-sm font-semibold text-dark-600 hover:bg-dark-50">Batal</button>
-                    <button type="submit"
-                        class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-primary-500/30">Simpan Ruangan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Edit Ruangan --}}
-    <div id="modal-editroom" class="fixed inset-0 z-50 hidden bg-dark-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-dark-200">
-            <div class="px-6 py-4 border-b border-dark-200 flex items-center justify-between">
-                <h3 class="font-bold text-dark-900 text-base">Edit Data Ruangan</h3>
-                <button type="button" onclick="closeModal('modal-editroom')" class="text-dark-400 hover:text-dark-600"><i class='bx bx-x text-2xl'></i></button>
-            </div>
-            <form id="frmEditRoom" method="POST" class="p-6 space-y-4">
-                @csrf
-                <div>
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Nama Ruangan <span class="text-rose-500">*</span></label>
-                    <input type="text" name="name" id="edit_name" required
-                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Kode Ruangan <span class="text-rose-500">*</span></label>
-                        <input type="text" name="code" id="edit_code" required
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Kapasitas (Siswa)</label>
-                        <input type="number" name="capacity" id="edit_capacity" min="1"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Gedung / Wilayah</label>
-                        <input type="text" name="building" id="edit_building"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Jenis / Tipe</label>
-                        <input type="text" name="type" id="edit_type"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Deskripsi / Fasilitas (Opsional)</label>
-                    <textarea name="description" id="edit_description" rows="2"
-                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"></textarea>
-                </div>
-                <div class="flex items-center gap-2 pt-1">
-                    <input type="checkbox" name="is_active" id="edit_is_active" value="1"
-                        class="w-4 h-4 text-primary-600 rounded border-dark-300 focus:ring-primary-500">
-                    <label for="edit_is_active" class="text-xs font-semibold text-dark-700">Ruangan Aktif untuk Presensi</label>
-                </div>
-                <div class="pt-4 flex items-center justify-end gap-2 border-t border-dark-200">
-                    <button type="button" onclick="closeModal('modal-editroom')"
-                        class="px-4 py-2 border border-dark-200 rounded-xl text-sm font-semibold text-dark-600 hover:bg-dark-50">Batal</button>
-                    <button type="submit"
-                        class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-primary-500/30">Simpan Perubahan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Modal Preview QR Code --}}
-    <div id="modal-previewqr" class="fixed inset-0 z-50 hidden bg-dark-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center border border-dark-200">
-            <h3 class="font-extrabold text-dark-900 text-lg" id="modal_qr_name">Ruangan</h3>
-            <p class="text-xs text-dark-500 font-mono mt-0.5" id="modal_qr_code">R-000</p>
-
-            <div class="my-4 p-4 bg-white border-2 border-dark-900 rounded-2xl inline-block mx-auto shadow-inner">
-                <div id="modal_qrcode_container"></div>
-            </div>
-
-            <p class="text-[10px] text-dark-400 font-mono break-all bg-dark-50 p-2 rounded border border-dark-200" id="modal_qr_token"></p>
-
-            <div class="mt-4 flex items-center justify-center gap-2">
-                <button type="button" id="btnDownloadModalQr"
-                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
-                    <i class='bx bx-download text-sm'></i> Unduh QR PNG
-                </button>
-                <button type="button" onclick="closeModal('modal-previewqr')"
-                    class="px-4 py-2 border border-dark-200 hover:bg-dark-50 text-dark-600 text-xs font-semibold rounded-xl transition">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
 @endsection
+
+@push('modals')
+{{-- Modal Tambah Ruangan (Wizard) --}}
+    @include('rooms.modal-wizard')
+
+    {{-- Modal Edit Ruangan (Exact Design System) --}}
+    <div id="modal-editroom" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onclick="closeModal('modal-editroom')"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Ruangan</h2>
+                        <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                            Perbarui Spesifikasi, Kapasitas & Gedung
+                        </span>
+                    </div>
+                    <button type="button" onclick="closeModal('modal-editroom')"
+                        class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
+
+                <form id="frmEditRoom" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-sm font-semibold text-[#1E293B] mb-1.5">Nama Ruangan <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" id="edit_name" required
+                            class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                            placeholder="Contoh: Lab Komputer 1, Ruang 201">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1E293B] mb-1.5">Kode Ruangan <span class="text-rose-500">*</span></label>
+                            <input type="text" name="code" id="edit_code" required
+                                class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                placeholder="Contoh: LAB-01">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1E293B] mb-1.5">Kapasitas (Siswa)</label>
+                            <input type="number" name="capacity" id="edit_capacity" min="1" max="200"
+                                class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                placeholder="36">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1E293B] mb-1.5">Gedung / Lokasi</label>
+                            <input type="text" name="building" id="edit_building"
+                                class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                placeholder="Contoh: Gedung A Lantai 2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#1E293B] mb-1.5">Jenis / Tipe</label>
+                            <input type="text" name="type" id="edit_type"
+                                class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                placeholder="Contoh: Ruang Teori, Lab, Bengkel">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[#1E293B] mb-1.5">Fasilitas & Keterangan</label>
+                        <textarea name="description" id="edit_description" rows="2"
+                            class="w-full p-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                            placeholder="Fasilitas AC, Projector, PC, sound system..."></textarea>
+                    </div>
+
+                    <div class="pt-1">
+                        <label class="flex items-center gap-3 cursor-pointer select-none bg-white/70 p-3.5 rounded-xl border border-blue-100">
+                            <input type="checkbox" name="is_active" id="edit_is_active" value="1"
+                                class="w-5 h-5 text-[#003FA9] rounded border-blue-300 focus:ring-[#003FA9]">
+                            <div>
+                                <span class="text-sm font-bold text-[#0F172A] block">Ruangan Aktif</span>
+                                <span class="text-xs text-[#64748B]">Dapat digunakan untuk presensi QR code</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-[#D8E6FC] flex items-center justify-between">
+                        <button type="button" onclick="closeModal('modal-editroom')"
+                            class="px-5 py-2.5 rounded-xl bg-[#E2EDFF] text-[#003FA9] font-semibold text-sm hover:bg-[#d4e4fc] transition-colors focus:outline-none">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#003FA9] text-white font-semibold text-sm hover:bg-[#00338d] shadow-md shadow-blue-500/20 transition-all focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Preview QR Code (Exact Design System) --}}
+    <div id="modal-previewqr" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onclick="closeModal('modal-previewqr')"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-center">
+            <div class="relative w-full max-w-sm rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full">
+                        QR Code Presensi
+                    </span>
+                    <button type="button" onclick="closeModal('modal-previewqr')"
+                        class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <h3 class="font-extrabold text-[#0F172A] text-xl" id="modal_qr_name">Ruangan</h3>
+                <p class="text-xs text-[#003FA9] font-mono font-bold mt-1" id="modal_qr_code">R-000</p>
+
+                <div class="my-5 p-4 bg-white rounded-2xl inline-block mx-auto shadow-md border border-blue-100">
+                    <div id="modal_qrcode_container"></div>
+                </div>
+
+                <p class="text-[10px] text-slate-500 font-mono break-all bg-[#E2EDFF] p-2.5 rounded-xl border border-blue-200/50" id="modal_qr_token"></p>
+
+                <div class="mt-6 flex items-center justify-center gap-3">
+                    <button type="button" id="btnDownloadModalQr"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#003FA9] hover:bg-[#00338d] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Unduh QR PNG
+                    </button>
+                    <button type="button" onclick="closeModal('modal-previewqr')"
+                        class="px-5 py-2.5 bg-[#E2EDFF] hover:bg-[#d4e4fc] text-[#003FA9] text-xs font-bold rounded-xl transition">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endpush
+
+
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>

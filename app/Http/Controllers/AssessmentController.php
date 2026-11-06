@@ -53,7 +53,11 @@ class AssessmentController extends Controller
 
         $categories = AssessmentCategory::where('is_active', true)->get();
 
-        return view('gradebook.index', compact('guru', 'assessments', 'classes', 'categories'));
+        $subjects = MataPelajaran::whereHas('subjectAssignments', function ($q) use ($guru) {
+            $q->where('guru_id', $guru->id)->where('is_active', true);
+        })->distinct()->get();
+
+        return view('gradebook.index', compact('guru', 'assessments', 'classes', 'categories', 'subjects'));
     }
 
     /**

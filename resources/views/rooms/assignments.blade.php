@@ -194,95 +194,12 @@
         @endif
     </div>
 
-    {{-- Modal Tambah Alokasi Ruangan --}}
-    <div id="modal-addassignment" class="fixed inset-0 z-50 hidden bg-dark-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-dark-200">
-            <div class="px-6 py-4 border-b border-dark-200 flex items-center justify-between">
-                <h3 class="font-bold text-dark-900 text-base">Alokasikan Rombel ke Ruangan</h3>
-                <button type="button" onclick="closeModal('modal-addassignment')" class="text-dark-400 hover:text-dark-600"><i class='bx bx-x text-2xl'></i></button>
-            </div>
-            <form action="{{ route('rooms.assignments.store') }}" method="POST" class="p-6 space-y-4">
-                @csrf
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Ruangan Fisik <span class="text-rose-500">*</span></label>
-                        <select name="room_id" required
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                            <option value="">-- Pilih Ruangan --</option>
-                            @foreach($rooms as $r)
-                                <option value="{{ $r->id }}">{{ $r->name }} ({{ $r->code }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Rombel Belajar <span class="text-rose-500">*</span></label>
-                        <select name="kelas_id" required
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                            <option value="">-- Pilih Rombel --</option>
-                            @foreach($kelas as $k)
-                                <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Tahun Ajaran <span class="text-rose-500">*</span></label>
-                        <input type="text" name="tahun_ajaran" value="2026/2027" required
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Hari (Opsional)</label>
-                        <select name="day_of_week"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                            <option value="">Setiap Hari Kerja</option>
-                            <option value="Monday">Senin</option>
-                            <option value="Tuesday">Selasa</option>
-                            <option value="Wednesday">Rabu</option>
-                            <option value="Thursday">Kamis</option>
-                            <option value="Friday">Jumat</option>
-                            <option value="Saturday">Sabtu</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Mulai Tanggal <span class="text-rose-500">*</span></label>
-                        <input type="date" name="starts_on" value="{{ date('Y-m-d') }}" required
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Selesai Tanggal (Opsional)</label>
-                        <input type="date" name="ends_on"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Jam Mulai (Opsional)</label>
-                        <input type="time" name="start_time"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-dark-700 mb-1">Jam Selesai (Opsional)</label>
-                        <input type="time" name="end_time"
-                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                    </div>
-                </div>
-
-                <div class="pt-4 flex items-center justify-end gap-2 border-t border-dark-200">
-                    <button type="button" onclick="closeModal('modal-addassignment')"
-                        class="px-4 py-2 border border-dark-200 rounded-xl text-sm font-semibold text-dark-600 hover:bg-dark-50">Batal</button>
-                    <button type="submit"
-                        class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-primary-500/30">Simpan Alokasi</button>
-                </div>
-            </form>
-        </div>
-    </div>
 @endsection
+
+@push('modals')
+    {{-- Modal Tambah Alokasi Ruangan (Wizard) --}}
+    @include('rooms.modal-wizard-assignment')
+@endpush
 
 @push('scripts')
     <script>

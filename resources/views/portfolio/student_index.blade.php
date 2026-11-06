@@ -76,62 +76,96 @@
     </div>
 </div>
 
+@endsection
+
+@push('modals')
 <!-- Modal Upload Portofolio -->
-<div id="modalTambahPortofolio" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between border-b pb-3">
-            <h3 class="text-sm font-black text-slate-800">Unggah Karya / Portofolio Baru</h3>
-            <button onclick="document.getElementById('modalTambahPortofolio').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+<div id="modalTambahPortofolio" class="hidden fixed inset-0 z-[60] overflow-y-auto">
+    {{-- Overlay --}}
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalTambahPortofolio').classList.add('hidden')"></div>
+
+    {{-- Modal Card --}}
+    <div class="relative flex items-center justify-center min-h-full p-4">
+        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden">
+
+            {{-- Header --}}
+            <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Unggah Karya / Portofolio Baru</h2>
+                        <p class="text-xs font-semibold text-[#003FA9] mt-1">Showcase Teaching Factory & Portofolio Siswa</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('modalTambahPortofolio').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/60 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('portfolio.store') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="px-8 py-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Judul Karya / Proyek <span class="text-rose-500">*</span></label>
+                        <input type="text" name="judul" required placeholder="Contoh: Aplikasi Sistem Kasir POS Berbasis Flutter"
+                            class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Kategori Bidang Kejuruan <span class="text-rose-500">*</span></label>
+                        <select name="kategori" required
+                            class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                            <option value="web_app">Web Application & Cloud</option>
+                            <option value="game">Game Development (2D/3D)</option>
+                            <option value="2d_animation">Animasi 2D</option>
+                            <option value="3d_animation">Animasi 3D & Pemodelan</option>
+                            <option value="multimedia_video">Produksi Video & Broadcasting</option>
+                            <option value="iot_hardware">IoT & Embedded System</option>
+                            <option value="design_uiux">Desain UI/UX & Grafis</option>
+                            <option value="machining_fabrication">Fabrikasi & Pengelasan Logam</option>
+                            <option value="otomotif">Teknologi Otomotif & Kendaraan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Deskripsi Proyek & Teknologi yang Digunakan <span class="text-rose-500">*</span></label>
+                        <textarea name="deskripsi" rows="3" required placeholder="Jelaskan fungsionalitas, teknologi yang digunakan, serta latar belakang proyek..."
+                            class="w-full text-sm rounded-xl border-0 bg-[#E2EDFF] p-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9] resize-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Tautan Live Demo / Video</label>
+                            <input type="url" name="demo_url" placeholder="https://..."
+                                class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Tautan GitHub / Repositori</label>
+                            <input type="url" name="repository_url" placeholder="https://github.com/..."
+                                class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Gambar Sampul / Screenshot (Maks. 3MB)</label>
+                        <input type="file" name="cover_image" accept="image/*"
+                            class="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#E2EDFF] file:text-[#003FA9] hover:file:bg-blue-200">
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="px-8 py-5 border-t border-blue-100/60 flex items-center justify-between">
+                    <button type="button" onclick="document.getElementById('modalTambahPortofolio').classList.add('hidden')"
+                        class="px-5 py-2.5 rounded-full text-sm font-bold text-[#003FA9] hover:bg-blue-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#003FA9] text-white text-sm font-bold hover:bg-[#00297A] transition-colors shadow-lg shadow-blue-500/25">
+                        <i class='bx bx-upload text-lg'></i>
+                        <span>Ajukan Karya</span>
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <form method="POST" action="{{ route('portfolio.store') }}" enctype="multipart/form-data" class="space-y-3">
-            @csrf
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Judul Karya / Proyek *</label>
-                <input type="text" name="judul" required placeholder="Contoh: Aplikasi Sistem Kasir POS Berbasis Flutter" class="w-full text-xs rounded-xl border-slate-200">
-            </div>
-
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Kategori Bidang *</label>
-                <select name="kategori" required class="w-full text-xs rounded-xl border-slate-200">
-                    <option value="web_app">Web Application & Cloud</option>
-                    <option value="game">Game Development (2D/3D)</option>
-                    <option value="2d_animation">Animasi 2D</option>
-                    <option value="3d_animation">Animasi 3D & Pemodelan</option>
-                    <option value="multimedia_video">Produksi Video & Broadcasting</option>
-                    <option value="iot_hardware">IoT & Embedded System</option>
-                    <option value="design_uiux">Desain UI/UX & Grafis</option>
-                    <option value="machining_fabrication">Fabrikasi & Pengelasan Logam</option>
-                    <option value="otomotif">Teknologi Otomotif & Kendaraan</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Deskripsi Proyek & Teknologi yang Digunakan *</label>
-                <textarea name="deskripsi" rows="3" required placeholder="Jelaskan fungsionalitas, teknologi yang digunakan, serta latar belakang proyek..." class="w-full text-xs rounded-xl border-slate-200"></textarea>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Tautan Live Demo / Video</label>
-                    <input type="url" name="demo_url" placeholder="https://..." class="w-full text-xs rounded-xl border-slate-200">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Tautan GitHub / Repositori</label>
-                    <input type="url" name="repository_url" placeholder="https://github.com/..." class="w-full text-xs rounded-xl border-slate-200">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Gambar Sampul / Screenshot (Maks. 3MB)</label>
-                <input type="file" name="cover_image" accept="image/*" class="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700">
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t">
-                <button type="button" onclick="document.getElementById('modalTambahPortofolio').classList.add('hidden')" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
-                <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm">Ajukan Karya</button>
-            </div>
-        </form>
     </div>
 </div>
-@endsection
+@endpush

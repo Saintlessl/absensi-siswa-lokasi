@@ -14,11 +14,11 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-shrink-0">
-            <a href="{{ route('gradebook.create') }}"
+            <button type="button" onclick="openModal('modal-addassessment')"
                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0052CC] text-white text-xs font-semibold hover:bg-[#003FA9] transition-colors shadow-xs">
                 <i class='bx bx-plus text-base'></i>
                 <span>Buat Asesmen Baru</span>
-            </a>
+            </button>
         </div>
     </div>
 
@@ -88,10 +88,10 @@
                     Buat asesmen tugas atau ujian baru untuk mulai menginput nilai siswa per rombel.
                 </p>
                 <div class="mt-4">
-                    <a href="{{ route('gradebook.create') }}"
+                    <button type="button" onclick="openModal('modal-addassessment')"
                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0052CC] text-white text-xs font-semibold hover:bg-[#003FA9] transition-colors shadow-xs">
                         <i class='bx bx-plus'></i> Buat Asesmen Pertama
-                    </a>
+                    </button>
                 </div>
             </div>
         @else
@@ -193,4 +193,9 @@
     </div>
 
 </div>
+
 @endsection
+
+@push('modals')
+    @include('gradebook.modal-wizard')
+@endpush

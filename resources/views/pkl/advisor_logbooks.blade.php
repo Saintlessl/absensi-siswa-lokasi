@@ -79,39 +79,70 @@
     </div>
 </div>
 
+@endsection
+
+@push('modals')
 <!-- Review Modal -->
-<div id="modalReview" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between border-b pb-3">
-            <h3 class="text-sm font-black text-slate-800">Verifikasi Jurnal Logbook</h3>
-            <button onclick="document.getElementById('modalReview').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+<div id="modalReview" class="hidden fixed inset-0 z-[60] overflow-y-auto">
+    {{-- Overlay --}}
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalReview').classList.add('hidden')"></div>
+
+    {{-- Modal Card --}}
+    <div class="relative flex items-center justify-center min-h-full p-4">
+        <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden">
+
+            {{-- Header --}}
+            <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Verifikasi Jurnal Logbook</h2>
+                        <p class="text-xs font-semibold text-[#003FA9] mt-1">Evaluasi & Feedback Pembimbing PKL</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('modalReview').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/60 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <form id="formReview" method="POST" action="">
+                @csrf
+                <div class="px-8 py-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Aktivitas Siswa</label>
+                        <div id="modalAktivitas" class="p-4 bg-[#E2EDFF] rounded-xl text-sm text-slate-800 max-h-36 overflow-y-auto leading-relaxed"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Keputusan Pembimbing <span class="text-rose-500">*</span></label>
+                        <select name="status" id="modalStatus" required
+                            class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                            <option value="approved">Setujui Jurnal (Disetujui)</option>
+                            <option value="revision_requested">Minta Perbaikan (Revisi)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Catatan / Evaluasi Pembimbing</label>
+                        <textarea name="catatan_guru" id="modalCatatan" rows="3"
+                            placeholder="Berikan feedback atau poin yang perlu dilengkapi siswa..."
+                            class="w-full text-sm rounded-xl border-0 bg-[#E2EDFF] p-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9] resize-none"></textarea>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="px-8 py-5 border-t border-blue-100/60 flex items-center justify-between">
+                    <button type="button" onclick="document.getElementById('modalReview').classList.add('hidden')"
+                        class="px-5 py-2.5 rounded-full text-sm font-bold text-[#003FA9] hover:bg-blue-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#003FA9] text-white text-sm font-bold hover:bg-[#00297A] transition-colors shadow-lg shadow-blue-500/25">
+                        <i class='bx bx-check text-lg'></i>
+                        <span>Simpan Verifikasi</span>
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <form id="formReview" method="POST" action="" class="space-y-3">
-            @csrf
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 mb-1">Aktivitas Siswa</label>
-                <div id="modalAktivitas" class="p-3 bg-slate-50 rounded-xl text-xs text-slate-700 border border-slate-100 max-h-32 overflow-y-auto"></div>
-            </div>
-
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Keputusan Pembimbing *</label>
-                <select name="status" id="modalStatus" required class="w-full text-xs rounded-xl border-slate-200">
-                    <option value="approved">Setujui Jurnal (Disetujui)</option>
-                    <option value="revision_requested">Minta Perbaikan (Revisi)</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Catatan / Evaluasi Pembimbing</label>
-                <textarea name="catatan_guru" id="modalCatatan" rows="3" placeholder="Berikan feedback atau poin yang perlu dilengkapi siswa..." class="w-full text-xs rounded-xl border-slate-200"></textarea>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t">
-                <button type="button" onclick="document.getElementById('modalReview').classList.add('hidden')" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
-                <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm">Simpan Verifikasi</button>
-            </div>
-        </form>
     </div>
 </div>
 
@@ -124,4 +155,5 @@
         document.getElementById('modalReview').classList.remove('hidden');
     }
 </script>
-@endsection
+@endpush
+

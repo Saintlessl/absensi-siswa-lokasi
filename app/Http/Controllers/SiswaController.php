@@ -83,20 +83,22 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         // Enforce fixed domain @myskanic.com for student accounts
-        $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
+        $rawUsername = strtolower(trim($request->username ?? $request->email ?? $request->nis ?? ''));
         if (str_contains($rawUsername, '@')) {
             $rawUsername = explode('@', $rawUsername)[0];
         }
         $rawUsername = preg_replace('/[^a-z0-9._-]/', '', $rawUsername);
 
         if (empty($rawUsername)) {
-            return back()->with('error', 'Username email siswa wajib diisi (hanya huruf, angka, titik, strip, underscore).')->withInput();
+            return back()->withErrors(['nis' => 'NIS atau Username email siswa wajib diisi.'])->withInput();
         }
 
         $finalEmail = $rawUsername . '@myskanic.com';
+        $defaultPassword = $request->password ?: ($request->nis ?: 'password123');
         $request->merge([
             'email'    => $finalEmail,
             'username' => $rawUsername,
+            'password' => $defaultPassword,
         ]);
 
         $request->validate([

@@ -105,11 +105,11 @@
                 <span>Transaksi Peminjaman</span>
             </a>
             @if(in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog']))
-                <a href="{{ route('inventory.create') }}"
+                <button type="button" onclick="openModal('modal-addinventory')"
                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0052CC] text-white text-xs font-semibold hover:bg-[#003FA9] transition-colors shadow-xs">
                     <i class='bx bx-plus text-base'></i>
                     <span>Tambah Alat</span>
-                </a>
+                </button>
             @endif
         </div>
     </div>
@@ -189,4 +189,9 @@
     @endif
 
 </div>
+
 @endsection
+
+@push('modals')
+    @include('inventory.modal-wizard')
+@endpush

@@ -147,157 +147,154 @@
     </div>
 
     @push('modals')
-        {{-- Modal Tambah Orang Tua --}}
-        <div id="modal-inputorangtua" class="fixed inset-0 z-[60] hidden">
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+        {{-- Modal Tambah Orang Tua (Exact Design System) --}}
+        <div id="modal-inputorangtua" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-inputorangtua')"></div>
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Tambah Data Orang Tua</h2>
+                            <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                                Informasi Pribadi, Siswa Terkait & Akun Portal
+                            </span>
+                        </div>
+                        <button type="button" onclick="closeModal('modal-inputorangtua')"
+                            class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
 
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
-                        {{-- Header --}}
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-user-plus text-primary-600 text-xl'></i>
-                                Tambah Data Orang Tua
-                            </h3>
+                    <form action="{{ route('orangtua.store') }}" method="POST" id="frmOrangTua" class="space-y-4">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                                    Informasi Pribadi & Kontak
+                                </span>
+                            </div>
+
+                            <div>
+                                <label for="nama" class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <i class='bx bx-user text-slate-400 text-lg'></i>
+                                    </div>
+                                    <input type="text" name="nama" id="nama"
+                                        class="block w-full pl-10 pr-4 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                        placeholder="Nama Orang Tua" required autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="telepon" class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor Telepon <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <i class='bx bx-phone text-slate-400 text-lg'></i>
+                                    </div>
+                                    <input type="text" name="telepon" id="telepon"
+                                        class="block w-full pl-10 pr-4 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                        placeholder="08xxxxxxxxxx" required autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="alamat" class="block text-sm font-semibold text-slate-700 mb-1.5">Alamat Lengkap</label>
+                                <textarea name="alamat" id="alamat" rows="2"
+                                    class="block w-full p-3.5 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition resize-none"
+                                    placeholder="Alamat Lengkap"></textarea>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="siswa_id" class="block text-sm font-semibold text-slate-700 mb-1.5">Siswa Terkait <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <select name="siswa_id" id="siswa_id" required
+                                        class="block w-full px-4 pr-8 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none cursor-pointer">
+                                        <option value="">-- Pilih Siswa --</option>
+                                        @foreach ($siswa as $s)
+                                            <option value="{{ $s->id }}">{{ $s->nama }} - {{ $s->kelas->nama_kelas }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2 pt-2">
+                                <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                                    Akun Akses Portal Orang Tua
+                                </span>
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-semibold text-slate-700 mb-1.5">Email Akun <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <i class='bx bx-envelope text-slate-400 text-lg'></i>
+                                    </div>
+                                    <input type="email" name="email" id="email"
+                                        class="block w-full pl-10 pr-4 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                        placeholder="email@example.com" required autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="password" class="block text-sm font-semibold text-slate-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <i class='bx bx-lock-alt text-slate-400 text-lg'></i>
+                                    </div>
+                                    <input type="password" name="password" id="password"
+                                        class="block w-full pl-10 pr-4 h-11 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                                        placeholder="Minimal 6 karakter" required autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="pt-4 flex items-center justify-end gap-3 border-t border-[#D8E6FC]">
                             <button type="button" onclick="closeModal('modal-inputorangtua')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
+                                class="px-5 py-2.5 rounded-xl bg-[#E2EDFF] hover:bg-[#d4e4fc] text-[#003FA9] font-bold text-sm transition">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#003FA9] hover:bg-[#00338d] text-white font-bold text-sm shadow-md shadow-blue-500/20 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Simpan Data
                             </button>
                         </div>
-
-                        {{-- Body --}}
-                        <div class="px-6 py-5">
-                            <form action="{{ route('orangtua.store') }}" method="POST" id="frmOrangTua">
-                                @csrf
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="md:col-span-2">
-                                        <h4 class="text-sm font-semibold text-dark-600 mb-2 border-b border-dark-200 pb-2">
-                                            Informasi Pribadi & Kontak</h4>
-                                    </div>
-
-                                    <div>
-                                        <label for="nama" class="block text-sm font-medium text-dark-700 mb-1.5">Nama
-                                            Lengkap</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-user text-dark-400 text-lg'></i>
-                                            </div>
-                                            <input type="text" name="nama" id="nama"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Nama Orang Tua" required autocomplete="off">
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label for="telepon" class="block text-sm font-medium text-dark-700 mb-1.5">Nomor
-                                            Telepon</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-phone text-dark-400 text-lg'></i>
-                                            </div>
-                                            <input type="text" name="telepon" id="telepon"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="08xxxxxxxxxx" required autocomplete="off">
-                                        </div>
-                                    </div>
-
-                                    <div class="md:col-span-2">
-                                        <label for="alamat"
-                                            class="block text-sm font-medium text-dark-700 mb-1.5">Alamat</label>
-                                        <textarea name="alamat" id="alamat" rows="2"
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                            placeholder="Alamat Lengkap"></textarea>
-                                    </div>
-
-                                    <div class="md:col-span-2">
-                                        <label for="siswa_id" class="block text-sm font-medium text-dark-700 mb-1.5">Siswa
-                                            Terkait</label>
-                                        <select name="siswa_id" id="siswa_id" required
-                                            class="block w-full px-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                                            <option value="">-- Pilih Siswa --</option>
-                                            @foreach ($siswa as $s)
-                                                <option value="{{ $s->id }}">{{ $s->nama }}
-                                                    - {{ $s->kelas->nama_kelas }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="md:col-span-2 mt-4">
-                                        <h4 class="text-sm font-semibold text-dark-600 mb-2 border-b border-dark-200 pb-2">Akun
-                                            Login Orang Tua</h4>
-                                    </div>
-
-                                    <div>
-                                        <label for="email"
-                                            class="block text-sm font-medium text-dark-700 mb-1.5">Email</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-envelope text-dark-400 text-lg'></i>
-                                            </div>
-                                            <input type="email" name="email" id="email"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="email@example.com" required autocomplete="off">
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label for="password"
-                                            class="block text-sm font-medium text-dark-700 mb-1.5">Password</label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-lock-alt text-dark-400 text-lg'></i>
-                                            </div>
-                                            <input type="password" name="password" id="password"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Minimal 6 karakter" required autocomplete="off">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Actions --}}
-                                <div class="mt-8 flex items-center justify-end gap-3">
-                                    <button type="button" onclick="closeModal('modal-inputorangtua')"
-                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 hover:text-dark-800 font-medium transition-colors duration-200">
-                                        Batal
-                                    </button>
-                                    <button type="submit"
-                                        class="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 flex items-center gap-2">
-                                        <i class='bx bx-save text-lg'></i>
-                                        Simpan Data
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        {{-- Modal Edit Orang Tua --}}
-        <div id="modal-editorangtua" class="fixed inset-0 z-[60] hidden">
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+        {{-- Modal Edit Orang Tua (Exact Design System) --}}
+        <div id="modal-editorangtua" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editorangtua')"></div>
-
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
-                                Edit Data Orang Tua
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-editorangtua')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Orang Tua</h2>
+                            <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                                Perbarui Profil, Kontak & Password Akun
+                            </span>
                         </div>
+                        <button type="button" onclick="closeModal('modal-editorangtua')"
+                            class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
 
-                        <div class="px-6 py-5" id="loadeditform">
-                            {{-- Form loaded via ajax --}}
+                    <div id="loadeditform">
+                        <div class="text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#003FA9] border-t-transparent"></div>
+                            <p class="text-xs text-slate-500 mt-2">Memuat formulir...</p>
                         </div>
                     </div>
                 </div>

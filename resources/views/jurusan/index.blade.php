@@ -179,124 +179,29 @@
     </div>
 
     @push('modals')
-        {{-- Modal Tambah Jurusan --}}
-        <div id="modal-inputjurusan" class="fixed inset-0 z-[60] hidden">
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
-                onclick="closeModal('modal-inputjurusan')"></div>
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl fade-in">
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-layer text-primary-600 text-xl'></i>
-                                Tambah Data Jurusan
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-inputjurusan')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
-                        </div>
-                        <div class="px-6 py-5">
-                            <form action="{{ route('jurusan.store') }}" method="POST" id="formTambahJurusan" enctype="multipart/form-data">
-                                @csrf
-                                <div class="space-y-4">
-                                    {{-- Logo upload --}}
-                                    <div>
-                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Logo Jurusan</label>
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-16 h-16 rounded-xl border border-dashed border-dark-300 bg-dark-50 flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_add_logo_container">
-                                                <i class='bx bx-image text-2xl text-dark-400'></i>
-                                            </div>
-                                            <div class="flex-1">
-                                                <input type="file" name="logo" id="logo_add" accept="image/jpeg,image/png,image/webp"
-                                                    class="block w-full text-xs text-dark-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
-                                                    onchange="previewAddLogo(this)">
-                                                <p class="text-[11px] text-dark-400 mt-1">Format: JPG, PNG, WebP. Maks 2MB.</p>
-                                            </div>
-                                        </div>
-                                    </div>
+        {{-- Multi-Step Wizard Modal for Jurusan (Exact Design System) --}}
+        @include('jurusan.modal-wizard')
 
-                                    <div>
-                                        <label for="kode_jurusan" class="block text-sm font-medium text-dark-700 mb-1.5">
-                                            Kode Jurusan <span class="text-rose-500">*</span>
-                                        </label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-tag text-dark-400 text-lg'></i>
-                                            </div>
-                                            <input type="text" name="kode_jurusan" id="kode_jurusan"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 uppercase focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200 font-mono font-bold"
-                                                placeholder="Contoh: PPLG, ANIMASI, TPFL, TO, BCF" required autocomplete="off">
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label for="nama_jurusan" class="block text-sm font-medium text-dark-700 mb-1.5">
-                                            Nama Lengkap Jurusan <span class="text-rose-500">*</span>
-                                        </label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <i class='bx bx-book-bookmark text-dark-400 text-lg'></i>
-                                            </div>
-                                            <input type="text" name="nama_jurusan" id="nama_jurusan"
-                                                class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                                placeholder="Contoh: Pengembangan Perangkat Lunak dan Gim" required autocomplete="off">
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label for="deskripsi" class="block text-sm font-medium text-dark-700 mb-1.5">Deskripsi / Kompetensi</label>
-                                        <textarea name="deskripsi" id="deskripsi" rows="3"
-                                            class="block w-full p-3 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200 text-sm"
-                                            placeholder="Deskripsi singkat tentang fokus keahlian jurusan ini..."></textarea>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Status Jurusan</label>
-                                        <label class="inline-flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" name="is_active" value="1" checked class="rounded border-dark-300 text-primary-600 focus:ring-primary-500">
-                                            <span class="text-sm text-dark-700 font-medium">Aktif (Dapat dipilih saat membuat kelas dan siswa)</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="mt-8 flex items-center justify-end gap-3">
-                                    <button type="button" onclick="closeModal('modal-inputjurusan')"
-                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 hover:text-dark-800 font-medium transition-colors duration-200">
-                                        Batal
-                                    </button>
-                                    <button type="submit"
-                                        class="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 flex items-center gap-2">
-                                        <i class='bx bx-save text-lg'></i>
-                                        Simpan Jurusan
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal Edit Jurusan --}}
-        <div id="modal-editjurusan" class="fixed inset-0 z-[60] hidden">
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+        {{-- Modal Edit Jurusan (Exact Design System) --}}
+        <div id="modal-editjurusan" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editjurusan')"></div>
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl fade-in">
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
-                                Edit Data Jurusan
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-editjurusan')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Jurusan</h2>
+                            <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                                Perbarui Kode, Nama & Kompetensi Keahlian
+                            </span>
                         </div>
-                        <div class="px-6 py-5" id="loadeditformjurusan"></div>
+                        <button type="button" onclick="closeModal('modal-editjurusan')"
+                            class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
+                    <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
+                    <div id="loadeditformjurusan"></div>
                 </div>
             </div>
         </div>

@@ -209,256 +209,38 @@
     </div>
 
     @push('modals')
-        {{-- Modal Tambah Siswa --}}
-        <div id="modal-inputsiswa" class="fixed inset-0 z-[60] hidden">
+        {{-- Multi-Step Wizard Modal for Siswa (Exact Design System) --}}
+        @include('siswa.modal-wizard')
+
+        {{-- Modal Edit Siswa (Exact Design System) --}}
+        <div id="modal-editsiswa" class="fixed inset-0 z-[60] hidden overflow-y-auto">
             {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
-                onclick="closeModal('modal-inputsiswa')"></div>
-
-            {{-- Modal Panel --}}
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
-                        {{-- Header --}}
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-user-plus text-primary-600 text-xl'></i>
-                                Tambah Data Siswa
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-inputsiswa')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
-                        </div>
-
-                        {{-- Body --}}
-                        <div class="px-6 py-5">
-                            <form action="{{ route('siswa.store') }}" method="POST" id="frmSiswa" enctype="multipart/form-data">
-                                @csrf
-
-                                {{-- Section A: Identitas Siswa --}}
-                                <div class="mb-5">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">1</div>
-                                        <h4 class="text-sm font-semibold text-dark-800">Identitas Siswa</h4>
-                                    </div>
-
-                                    {{-- Foto Profil Siswa --}}
-                                    <div class="mb-4 p-3 rounded-xl bg-dark-50/50 border border-dark-100">
-                                        <label class="block text-xs font-medium text-dark-700 mb-1.5">Foto Profil Siswa (Opsional)</label>
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-14 h-14 rounded-xl border border-dashed border-dark-300 bg-white flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_add_photo_container">
-                                                <i class='bx bx-user text-2xl text-dark-400'></i>
-                                            </div>
-                                            <div class="flex-1">
-                                                <input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp"
-                                                    class="block w-full text-xs text-dark-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
-                                                    onchange="previewAddStudentPhoto(this)">
-                                                <p class="text-[11px] text-dark-400 mt-1">Format: JPG, PNG, WebP. Maks 2MB.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="nisn" class="block text-xs font-medium text-dark-700 mb-1.5">NISN <span class="text-dark-400 font-normal">(10 digit)</span></label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <i class='bx bx-id-card text-dark-400 text-lg'></i>
-                                                </div>
-                                                <input type="text" name="nisn" id="nisn" maxlength="20"
-                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
-                                                    placeholder="Contoh: 0051234567" autocomplete="off">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="nis" class="block text-xs font-medium text-dark-700 mb-1.5">NIS <span class="text-rose-500">*</span></label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <i class='bx bx-badge-check text-dark-400 text-lg'></i>
-                                                </div>
-                                                <input type="text" name="nis" id="nis" maxlength="20"
-                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
-                                                    placeholder="Contoh: 21221001" required autocomplete="off">
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-2">
-                                            <label for="nama" class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap <span class="text-rose-500">*</span></label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <i class='bx bx-user text-dark-400 text-lg'></i>
-                                                </div>
-                                                <input type="text" name="nama" id="nama"
-                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                                                    placeholder="Nama Lengkap Siswa" required autocomplete="off">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="jenis_kelamin" class="block text-xs font-medium text-dark-700 mb-1.5">Jenis Kelamin <span class="text-rose-500">*</span></label>
-                                            <select name="jenis_kelamin" id="jenis_kelamin" required
-                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                                <option value="">-- Pilih Jenis Kelamin --</option>
-                                                <option value="L">Laki-laki</option>
-                                                <option value="P">Perempuan</option>
-                                            </select>
-                                        </div>
-
-                                        {{-- 3-Step Dependent Dropdown --}}
-                                        <div>
-                                            <label for="modal_filter_jurusan" class="block text-xs font-medium text-dark-700 mb-1.5">1. Jurusan (Program Keahlian) <span class="text-rose-500">*</span></label>
-                                            <select id="modal_filter_jurusan" required onchange="filterAddStudentRombel()"
-                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                                <option value="">-- Pilih Jurusan --</option>
-                                                @foreach($jurusans as $j)
-                                                    <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label for="modal_filter_tingkat" class="block text-xs font-medium text-dark-700 mb-1.5">2. Tingkat Kelas <span class="text-rose-500">*</span></label>
-                                            <select id="modal_filter_tingkat" required onchange="filterAddStudentRombel()"
-                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                                <option value="">-- Pilih Tingkat --</option>
-                                                <option value="10">Kelas 10</option>
-                                                <option value="11">Kelas 11</option>
-                                                <option value="12">Kelas 12</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label for="kelas_id" class="block text-xs font-medium text-dark-700 mb-1.5">3. Rombel Belajar <span class="text-rose-500">*</span></label>
-                                            <select name="kelas_id" id="kelas_id" required
-                                                class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono">
-                                                <option value="">-- Pilih Rombel --</option>
-                                                @foreach($kelas as $k)
-                                                    <option value="{{ $k->id }}" data-jurusan="{{ $k->jurusan_id }}" data-tingkat="{{ $k->tingkat }}">
-                                                        {{ $k->nama_kelas }} (Wali: {{ $k->wali_kelas }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Section B: Informasi Orang Tua/Wali --}}
-                                <div class="mb-5 pt-4 border-t border-dark-100">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">2</div>
-                                        <h4 class="text-sm font-semibold text-dark-800">Informasi Orang Tua / Wali</h4>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="parent_name" class="block text-xs font-medium text-dark-700 mb-1.5">Nama Lengkap Orang Tua / Wali <span class="text-rose-500">*</span></label>
-                                            <input type="text" name="parent_name" id="parent_name" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Nama lengkap orang tua/wali" autocomplete="off">
-                                        </div>
-                                        <div>
-                                            <label for="parent_jenis_kelamin" class="block text-xs font-medium text-dark-700 mb-1.5">Jenis Kelamin <span class="text-rose-500">*</span></label>
-                                            <select name="parent_jenis_kelamin" id="parent_jenis_kelamin" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30">
-                                                <option value="">-- Pilih Jenis Kelamin --</option>
-                                                <option value="L">Laki-laki</option>
-                                                <option value="P">Perempuan</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label for="parent_phone" class="block text-xs font-medium text-dark-700 mb-1.5">Nomor WhatsApp <span class="text-rose-500">*</span></label>
-                                            <input type="tel" name="parent_phone" id="parent_phone" required class="block w-full px-3 py-2 border border-emerald-300 rounded-xl bg-emerald-50/20 text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono" placeholder="081234567890" autocomplete="off">
-                                        </div>
-                                        <div class="md:col-span-2">
-                                            <label for="parent_address" class="block text-xs font-medium text-dark-700 mb-1.5">Alamat Lengkap <span class="text-rose-500">*</span></label>
-                                            <textarea name="parent_address" id="parent_address" rows="3" required class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" placeholder="Alamat lengkap orang tua/wali"></textarea>
-                                            <p class="mt-1 text-[11px] text-dark-500">Nomor disimpan dalam format internasional untuk notifikasi presensi.</p>
-                                        </div>
-                                        <div class="md:col-span-2 border-t border-dark-100 pt-3"><label for="existing_orangtua_id" class="block text-xs font-medium text-dark-700 mb-1.5">Atau hubungkan profil orang tua yang sudah diverifikasi</label><select name="existing_orangtua_id" id="existing_orangtua_id" class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm"><option value="">Buat profil orang tua baru</option>@foreach($orangTuaExisting as $ot)<option value="{{ $ot->id }}">{{ $ot->nama }} — {{ $ot->telepon }} ({{ $ot->siswa->pluck('nama')->join(', ') ?: 'belum terhubung' }})</option>@endforeach</select><label class="mt-2 flex items-start gap-2 text-xs text-dark-600"><input type="checkbox" name="confirm_existing_parent" value="1" class="mt-0.5"> Saya telah memverifikasi identitas orang tua/wali ini dan mengonfirmasi relasi baru.</label></div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-5 pt-4 border-t border-dark-100 text-sm text-dark-600"><p class="font-semibold text-dark-800">Akun Orang Tua</p><p class="mt-1">Akun dibuat otomatis. Orang tua menetapkan password sendiri lewat tautan aktivasi sekali pakai yang berlaku 7 hari.</p></div>
-
-                                {{-- Section C: Akun Siswa --}}
-                                <div class="mb-5 pt-4 border-t border-dark-100">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">3</div>
-                                        <h4 class="text-sm font-semibold text-dark-800">Akun Login Siswa (@myskanic.com)</h4>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="username_input" class="block text-xs font-medium text-dark-700 mb-1.5">Username Siswa <span class="text-rose-500">*</span></label>
-                                            <div class="flex rounded-xl overflow-hidden border border-dark-200 focus-within:ring-2 focus-within:ring-primary-500/30 focus-within:border-primary-500 transition-all">
-                                                <span class="inline-flex items-center px-3 bg-dark-50 text-dark-500 text-sm border-r border-dark-200">
-                                                    <i class='bx bx-user text-base'></i>
-                                                </span>
-                                                <input type="text" name="username" id="username_input"
-                                                    class="block w-full px-3 py-2 bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none font-mono lowercase"
-                                                    placeholder="budi.santoso" required autocomplete="off">
-                                                <span class="inline-flex items-center px-3 bg-primary-50 text-primary-700 font-semibold text-xs border-l border-primary-100 select-none">
-                                                    @myskanic.com
-                                                </span>
-                                            </div>
-                                            <p class="text-[11px] text-dark-500 mt-1">Hanya huruf kecil, angka, titik, strip.</p>
-                                        </div>
-                                        <div>
-                                            <label for="password" class="block text-xs font-medium text-dark-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <i class='bx bx-lock-alt text-dark-400 text-lg'></i>
-                                                </div>
-                                                <input type="password" name="password" id="password" minlength="6"
-                                                    class="block w-full pl-10 pr-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                                                    placeholder="Minimal 6 karakter" required autocomplete="off">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Actions --}}
-                                <div class="mt-6 pt-4 border-t border-dark-100 flex items-center justify-end gap-3">
-                                    <button type="button" onclick="closeModal('modal-inputsiswa')"
-                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 hover:text-dark-800 text-sm font-medium transition-colors duration-200">
-                                        Batal
-                                    </button>
-                                    <button type="submit"
-                                        class="px-5 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 flex items-center gap-2">
-                                        <i class='bx bx-save text-lg'></i>
-                                        Simpan Siswa
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal Edit Siswa --}}
-        <div id="modal-editsiswa" class="fixed inset-0 z-[60] hidden">
-            {{-- Backdrop --}}
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editsiswa')"></div>
 
-            {{-- Modal Panel --}}
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
-                        {{-- Header --}}
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
-                                Edit Data Siswa
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-editsiswa')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
+            {{-- Modal Positioning Container --}}
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+                <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    {{-- Header --}}
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Siswa</h2>
+                            <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                                Perbarui Profil, Akun & Relasi Orang Tua
+                            </span>
                         </div>
-
-                        {{-- Body (Loaded via AJAX) --}}
-                        <div class="px-6 py-5" id="loadeditform">
-
-                        </div>
+                        <button type="button" onclick="closeModal('modal-editsiswa')"
+                            class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
+
+                    <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
+
+                    {{-- Body (Loaded via AJAX) --}}
+                    <div id="loadeditform"></div>
                 </div>
             </div>
         </div>

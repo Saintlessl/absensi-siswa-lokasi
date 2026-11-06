@@ -165,133 +165,28 @@
     </div>
 
     @push('modals')
-        {{-- Modal Tambah Rombel --}}
-        <div id="modal-inputkelas" class="fixed inset-0 z-[60] hidden">
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
-                onclick="closeModal('modal-inputkelas')"></div>
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl fade-in">
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-plus-circle text-primary-600 text-xl'></i>
-                                Tambah Rombongan Belajar
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-inputkelas')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
-                        </div>
-                        <div class="px-6 py-5">
-                            <form action="{{ route('kelas.store') }}" method="POST" id="frmKelas">
-                                @csrf
+        @include('kelas.modal-wizard')
 
-                                {{-- Live preview pill --}}
-                                <div class="mb-4 p-3 bg-primary-50/60 border border-primary-200/70 rounded-xl flex items-center justify-between">
-                                    <span class="text-xs text-primary-700 font-medium">Format Nama Rombel:</span>
-                                    <span id="preview_add_nama_kelas" class="font-bold text-sm text-primary-900 font-mono">10 PPLG 1</span>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="jurusan_id" class="block text-xs font-semibold text-dark-700 mb-1.5">
-                                            Jurusan (Program Keahlian) <span class="text-rose-500">*</span>
-                                        </label>
-                                        <select name="jurusan_id" id="jurusan_id" required onchange="updateAddKelasPreview()"
-                                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                            <option value="">-- Pilih Jurusan --</option>
-                                            @foreach ($jurusans as $j)
-                                                <option value="{{ $j->id }}" data-kode="{{ $j->kode_jurusan }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="tingkat" class="block text-xs font-semibold text-dark-700 mb-1.5">
-                                            Tingkat Kelas <span class="text-rose-500">*</span>
-                                        </label>
-                                        <select name="tingkat" id="tingkat" required onchange="updateAddKelasPreview()"
-                                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                                            <option value="10">Kelas 10 (Sepuluh)</option>
-                                            <option value="11">Kelas 11 (Sebelas)</option>
-                                            <option value="12">Kelas 12 (Dua Belas)</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="nomor_rombel" class="block text-xs font-semibold text-dark-700 mb-1.5">
-                                            Nomor Rombel <span class="text-rose-500">*</span>
-                                        </label>
-                                        <input type="number" name="nomor_rombel" id="nomor_rombel" value="1" min="1" max="99" required oninput="updateAddKelasPreview()"
-                                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
-                                            placeholder="Contoh: 1, 2, 3">
-                                    </div>
-
-                                    <div>
-                                        <label for="tahun_ajaran" class="block text-xs font-semibold text-dark-700 mb-1.5">
-                                            Tahun Ajaran <span class="text-rose-500">*</span>
-                                        </label>
-                                        <input type="text" name="tahun_ajaran" id="tahun_ajaran" value="2026/2027" required
-                                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
-                                            placeholder="2026/2027">
-                                    </div>
-
-                                    <div>
-                                        <label for="wali_kelas" class="block text-xs font-semibold text-dark-700 mb-1.5">
-                                            Wali Kelas <span class="text-rose-500">*</span>
-                                        </label>
-                                        <input type="text" name="wali_kelas" id="wali_kelas" required
-                                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                                            placeholder="Nama Wali Kelas">
-                                    </div>
-
-                                    <div>
-                                        <label for="jumlah_siswa" class="block text-xs font-semibold text-dark-700 mb-1.5">
-                                            Kapasitas Siswa <span class="text-rose-500">*</span>
-                                        </label>
-                                        <input type="number" name="jumlah_siswa" id="jumlah_siswa" value="36" min="1" required
-                                            class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                                            placeholder="36">
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 pt-4 border-t border-dark-100 flex items-center justify-end gap-3">
-                                    <button type="button" onclick="closeModal('modal-inputkelas')"
-                                        class="px-4 py-2 border border-dark-200 rounded-xl text-dark-600 bg-white hover:bg-dark-50 font-medium transition-colors duration-200 text-sm">
-                                        Batal
-                                    </button>
-                                    <button type="submit"
-                                        class="px-5 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 flex items-center gap-2 text-sm">
-                                        <i class='bx bx-save text-lg'></i>
-                                        Simpan Rombel
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal Edit Rombel --}}
-        <div id="modal-editkelas" class="fixed inset-0 z-[60] hidden">
-            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+        {{-- Modal Edit Rombel (Exact Design System) --}}
+        <div id="modal-editkelas" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+            <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editkelas')"></div>
-            <div class="fixed inset-0 z-10 overflow-y-auto">
-                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl fade-in">
-                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
-                                <i class='bx bx-edit-alt text-primary-600 text-xl'></i>
-                                Edit Data Rombel
-                            </h3>
-                            <button type="button" onclick="closeModal('modal-editkelas')"
-                                class="text-dark-400 hover:text-dark-600 transition-colors">
-                                <i class='bx bx-x text-2xl'></i>
-                            </button>
+            <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Rombongan Belajar</h2>
+                            <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                                Perbarui Struktur, Tingkat & Wali Kelas
+                            </span>
                         </div>
-                        <div class="px-6 py-5" id="loadeditformkelas"></div>
+                        <button type="button" onclick="closeModal('modal-editkelas')"
+                            class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
+                    <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
+                    <div id="loadeditformkelas"></div>
                 </div>
             </div>
         </div>

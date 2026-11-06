@@ -288,6 +288,12 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="inline-flex items-center gap-1.5">
+                                    <button type="button" onclick="editGuru('{{ $g->id }}')"
+                                        class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#003FA9] border border-blue-200 hover:bg-blue-100 text-xs font-semibold flex items-center gap-1 transition"
+                                        title="Edit Cepat Data Guru">
+                                        <i class='bx bx-edit text-sm'></i>
+                                        <span>Edit</span>
+                                    </button>
                                     <a href="{{ route('guru.show', $g->id) }}"
                                         class="px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-700 border border-primary-200 hover:bg-primary-100 text-xs font-semibold flex items-center gap-1 transition"
                                         title="Detail Profil & Kelola Penugasan">
@@ -327,275 +333,34 @@
 @endsection
 
 @push('modals')
-    {{-- Modal Tambah Guru Baru --}}
-    <div id="modal-inputguru" class="fixed inset-0 z-[60] hidden">
-        {{-- Backdrop --}}
-        <div class="fixed inset-0 bg-dark-950/60 backdrop-blur-sm transition-opacity" onclick="closeModal('modal-inputguru')"></div>
+    {{-- Multi-Step Wizard Modal for Guru (Exact Design System) --}}
+    @include('guru.modal-wizard')
 
-        {{-- Scrollable Container --}}
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-start justify-center p-3 sm:p-6 sm:py-10 text-center">
-                <div class="relative transform overflow-hidden rounded-2xl sm:rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-2xl max-h-[86vh] flex flex-col border border-dark-200 fade-in">
-                    {{-- Header (Pinned) --}}
-                    <div class="px-6 py-4 border-b border-dark-200 flex items-center justify-between bg-dark-50/70 flex-shrink-0">
-                        <div>
-                            <h3 class="font-bold text-dark-900 text-base flex items-center gap-2">
-                                <i class='bx bx-user-plus text-primary-600 text-xl'></i>
-                                Tambah Profil & Akun Guru
-                            </h3>
-                            <p class="text-xs text-dark-500 mt-0.5">Satu akun autentikasi terintegrasi dengan profil pengajar</p>
-                        </div>
-                        <button type="button" onclick="closeModal('modal-inputguru')"
-                            class="text-dark-400 hover:text-dark-700 w-8 h-8 rounded-lg hover:bg-dark-100 flex items-center justify-center transition">
-                            <i class='bx bx-x text-2xl'></i>
-                        </button>
+    {{-- Modal Edit Guru (Exact Design System) --}}
+    <div id="modal-editguru" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onclick="closeModal('modal-editguru')"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Guru</h2>
+                        <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                            Perbarui Profil, Mapel & Akun Guru
+                        </span>
                     </div>
+                    <button type="button" onclick="closeModal('modal-editguru')"
+                        class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
 
-                    {{-- Form with Scrollable Body and Pinned Footer --}}
-                    <form action="{{ route('guru.store') }}" method="POST" enctype="multipart/form-data" id="frmCreateGuru" class="flex flex-col flex-1 overflow-hidden">
-                        @csrf
-
-                        {{-- Scrollable Form Fields --}}
-                        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar" id="modal_guru_scroll_body">
-                            {{-- Photo preview --}}
-                            <div class="flex items-center gap-4 p-3 bg-dark-50/60 rounded-2xl border border-dark-100">
-                                <div class="w-16 h-16 rounded-2xl bg-white border border-dashed border-dark-300 flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_guru_photo">
-                                    <i class='bx bx-user text-3xl text-dark-300'></i>
-                                </div>
-                                <div class="flex-1">
-                                    <label class="block text-xs font-semibold text-dark-700 mb-1">Foto Profil Guru (Opsional)</label>
-                                    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
-                                        onchange="previewPhoto(this)"
-                                        class="block w-full text-xs text-dark-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer">
-                                    <p class="text-[11px] text-dark-400 mt-1">Format: JPG, PNG, WebP. Maksimal 2MB.</p>
-                                </div>
-                            </div>
-
-                            {{-- Section 1: Identitas --}}
-                            <div class="space-y-3">
-                                <h4 class="text-xs font-bold text-dark-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class='bx bx-id-card text-primary-600 text-sm'></i> 1. Identitas Guru
-                                </h4>
-                                <div>
-                                    <label class="block text-xs font-semibold text-dark-700 mb-1">Nama Lengkap & Gelar <span class="text-rose-500">*</span></label>
-                                    <input type="text" name="nama" required placeholder="Contoh: Budi Santoso, S.Kom., M.T."
-                                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">NIP (Jika Ada)</label>
-                                        <input type="text" name="nip" placeholder="18 digit NIP resmi"
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">NUPTK (Jika Ada)</label>
-                                        <input type="text" name="nuptk" placeholder="16 digit NUPTK"
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">Jenis Kelamin <span class="text-rose-500">*</span></label>
-                                        <select name="jenis_kelamin" required
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                            <option value="L">Laki-laki</option>
-                                            <option value="P">Perempuan</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">Status Kepegawaian</label>
-                                        <select name="status_kepegawaian"
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                            <option value="PNS">PNS</option>
-                                            <option value="PPPK">PPPK</option>
-                                            <option value="GTT/Honorer" selected>GTT / Guru Tidak Tetap (Honorer)</option>
-                                            <option value="Tetap Yayasan">Guru Tetap Yayasan</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">Nomor WhatsApp / Telepon</label>
-                                        <input type="text" name="telepon" placeholder="08xxxxxxxxxx"
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">Alamat Tinggal</label>
-                                        <input type="text" name="alamat" placeholder="Kota / Alamat domisili"
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Section 2: Akun Autentikasi --}}
-                            <div class="space-y-3 pt-3 border-t border-dark-100">
-                                <h4 class="text-xs font-bold text-dark-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class='bx bx-lock-alt text-primary-600 text-sm'></i> 2. Akun Login & Autentikasi
-                                </h4>
-
-                                <div>
-                                    <label class="block text-xs font-semibold text-dark-700 mb-1">Email Login Guru <span class="text-rose-500">*</span></label>
-                                    <input type="email" name="email" required placeholder="guru@skanic.com"
-                                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-semibold text-dark-700 mb-1.5">Metode Pembuatan Password <span class="text-rose-500">*</span></label>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <label class="flex items-center gap-2 p-3 border border-dark-200 rounded-xl cursor-pointer hover:bg-dark-50 transition">
-                                            <input type="radio" name="password_mode" value="invitation" checked onchange="togglePasswordMode(this.value)"
-                                                class="w-4 h-4 text-primary-600 focus:ring-primary-500">
-                                            <div>
-                                                <p class="text-xs font-bold text-dark-800">Aktivasi Mandiri (Direkomendasikan)</p>
-                                                <p class="text-[11px] text-dark-500">Guru membuat password sendiri via tautan aman.</p>
-                                            </div>
-                                        </label>
-
-                                        <label class="flex items-center gap-2 p-3 border border-dark-200 rounded-xl cursor-pointer hover:bg-dark-50 transition">
-                                            <input type="radio" name="password_mode" value="direct" onchange="togglePasswordMode(this.value)"
-                                                class="w-4 h-4 text-primary-600 focus:ring-primary-500">
-                                            <div>
-                                                <p class="text-xs font-bold text-dark-800">Tetapkan Password Langsung</p>
-                                                <p class="text-[11px] text-dark-500">Administrator menentukan password awal.</p>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div id="wrapper_direct_password" class="hidden">
-                                    <label class="block text-xs font-semibold text-dark-700 mb-1">Password Awal <span class="text-rose-500">*</span></label>
-                                    <input type="password" name="password" id="field_direct_password" minlength="8" placeholder="Minimal 8 karakter"
-                                        class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                </div>
-                            </div>
-
-                            {{-- Section 3: Penugasan Mata Pelajaran Wajib (Subject Assignment) --}}
-                            <div class="space-y-3 pt-3 border-t border-dark-100">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="text-xs font-bold text-dark-800 uppercase tracking-wider flex items-center gap-1.5">
-                                        <i class='bx bx-book-bookmark text-primary-600 text-sm'></i> 3. Penugasan Mata Pelajaran (Wajib)
-                                    </h4>
-                                    <span class="text-[10px] text-primary-700 bg-primary-50 px-2 py-0.5 rounded font-bold border border-primary-200">1 Guru Wajib Memiliki Mapel</span>
-                                </div>
-                                <p class="text-xs text-dark-500">Setiap guru profesional wajib memiliki mata pelajaran yang diampu. Menjadi wali kelas atau KAPROG tidak menggantikan tugas mengajar.</p>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">Pilih Mata Pelajaran <span class="text-rose-500">*</span></label>
-                                        <select name="mata_pelajaran_id" required
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                            <option value="">-- Pilih Mata Pelajaran --</option>
-                                            @foreach($mataPelajarans as $mp)
-                                                <option value="{{ $mp->id }}">{{ $mp->nama_mapel }} ({{ $mp->kode_mapel }})</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-xs font-semibold text-dark-700 mb-1">Tahun Ajaran <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="tahun_ajaran" value="2026/2027" required
-                                            class="w-full px-3 py-2 border border-dark-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label class="block text-xs font-semibold text-dark-700">Rombongan Belajar yang Diajar <span class="text-rose-500">*</span></label>
-                                        <div class="flex items-center gap-2 text-[11px]">
-                                            <button type="button" onclick="selectAllClasses(true)" class="text-primary-600 hover:underline font-bold">Pilih Semua</button>
-                                            <span>&bull;</span>
-                                            <button type="button" onclick="selectAllClasses(false)" class="text-dark-500 hover:underline">Hapus Pilihan</button>
-                                        </div>
-                                    </div>
-                                    <div class="max-h-40 overflow-y-auto border border-dark-200 rounded-xl p-2.5 bg-dark-50/40 grid grid-cols-2 sm:grid-cols-3 gap-2 custom-scrollbar">
-                                        @foreach($kelasList as $k)
-                                            <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white text-xs text-dark-700 cursor-pointer transition border border-transparent hover:border-dark-200">
-                                                <input type="checkbox" name="kelas_ids[]" value="{{ $k->id }}" class="class-checkbox rounded text-primary-600 focus:ring-primary-500">
-                                                <span class="font-medium truncate">{{ $k->nama_kelas }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    <p class="text-[10px] text-dark-400 mt-1">Pilih minimal 1 rombel yang diajar untuk mata pelajaran ini.</p>
-                                </div>
-                            </div>
-
-                            {{-- Section 4: Tanggung Jawab Tambahan (Additional Responsibilities - Opsional) --}}
-                            <div class="space-y-3 pt-3 border-t border-dark-100">
-                                <div>
-                                    <h4 class="text-xs font-bold text-dark-800 uppercase tracking-wider flex items-center gap-1.5">
-                                        <i class='bx bx-award text-purple-600 text-sm'></i> 4. Tanggung Jawab Tambahan (Opsional)
-                                    </h4>
-                                    <p class="text-xs text-dark-500 mt-0.5">Tanggung jawab tambahan berjalan berdampingan dan tidak menggantikan tugas mengajar mata pelajaran.</p>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {{-- Tugas Tambahan 1: Wali Kelas --}}
-                                    <div class="p-3 border border-dark-200 rounded-xl bg-white shadow-xs">
-                                        <label class="flex items-start gap-2.5 cursor-pointer">
-                                            <input type="checkbox" name="is_homeroom" value="1" id="check_is_homeroom" onchange="toggleHomeroomSelect(this.checked)"
-                                                class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500">
-                                            <div>
-                                                <p class="text-xs font-bold text-dark-800">Tugaskan sebagai Wali Kelas</p>
-                                                <p class="text-[10px] text-dark-400">Guru bertanggung jawab membina satu rombel tertentu.</p>
-                                            </div>
-                                        </label>
-
-                                        <div id="wrapper_homeroom_select" class="hidden mt-2.5 pt-2.5 border-t border-dark-100">
-                                            <label class="block text-[11px] font-semibold text-dark-700 mb-1">Pilih Rombel Binaan <span class="text-rose-500">*</span></label>
-                                            <select name="homeroom_kelas_id" id="field_homeroom_kelas_id"
-                                                class="w-full px-2.5 py-1.5 border border-dark-200 rounded-lg text-xs focus:ring-primary-500 focus:border-primary-500">
-                                                <option value="">-- Pilih Kelas Binaan --</option>
-                                                @foreach($kelasList as $k)
-                                                    <option value="{{ $k->id }}">
-                                                        {{ $k->nama_kelas }} ({{ $k->jurusan->singkatan ?? $k->jurusan->nama_jurusan }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {{-- Tugas Tambahan 2: KAPROG --}}
-                                    <div class="p-3 border border-dark-200 rounded-xl bg-white shadow-xs">
-                                        <label class="flex items-start gap-2.5 cursor-pointer">
-                                            <input type="checkbox" name="is_kaprog" value="1" id="check_is_kaprog" onchange="toggleKaprogSelect(this.checked)"
-                                                class="mt-0.5 rounded text-purple-600 focus:ring-purple-500">
-                                            <div>
-                                                <p class="text-xs font-bold text-dark-800">Tugaskan sebagai KAPROG</p>
-                                                <p class="text-[10px] text-dark-400">Kepala Program Keahlian membawahi satu jurusan.</p>
-                                            </div>
-                                        </label>
-
-                                        <div id="wrapper_kaprog_select" class="hidden mt-2.5 pt-2.5 border-t border-dark-100">
-                                            <label class="block text-[11px] font-semibold text-dark-700 mb-1">Pilih Program Keahlian <span class="text-rose-500">*</span></label>
-                                            <select name="kaprog_jurusan_id" id="field_kaprog_jurusan_id"
-                                                class="w-full px-2.5 py-1.5 border border-dark-200 rounded-lg text-xs focus:ring-primary-500 focus:border-primary-500">
-                                                <option value="">-- Pilih Jurusan --</option>
-                                                @foreach($jurusans as $j)
-                                                    <option value="{{ $j->id }}">{{ $j->nama_jurusan }} ({{ $j->kode_jurusan }})</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Footer (Pinned) --}}
-                        <div class="px-6 py-4 bg-dark-50/70 border-t border-dark-200 flex items-center justify-end gap-3 flex-shrink-0">
-                            <button type="button" onclick="closeModal('modal-inputguru')"
-                                class="px-4 py-2 border border-dark-200 rounded-xl text-sm font-semibold text-dark-600 hover:bg-white hover:text-dark-800 transition">
-                                Batal
-                            </button>
-                            <button type="submit"
-                                class="px-5 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl text-sm font-semibold shadow-md shadow-primary-500/30 hover:shadow-primary-500/40 transition flex items-center gap-1.5">
-                                <i class='bx bx-save text-lg'></i>
-                                Simpan & Buat Akun
-                            </button>
-                        </div>
-                    </form>
+                <div id="loadeditform">
+                    <div class="text-center py-8">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#003FA9] border-t-transparent"></div>
+                        <p class="text-xs text-slate-500 mt-2">Memuat formulir...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -702,4 +467,27 @@
             });
         }
     </script>
-@endpush
+
+        function editGuru(id) {
+            document.getElementById('loadeditform').innerHTML =
+                '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#003FA9] border-t-transparent"></div><p class="text-xs text-slate-500 mt-2">Memuat data guru...</p></div>';
+            openModal('modal-editguru');
+
+            fetch('/guru/edit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('loadeditform').innerHTML = html;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('loadeditform').innerHTML = '<p class="text-rose-500 text-xs text-center py-4">Gagal memuat formulir edit.</p>';
+            });
+        }
+    @endpush

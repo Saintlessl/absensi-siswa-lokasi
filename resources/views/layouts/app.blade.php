@@ -21,6 +21,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     {{-- Alpine.js for lightweight UI interactions --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    {{-- Reusable Wizard Modal System --}}
+    <script src="{{ asset('js/wizard-modal.js') }}"></script>
     <script>
         tailwind.config = {
             theme: {
