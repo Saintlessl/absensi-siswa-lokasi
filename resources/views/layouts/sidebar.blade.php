@@ -1,9 +1,9 @@
 {{-- Sidebar --}}
 <aside id="sidebar"
-    class="fixed top-0 left-0 z-50 h-screen lg:w-[272px] w-[272px] -translate-x-full lg:translate-x-0 sidebar-transition bg-[#003FA9] border-r border-blue-900/30 flex flex-col shadow-xl">
+    class="fixed top-0 left-0 z-50 h-screen lg:w-[272px] w-[272px] -translate-x-full lg:translate-x-0 sidebar-transition bg-[#0052CC] border-r border-blue-900/30 flex flex-col shadow-xl">
 
     {{-- Logo Section --}}
-    <div class="flex items-center gap-3.5 px-6 py-5 border-b border-white/10">
+    <div class="flex items-center gap-3.5 px-6 pt-6 pb-4">
         <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-white/15 border border-white/20 p-1 flex items-center justify-center shadow-sm backdrop-blur-xs">
             <img src="{{ asset('img/school-crest.png') }}" alt="Logo" class="w-full h-full object-contain filter drop-shadow">
         </div>
@@ -14,7 +14,7 @@
     </div>
 
     {{-- Navigation --}}
-    <nav class="flex-1 px-3 py-4 sidebar-scroll overflow-y-auto">
+    <nav class="flex-1 px-3 pt-6 pb-4 sidebar-scroll overflow-y-auto">
 
         {{-- Top: Dashboard --}}
         <div class="mb-5">
@@ -930,34 +930,4 @@
         @endif
     </nav>
 
-    {{-- Sidebar Footer: User Info (Fixed at Bottom) --}}
-    <div class="flex-shrink-0 border-t border-white/10 px-4 py-3.5 bg-[#003795]/70 backdrop-blur-sm">
-        <div class="flex items-center justify-between gap-2.5">
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-blue-500/80 border border-white/20 flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                    @if (Auth::user()->role === 'guru' && Auth::user()->guru && Auth::user()->guru->photo_path && file_exists(public_path('storage/' . Auth::user()->guru->photo_path)))
-                        <img src="{{ asset('storage/' . Auth::user()->guru->photo_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover rounded-xl">
-                    @else
-                        {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
-                    @endif
-                </div>
-                <div class="sidebar-logo-text overflow-hidden min-w-0 transition-all duration-300">
-                    <p class="text-white text-xs font-bold truncate leading-tight">
-                        {{ Auth::user()->salutation_name ?? Auth::user()->name ?? 'Admin Kesiswaan' }}
-                    </p>
-                    <p class="text-blue-200 text-[10px] font-semibold uppercase tracking-wider mt-0.5">
-                        {{ strtoupper(Auth::user()->role) }}
-                    </p>
-                </div>
-            </div>
-
-            <a href="{{ route('proseslogout') }}"
-                onclick="event.preventDefault(); document.getElementById('sidebar-logout-form').submit();"
-                class="flex-shrink-0 w-8 h-8 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 flex items-center justify-center transition-all duration-200"
-                title="Keluar">
-                <i class='bx bx-log-out text-base'></i>
-            </a>
-            <form id="sidebar-logout-form" action="{{ route('proseslogout') }}" method="POST" class="hidden">@csrf</form>
-        </div>
-    </div>
 </aside>
