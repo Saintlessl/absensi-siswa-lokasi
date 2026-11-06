@@ -479,7 +479,6 @@
 
                 if (inputMapel) {
                     inputMapel.value = mapel || '';
-                    console.log("Mapel diupdate ke: " + mapel); // Untuk debugging
                 }
             }
         });

@@ -176,7 +176,7 @@
                             {{-- Aksi --}}
                             <td class="px-6 py-4 text-sm text-center">
                                 <button type="button"
-                                    onclick="showDetailAbsensi('{{ $log->tanggal }}', '{{ $log->jam_masuk }}', '{{ $log->status }}', '{{ $log->keterangan }}', '{{ $log->foto }}', '{{ $log->latitude }}', '{{ $log->longitude }}')"
+                                    onclick="showDetailAbsensi(@js($log->tanggal), @js($log->jam_masuk), @js($log->status), @js($log->keterangan), @js($log->foto), @js($log->latitude), @js($log->longitude))"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
                                     title="Detail Lengkap">
                                     <i class='bx bx-show text-lg'></i>
@@ -185,7 +185,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-16 h-16 mb-4 rounded-full bg-dark-100 flex items-center justify-center">
                                         <i class='bx bx-history text-3xl text-dark-400'></i>

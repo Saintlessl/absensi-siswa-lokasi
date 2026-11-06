@@ -57,7 +57,9 @@
                             <span
                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 <i class='bx bx-check-circle'></i> {{ ucfirst($absenHariIni->status) }}
-                                ({{ date('H:i', strtotime($absenHariIni->jam_masuk)) }})
+                                @if ($absenHariIni->jam_masuk)
+                                    ({{ date('H:i', strtotime($absenHariIni->jam_masuk)) }})
+                                @endif
                             </span>
                         @else
                             <span
@@ -107,8 +109,10 @@
                             @if ($absenHariIni)
                                 <span
                                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <i class='bx bx-check-circle'></i> Hadir
-                                    ({{ date('H:i', strtotime($absenHariIni->jam_masuk)) }})
+                                    <i class='bx bx-check-circle'></i> {{ ucfirst($absenHariIni->status) }}
+                                    @if ($absenHariIni->jam_masuk)
+                                        ({{ date('H:i', strtotime($absenHariIni->jam_masuk)) }})
+                                    @endif
                                 </span>
                             @else
                                 <span
@@ -233,6 +237,7 @@
 
         @if (!$absenHariIni)
             let currentLat = null;
+            let currentAccuracy = null;
             let currentLng = null;
             let currentDistance = null;
             let isMocked = false;
@@ -255,8 +260,10 @@
                             currentLat = position.coords.latitude;
                             currentLng = position.coords.longitude;
                             
-                            // Basic Fake GPS Detection
-                            isMocked = position.mocked || (position.coords.accuracy && position.coords.accuracy < 1);
+                            // Basic Fake GPS Detection (advisory only — the
+                            // server re-validates bounds and accuracy plausibility)
+                            currentAccuracy = position.coords.accuracy || null;
+                            isMocked = position.mocked === true;
                             
                             updateLocationOnMap(currentLat, currentLng);
 
@@ -361,12 +368,22 @@
                 });
 
                 document.getElementById('btn-absen').addEventListener('click', function() {
-                    if (!currentLat || !currentLng) return;
+                    const btn = document.getElementById('btn-absen');
+                    // BUG-050: strict null check (lat 0 is a valid coordinate in Indonesia)
+                    if (currentLat === null || currentLng === null) return;
+                    // BUG-051: synchronous double-submit guard
+                    if (btn.disabled) return;
+                    const originalText = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class='bx bx-loader-alt animate-spin text-2xl'></i><span>Memproses...</span>`;
+
                     Webcam.snap(function(data_uri) {
-                        const btn = document.getElementById('btn-absen');
-                        const originalText = btn.innerHTML;
-                        btn.disabled = true;
-                        btn.innerHTML = `<i class='bx bx-loader-alt animate-spin text-2xl'></i><span>Memproses...</span>`;
+                        if (!data_uri) {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            Swal.fire({ icon: 'error', title: 'Kamera Gagal', text: 'Ambil ulang foto selfie Anda.' });
+                            return;
+                        }
 
                         fetch('{{ route('absensi.store') }}', {
                             method: 'POST',
@@ -376,19 +393,30 @@
                                 'Accept': 'application/json'
                             },
                             body: JSON.stringify({
-                                latitude: currentLat, longitude: currentLng, image: data_uri, is_mocked: isMocked
+                                latitude: currentLat, longitude: currentLng, image: data_uri, is_mocked: isMocked, accuracy: currentAccuracy
                             })
                         })
-                        .then(response => response.json())
+                        // BUG-052: handle non-JSON responses (419 CSRF, 500, offline)
+                        // and restore the button in every failure path.
+                        .then(response => response.json().catch(() => ({})))
                         .then(data => {
                             if (data.success) {
                                 Swal.fire({ icon: 'success', title: 'Berhasil!', text: data.message }).then(() => window.location.reload());
                             } else {
-                                Swal.fire({ icon: 'error', title: 'Gagal', text: data.message });
+                                Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan. Muat ulang halaman jika sesi Anda kedaluwarsa.' });
                                 btn.disabled = false;
                                 btn.innerHTML = originalText;
                             }
+                        })
+                        .catch(() => {
+                            Swal.fire({ icon: 'error', title: 'Jaringan Gagal', text: 'Tidak dapat mengirim absensi. Periksa koneksi Anda.' });
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
                         });
+                    }, function() {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                        Swal.fire({ icon: 'error', title: 'Kamera Bermasalah', text: 'Izinkan akses kamera dan muat ulang halaman.' });
                     });
                 });
             });

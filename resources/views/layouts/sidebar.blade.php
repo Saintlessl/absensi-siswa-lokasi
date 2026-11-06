@@ -405,9 +405,11 @@
             </div>
             <a href="{{ route('proseslogout') }}"
                 class="sidebar-logo-text flex-shrink-0 w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-400 hover:text-red-300 transition-all duration-200"
-                title="Logout">
+                title="Logout"
+                onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
                 <i class='bx bx-log-out text-lg'></i>
             </a>
+            <form id="logout-form-sidebar" action="{{ route('proseslogout') }}" method="POST" class="hidden">@csrf</form>
         </div>
     </div>
 </aside>
