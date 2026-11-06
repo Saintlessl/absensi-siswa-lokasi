@@ -38,6 +38,12 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // Defense-in-depth: even if middleware is misconfigured, only admins
+        // may change user accounts. (BUG-002 privilege-escalation guard)
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki hak akses untuk mengubah data user.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -49,6 +55,14 @@ class UserController extends Controller
             'email' => $request->email,
             'role' => $request->role,
         ];
+
+        // BUG-002: prevent demoting the last remaining admin (lockout guard).
+        if ($user->role === 'admin' && $request->role !== 'admin') {
+            $adminCount = User::where('role', 'admin')->count();
+            if ($adminCount <= 1) {
+                return redirect()->back()->with('error', 'Tidak dapat menurunkan role admin terakhir.');
+            }
+        }
 
         if ($request->filled('password')) {
             $request->validate(['password' => 'string|min:6']);
@@ -62,7 +76,21 @@ class UserController extends Controller
 
     public function destroy(int $id)
     {
+        // Defense-in-depth role check (BUG-003)
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki hak akses untuk menghapus user.');
+        }
+
         $user = User::findOrFail($id);
+
+        // BUG-003: never allow self-delete; never allow deleting last admin.
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'Tidak dapat menghapus akun sendiri.');
+        }
+        if ($user->role === 'admin' && User::where('role', 'admin')->count() <= 1) {
+            return redirect()->back()->with('error', 'Tidak dapat menghapus admin terakhir.');
+        }
+
         $user->delete();
 
         return redirect()->back()->with('success', 'Data User berhasil dihapus');
