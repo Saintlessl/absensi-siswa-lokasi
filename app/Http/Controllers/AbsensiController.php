@@ -144,8 +144,8 @@ class AbsensiController extends Controller
             // ~2 MB cap on the base64 payload; without it a student could post
             // hundreds of megabytes of base64 and fill the disk.
             'foto'              => 'required|string|max:2800000',
-            'latitude'          => 'required',
-            'longitude'         => 'required',
+            'latitude'          => 'required|numeric|between:-90,90',
+            'longitude'         => 'required|numeric|between:-180,180',
             'tipe'              => 'nullable|in:masuk,pulang',
             'face_descriptor'   => 'required|array|size:128',
             'face_descriptor.*' => 'numeric',
