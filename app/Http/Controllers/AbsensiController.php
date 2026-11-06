@@ -11,6 +11,7 @@ use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -62,31 +63,32 @@ class AbsensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Lokasi sekolah belum diatur'], 500);
         }
 
-        // Cek apakah sudah absen hari ini
-        $cekAbsen = Absensi::where('siswa_id', $siswa->id)
-            ->whereDate('tanggal', date('Y-m-d'))
-            ->exists();
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'image' => 'required|string',
+            'accuracy' => 'nullable|numeric|min:0',
+        ]);
 
-        if ($cekAbsen) {
-            return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absensi hari ini.'], 400);
-        }
-
-        $lat = $request->latitude;
-        $lng = $request->longitude;
-        $isMocked = $request->is_mocked; // New: Detect fake GPS from frontend
-
-        if (!$lat || !$lng) {
-            return response()->json(['success' => false, 'message' => 'Lokasi Anda tidak terdeteksi.'], 400);
-        }
+        $lat = (float) $request->latitude;
+        $lng = (float) $request->longitude;
+        // is_mocked is advisory only: it is client-supplied and cannot be
+        // trusted by itself. Server-side checks below limit casual abuse.
+        $isMocked = (bool) $request->is_mocked;
 
         if ($isMocked) {
             return response()->json(['success' => false, 'message' => 'Peringatan: Fake GPS terdeteksi! Silakan gunakan lokasi asli.'], 400);
         }
 
+        // BUG-022: reject absurd accuracy claims when the client reports them.
+        if ($request->filled('accuracy') && (float) $request->accuracy > 100) {
+            return response()->json(['success' => false, 'message' => 'Akurasi GPS terlalu rendah. Aktifkan GPS presisi tinggi lalu coba lagi.'], 400);
+        }
+
         // Haversine formula backend validation
         $earthRadius = 6371000; // in meters
-        $latFrom = deg2rad($lokasiSekolah->latitude);
-        $lonFrom = deg2rad($lokasiSekolah->longitude);
+        $latFrom = deg2rad((float) $lokasiSekolah->latitude);
+        $lonFrom = deg2rad((float) $lokasiSekolah->longitude);
         $latTo = deg2rad($lat);
         $lonTo = deg2rad($lng);
 
@@ -106,59 +108,94 @@ class AbsensiController extends Controller
 
         // Selfie handling
         $img = $request->image;
-        if (!$img) {
-            return response()->json(['success' => false, 'message' => 'Foto selfie diperlukan.'], 400);
+        if (!str_contains($img, ';base64,')) {
+            return response()->json(['success' => false, 'message' => 'Format foto tidak valid.'], 400);
+        }
+
+        $image_parts = explode(";base64,", $img);
+        $image_base64 = base64_decode($image_parts[1]);
+        if ($image_base64 === false || strlen($image_base64) < 100) {
+            return response()->json(['success' => false, 'message' => 'Foto selfie tidak dapat diproses.'], 400);
+        }
+
+        // BUG-030: only accept real image payload (magic bytes), cap size.
+        if (strlen($image_base64) > 8 * 1024 * 1024) {
+            return response()->json(['success' => false, 'message' => 'Foto terlalu besar (maks 8MB).'], 400);
+        }
+        $isPng = str_starts_with($image_base64, "\x89PNG");
+        $isJpg = str_starts_with($image_base64, "\xFF\xD8\xFF");
+        if (!$isPng && !$isJpg) {
+            return response()->json(['success' => false, 'message' => 'Foto selfie tidak valid.'], 400);
         }
 
         $folderPath = "public/absensi/selfie/";
-        $image_parts = explode(";base64,", $img);
-        $image_base64 = base64_decode($image_parts[1]);
-        $fileName = $siswa->nis . "_" . date('Ymd_His') . ".png";
-        $file = $folderPath . $fileName;
-        Storage::put($file, $image_base64);
+        $ext = $isJpg ? 'jpg' : 'png';
+        $fileName = preg_replace('/[^A-Za-z0-9_-]/', '', $siswa->nis) . "_" . date('Ymd_His') . "." . $ext;
 
-        // Determine if late
-        $days = [
-            'Sunday' => 'Minggu',
-            'Monday' => 'Senin',
-            'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu',
-            'Thursday' => 'Kamis',
-            'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu'
-        ];
-        $hariIniStr = $days[date('l')];
-        $jamSekarang = date('H:i:s');
-        
-        $jadwalHariIni = Jadwal::where('kelas_id', $siswa->kelas_id)
-            ->where('hari', $hariIniStr)
-            ->orderBy('jam_mulai', 'asc')
-            ->first();
+        // BUG-021: atomic duplicate check + writes inside one transaction —
+        // two concurrent submissions cannot both insert for the same day.
+        $absenHariIni = null;
+        $created = null;
+        DB::transaction(function () use ($siswa, $lat, $lng, $folderPath, $fileName, $image_base64, &$absenHariIni, &$created) {
+            $absenHariIni = Absensi::where('siswa_id', $siswa->id)
+                ->whereDate('tanggal', date('Y-m-d'))
+                ->lockForUpdate()
+                ->first();
 
-        $isLate = false;
-        $lateThreshold = \App\Helpers\SettingHelper::getLateThreshold();
-        if ($jamSekarang > $lateThreshold) {
-            $isLate = true;
+            if ($absenHariIni) {
+                return;
+            }
+
+            Storage::put($folderPath . $fileName, $image_base64);
+
+            // Determine if late
+            $days = [
+                'Sunday' => 'Minggu',
+                'Monday' => 'Senin',
+                'Tuesday' => 'Selasa',
+                'Wednesday' => 'Rabu',
+                'Thursday' => 'Kamis',
+                'Friday' => 'Jumat',
+                'Saturday' => 'Sabtu'
+            ];
+            $hariIniStr = $days[date('l')];
+            $jamSekarang = date('H:i:s');
+
+            $jadwalHariIni = Jadwal::where('kelas_id', $siswa->kelas_id)
+                ->where('hari', $hariIniStr)
+                ->orderBy('jam_mulai', 'asc')
+                ->first();
+
+            // BUG-024: lateness compares against the class first bell when
+            // available, falling back to the global threshold.
+            $batasMasuk = $jadwalHariIni && $jadwalHariIni->jam_mulai
+                ? (string) $jadwalHariIni->jam_mulai
+                : \App\Helpers\SettingHelper::getLateThreshold();
+
+            $isLate = $jamSekarang > $batasMasuk;
+
+            $created = Absensi::create([
+                'siswa_id' => $siswa->id,
+                'tanggal' => date('Y-m-d'),
+                'jam_masuk' => date('H:i:s'),
+                'status' => 'hadir',
+                'is_late' => $isLate,
+                'keterangan' => $isLate ? 'Terlambat' : 'Hadir Tepat Waktu',
+                'foto' => $fileName,
+                'latitude' => $lat,
+                'longitude' => $lng,
+            ]);
+        });
+
+        if (!$created) {
+            return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absensi hari ini.'], 400);
         }
-
-        Absensi::create([
-            'siswa_id' => $siswa->id,
-            'tanggal' => date('Y-m-d'),
-            'jam_masuk' => date('H:i:s'),
-            'status' => $isLate ? 'Hadir' : 'Hadir', // We use is_late column now
-            'is_late' => $isLate,
-            'keterangan' => $isLate ? 'Terlambat' : 'Hadir Tepat Waktu',
-            'foto' => $fileName,
-            'latitude' => $lat,
-            'longitude' => $lng,
-        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Absensi berhasil tersimpan.' . ($isLate ? ' (Terlambat)' : '')
+            'message' => 'Absensi berhasil tersimpan.' . ($created->is_late ? ' (Terlambat)' : '')
         ]);
     }
-
 
     public function riwayatKehadiran()
     {
@@ -198,22 +235,8 @@ class AbsensiController extends Controller
         $sakitCount = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['sakit'])->count();
         $alpaCount  = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['alfa'])->count();
 
-        // 4. Perhitungan Hari Efektif (Menghindari Alpa manual yang tidak terinput)
-        $startDate = Carbon::now()->startOfMonth();
-        $endDate = Carbon::now();
-        $hariEfektif = 0;
-
-        $currentDate = $startDate->copy();
-        while ($currentDate->lte($endDate)) {
-            // Asumsi hari minggu libur
-            if ($currentDate->dayOfWeek !== CarbonInterface::SUNDAY) {
-                $hariEfektif++;
-            }
-            $currentDate->addDay();
-        }
-
-        $totalTercatat = $hadirCount + $izinCount + $sakitCount + $alpaCount;
-        $calculatedAlpa = max(0, $hariEfektif - $totalTercatat);
+        // BUG-027: removed dead effective-day computation (result was
+        // discarded; getAlphaCount() below is the single source of truth).
 
         $rekap = [
             'hadir' => $hadirCount,
@@ -270,60 +293,75 @@ class AbsensiController extends Controller
 
     public function updateHarian(Request $request)
     {
+        // Defense-in-depth: route also gates with role:guru,admin
+        if (!in_array(Auth::user()->role, ['guru', 'admin'], true)) {
+            return redirect()->route('dashboard')->with('error', 'Hanya guru yang dapat memperbarui absensi harian.');
+        }
+
         $request->validate([
             'siswa_id' => 'required|exists:siswas,id',
             'status' => 'required|in:Hadir,Izin,Sakit,Alfa',
-            'keterangan' => 'nullable|string'
+            'keterangan' => 'nullable|string|max:255'
         ]);
 
+        // BUG-026: write the DB enum's lowercase form regardless of input casing.
+        $status = strtolower($request->status);
         $siswa = Siswa::findOrFail($request->siswa_id);
         $tanggalInfo = date('Y-m-d');
 
-        $absensi = Absensi::where('siswa_id', $request->siswa_id)
-            ->whereDate('tanggal', $tanggalInfo)
-            ->first();
+        // BUG-021: atomic read-lock-write to prevent duplicate rows per day.
+        $absensi = null;
+        DB::transaction(function () use ($request, $siswa, $status, $tanggalInfo, &$absensi) {
+            $absensi = Absensi::where('siswa_id', $request->siswa_id)
+                ->whereDate('tanggal', $tanggalInfo)
+                ->lockForUpdate()
+                ->first();
 
-        if ($absensi) {
-            $absensi->update([
-                'status' => $request->status,
-                'keterangan' => $request->keterangan ?? 'Diperbarui otomatis oleh Guru'
-            ]);
-        } else {
-            $absensi = Absensi::create([
-                'siswa_id' => $request->siswa_id,
-                'tanggal' => $tanggalInfo,
-                'jam_masuk' => date('H:i:s'),
-                'status' => $request->status,
-                'keterangan' => $request->keterangan ?? 'Ditambahkan otomatis oleh Guru',
-            ]);
-        }
+            if ($absensi) {
+                $absensi->update([
+                    'status' => $status,
+                    'keterangan' => $request->keterangan ?? 'Diperbarui otomatis oleh Guru'
+                ]);
+            } else {
+                $absensi = Absensi::create([
+                    'siswa_id' => $request->siswa_id,
+                    'tanggal' => $tanggalInfo,
+                    'jam_masuk' => date('H:i:s'),
+                    'status' => $status,
+                    'keterangan' => $request->keterangan ?? 'Ditambahkan otomatis oleh Guru',
+                ]);
+            }
+        });
 
         // Point 5: Automated SP System (SP1, SP2, SP3 with dynamic thresholds)
-        if (strtolower($request->status) == 'alfa') {
+        if ($status === 'alfa') {
             $alfaCount = $siswa->getTotalAlpha();
 
+            // BUG-025: issue every crossed-but-not-yet-issued level, lowest
+            // first; the old loop broke on the highest quota and skipped SP1/SP2.
             $spLevels = [
-                'SP3' => \App\Helpers\SettingHelper::getAlphaQuota('SP3'),
-                'SP2' => \App\Helpers\SettingHelper::getAlphaQuota('SP2'),
                 'SP1' => \App\Helpers\SettingHelper::getAlphaQuota('SP1'),
+                'SP2' => \App\Helpers\SettingHelper::getAlphaQuota('SP2'),
+                'SP3' => \App\Helpers\SettingHelper::getAlphaQuota('SP3'),
             ];
 
             foreach ($spLevels as $jenisSP => $kuota) {
-                if ($alfaCount >= $kuota) {
-                    $exists = \App\Models\SuratPeringatan::where('siswa_id', $request->siswa_id)
-                        ->where('jenis_sp', $jenisSP)
-                        ->exists();
+                if ($kuota > 0 && $alfaCount >= $kuota) {
+                    DB::transaction(function () use ($siswa, $request, $jenisSP, $alfaCount) {
+                        $exists = \App\Models\SuratPeringatan::where('siswa_id', $request->siswa_id)
+                            ->where('jenis_sp', $jenisSP)
+                            ->exists();
 
-                    if (!$exists) {
-                        \App\Models\SuratPeringatan::create([
-                            'siswa_id' => $request->siswa_id,
-                            'nomor_surat' => $jenisSP . '/' . date('Ymd') . '/' . $request->siswa_id,
-                            'jenis_sp' => $jenisSP,
-                            'tanggal_terbit' => date('Y-m-d'),
-                            'keterangan' => "Akumulasi Alfa mencapai {$alfaCount} hari. (Otomatis oleh sistem)"
-                        ]);
-                    }
-                    break; // Only create the highest applicable SP that doesn't exist yet
+                        if (!$exists) {
+                            \App\Models\SuratPeringatan::create([
+                                'siswa_id' => $request->siswa_id,
+                                'nomor_surat' => $jenisSP . '/' . date('Ymd') . '/' . $request->siswa_id,
+                                'jenis_sp' => $jenisSP,
+                                'tanggal_terbit' => date('Y-m-d'),
+                                'keterangan' => "Akumulasi Alfa mencapai {$alfaCount} hari. (Otomatis oleh sistem)"
+                            ]);
+                        }
+                    });
                 }
             }
         }
@@ -333,8 +371,15 @@ class AbsensiController extends Controller
 
     public function rekapAbsensi(Request $request)
     {
-        $bulan = $request->bulan ?? date('m');
-        $tahun = $request->tahun ?? date('Y');
+        // BUG-028: non-numeric bulan/tahun previously reached
+        // Carbon::createFromDate() unvalidated -> 500.
+        $request->validate([
+            'bulan' => 'nullable|integer|between:1,12',
+            'tahun' => 'nullable|integer|between:2000,2100',
+        ]);
+
+        $bulan = (int) ($request->bulan ?? date('m'));
+        $tahun = (int) ($request->tahun ?? date('Y'));
         $id_kelas = $request->id_kelas;
 
         $query = Siswa::with('kelas');
@@ -369,23 +414,22 @@ class AbsensiController extends Controller
             $currentDate->addDay();
         }
 
+        // BUG-043: one grouped query replaces 4 counts per student (N+1).
+        $counts = Absensi::selectRaw('siswa_id, LOWER(status) as st, COUNT(*) as n')
+            ->whereIn('siswa_id', $siswas->pluck('id'))
+            ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
+            ->groupBy('siswa_id', 'st')
+            ->get()
+            ->groupBy('siswa_id')
+            ->map(fn ($g) => $g->pluck('n', 'st'));
+
         $rekapAll = [];
         foreach ($siswas as $s) {
-            $hadir = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['hadir'])->count();
-            $izin = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['izin'])->count();
-            $sakit = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['sakit'])->count();
-            $alfaDb = Absensi::where('siswa_id', $s->id)
-                ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                ->whereRaw('LOWER(status) = ?', ['alfa'])->count();
-
-            $totalTercatat = $hadir + $izin + $sakit + $alfaDb;
-            $alpa = $alfaDb + max(0, $hariEfektif - $totalTercatat);
+            $c = $counts->get($s->id, collect());
+            $hadir = (int) ($c['hadir'] ?? 0);
+            $izin = (int) ($c['izin'] ?? 0);
+            $sakit = (int) ($c['sakit'] ?? 0);
+            $alfaDb = (int) ($c['alfa'] ?? 0);
 
             $rekapAll[] = [
                 'siswa' => $s,
@@ -415,8 +459,14 @@ class AbsensiController extends Controller
 
     public function rekapPerKelas(Request $request)
     {
-        $bulan = $request->bulan ?? date('m');
-        $tahun = $request->tahun ?? date('Y');
+        // BUG-028: validate filter params (same as rekapAbsensi).
+        $request->validate([
+            'bulan' => 'nullable|integer|between:1,12',
+            'tahun' => 'nullable|integer|between:2000,2100',
+        ]);
+
+        $bulan = (int) ($request->bulan ?? date('m'));
+        $tahun = (int) ($request->tahun ?? date('Y'));
 
         $kelasList = \App\Models\Kelas::withCount('siswa')->orderBy('nama_kelas')->get();
 
