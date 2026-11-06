@@ -36,13 +36,18 @@ class LokasiSekolahController extends Controller
         $lokasi = LokasiSekolah::first();
         
         $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'radius' => 'required|integer|min:1',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'radius' => 'required|integer|min:1|max:5000',
         ]);
 
+        $data = $request->only(['latitude', 'longitude', 'radius']);
+
+        // No silent no-op when the row does not exist yet.
         if ($lokasi) {
-            $lokasi->update($request->all());
+            $lokasi->update($data);
+        } else {
+            \App\Models\LokasiSekolah::create($data);
         }
 
         return redirect()->back()->with('success', 'Pengaturan lokasi sekolah berhasil diperbarui');
