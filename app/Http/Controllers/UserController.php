@@ -85,6 +85,12 @@ class UserController extends Controller
             'jurusan_id'    => 'required_if:role,kaprog|nullable|exists:jurusans,id',
         ]);
 
+        // Lockout guard: refuse to demote the last superadmin (including self).
+        if ($user->role === 'superadmin' && $request->role !== 'superadmin'
+            && \App\Models\User::where('role', 'superadmin')->count() <= 1) {
+            return redirect()->back()->with('error', 'Tidak dapat menurunkan role satu-satunya akun Superadmin.');
+        }
+
         $data = [
             'name'          => $request->name,
             'email'         => $request->email,
