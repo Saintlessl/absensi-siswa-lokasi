@@ -53,8 +53,10 @@ class Siswa extends Model
 
     public function getAlphaCount($month = null, $year = null)
     {
-        $month = $month ?? date('m');
-        $year = $year ?? date('Y');
+        // BUG-029: int-normalize ('5' vs '05' string compare made the
+        // current month look like a past month -> full-month alpa).
+        $month = (int) ($month ?? date('m'));
+        $year = (int) ($year ?? date('Y'));
 
         // Count explicit Alpa records
         $alfaDb = $this->absensi()
@@ -73,7 +75,7 @@ class Siswa extends Model
             $startDate = $registrationDate->copy();
         }
 
-        $endDate = ($month == date('m') && $year == date('Y'))
+        $endDate = ($month === (int) date('n') && $year === (int) date('Y'))
             ? \Carbon\Carbon::now()->startOfDay()
             : \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth()->startOfDay();
 

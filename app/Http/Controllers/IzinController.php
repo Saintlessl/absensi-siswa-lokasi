@@ -76,28 +76,38 @@ class IzinController extends Controller
 
         $request->validate($rules);
 
-        $cekAbsen = Absensi::where('siswa_id', $siswa->id)
-            ->whereDate('tanggal', date('Y-m-d'))
-            ->exists();
+        // BUG-031: atomic duplicate check inside a transaction (same pattern
+        // as AbsensiController::store / updateHarian).
+        $rekor = null;
+        \Illuminate\Support\Facades\DB::transaction(function () use ($siswa, $request, &$rekor) {
+            $cekAbsen = Absensi::where('siswa_id', $siswa->id)
+                ->whereDate('tanggal', date('Y-m-d'))
+                ->lockForUpdate()
+                ->exists();
 
-        if ($cekAbsen) {
+            if ($cekAbsen) {
+                return;
+            }
+
+            $fileName = null;
+            if ($request->hasFile('lampiran')) {
+                $file = $request->file('lampiran');
+                $fileName = preg_replace('/[^A-Za-z0-9_-]/', '', $siswa->nis) . "_lampiran_" . date('Ymd_His') . "." . $file->getClientOriginalExtension();
+                $file->storeAs('public/absensi/lampiran', $fileName);
+            }
+
+            $rekor = Absensi::create([
+                'siswa_id' => $siswa->id,
+                'tanggal' => date('Y-m-d'),
+                'status' => $request->status,
+                'keterangan' => $request->keterangan,
+                'lampiran' => $fileName,
+            ]);
+        });
+
+        if (!$rekor) {
             return redirect()->back()->with('error', 'Rekam kehadiran sudah ada untuk hari ini.');
         }
-
-        $fileName = null;
-        if ($request->hasFile('lampiran')) {
-            $file = $request->file('lampiran');
-            $fileName = $siswa->nis . "_lampiran_" . date('Ymd_His') . "." . $file->getClientOriginalExtension();
-            $file->storeAs('public/absensi/lampiran', $fileName);
-        }
-
-        Absensi::create([
-            'siswa_id' => $siswa->id,
-            'tanggal' => date('Y-m-d'),
-            'status' => $request->status,
-            'keterangan' => $request->keterangan,
-            'lampiran' => $fileName,
-        ]);
 
         return redirect()->back()->with('success', 'Pengajuan ' . ucfirst($request->status) . ' berhasil dikirim.');
     }
