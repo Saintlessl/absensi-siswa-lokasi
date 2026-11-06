@@ -38,20 +38,23 @@ class GuruController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'guru',
-        ]);
+        // BUG-038: atomic two-table write.
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name' => $request->nama,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'guru',
+            ]);
 
-        Guru::create([
-            'user_id' => $user->id,
-            'nip' => $request->nip,
-            'nama' => $request->nama,
-            'mapel' => $request->mapel,
-            'jenis_kelamin' => $request->jenis_kelamin,
-        ]);
+            Guru::create([
+                'user_id' => $user->id,
+                'nip' => $request->nip,
+                'nama' => $request->nama,
+                'mapel' => $request->mapel,
+                'jenis_kelamin' => $request->jenis_kelamin,
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Data Guru berhasil ditambahkan');
     }
@@ -84,7 +87,10 @@ class GuruController extends Controller
             $userData['password'] = Hash::make($request->password);
         }
 
-        $guru->user->update($userData);
+        // BUG-039: null-safe profile->user update.
+        if ($guru->user) {
+            $guru->user->update($userData);
+        }
 
         $guru->update([
             'nip' => $request->nip,
@@ -99,11 +105,22 @@ class GuruController extends Controller
     public function destroy($id)
     {
         $guru = Guru::findOrFail($id);
-        if ($guru->user) {
-            $guru->user->delete(); // This should cascade
-        } else {
-            $guru->delete();
+
+        // BUG-040: block silent cascade-wipe of teaching schedules.
+        if ($guru->jadwal()->exists()) {
+            return redirect()->back()->with(
+                'error',
+                'Guru "' . $guru->nama . '" masih memiliki jadwal mengajar. Hapus jadwalnya terlebih dahulu.'
+            );
         }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($guru) {
+            if ($guru->user) {
+                $guru->user->delete(); // cascades to gurus via FK
+            } else {
+                $guru->delete();
+            }
+        });
 
         return redirect()->back()->with('success', 'Data Guru berhasil dihapus');
     }

@@ -46,20 +46,24 @@ class SiswaController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        $user = User::create([
-            'name' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'siswa',
-        ]);
+        // BUG-038: two-table write wrapped in a transaction — no orphan
+        // user row (and burned unique email) if the profile create fails.
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name' => $request->nama,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'siswa',
+            ]);
 
-        Siswa::create([
-            'user_id' => $user->id,
-            'nis' => $request->nis,
-            'nama' => $request->nama,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'kelas_id' => $request->kelas_id,
-        ]);
+            Siswa::create([
+                'user_id' => $user->id,
+                'nis' => $request->nis,
+                'nama' => $request->nama,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'kelas_id' => $request->kelas_id,
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Data Siswa berhasil ditambahkan');
     }
@@ -93,7 +97,10 @@ class SiswaController extends Controller
             $userData['password'] = Hash::make($request->password);
         }
 
-        $siswa->user->update($userData);
+        // BUG-039: null-safe when profile row has a dangling user_id.
+        if ($siswa->user) {
+            $siswa->user->update($userData);
+        }
 
         $siswa->update([
             'nis' => $request->nis,
@@ -108,11 +115,23 @@ class SiswaController extends Controller
     public function destroy($id)
     {
         $siswa = Siswa::findOrFail($id);
-        if ($siswa->user) {
-            $siswa->user->delete(); // This should cascade and delete Siswa as well based on migration
-        } else {
-            $siswa->delete();
+
+        // BUG-040: refuse to wipe history silently. If the student already
+        // has attendance records, admin must remove those deliberately.
+        if ($siswa->absensi()->exists()) {
+            return redirect()->back()->with(
+                'error',
+                'Siswa "' . $siswa->nama . '" masih memiliki riwayat absensi. Hapus/serahkan riwayat terlebih dahulu sebelum menghapus siswa.'
+            );
         }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($siswa) {
+            if ($siswa->user) {
+                $siswa->user->delete(); // cascades to siswas via FK
+            } else {
+                $siswa->delete();
+            }
+        });
 
         return redirect()->back()->with('success', 'Data Siswa berhasil dihapus');
     }

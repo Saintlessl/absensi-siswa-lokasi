@@ -28,10 +28,11 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kelas' => 'required',
-            'jumlah_siswa' => 'required|integer',
-            'wali_kelas' => 'required|',
-
+            // BUG-036: complete rules; dangling pipe removed; length caps
+            // prevent MySQL 1406 -> uncaught 500.
+            'nama_kelas' => 'required|string|max:255|unique:kelas,nama_kelas',
+            'jumlah_siswa' => 'required|integer|min:0',
+            'wali_kelas' => 'required|string|max:255',
         ]);
 
         $kelas = Kelas::create([
@@ -55,7 +56,7 @@ class KelasController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
-            'nama_kelas'   => 'required|string|max:255',
+            'nama_kelas'   => 'required|string|max:255|unique:kelas,nama_kelas,' . $id,
             'jumlah_siswa' => 'required|integer',
             'wali_kelas'   => 'required|string|max:255',
         ]);
