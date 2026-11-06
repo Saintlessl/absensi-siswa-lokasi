@@ -87,6 +87,8 @@
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">L/P</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Kelas</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Alpha</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">SP</th>
                         <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">
                             Aksi</th>
                     </tr>
@@ -107,6 +109,25 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $s->jenis_kelamin }}</td>
                             <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $s->kelas->nama_kelas ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-center">
+                                @php
+                                    $alphaCount = $s->getTotalAlpha();
+                                @endphp
+                                @if ($alphaCount >= 5)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 animate-pulse" title="Segera beri SP!">
+                                        <i class='bx bx-error-circle text-sm'></i> {{ $alphaCount }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-dark-100 text-dark-700 border border-dark-200">
+                                        {{ $alphaCount }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm text-center">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold {{ $s->getLatestSP() != '-' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-dark-100 text-dark-700 border border-dark-200' }}">
+                                    {{ $s->getLatestSP() }}
+                                </span>
+                            </td>
                             <td class="px-6 py-4 text-sm text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button onclick="editSiswa('{{ $s->id }}')"

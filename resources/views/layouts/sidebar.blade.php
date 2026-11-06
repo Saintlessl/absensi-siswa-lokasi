@@ -178,6 +178,40 @@
                             <span class="sidebar-label transition-all duration-300">Setting Lokasi</span>
                         </a>
                     </li>
+                    {{-- Pengaturan Sistem --}}
+                    <li>
+                        <a href="{{ route('setting') }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                              {{ request()->routeIs('setting') || request()->routeIs('setting.*')
+                                  ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                  : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                    {{ request()->routeIs('setting') || request()->routeIs('setting.*')
+                                        ? 'bg-primary-600/30 text-primary-400'
+                                        : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-cog text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Pengaturan Sistem</span>
+                        </a>
+                    </li>
+                    {{-- Surat Peringatan --}}
+                    <li>
+                        <a href="{{ route('surat-peringatan') }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                              {{ request()->routeIs('surat-peringatan') || request()->routeIs('surat-peringatan.*')
+                                  ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                  : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                    {{ request()->routeIs('surat-peringatan') || request()->routeIs('surat-peringatan.*')
+                                        ? 'bg-primary-600/30 text-primary-400'
+                                        : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-error-alt text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Surat Peringatan</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         @endif
@@ -206,22 +240,6 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('izin') }}"
-                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('izin')
-                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
-                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
-                            <div
-                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
-                                        {{ request()->routeIs('izin')
-                                            ? 'bg-primary-600/30 text-primary-400'
-                                            : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
-                                <i class='bx bx-envelope text-lg'></i>
-                            </div>
-                            <span class="sidebar-label transition-all duration-300">Pengajuan Izin</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ route('riwayatkehadiran') }}"
                             class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                                   {{ request()->routeIs('riwayatkehadiran')
@@ -237,7 +255,6 @@
                             <span class="sidebar-label transition-all duration-300">Riwayat Kehadiran</span>
                         </a>
                     </li>
-
                 </ul>
             </div>
         @endif
@@ -294,6 +311,22 @@
                             <span class="sidebar-label transition-all duration-300">Rekap Absensi PerKelas</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('surat-peringatan') }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('surat-peringatan') || request()->routeIs('surat-peringatan.*')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('surat-peringatan') || request()->routeIs('surat-peringatan.*')
+                                            ? 'bg-primary-600/30 text-primary-400'
+                                            : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-error-alt text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Surat Peringatan</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         @endif
@@ -334,6 +367,22 @@
                                 <i class='bx bx-history text-lg'></i>
                             </div>
                             <span class="sidebar-label transition-all duration-300">Riwayat Kehadiran</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('izin') }}"
+                            class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('izin')
+                                      ? 'bg-primary-600/20 text-primary-400 menu-active'
+                                      : 'text-dark-300 hover:bg-white/5 hover:text-white' }}">
+                            <div
+                                class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                                        {{ request()->routeIs('izin')
+                                            ? 'bg-primary-600/30 text-primary-400'
+                                            : 'bg-white/5 text-dark-400 group-hover:bg-white/10 group-hover:text-white' }}">
+                                <i class='bx bx-envelope text-lg'></i>
+                            </div>
+                            <span class="sidebar-label transition-all duration-300">Pengajuan Izin</span>
                         </a>
                     </li>
                 </ul>

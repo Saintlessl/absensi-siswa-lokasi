@@ -107,4 +107,14 @@ Route::middleware(['auth:web'])->group(function () {
     // Izin / Sakit
     Route::get('/izin-siswa', [IzinController::class, 'index'])->name('izin');
     Route::post('/izin-siswa', [IzinController::class, 'store'])->name('izin.store');
+
+    // Settings (Admin)
+    Route::get('/pengaturan', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting');
+    Route::post('/pengaturan', [\App\Http\Controllers\SettingController::class, 'update'])->name('setting.update');
+
+    // Surat Peringatan (Admin & Guru)
+    Route::get('/surat-peringatan', [\App\Http\Controllers\SuratPeringatanController::class, 'index'])->name('surat-peringatan');
+    Route::post('/surat-peringatan', [\App\Http\Controllers\SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
+    Route::post('/surat-peringatan/delete/{id}', [\App\Http\Controllers\SuratPeringatanController::class, 'destroy'])->name('surat-peringatan.delete');
+    Route::get('/surat-peringatan/cetak/{id}', [\App\Http\Controllers\SuratPeringatanController::class, 'cetak'])->name('surat-peringatan.cetak');
 });

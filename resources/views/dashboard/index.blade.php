@@ -593,6 +593,49 @@
                 </table>
             </div>
         </div>
+        {{-- Surat Peringatan (Disiplin) --}}
+        @if (isset($suratPeringatan) && $suratPeringatan->count() > 0)
+            <div class="mb-6 mt-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                        <i class='bx bx-error-alt text-2xl'></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-dark-800">Peringatan Disiplin</h3>
+                        <p class="text-sm text-dark-500">Daftar Surat Peringatan yang diterbitkan sekolah</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach ($suratPeringatan as $sp)
+                        <div
+                            class="glass-card rounded-2xl border border-rose-200 p-5 relative overflow-hidden group hover:shadow-lg hover:shadow-rose-500/10 transition-all">
+                            <div class="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/5 rounded-full blur-xl"></div>
+
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider
+                                    @if ($sp->jenis_sp == 'SP1') bg-amber-100 text-amber-700
+                                    @elseif($sp->jenis_sp == 'SP2') bg-orange-100 text-orange-700
+                                    @else bg-rose-100 text-rose-700 @endif">
+                                    {{ $sp->jenis_sp }}
+                                </span>
+                                <span
+                                    class="text-[10px] font-mono text-dark-400">{{ date('d/m/Y', strtotime($sp->tanggal_terbit)) }}</span>
+                            </div>
+
+                            <h4 class="text-sm font-bold text-dark-800 mb-1">{{ $sp->nomor_surat }}</h4>
+                            <p class="text-xs text-dark-500 line-clamp-2 mb-4">{{ $sp->keterangan }}</p>
+
+                            <a href="{{ route('surat-peringatan.cetak', $sp->id) }}" target="_blank"
+                                class="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">
+                                <i class='bx bx-printer'></i> Lihat & Cetak Surat
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     @endif
     {{-- TAMPILAN KHUSUS SISWA --}}
     @if (Auth::user()->role === 'siswa' && isset($siswa))
@@ -672,6 +715,49 @@
                 </div>
             </div>
         </div>
+        {{-- Surat Peringatan (Disiplin) --}}
+        @if (isset($suratPeringatan) && $suratPeringatan->count() > 0)
+            <div class="mb-6 mt-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                        <i class='bx bx-error-alt text-2xl'></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-dark-800">Peringatan Disiplin</h3>
+                        <p class="text-sm text-dark-500">Anda memiliki catatan peringatan dari kesiswaan</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach ($suratPeringatan as $sp)
+                        <div
+                            class="glass-card rounded-2xl border border-rose-200 p-5 relative overflow-hidden group hover:shadow-lg hover:shadow-rose-500/10 transition-all">
+                            <div class="absolute -right-4 -top-4 w-20 h-20 bg-rose-500/5 rounded-full blur-xl"></div>
+
+                            <div class="flex items-center justify-between mb-4">
+                                <span
+                                    class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider
+                                    @if ($sp->jenis_sp == 'SP1') bg-amber-100 text-amber-700
+                                    @elseif($sp->jenis_sp == 'SP2') bg-orange-100 text-orange-700
+                                    @else bg-rose-100 text-rose-700 @endif">
+                                    {{ $sp->jenis_sp }}
+                                </span>
+                                <span
+                                    class="text-[10px] font-mono text-dark-400">{{ date('d/m/Y', strtotime($sp->tanggal_terbit)) }}</span>
+                            </div>
+
+                            <h4 class="text-sm font-bold text-dark-800 mb-1">{{ $sp->nomor_surat }}</h4>
+                            <p class="text-xs text-dark-500 line-clamp-2 mb-4">{{ $sp->keterangan }}</p>
+
+                            <a href="{{ route('surat-peringatan.cetak', $sp->id) }}" target="_blank"
+                                class="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">
+                                <i class='bx bx-printer'></i> Lihat & Cetak Surat
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     @endif
     @if (Auth::user()->role === 'guru' && isset($guru))
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

@@ -174,11 +174,22 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <button type="button"
-                                            onclick="openEditAbsensi({{ $s->id }}, '{{ $absen ? $absen->status : '' }}', '{{ $absen ? addslashes($absen->keterangan) : '' }}', '{{ addslashes($s->nama) }}')"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors" title="Edit Kehadiran">
-                                            <i class='bx bx-edit-alt text-lg'></i>
-                                        </button>
+                                        <div class="flex items-center justify-center gap-2">
+                                            @if ($absen)
+                                                <button type="button"
+                                                    onclick="showDetailAbsensi('{{ $absen->tanggal }}', '{{ $absen->jam_masuk }}', '{{ $absen->status }}', '{{ addslashes($absen->keterangan) }}', '{{ $absen->foto }}', '{{ $absen->latitude }}', '{{ $absen->longitude }}', '{{ addslashes($s->nama) }}')"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                                                    title="Detail Lengkap">
+                                                    <i class='bx bx-show text-lg'></i>
+                                                </button>
+                                            @endif
+                                            <button type="button"
+                                                onclick="openEditAbsensi({{ $s->id }}, '{{ $absen ? $absen->status : '' }}', '{{ $absen ? addslashes($absen->keterangan) : '' }}', '{{ addslashes($s->nama) }}')"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+                                                title="Edit Kehadiran">
+                                                <i class='bx bx-edit-alt text-lg'></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -277,6 +288,82 @@
                 </div>
             </div>
         </div>
+        </div>
+
+        {{-- Modal Detail Absensi --}}
+        <div id="modal-detailabsensi" class="fixed inset-0 z-[60] hidden">
+            {{-- Backdrop --}}
+            <div class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm transition-opacity"
+                onclick="closeModal('modal-detailabsensi')"></div>
+
+            {{-- Modal Panel --}}
+            <div class="fixed inset-0 z-10 overflow-y-auto">
+                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div
+                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl fade-in">
+                        {{-- Header --}}
+                        <div class="bg-dark-50/50 px-6 py-4 border-b border-dark-100 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-dark-800 flex items-center gap-2">
+                                <i class='bx bx-info-circle text-primary-600 text-xl'></i>
+                                Detail Absensi: <span id="detail_nama_siswa">-</span>
+                            </h3>
+                            <button type="button" onclick="closeModal('modal-detailabsensi')"
+                                class="text-dark-400 hover:text-dark-600 transition-colors">
+                                <i class='bx bx-x text-2xl'></i>
+                            </button>
+                        </div>
+
+                        {{-- Body --}}
+                        <div class="px-6 py-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Left Column: Info --}}
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-dark-50 rounded-xl border border-dark-100">
+                                        <p class="text-xs font-bold text-dark-500 uppercase tracking-widest mb-1">Tanggal & Waktu</p>
+                                        <p id="detail_waktu" class="text-sm font-bold text-dark-800">-</p>
+                                    </div>
+                                    <div class="p-4 bg-dark-50 rounded-xl border border-dark-100">
+                                        <p class="text-xs font-bold text-dark-500 uppercase tracking-widest mb-1">Status Kehadiran</p>
+                                        <div id="detail_status_badge"></div>
+                                    </div>
+                                    <div class="p-4 bg-dark-50 rounded-xl border border-dark-100">
+                                        <p class="text-xs font-bold text-dark-500 uppercase tracking-widest mb-1">Keterangan</p>
+                                        <p id="detail_keterangan" class="text-sm text-dark-700 leading-relaxed">-</p>
+                                    </div>
+                                    <div class="p-4 bg-dark-50 rounded-xl border border-dark-100">
+                                        <p class="text-xs font-bold text-dark-500 uppercase tracking-widest mb-1">Lokasi Koordinat</p>
+                                        <p id="detail_koordinat" class="text-xs font-mono text-dark-600 mb-2">-</p>
+                                        <a id="detail_maps_link" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">
+                                            <i class='bx bx-map-alt'></i> Lihat di Google Maps
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {{-- Right Column: Selfie --}}
+                                <div class="flex flex-col">
+                                    <p class="text-xs font-bold text-dark-500 uppercase tracking-widest mb-3">Foto Selfie / Lampiran</p>
+                                    <div class="flex-1 min-h-[300px] rounded-2xl border-2 border-dashed border-dark-200 bg-dark-50 overflow-hidden flex items-center justify-center relative">
+                                        <img id="detail_foto" src="" alt="Selfie" class="w-full h-full object-cover hidden">
+                                        <div id="no_foto" class="flex flex-col items-center justify-center text-dark-400">
+                                            <i class='bx bx-image-alt text-5xl mb-2'></i>
+                                            <p class="text-xs">Tidak ada foto</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Footer --}}
+                        <div class="bg-dark-50/50 px-6 py-4 border-t border-dark-100 flex justify-end">
+                            <button type="button" onclick="closeModal('modal-detailabsensi')"
+                                class="px-5 py-2 bg-white border border-dark-200 rounded-xl text-dark-600 hover:text-dark-800 hover:bg-dark-50 font-bold text-sm transition-all shadow-sm">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endpush
 
 @endsection
@@ -321,10 +408,59 @@
             openModal('modal-editabsensi');
         }
 
+        function showDetailAbsensi(tanggal, jam, status, keterangan, foto, lat, lng, nama) {
+            // Set Text Data
+            document.getElementById('detail_nama_siswa').innerText = nama || '-';
+            document.getElementById('detail_waktu').innerText = tanggal + ' (' + (jam || '-') + ')';
+            document.getElementById('detail_keterangan').innerText = keterangan || '-';
+            document.getElementById('detail_koordinat').innerText = lat && lng ? lat + ', ' + lng : 'Lokasi tidak tersedia';
+            
+            // Set Badge Status
+            const badgeContainer = document.getElementById('detail_status_badge');
+            let badgeHtml = '';
+            const lowerStatus = status.toLowerCase();
+            
+            if (lowerStatus === 'hadir') {
+                badgeHtml = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="bx bx-check-shield text-sm"></i> Hadir</span>';
+            } else if (lowerStatus === 'izin') {
+                badgeHtml = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200"><i class="bx bx-envelope text-sm"></i> Izin</span>';
+            } else if (lowerStatus === 'sakit') {
+                badgeHtml = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="bx bx-plus-medical text-sm"></i> Sakit</span>';
+            } else {
+                badgeHtml = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="bx bx-x-circle text-sm"></i> Alfa</span>';
+            }
+            badgeContainer.innerHTML = badgeHtml;
+
+            // Set Photo
+            const imgElement = document.getElementById('detail_foto');
+            const noFotoElement = document.getElementById('no_foto');
+            if (foto && foto !== '') {
+                imgElement.src = '/storage/absensi/selfie/' + foto;
+                imgElement.classList.remove('hidden');
+                noFotoElement.classList.add('hidden');
+            } else {
+                imgElement.src = '';
+                imgElement.classList.add('hidden');
+                noFotoElement.classList.remove('hidden');
+            }
+
+            // Set Maps Link
+            const mapsLink = document.getElementById('detail_maps_link');
+            if (lat && lng) {
+                mapsLink.href = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+                mapsLink.classList.remove('hidden');
+            } else {
+                mapsLink.classList.add('hidden');
+            }
+
+            openModal('modal-detailabsensi');
+        }
+
         // Close modal on escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal('modal-editabsensi');
+                closeModal('modal-detailabsensi');
             }
         });
     </script>

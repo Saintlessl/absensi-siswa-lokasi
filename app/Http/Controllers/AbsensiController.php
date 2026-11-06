@@ -11,6 +11,9 @@ use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 
 class AbsensiController extends Controller
 {
@@ -70,9 +73,14 @@ class AbsensiController extends Controller
 
         $lat = $request->latitude;
         $lng = $request->longitude;
+        $isMocked = $request->is_mocked; // New: Detect fake GPS from frontend
 
         if (!$lat || !$lng) {
             return response()->json(['success' => false, 'message' => 'Lokasi Anda tidak terdeteksi.'], 400);
+        }
+
+        if ($isMocked) {
+            return response()->json(['success' => false, 'message' => 'Peringatan: Fake GPS terdeteksi! Silakan gunakan lokasi asli.'], 400);
         }
 
         // Haversine formula backend validation
@@ -96,19 +104,58 @@ class AbsensiController extends Controller
             ], 400);
         }
 
+        // Selfie handling
+        $img = $request->image;
+        if (!$img) {
+            return response()->json(['success' => false, 'message' => 'Foto selfie diperlukan.'], 400);
+        }
+
+        $folderPath = "public/absensi/selfie/";
+        $image_parts = explode(";base64,", $img);
+        $image_base64 = base64_decode($image_parts[1]);
+        $fileName = $siswa->nis . "_" . date('Ymd_His') . ".png";
+        $file = $folderPath . $fileName;
+        Storage::put($file, $image_base64);
+
+        // Determine if late
+        $days = [
+            'Sunday' => 'Minggu',
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu'
+        ];
+        $hariIniStr = $days[date('l')];
+        $jamSekarang = date('H:i:s');
+        
+        $jadwalHariIni = Jadwal::where('kelas_id', $siswa->kelas_id)
+            ->where('hari', $hariIniStr)
+            ->orderBy('jam_mulai', 'asc')
+            ->first();
+
+        $isLate = false;
+        $lateThreshold = \App\Helpers\SettingHelper::getLateThreshold();
+        if ($jamSekarang > $lateThreshold) {
+            $isLate = true;
+        }
+
         Absensi::create([
             'siswa_id' => $siswa->id,
             'tanggal' => date('Y-m-d'),
             'jam_masuk' => date('H:i:s'),
-            'status' => 'Hadir',
-            'keterangan' => 'Hadir',
+            'status' => $isLate ? 'Hadir' : 'Hadir', // We use is_late column now
+            'is_late' => $isLate,
+            'keterangan' => $isLate ? 'Terlambat' : 'Hadir Tepat Waktu',
+            'foto' => $fileName,
             'latitude' => $lat,
             'longitude' => $lng,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Absensi berhasil tersimpan.'
+            'message' => 'Absensi berhasil tersimpan.' . ($isLate ? ' (Terlambat)' : '')
         ]);
     }
 
@@ -120,12 +167,12 @@ class AbsensiController extends Controller
 
         // 1. Logika Penentuan Siswa (Siswa itu sendiri atau Anak dari Orang Tua)
         if ($user->role == 'orangtua') {
-            $dataOrangTua = \App\Models\OrangTua::where('user_id', $user->id)->first();
+            $dataOrangTua = OrangTua::where('user_id', $user->id)->first();
             if ($dataOrangTua) {
-                $siswa = \App\Models\Siswa::find($dataOrangTua->siswa_id);
+                $siswa = Siswa::find($dataOrangTua->siswa_id);
             }
         } else {
-            $siswa = \App\Models\Siswa::where('user_id', $user->id)->first();
+            $siswa = Siswa::where('user_id', $user->id)->first();
         }
 
         if (!$siswa) {
@@ -152,14 +199,14 @@ class AbsensiController extends Controller
         $alpaCount  = (clone $baseQuery)->whereRaw('LOWER(status) = ?', ['alfa'])->count();
 
         // 4. Perhitungan Hari Efektif (Menghindari Alpa manual yang tidak terinput)
-        $startDate = \Carbon\Carbon::now()->startOfMonth();
-        $endDate = \Carbon\Carbon::now();
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now();
         $hariEfektif = 0;
 
         $currentDate = $startDate->copy();
         while ($currentDate->lte($endDate)) {
             // Asumsi hari minggu libur
-            if ($currentDate->dayOfWeek !== \Carbon\Carbon::SUNDAY) {
+            if ($currentDate->dayOfWeek !== CarbonInterface::SUNDAY) {
                 $hariEfektif++;
             }
             $currentDate->addDay();
@@ -172,7 +219,7 @@ class AbsensiController extends Controller
             'hadir' => $hadirCount,
             'izin'  => $izinCount,
             'sakit' => $sakitCount,
-            'alpa'  => $alpaCount + $calculatedAlpa,
+            'alpa'  => $siswa->getAlphaCount(),
         ];
 
         return view('absensi.riwayat-kehadiran', compact('riwayat', 'rekap', 'siswa'));
@@ -229,6 +276,7 @@ class AbsensiController extends Controller
             'keterangan' => 'nullable|string'
         ]);
 
+        $siswa = Siswa::findOrFail($request->siswa_id);
         $tanggalInfo = date('Y-m-d');
 
         $absensi = Absensi::where('siswa_id', $request->siswa_id)
@@ -241,13 +289,43 @@ class AbsensiController extends Controller
                 'keterangan' => $request->keterangan ?? 'Diperbarui otomatis oleh Guru'
             ]);
         } else {
-            Absensi::create([
+            $absensi = Absensi::create([
                 'siswa_id' => $request->siswa_id,
                 'tanggal' => $tanggalInfo,
                 'jam_masuk' => date('H:i:s'),
                 'status' => $request->status,
                 'keterangan' => $request->keterangan ?? 'Ditambahkan otomatis oleh Guru',
             ]);
+        }
+
+        // Point 5: Automated SP System (SP1, SP2, SP3 with dynamic thresholds)
+        if (strtolower($request->status) == 'alfa') {
+            $alfaCount = $siswa->getTotalAlpha();
+
+            $spLevels = [
+                'SP3' => \App\Helpers\SettingHelper::getAlphaQuota('SP3'),
+                'SP2' => \App\Helpers\SettingHelper::getAlphaQuota('SP2'),
+                'SP1' => \App\Helpers\SettingHelper::getAlphaQuota('SP1'),
+            ];
+
+            foreach ($spLevels as $jenisSP => $kuota) {
+                if ($alfaCount >= $kuota) {
+                    $exists = \App\Models\SuratPeringatan::where('siswa_id', $request->siswa_id)
+                        ->where('jenis_sp', $jenisSP)
+                        ->exists();
+
+                    if (!$exists) {
+                        \App\Models\SuratPeringatan::create([
+                            'siswa_id' => $request->siswa_id,
+                            'nomor_surat' => $jenisSP . '/' . date('Ymd') . '/' . $request->siswa_id,
+                            'jenis_sp' => $jenisSP,
+                            'tanggal_terbit' => date('Y-m-d'),
+                            'keterangan' => "Akumulasi Alfa mencapai {$alfaCount} hari. (Otomatis oleh sistem)"
+                        ]);
+                    }
+                    break; // Only create the highest applicable SP that doesn't exist yet
+                }
+            }
         }
 
         return redirect()->back()->with('success', 'Status absensi berhasil diperbarui.');
@@ -257,9 +335,15 @@ class AbsensiController extends Controller
     {
         $bulan = $request->bulan ?? date('m');
         $tahun = $request->tahun ?? date('Y');
+        $id_kelas = $request->id_kelas;
 
-        $siswas = Siswa::with('kelas')
-            ->orderByDesc(
+        $query = Siswa::with('kelas');
+
+        if ($id_kelas) {
+            $query->where('kelas_id', $id_kelas);
+        }
+
+        $siswas = $query->orderByDesc(
                 Absensi::selectRaw('MAX(tanggal)')
                     ->whereColumn('siswa_id', 'siswas.id')
                     ->whereMonth('tanggal', $bulan)
@@ -267,17 +351,19 @@ class AbsensiController extends Controller
             )
             ->orderBy('nama')
             ->get();
+        
+        $kelasList = \App\Models\Kelas::orderBy('nama_kelas')->get();
 
         // Hitung hari efektif (kecuali Minggu) di bulan tersebut sampai hari ini atau akhir bulan
-        $startDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
         $endDate = ($bulan == date('m') && $tahun == date('Y'))
-            ? \Carbon\Carbon::now()
-            : \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+            ? Carbon::now()
+            : Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
 
         $hariEfektif = 0;
         $currentDate = $startDate->copy();
         while ($currentDate->lte($endDate)) {
-            if ($currentDate->dayOfWeek !== \Carbon\Carbon::SUNDAY) {
+            if ($currentDate->dayOfWeek !== CarbonInterface::SUNDAY) {
                 $hariEfektif++;
             }
             $currentDate->addDay();
@@ -306,7 +392,7 @@ class AbsensiController extends Controller
                 'hadir' => $hadir,
                 'izin' => $izin,
                 'sakit' => $sakit,
-                'alpa' => $alpa,
+                'alpa' => $s->getAlphaCount($bulan, $tahun),
             ];
         }
 
@@ -322,9 +408,9 @@ class AbsensiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
 
-        return view('absensi.rekap-absensi', compact('rekap', 'bulan', 'tahun', 'namaBulan', 'hariEfektif', 'totalSiswa'));
+        return view('absensi.rekap-absensi', compact('rekap', 'bulan', 'tahun', 'namaBulan', 'hariEfektif', 'totalSiswa', 'kelasList'));
     }
 
     public function rekapPerKelas(Request $request)
@@ -335,15 +421,15 @@ class AbsensiController extends Controller
         $kelasList = \App\Models\Kelas::withCount('siswa')->orderBy('nama_kelas')->get();
 
         // Buat daftar tanggal efektif (kecuali Minggu)
-        $startDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
         $endDate = ($bulan == date('m') && $tahun == date('Y'))
-            ? \Carbon\Carbon::now()
-            : \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+            ? Carbon::now()
+            : Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
 
         $tanggalList = [];
         $currentDate = $startDate->copy();
         while ($currentDate->lte($endDate)) {
-            if ($currentDate->dayOfWeek !== \Carbon\Carbon::SUNDAY) {
+            if ($currentDate->dayOfWeek !== CarbonInterface::SUNDAY) {
                 $tanggalList[] = $currentDate->format('Y-m-d');
             }
             $currentDate->addDay();
@@ -356,7 +442,10 @@ class AbsensiController extends Controller
         $rekapAll = [];
         foreach ($tanggalList as $tgl) {
             foreach ($kelasList as $kelas) {
-                $siswaIds = Siswa::where('kelas_id', $kelas->id)->pluck('id');
+                // Only count students who were already registered on or before this date
+                $siswaIds = Siswa::where('kelas_id', $kelas->id)
+                    ->whereDate('created_at', '<=', $tgl)
+                    ->pluck('id');
                 $totalSiswa = $siswaIds->count();
 
                 $hadir = Absensi::whereIn('siswa_id', $siswaIds)
@@ -399,7 +488,7 @@ class AbsensiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $namaBulan = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
+        $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->isoFormat('MMMM Y');
 
         return view('absensi.rekap-kelas', compact('rekap', 'bulan', 'tahun', 'namaBulan', 'totalBaris'));
     }

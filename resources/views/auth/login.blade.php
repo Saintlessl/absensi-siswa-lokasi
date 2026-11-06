@@ -324,6 +324,28 @@
                 <form action="{{ route('proseslogin') }}" method="POST" id="loginForm" class="space-y-5">
                     @csrf
 
+                    {{-- Kelas Input --}}
+                    <div class="space-y-1.5">
+                        <label for="id_kelas" class="block text-sm font-semibold text-dark-700">
+                            Kategori Kelas
+                        </label>
+                        <div class="relative input-glow rounded-xl transition-all duration-200">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class='bx bx-group text-lg text-dark-400'></i>
+                            </div>
+                            <select id="id_kelas" name="id_kelas" 
+                                class="w-full pl-11 pr-4 py-3.5 bg-dark-50/80 border border-dark-200 rounded-xl text-sm text-dark-800 focus:outline-none focus:border-primary-500 focus:bg-white transition-all duration-200 appearance-none">
+                                <option value="">-- Pilih Kelas (Opsional) --</option>
+                                @foreach($kelas as $k)
+                                    <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
+                                @endforeach
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-dark-400">
+                                <i class='bx bx-chevron-down text-lg'></i>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Email Input --}}
                     <div class="space-y-1.5">
                         <label for="email" class="block text-sm font-semibold text-dark-700">

@@ -20,6 +20,25 @@
                     <p class="text-sm text-dark-500 mt-1">Harap isi data dengan sebenar-benarnya.</p>
                 </div>
 
+                {{-- Alpha Threshold Info --}}
+                @if($alfaCount >= 5)
+                    <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3">
+                        <i class='bx bx-error-circle text-2xl text-rose-500 mt-0.5'></i>
+                        <div>
+                            <h4 class="font-bold text-rose-800">Peringatan Kuota Alpha!</h4>
+                            <p class="text-sm text-rose-700">Anak Anda sudah mencapai {{ $alfaCount }}x Alpha. Sesuai ketentuan, pengajuan izin berikutnya <b>WAJIB</b> melampirkan surat keterangan orang tua/lampiran resmi.</p>
+                        </div>
+                    </div>
+                @else
+                    <div class="mb-6 p-4 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class='bx bx-info-circle text-xl text-primary-500'></i>
+                            <span class="text-sm font-medium text-dark-700">Jumlah Alpha Anak:</span>
+                        </div>
+                        <span class="px-3 py-1 rounded-full bg-white border border-primary-200 text-sm font-bold text-primary-700">{{ $alfaCount }} / {{ $kuotaSP1 }}</span>
+                    </div>
+                @endif
+
                 @if($absenHariIni)
                     {{-- Blocked State --}}
                     <div class="p-6 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col items-center justify-center text-center">
@@ -30,16 +49,15 @@
                                 <i class='bx bx-task text-3xl'></i>
                             @endif
                         </div>
-                        <h4 class="text-lg font-bold text-amber-800 mb-2">Anda Sudah Melakukan Perekaman!</h4>
+                        <h4 class="text-lg font-bold text-amber-800 mb-2">Perekaman Sudah Dilakukan!</h4>
                         <p class="text-sm text-amber-700 max-w-md">
-                            Hari ini Anda sudah tercatat dalam sistem dengan status 
+                            Hari ini anak Anda sudah tercatat dalam sistem dengan status 
                             <span class="font-bold uppercase">({{ $absenHariIni->status }})</span>. 
-                            Anda tidak dapat mengajukan izin ganda di hari yang sama.
                         </p>
                     </div>
                 @else
                     {{-- Active Form --}}
-                    <form action="{{ route('izin.store') }}" method="POST" id="frmIzin">
+                    <form action="{{ route('izin.store') }}" method="POST" id="frmIzin" enctype="multipart/form-data">
                         @csrf
                         <div class="space-y-6">
                             
@@ -60,7 +78,7 @@
                                         <input type="radio" name="status" value="izin" class="peer sr-only" required>
                                         <div class="p-4 rounded-xl border-2 border-dark-200 bg-white hover:bg-dark-50 peer-checked:border-primary-500 peer-checked:bg-primary-50/50 transition-all duration-200 text-center">
                                             <i class='bx bx-envelope text-3xl text-dark-400 peer-checked:text-primary-500 mb-2 transition-colors duration-200 block'></i>
-                                            <span class="font-bold text-dark-700 peer-checked:text-primary-700 transition-colors duration-200">Keperluan (Izin)</span>
+                                            <span class="font-bold text-dark-700 peer-checked:text-primary-700 transition-colors duration-200">Izin</span>
                                         </div>
                                     </label>
                                     
@@ -74,15 +92,25 @@
                                 </div>
                             </div>
 
+                            {{-- Lampiran --}}
+                            <div>
+                                <label for="lampiran" class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-dark-700">Lampiran / Surat Keterangan</span>
+                                    <span id="label-wajib" class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-600 uppercase {{ ($needsAttachment) ? '' : 'hidden' }}">Wajib</span>
+                                </label>
+                                <input type="file" name="lampiran" id="lampiran" 
+                                    class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-dark-50/50 text-sm text-dark-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 transition-all cursor-pointer">
+                                <p class="text-[10px] text-dark-400 mt-2 italic">* Format: JPG, PNG, PDF (Maks 2MB). Wajib untuk status Sakit atau jika sudah {{ $kuotaSP1 }}x Alpha.</p>
+                            </div>
+
                             {{-- Keterangan --}}
                             <div>
                                 <label for="keterangan" class="block text-sm font-medium text-dark-700 mb-2">Penjelasan / Keterangan <span class="text-rose-500">*</span></label>
                                 <div class="relative">
-                                    <textarea name="keterangan" id="keterangan" rows="4" required
+                                    <textarea name="keterangan" id="keterangan" rows="3" required
                                         class="block w-full px-4 py-3 border border-dark-200 rounded-xl bg-white focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
-                                        placeholder="Berikan alasan kenapa Anda tidak dapat masuk ke sekolah hari ini..."></textarea>
+                                        placeholder="Berikan alasan detail..."></textarea>
                                 </div>
-                                <p class="text-xs text-dark-400 mt-2">Maksimal 255 karakter.</p>
                             </div>
 
                             {{-- Submit --}}
@@ -90,7 +118,7 @@
                                 <button type="submit" 
                                     class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 hover:-translate-y-0.5 transition-all duration-200">
                                     <i class='bx bx-send text-xl'></i>
-                                    Kirim Pengajuan
+                                    Kirim Pengajuan Izin
                                 </button>
                             </div>
 

@@ -88,15 +88,11 @@ class DashboardController extends Controller
                     $hariEfektif = 0;
                     $cur = $startDate->copy();
                     while ($cur->lte($endDate)) {
-                        if ($cur->dayOfWeek !== \Carbon\Carbon::SUNDAY) $hariEfektif++;
+                        if ($cur->dayOfWeek !== \Carbon\CarbonInterface::SUNDAY) $hariEfektif++;
                         $cur->addDay();
                     }
 
-                    $alfaDb = Absensi::where('siswa_id', $siswa->id)
-                        ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
-                        ->whereRaw('LOWER(status) = ?', ['alfa'])->count();
-                    $totalTercatat = $hadirCount + $izinCount + $sakitCount + $alfaDb;
-                    $alpaCount = $alfaDb + max(0, $hariEfektif - $totalTercatat);
+                    $alpaCount = $siswa->getTotalAlpha($bulan, $tahun);
 
                     $total = $hadirCount + $izinCount + $sakitCount + $alpaCount;
                     $data['rekap'] = [
@@ -116,6 +112,10 @@ class DashboardController extends Controller
                     $data['riwayatHarian'] = Absensi::where('siswa_id', $siswa->id)
                         ->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun)
                         ->orderBy('tanggal', 'desc')->limit(10)->get();
+                    
+                    // Surat Peringatan
+                    $data['suratPeringatan'] = \App\Models\SuratPeringatan::where('siswa_id', $siswa->id)
+                        ->orderBy('created_at', 'desc')->get();
                 }
             }
         }
@@ -131,10 +131,14 @@ class DashboardController extends Controller
 
                 // Tambahkan data waktu untuk jam digital di view
                 $data['tanggalHariIni'] = \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y');
+
+                // Surat Peringatan
+                $data['suratPeringatan'] = \App\Models\SuratPeringatan::where('siswa_id', $siswa->id)
+                    ->orderBy('created_at', 'desc')->get();
             }
         }
         if ($user->role === 'guru') {
-            $guru = \App\Models\Guru::where('user_id', $user->id)->first();
+            $guru = Guru::where('user_id', $user->id)->first();
             $data['guru'] = $guru;
 
             if ($guru) {
@@ -155,7 +159,7 @@ class DashboardController extends Controller
         return view('dashboard.index', $data);
     }
 
-    public function deleteAbsensi($id)
+    public function deleteAbsensi(int|string $id)
     {
         $absensi = Absensi::findOrFail($id);
         $absensi->delete();
@@ -163,7 +167,7 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'Data absensi berhasil dihapus.');
     }
 
-    public function updateAbsensi(Request $request, $id)
+    public function updateAbsensi(Request $request, int|string $id)
     {
         $request->validate([
             'status' => 'required|in:Hadir,Izin,Sakit,Alfa',

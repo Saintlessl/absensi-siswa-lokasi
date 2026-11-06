@@ -120,12 +120,25 @@
                     </div>
                 </div>
 
-                {{-- Live Clock & Absen Button --}}
-                <div class="glass-card rounded-2xl border border-dark-200/50 p-6 text-center shadow-lg">
+                {{-- Live Clock & Selfie Panel --}}
+                <div class="glass-card rounded-2xl border border-dark-200/50 p-6 text-center shadow-lg overflow-hidden relative">
+                    {{-- Webcam Container --}}
+                    @if (!$absenHariIni)
+                        <div class="mb-4 relative group">
+                            <div id="my_camera" class="mx-auto rounded-xl overflow-hidden border-2 border-primary-500/30 bg-dark-100 shadow-inner" style="width: 100%; max-width: 320px; height: 240px;">
+                                {{-- Video will be rendered here --}}
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity">
+                                <i class='bx bx-camera text-6xl text-dark-400'></i>
+                            </div>
+                            <div class="mt-2 text-[10px] text-dark-400 uppercase tracking-widest font-bold">Preview Kamera</div>
+                        </div>
+                    @endif
+
                     <p class="text-sm font-medium text-dark-500 mb-1">
                         {{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}
                     </p>
-                    <div class="text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600 mb-6 font-mono"
+                    <div class="text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600 mb-4 font-mono"
                         id="live-clock">
                         --:--:--
                     </div>
@@ -134,14 +147,22 @@
                         <div class="p-4 rounded-xl mb-6 flex flex-col items-center justify-center gap-2 border transition-all duration-300"
                             id="status-panel">
                             <i class='bx bx-loader-alt animate-spin text-3xl text-dark-400'></i>
-                            <p class="text-sm font-medium text-dark-600">Mendeteksi lokasi Anda...</p>
+                            <p class="text-sm font-medium text-dark-600">Mendeteksi lokasi & kamera...</p>
                         </div>
 
-                        <button id="btn-absen" disabled
-                            class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-dark-300 text-dark-500 font-bold rounded-xl transition-all duration-300 cursor-not-allowed">
-                            <i class='bx bx-scan text-xl'></i>
-                            <span>Menunggu Lokasi</span>
-                        </button>
+                        <div class="flex flex-col gap-3">
+                            <button id="btn-refresh-location" 
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-dark-100 hover:bg-dark-200 text-dark-700 text-xs font-bold rounded-lg transition-all border border-dark-200">
+                                <i class='bx bx-refresh text-lg'></i>
+                                <span>Refresh Lokasi</span>
+                            </button>
+                            
+                            <button id="btn-absen" disabled
+                                class="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-dark-300 text-dark-500 font-bold rounded-xl transition-all duration-300 cursor-not-allowed">
+                                <i class='bx bx-camera text-xl'></i>
+                                <span>Siapkan Kamera</span>
+                            </button>
+                        </div>
                         <p id="distance-info" class="mt-3 text-xs text-dark-400 hidden"></p>
                     @else
                         <div
@@ -193,6 +214,8 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Webcam JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
 
     <script>
         // Live Clock
@@ -209,266 +232,114 @@
         updateClock();
 
         @if (!$absenHariIni)
-            document.addEventListener('DOMContentLoaded', function() {
-                // Konfigurasi Lokasi Sekolah
-                const schoolLat = parseFloat('{{ $lokasiSekolah->latitude }}');
-                const schoolLng = parseFloat('{{ $lokasiSekolah->longitude }}');
-                const allowedRadius = parseFloat('{{ $lokasiSekolah->radius }}'); // dalam meter
+            let currentLat = null;
+            let currentLng = null;
+            let currentDistance = null;
+            let isMocked = false;
+            let watchId = null;
 
-                // Variabel Data Siswa / Lokasi saat ini
-                let currentLat = null;
-                let currentLng = null;
-                let currentDistance = null;
-
-                // Elemen UI
-                const btnAbsen = document.getElementById('btn-absen');
+            function startLocationWatch() {
                 const statusPanel = document.getElementById('status-panel');
                 const pDistanceInfo = document.getElementById('distance-info');
+                const btnAbsen = document.getElementById('btn-absen');
                 const mapLoading = document.getElementById('map-loading');
 
-                // Inisialisasi Map
-                const map = L.map('map').setView([schoolLat, schoolLng], 16);
+                if (watchId) navigator.geolocation.clearWatch(watchId);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                if ("geolocation" in navigator) {
+                    statusPanel.innerHTML = `<i class='bx bx-loader-alt animate-spin text-3xl text-dark-400'></i><p class="text-sm font-medium text-dark-600">Mencari lokasi...</p>`;
+                    
+                    watchId = navigator.geolocation.watchPosition(
+                        function(position) {
+                            if (mapLoading) mapLoading.classList.add('hidden');
+                            currentLat = position.coords.latitude;
+                            currentLng = position.coords.longitude;
+                            
+                            // Basic Fake GPS Detection
+                            isMocked = position.mocked || (position.coords.accuracy && position.coords.accuracy < 1);
+                            
+                            updateLocationOnMap(currentLat, currentLng);
 
-                // Marker Sekolah (Pusat Absen)
-                const schoolIcon = L.divIcon({
-                    html: `<div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-primary-500 shadow-lg"><i class='bx bxs-school text-primary-600 text-lg'></i></div>`,
-                    className: '',
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 16]
-                });
+                            currentDistance = calculateDistance(currentLat, currentLng, schoolLat, schoolLng);
+                            const distanceRounded = Math.round(currentDistance);
+                            pDistanceInfo.classList.remove('hidden');
+                            pDistanceInfo.innerHTML = `Jarak: <b>${distanceRounded} Meter</b>`;
 
-                L.marker([schoolLat, schoolLng], {
-                        icon: schoolIcon
-                    }).addTo(map)
-                    .bindPopup("<b>Titik Pusat Absensi</b><br>Lingkaran biru adalah batas radius yang sah.");
+                            if (currentDistance <= allowedRadius) {
+                                statusPanel.className = 'p-4 rounded-xl mb-6 flex flex-col items-center justify-center gap-2 border bg-emerald-50 border-emerald-200 transition-all duration-300';
+                                statusPanel.innerHTML = `<i class='bx bx-check-shield text-3xl text-emerald-500'></i><p class="text-sm font-bold text-emerald-700">Area Valid!</p>`;
+                                btnAbsen.disabled = false;
+                                btnAbsen.className = 'w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-emerald-500/20';
+                                btnAbsen.innerHTML = `<i class='bx bx-fingerprint text-2xl'></i><span>Absen Sekarang</span>`;
+                            } else {
+                                statusPanel.className = 'p-4 rounded-xl mb-6 flex flex-col items-center justify-center gap-2 border bg-rose-50 border-rose-200 transition-all duration-300';
+                                statusPanel.innerHTML = `<i class='bx bx-error-alt text-3xl text-rose-500'></i><p class="text-sm font-bold text-rose-700">Di Luar Area!</p>`;
+                                btnAbsen.disabled = true;
+                                btnAbsen.className = 'w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-rose-100 text-rose-400 font-bold rounded-xl cursor-not-allowed';
+                                btnAbsen.innerHTML = `<i class='bx bx-block text-xl'></i><span>Luar Radius</span>`;
+                            }
+                        },
+                        function(error) {
+                            console.error("Geolocation Error", error);
+                            let msg = "Gagal mengambil lokasi.";
+                            if (error.code === 1) msg = "Izin lokasi ditolak.";
+                            else if (error.code === 2) msg = "Lokasi tidak tersedia.";
+                            else if (error.code === 3) msg = "Waktu habis.";
+                            
+                            statusPanel.innerHTML = `<i class='bx bx-error-alt text-3xl text-amber-500'></i><p class="text-sm font-bold text-amber-700">${msg}</p>`;
+                            Swal.fire({ icon: 'warning', title: 'Lokasi Bermasalah', text: msg });
+                        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                    );
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Tidak Didukung', text: 'Gunakan HTTPS atau Localhost.' });
+                }
+            }
 
-                // Lingkaran Radius Sekolah
-                L.circle([schoolLat, schoolLng], {
-                    color: '#6366f1',
-                    fillColor: '#818cf8',
-                    fillOpacity: 0.15,
-                    weight: 2,
-                    dashArray: '5, 5',
-                    radius: allowedRadius
-                }).addTo(map);
+            // Global configurations
+            const schoolLat = parseFloat('{{ $lokasiSekolah->latitude }}');
+            const schoolLng = parseFloat('{{ $lokasiSekolah->longitude }}');
+            const allowedRadius = parseFloat('{{ $lokasiSekolah->radius }}');
+            let studentMarker = null;
+            let map = null;
 
-                // Marker Siswa (Dibuat dinamis nanti)
+            function updateLocationOnMap(lat, lng) {
+                const newLatLng = new L.LatLng(lat, lng);
                 const studentIcon = L.divIcon({
                     html: `<div class="relative w-4 h-4"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-4 w-4 bg-rose-500 border-2 border-white shadow-md"></span></div>`,
                     className: '',
                     iconSize: [16, 16],
                     iconAnchor: [8, 8]
                 });
-                let studentMarker = null;
 
-                // Fungsi Haversine Formula untuk Hitung Jarak (Client Side)
-                function calculateDistance(lat1, lon1, lat2, lon2) {
-                    const R = 6371e3; // metres
-                    const φ1 = lat1 * Math.PI / 180;
-                    const φ2 = lat2 * Math.PI / 180;
-                    const Δφ = (lat2 - lat1) * Math.PI / 180;
-                    const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-                    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                        Math.cos(φ1) * Math.cos(φ2) *
-                        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                    return R * c;
-                }
-
-                // Dapatkan Lokasi Pengguna
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.watchPosition(
-                        function(position) {
-                            if (mapLoading) mapLoading.classList.add('hidden'); // Sembunyikan loading
-
-                            currentLat = position.coords.latitude;
-                            currentLng = position.coords.longitude;
-
-                            // Update Posisi Marker Siswa
-                            const newLatLng = new L.LatLng(currentLat, currentLng);
-                            if (studentMarker) {
-                                studentMarker.setLatLng(newLatLng);
-                            } else {
-                                studentMarker = L.marker([currentLat, currentLng], {
-                                        icon: studentIcon
-                                    }).addTo(map)
-                                    .bindPopup("<b>Lokasi Anda Saat Ini</b>").openPopup();
-                            }
-
-                            // Sesuaikan Tampilan Peta agar mencakup Sekolah & Siswa
-                            const group = new L.featureGroup([L.marker([schoolLat, schoolLng]), studentMarker]);
-                            map.fitBounds(group.getBounds(), {
-                                padding: [50, 50],
-                                maxZoom: 17
-                            });
-
-                            // Hitung Jarak
-                            currentDistance = calculateDistance(currentLat, currentLng, schoolLat, schoolLng);
-                            const distanceRounded = Math.round(currentDistance);
-
-                            pDistanceInfo.classList.remove('hidden');
-                            pDistanceInfo.innerHTML =
-                                `Jarak Anda ke titik sekolah: <b>${distanceRounded} Meter</b>`;
-
-                            // Evaluasi Apakah Boleh Absen
-                            if (currentDistance <= allowedRadius) {
-                                // Dalam Radius
-                                statusPanel.className =
-                                    'p-4 rounded-xl mb-6 flex flex-col items-center justify-center gap-2 border bg-emerald-50 border-emerald-200 transition-all duration-300';
-                                statusPanel.innerHTML = `
-                                    <i class='bx bx-check-shield text-3xl text-emerald-500'></i>
-                                    <p class="text-sm font-bold text-emerald-700">Area Valid!</p>
-                                    <p class="text-xs font-medium text-emerald-600">Anda berada di dalam radius sekolah.</p>
-                                `;
-
-                                btnAbsen.disabled = false;
-                                btnAbsen.className =
-                                    'w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:-translate-y-0.5 font-bold rounded-xl transition-all duration-300 cursor-pointer';
-                                btnAbsen.innerHTML =
-                                    `<i class='bx bx-fingerprint text-2xl'></i><span>Absen Sekarang</span>`;
-
-                            } else {
-                                // Luar Radius
-                                statusPanel.className =
-                                    'p-4 rounded-xl mb-6 flex flex-col items-center justify-center gap-2 border bg-rose-50 border-rose-200 transition-all duration-300';
-                                statusPanel.innerHTML = `
-                                    <i class='bx bx-error-alt text-3xl text-rose-500'></i>
-                                    <p class="text-sm font-bold text-rose-700">Di Luar Area!</p>
-                                    <p class="text-xs font-medium text-rose-600 text-center">Jarak Anda melebihi radius batas absensi (${allowedRadius}m).</p>
-                                `;
-
-                                btnAbsen.disabled = true;
-                                btnAbsen.className =
-                                    'w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-rose-100/50 text-rose-400 font-bold rounded-xl transition-all duration-300 cursor-not-allowed';
-                                btnAbsen.innerHTML =
-                                    `<i class='bx bx-block text-xl'></i><span>Tidak Dapat Absen</span>`;
-                            }
-                        },
-                        function(error) {
-                            console.error("Error Geolocation: ", error);
-                            if (mapLoading) {
-                                mapLoading.innerHTML = `
-                                    <i class='bx bx-error-circle text-5xl text-rose-500 mb-3'></i>
-                                    <p class="font-bold text-dark-800">Akses Lokasi Ditolak/Gagal</p>
-                                    <p class="text-xs text-dark-500 mt-1 max-w-xs text-center">Sistem tidak bisa mendapatkan koordinat Anda. Pastikan GPS menyala dan Browser diberi izin akses lokasi.</p>
-                                    <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-dark-800 text-white rounded-lg text-sm font-medium hover:bg-dark-900 transition-colors">Coba Ulangi</button>
-                                `;
-                            }
-
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal Mendapatkan Lokasi',
-                                text: 'Berikan izin akses lokasi pada browser Anda atau periksa koneksi GPS!',
-                                confirmButtonColor: '#3b82f6',
-                                customClass: {
-                                    popup: 'font-inter rounded-2xl'
-                                }
-                            });
-                        }, {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0
-                        }
-                    );
+                if (studentMarker) {
+                    studentMarker.setLatLng(newLatLng);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Tidak Mendukung',
-                        text: 'Browser Anda tidak mendukung Geolocation Tracking.',
-                        customClass: {
-                            popup: 'font-inter rounded-2xl'
-                        }
-                    });
+                    studentMarker = L.marker([lat, lng], { icon: studentIcon }).addTo(map);
                 }
 
-                // Proses Absen (AJAX)
-                btnAbsen.addEventListener('click', function() {
-                    if (!currentLat || !currentLng) return;
+                const group = new L.featureGroup([L.marker([schoolLat, schoolLng]), studentMarker]);
+                map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 17 });
+            }
 
-                    // Loading State
-                    const originalText = this.innerHTML;
-                    this.disabled = true;
-                    this.innerHTML =
-                        `<i class='bx bx-loader-alt animate-spin text-2xl'></i><span>Memproses...</span>`;
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371e3;
+                const φ1 = lat1 * Math.PI / 180;
+                const φ2 = lat2 * Math.PI / 180;
+                const Δφ = (lat2 - lat1) * Math.PI / 180;
+                const Δλ = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
 
-                    fetch('{{ route('absensi.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .getAttribute('content'),
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                latitude: currentLat,
-                                longitude: currentLng
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil!',
-                                    text: data.message,
-                                    confirmButtonColor: '#10b981',
-                                    customClass: {
-                                        popup: 'font-inter rounded-2xl',
-                                        confirmButton: 'rounded-xl'
-                                    }
-                                }).then(() => {
-                                    window.location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Gagal Absen',
-                                    text: data.message,
-                                    confirmButtonColor: '#ef4444',
-                                    customClass: {
-                                        popup: 'font-inter rounded-2xl',
-                                        confirmButton: 'rounded-xl'
-                                    }
-                                });
-                                // Reset button
-                                this.disabled = false;
-                                this.innerHTML = originalText;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops!',
-                                text: 'Terjadi kesalahan sistem.',
-                                customClass: {
-                                    popup: 'font-inter rounded-2xl'
-                                }
-                            });
-                            this.disabled = false;
-                            this.innerHTML = originalText;
-                        });
-                });
-
-            });
-        @else
-            // Jika sudah absen, map cuma statis menunjukkan lokasi sekolah
             document.addEventListener('DOMContentLoaded', function() {
-                const schoolLat = parseFloat('{{ $lokasiSekolah->latitude }}');
-                const schoolLng = parseFloat('{{ $lokasiSekolah->longitude }}');
-                const allowedRadius = parseFloat('{{ $lokasiSekolah->radius }}');
+                // Initialize Webcam
+                Webcam.set({ width: 320, height: 240, image_format: 'jpeg', jpeg_quality: 90 });
+                Webcam.attach('#my_camera');
 
-                const map = L.map('map').setView([schoolLat, schoolLng], 16);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                // Initialize Map
+                map = L.map('map').setView([schoolLat, schoolLng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
                 const schoolIcon = L.divIcon({
                     html: `<div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-primary-500 shadow-lg"><i class='bx bxs-school text-primary-600 text-lg'></i></div>`,
@@ -477,17 +348,64 @@
                     iconAnchor: [16, 16]
                 });
 
-                L.marker([schoolLat, schoolLng], {
-                    icon: schoolIcon
-                }).addTo(map);
-                L.circle([schoolLat, schoolLng], {
-                    color: '#6366f1',
-                    fillColor: '#818cf8',
-                    fillOpacity: 0.15,
-                    weight: 2,
-                    dashArray: '5, 5',
-                    radius: allowedRadius
-                }).addTo(map);
+                L.marker([schoolLat, schoolLng], { icon: schoolIcon }).addTo(map);
+                L.circle([schoolLat, schoolLng], { color: '#6366f1', fillOpacity: 0.15, radius: allowedRadius }).addTo(map);
+
+                // Start tracking
+                startLocationWatch();
+
+                // Button refresh manual
+                document.getElementById('btn-refresh-location').addEventListener('click', function() {
+                    startLocationWatch();
+                    Swal.fire({ icon: 'info', title: 'Refresh', text: 'Mencoba mendapatkan lokasi ulang...', timer: 1500, showConfirmButton: false });
+                });
+
+                document.getElementById('btn-absen').addEventListener('click', function() {
+                    if (!currentLat || !currentLng) return;
+                    Webcam.snap(function(data_uri) {
+                        const btn = document.getElementById('btn-absen');
+                        const originalText = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = `<i class='bx bx-loader-alt animate-spin text-2xl'></i><span>Memproses...</span>`;
+
+                        fetch('{{ route('absensi.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                latitude: currentLat, longitude: currentLng, image: data_uri, is_mocked: isMocked
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({ icon: 'success', title: 'Berhasil!', text: data.message }).then(() => window.location.reload());
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'Gagal', text: data.message });
+                                btn.disabled = false;
+                                btn.innerHTML = originalText;
+                            }
+                        });
+                    });
+                });
+            });
+        @else
+            document.addEventListener('DOMContentLoaded', function() {
+                const schoolLat = parseFloat('{{ $lokasiSekolah->latitude }}');
+                const schoolLng = parseFloat('{{ $lokasiSekolah->longitude }}');
+                const map = L.map('map').setView([schoolLat, schoolLng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                const schoolIcon = L.divIcon({
+                    html: `<div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center border-2 border-primary-500 shadow-lg"><i class='bx bxs-school text-primary-600 text-lg'></i></div>`,
+                    className: '',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+                L.marker([schoolLat, schoolLng], { icon: schoolIcon }).addTo(map);
+                L.circle([schoolLat, schoolLng], { color: '#6366f1', radius: parseFloat('{{ $lokasiSekolah->radius }}') }).addTo(map);
             });
         @endif
     </script>
