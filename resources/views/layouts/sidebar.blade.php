@@ -957,7 +957,7 @@
                 title="Keluar">
                 <i class='bx bx-log-out text-base'></i>
             </a>
-            <form id="sidebar-logout-form" action="{{ route('proseslogout') }}" method="GET" class="hidden"></form>
+            <form id="sidebar-logout-form" action="{{ route('proseslogout') }}" method="POST" class="hidden">@csrf</form>
         </div>
     </div>
 </aside>

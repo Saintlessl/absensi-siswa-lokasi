@@ -281,11 +281,12 @@
                 <span class="text-slate-300 font-medium truncate max-w-[130px]">{{ $siswa->nama }}</span>
             </div>
 
-            <a href="{{ route('proseslogout') }}" title="Keluar dari Akun"
+            <a href="#" onclick="event.preventDefault();document.getElementById('bio-logout-form').submit();" title="Keluar dari Akun"
                 class="py-1.5 px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs text-slate-400 hover:text-rose-400 transition-colors flex items-center gap-1.5">
                 <i class='bx bx-log-out text-sm'></i>
                 <span class="hidden sm:inline">Keluar</span>
             </a>
+            <form id="bio-logout-form" action="{{ route('proseslogout') }}" method="POST" class="hidden">@csrf</form>
         </div>
     </header>
 

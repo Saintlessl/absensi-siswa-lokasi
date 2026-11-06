@@ -76,7 +76,7 @@ Route::post('/aktivasi-guru/{token}', [TeacherActivationController::class, 'stor
 Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     // Shared Dashboard & Auth
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
+    Route::post('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
 
     // Profile (All Authenticated Users)
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');

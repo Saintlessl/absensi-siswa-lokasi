@@ -283,8 +283,7 @@
                             <i class='bx bx-log-out text-lg'></i>
                             <span>Keluar</span>
                         </a>
-                        <form id="logout-form-header" action="{{ route('proseslogout') }}" method="GET"
-                            class="hidden"></form>
+                        <form id="logout-form-header" action="{{ route('proseslogout') }}" method="POST" class="hidden">@csrf</form>
                     </div>
                 </div>
             </div>
