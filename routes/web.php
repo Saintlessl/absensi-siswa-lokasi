@@ -9,9 +9,10 @@ use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\LokasiSekolahController;
 use App\Http\Controllers\OrangTuaController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\SuratPeringatanController;
 use App\Http\Controllers\UserController;
-use App\Models\Jadwal;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,9 +20,9 @@ use Illuminate\Support\Facades\Route;
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
+| Role authorization is enforced via the 'role' middleware alias
+| (App\Http\Middleware\RoleMiddleware). Controllers keep inline role
+| checks as defense-in-depth.
 |
 */
 
@@ -33,88 +34,97 @@ Route::middleware(['guest:web'])->group(function () {
 
 Route::middleware(['auth:web'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/dashboard/absensi/{id}/update', [DashboardController::class, 'updateAbsensi'])->name('dashboard.absensi.update');
-    Route::post('/dashboard/absensi/{id}/delete', [DashboardController::class, 'deleteAbsensi'])->name('dashboard.absensi.delete');
-    Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export.pdf');
-    Route::get('/dashboard/export-excel', [DashboardController::class, 'exportExcel'])->name('dashboard.export.excel');
-    Route::get('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
+    // BUG-013: logout must be POST (CSRF-protected), not a GET link
+    Route::post('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
 
-    // Profile
+    // Profile (all roles)
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [UserController::class, 'updatePassword'])->name('profile.password');
 
-    // Siswa CRUD
-    Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa');
-    Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
-    Route::post('/siswa/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
-    Route::post('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
-    Route::post('/siswa/delete/{id}', [SiswaController::class, 'destroy'])->name('siswa.delete');
-    Route::get('/siswa/export-pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
-    Route::get('/siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
+    // ---- Admin-only: master data, users, settings, geofence, exports ----
+    Route::middleware('role:admin')->group(function () {
+        // Dashboard absensi mutations/exports
+        Route::post('/dashboard/absensi/{id}/update', [DashboardController::class, 'updateAbsensi'])->name('dashboard.absensi.update');
+        Route::post('/dashboard/absensi/{id}/delete', [DashboardController::class, 'deleteAbsensi'])->name('dashboard.absensi.delete');
+        Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export.pdf');
+        Route::get('/dashboard/export-excel', [DashboardController::class, 'exportExcel'])->name('dashboard.export.excel');
 
-    // Kelas
-    Route::get('/kelas', [KelasController::class, 'index'])->name('kelas');
-    Route::post('/kelas', [KelasController::class, 'store'])->name('kelas.store');
-    Route::post('/kelas/edit', [KelasController::class, 'edit'])->name('kelas.edit');
-    Route::post('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update');
-    Route::post('/kelas/delete/{id}', [KelasController::class, 'destroy'])->name('kelas.delete');
+        // Siswa CRUD
+        Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa');
+        Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
+        Route::post('/siswa/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
+        Route::post('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
+        Route::post('/siswa/delete/{id}', [SiswaController::class, 'destroy'])->name('siswa.delete');
+        Route::get('/siswa/export-pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
+        Route::get('/siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
 
-    // Guru
-    Route::get('/guru', [GuruController::class, 'index'])->name('guru');
-    Route::post('/guru', [GuruController::class, 'store'])->name('guru.store');
-    Route::post('/guru/edit', [GuruController::class, 'edit'])->name('guru.edit');
-    Route::post('/guru/{id}', [GuruController::class, 'update'])->name('guru.update');
-    Route::post('/guru/delete/{id}', [GuruController::class, 'destroy'])->name('guru.delete');
+        // Kelas
+        Route::get('/kelas', [KelasController::class, 'index'])->name('kelas');
+        Route::post('/kelas', [KelasController::class, 'store'])->name('kelas.store');
+        Route::post('/kelas/edit', [KelasController::class, 'edit'])->name('kelas.edit');
+        Route::post('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update');
+        Route::post('/kelas/delete/{id}', [KelasController::class, 'destroy'])->name('kelas.delete');
 
-    // Jadwal
-    Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal');
-    Route::post('/jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
-    Route::post('/jadwal/edit', [JadwalController::class, 'edit'])->name('jadwal.edit');
-    Route::post('/jadwal/{id}', [JadwalController::class, 'update'])->name('jadwal.update');
-    Route::post('/jadwal/delete/{id}', [JadwalController::class, 'destroy'])->name('jadwal.delete');
+        // Guru
+        Route::get('/guru', [GuruController::class, 'index'])->name('guru');
+        Route::post('/guru', [GuruController::class, 'store'])->name('guru.store');
+        Route::post('/guru/edit', [GuruController::class, 'edit'])->name('guru.edit');
+        Route::post('/guru/{id}', [GuruController::class, 'update'])->name('guru.update');
+        Route::post('/guru/delete/{id}', [GuruController::class, 'destroy'])->name('guru.delete');
 
-    // Orang Tua
-    Route::get('/orangtua', [OrangTuaController::class, 'index'])->name('orangtua');
-    Route::post('/orangtua.store', [OrangTuaController::class, 'store'])->name('orangtua.store');
-    Route::post('/orangtua/edit', [OrangTuaController::class, 'edit'])->name('orangtua.edit');
-    Route::post('/orangtua/update/{id}', [OrangTuaController::class, 'update'])->name('orangtua.update');
-    Route::post('/orangtua/delete/{id}', [OrangTuaController::class, 'destroy'])->name('orangtua.delete');
+        // Jadwal
+        Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal');
+        Route::post('/jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
+        Route::post('/jadwal/edit', [JadwalController::class, 'edit'])->name('jadwal.edit');
+        Route::post('/jadwal/{id}', [JadwalController::class, 'update'])->name('jadwal.update');
+        Route::post('/jadwal/delete/{id}', [JadwalController::class, 'destroy'])->name('jadwal.delete');
 
-    // Lokasi Sekolah
-    Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('lokasi_sekolah');
-    Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('lokasi_sekolah.update');
+        // Orang Tua
+        Route::get('/orangtua', [OrangTuaController::class, 'index'])->name('orangtua');
+        Route::post('/orangtua.store', [OrangTuaController::class, 'store'])->name('orangtua.store');
+        Route::post('/orangtua/edit', [OrangTuaController::class, 'edit'])->name('orangtua.edit');
+        Route::post('/orangtua/update/{id}', [OrangTuaController::class, 'update'])->name('orangtua.update');
+        Route::post('/orangtua/delete/{id}', [OrangTuaController::class, 'destroy'])->name('orangtua.delete');
 
-    // Users
-    Route::get('user', [UserController::class, 'index'])->name('user');
-    Route::post('/user', [UserController::class, 'store'])->name('user');
-    Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
-    Route::post('/user/{id}', [UserController::class, 'update'])->name('user.update');
-    Route::post('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+        // Lokasi Sekolah (geofence)
+        Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('lokasi_sekolah');
+        Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('lokasi_sekolah.update');
 
-    // Absensi
+        // Users: BUG-004 removed dead POST /user (nonexistent store) and
+        // duplicate route names ('user', 'profile').
+        Route::get('/user', [UserController::class, 'index'])->name('user');
+        Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
+        Route::post('/user/{id}', [UserController::class, 'update'])->name('user.update');
+        Route::post('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.delete');
+
+        // Settings
+        Route::get('/pengaturan', [SettingController::class, 'index'])->name('setting');
+        Route::post('/pengaturan', [SettingController::class, 'update'])->name('setting.update');
+    });
+
+    // ---- Surat Peringatan: admin & guru manage; cetak allows siswa/orangtua
+    // via ownership checks inside the controller ----
+    Route::middleware('role:admin,guru')->group(function () {
+        Route::get('/surat-peringatan', [SuratPeringatanController::class, 'index'])->name('surat-peringatan');
+        Route::post('/surat-peringatan', [SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
+        Route::post('/surat-peringatan/delete/{id}', [SuratPeringatanController::class, 'destroy'])->name('surat-peringatan.delete');
+    });
+    Route::get('/surat-peringatan/cetak/{id}', [SuratPeringatanController::class, 'cetak'])->name('surat-peringatan.cetak');
+
+    // ---- Absensi ----
     Route::get('/absensi-siswa', [AbsensiController::class, 'index'])->name('absensi');
-    Route::post('/absensi-siswa/store', [AbsensiController::class, 'store'])->name('absensi.store');
+    Route::post('/absensi-siswa/store', [AbsensiController::class, 'store'])->middleware('role:siswa')->name('absensi.store');
     Route::get('/riwayat-kehadiran', [AbsensiController::class, 'riwayatKehadiran'])->name('riwayatkehadiran');
 
+    // Guru harian / rekap: guru & admin
     Route::get('/absensi-siswa/harian', [AbsensiController::class, 'absensiHarian'])->name('absensi.harian');
-    Route::post('/absensi-siswa/harian/update', [AbsensiController::class, 'updateHarian'])->name('absensi.harian.update');
+    Route::post('/absensi-siswa/harian/update', [AbsensiController::class, 'updateHarian'])->middleware('role:guru,admin')->name('absensi.harian.update');
 
-    Route::get('/rekap-absensi', [AbsensiController::class, 'rekapAbsensi'])->name('rekapabsensi');
-    Route::get('/rekap-kelas', [AbsensiController::class, 'rekapPerKelas'])->name('rekapkelas');
+    Route::get('/rekap-absensi', [AbsensiController::class, 'rekapAbsensi'])->middleware('role:guru,admin')->name('rekapabsensi');
+    Route::get('/rekap-kelas', [AbsensiController::class, 'rekapPerKelas'])->middleware('role:guru,admin')->name('rekapkelas');
 
-    // Izin / Sakit
+    // ---- Izin / Sakit: hanya orang tua (controller re-checks) ----
     Route::get('/izin-siswa', [IzinController::class, 'index'])->name('izin');
     Route::post('/izin-siswa', [IzinController::class, 'store'])->name('izin.store');
-
-    // Settings (Admin)
-    Route::get('/pengaturan', [\App\Http\Controllers\SettingController::class, 'index'])->name('setting');
-    Route::post('/pengaturan', [\App\Http\Controllers\SettingController::class, 'update'])->name('setting.update');
-
-    // Surat Peringatan (Admin & Guru)
-    Route::get('/surat-peringatan', [\App\Http\Controllers\SuratPeringatanController::class, 'index'])->name('surat-peringatan');
-    Route::post('/surat-peringatan', [\App\Http\Controllers\SuratPeringatanController::class, 'store'])->name('surat-peringatan.store');
-    Route::post('/surat-peringatan/delete/{id}', [\App\Http\Controllers\SuratPeringatanController::class, 'destroy'])->name('surat-peringatan.delete');
-    Route::get('/surat-peringatan/cetak/{id}', [\App\Http\Controllers\SuratPeringatanController::class, 'cetak'])->name('surat-peringatan.cetak');
 });
