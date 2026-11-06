@@ -175,8 +175,9 @@ class DashboardController extends Controller
         ]);
 
         $absensi = Absensi::findOrFail($id);
+        // BUG-026: persist the enum's lowercase form regardless of input casing.
         $absensi->update([
-            'status' => $request->status,
+            'status' => strtolower($request->status),
             'keterangan' => $request->keterangan,
         ]);
 

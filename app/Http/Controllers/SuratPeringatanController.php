@@ -67,13 +67,21 @@ class SuratPeringatanController extends Controller
             return redirect()->back()->with('error', "Surat {$request->jenis_sp} sudah pernah diterbitkan untuk siswa ini.");
         }
 
-        SuratPeringatan::create([
-            'siswa_id' => $request->siswa_id,
-            'nomor_surat' => $request->jenis_sp . '/' . date('Ymd') . '/' . $request->siswa_id,
-            'jenis_sp' => $request->jenis_sp,
-            'tanggal_terbit' => date('Y-m-d'),
-            'keterangan' => $request->keterangan ?? "Diterbitkan manual oleh " . ucfirst($user->role),
-        ]);
+        // BUG-042: check-then-create race -> unique violation 500. Wrap and
+        // catch duplicate-key errors into a friendly message.
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $user) {
+                SuratPeringatan::create([
+                    'siswa_id' => $request->siswa_id,
+                    'nomor_surat' => $request->jenis_sp . '/' . date('Ymd') . '/' . $request->siswa_id,
+                    'jenis_sp' => $request->jenis_sp,
+                    'tanggal_terbit' => date('Y-m-d'),
+                    'keterangan' => $request->keterangan ?? "Diterbitkan manual oleh " . ucfirst($user->role),
+                ]);
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->back()->with('error', "Surat {$request->jenis_sp} sudah pernah diterbitkan untuk siswa ini.");
+        }
 
         return redirect()->back()->with('success', "Surat Peringatan {$request->jenis_sp} berhasil diterbitkan.");
     }

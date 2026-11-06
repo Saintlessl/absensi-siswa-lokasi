@@ -35,7 +35,7 @@ class JadwalController extends Controller
             'guru_id' => 'required|exists:gurus,id',
             'kelas_id' => 'required|exists:kelas,id',
             'mata_pelajaran' => 'required|string|max:255', // Tetap divalidasi untuk keamanan
-            'hari' => 'required|string',
+            'hari' => 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
         ], [
@@ -43,7 +43,8 @@ class JadwalController extends Controller
             'jam_mulai.date_format' => 'Format jam mulai tidak valid.',
         ]);
 
-        Jadwal::create($request->all());
+        // BUG-034: explicit fields instead of $request->all() mass-assign
+        Jadwal::create($request->only(['guru_id', 'kelas_id', 'mata_pelajaran', 'hari', 'jam_mulai', 'jam_selesai']));
 
         return redirect()->back()->with('success', 'Jadwal berhasil ditambahkan!');
     }
@@ -61,12 +62,17 @@ class JadwalController extends Controller
     // Proses Update ke Database
     public function update(Request $request, $id)
     {
+        // BUG-032: update() validation was gutted vs store() — mirror it.
         $request->validate([
-            'kelas_id' => 'required',
-            'hari' => 'required',
-            'guru_id' => 'required',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required',
+            'guru_id' => 'required|exists:gurus,id',
+            'kelas_id' => 'required|exists:kelas,id',
+            'mata_pelajaran' => 'required|string|max:255',
+            'hari' => 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+        ], [
+            'jam_selesai.after' => 'Jam selesai harus lebih besar dari jam mulai.',
+            'jam_mulai.date_format' => 'Format jam mulai tidak valid.',
         ]);
 
         try {
@@ -82,7 +88,9 @@ class JadwalController extends Controller
 
             return redirect()->back()->with('success', 'Jadwal berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage());
+            // BUG-033: never leak raw SQL/exception text to the user.
+            \Illuminate\Support\Facades\Log::error('Jadwal update gagal: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memperbarui jadwal. Silakan hubungi administrator.');
         }
     }
     public function destroy($id)
@@ -93,7 +101,8 @@ class JadwalController extends Controller
 
             return redirect()->back()->with('success', 'Jadwal berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Jadwal delete gagal: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus data. Silakan hubungi administrator.');
         }
     }
 }

@@ -43,6 +43,14 @@ class SettingController extends Controller
             'late_threshold' => 'required|date_format:H:i:s',
         ]);
 
+        // BUG-037: quotas must be strictly ordered or the SP ladder breaks
+        // (a student can cross SP3 quota before SP1 ever triggers).
+        if (!($request->kuota_alpha_SP1 < $request->kuota_alpha_SP2 && $request->kuota_alpha_SP2 < $request->kuota_alpha_SP3)) {
+            return redirect()->back()->withInput()->with(
+                'error', 'Kuota alpha harus berurutan: SP1 < SP2 < SP3 (contoh: 5, 10, 15).'
+            );
+        }
+
         SettingHelper::set('kuota_alpha_SP1', $request->kuota_alpha_SP1);
         SettingHelper::set('kuota_alpha_SP2', $request->kuota_alpha_SP2);
         SettingHelper::set('kuota_alpha_SP3', $request->kuota_alpha_SP3);
