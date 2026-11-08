@@ -109,15 +109,14 @@
             position: absolute;
             inset-inline: 0;
             bottom: 0;
-            height: 28%;
+            height: 30%;
             z-index: 15;
             pointer-events: none;
             background: linear-gradient(
                 to bottom,
                 rgba(0, 43, 117, 0) 0%,
-                rgba(0, 43, 117, 0.25) 25%,
-                rgba(0, 35, 95, 0.65) 55%,
-                rgba(0, 31, 92, 0.92) 80%,
+                rgba(0, 35, 95, 0.40) 25%,
+                rgba(0, 31, 92, 0.85) 60%,
                 #001F5C 100%
             );
             backdrop-filter: blur(8px);
@@ -125,15 +124,15 @@
             mask-image: linear-gradient(
                 to bottom,
                 rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0.25) 25%,
-                rgba(0, 0, 0, 0.8) 60%,
+                rgba(0, 0, 0, 0.35) 25%,
+                rgba(0, 0, 0, 0.85) 60%,
                 rgba(0, 0, 0, 1) 100%
             );
             -webkit-mask-image: linear-gradient(
                 to bottom,
                 rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0.25) 25%,
-                rgba(0, 0, 0, 0.8) 60%,
+                rgba(0, 0, 0, 0.35) 25%,
+                rgba(0, 0, 0, 0.85) 60%,
                 rgba(0, 0, 0, 1) 100%
             );
         }
@@ -232,7 +231,7 @@
                     <div class="char-idle-1 w-full h-full flex justify-center items-end">
                         <img src="{{ asset($assets['student_chars']) }}"
                              alt="Ilustrasi Siswa SMK Negeri 1 Ciomas"
-                             class="h-full w-auto max-w-[75%] sm:max-w-[70%] lg:max-w-[65%] object-contain object-bottom drop-shadow-[0_20px_45px_rgba(0,15,60,0.55)] select-none pointer-events-none">
+                             class="h-full w-auto max-w-[75%] sm:max-w-[70%] lg:max-w-[65%] object-contain object-bottom drop-shadow-[0_15px_30px_rgba(0,15,60,0.35)] select-none pointer-events-none">
                     </div>
                 </div>
 
@@ -242,7 +241,7 @@
                     <div class="char-idle-2 w-full h-full flex justify-center items-end">
                         <img src="{{ asset($assets['teacher_chars']) }}"
                              alt="Ilustrasi Guru SMK Negeri 1 Ciomas"
-                             class="h-full w-auto max-w-[85%] sm:max-w-[80%] lg:max-w-[75%] object-contain object-bottom drop-shadow-[0_20px_45px_rgba(0,15,60,0.55)] select-none pointer-events-none">
+                             class="h-full w-auto max-w-[85%] sm:max-w-[80%] lg:max-w-[75%] object-contain object-bottom drop-shadow-[0_15px_30px_rgba(0,15,60,0.35)] select-none pointer-events-none">
                     </div>
                 </div>
             </div>
