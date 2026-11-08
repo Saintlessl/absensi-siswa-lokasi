@@ -221,8 +221,18 @@ class AcademicPromotionService
 
         DB::transaction(function () use ($originClasses, $destTa, &$createdCount) {
             foreach ($originClasses as $orig) {
-                $exists = Kelas::where('tahun_ajaran_id', $destTa->id)
-                    ->where('nama_kelas', $orig->nama_kelas)
+                $exists = Kelas::where(function ($q) use ($destTa) {
+                        $q->where('tahun_ajaran_id', $destTa->id)
+                          ->orWhere('tahun_ajaran', $destTa->nama);
+                    })
+                    ->where(function ($q) use ($orig) {
+                        $q->where('nama_kelas', $orig->nama_kelas)
+                          ->orWhere(function ($sub) use ($orig) {
+                              $sub->where('jurusan_id', $orig->jurusan_id)
+                                  ->where('tingkat', $orig->tingkat)
+                                  ->where('nomor_rombel', $orig->nomor_rombel);
+                          });
+                    })
                     ->exists();
 
                 if (!$exists) {

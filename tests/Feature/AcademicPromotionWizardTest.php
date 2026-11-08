@@ -1148,4 +1148,38 @@ class AcademicPromotionWizardTest extends TestCase
         $this->assertTrue($roster->contains($activeStudent->id));
         $this->assertFalse($roster->contains($graduatedStudent->id));
     }
+
+    /**
+     * Test 26: Promotion views render successfully with consistent font styling, clean typography, and SweetAlert.
+     */
+    public function test_promotion_views_render_successfully_with_consistent_font_styling_and_clean_syntax(): void
+    {
+        // 1. Wizard index page
+        $resIndex = $this->actingAs($this->admin)->get(route('academic.promotion.index'));
+        $resIndex->assertStatus(200);
+        $resIndex->assertDontSee('$\rightarrow$');
+        $resIndex->assertSee('font-normal text-slate-900 tracking-tight', false);
+        $resIndex->assertSee('Swal.fire', false);
+
+        // 2. History page
+        $resHistory = $this->actingAs($this->admin)->get(route('academic.promotion.history'));
+        $resHistory->assertStatus(200);
+        $resHistory->assertSee('font-normal text-slate-900 tracking-tight', false);
+
+        // 3. Batch show page
+        $batch = AcademicPromotionBatch::create([
+            'batch_code'             => 'PROM-TEST-001',
+            'tahun_ajaran_asal_id'   => $this->ta2025->id,
+            'tahun_ajaran_tujuan_id' => $this->ta2026->id,
+            'total_siswa'            => 1,
+            'total_naik'             => 1,
+            'status'                 => 'completed',
+            'created_by'             => $this->admin->id,
+        ]);
+
+        $resShow = $this->actingAs($this->admin)->get(route('academic.promotion.show', $batch->id));
+        $resShow->assertStatus(200);
+        $resShow->assertSee('font-normal text-slate-900 tracking-tight', false);
+        $resShow->assertSee('PROM-TEST-001');
+    }
 }

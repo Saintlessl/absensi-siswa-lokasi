@@ -5,14 +5,14 @@
 @section('page-subtitle', 'Laporan Audit Kenaikan Kelas, Tinggal Kelas, dan Kelulusan Siswa')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.index') }}" class="hover:text-primary-600">Struktur Akademik</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.promotion.index') }}" class="hover:text-primary-600">Kenaikan Kelas</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.promotion.history') }}" class="hover:text-primary-600">Riwayat</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">{{ $batch->batch_code }}</li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li><a href="{{ route('academic.index') }}" class="hover:text-[#003EA7]">Struktur Akademik</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li><a href="{{ route('academic.promotion.index') }}" class="hover:text-[#003EA7]">Kenaikan Kelas</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li><a href="{{ route('academic.promotion.history') }}" class="hover:text-[#003EA7]">Riwayat</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li class="text-[#003EA7] font-medium">{{ $batch->batch_code }}</li>
 @endsection
 
 @section('page-header')
@@ -25,8 +25,8 @@
                     {{ $batch->status }}
                 </span>
             </div>
-            <h2 class="text-xl font-bold text-dark-800 mt-1">Laporan Audit Perpindahan Tahun Ajaran</h2>
-            <p class="text-sm text-dark-400">
+            <h2 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight mt-1">Laporan Audit Perpindahan Tahun Ajaran</h2>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">
                 Eksekusi dari <strong class="text-slate-700">{{ $batch->tahunAjaranAsal?->nama ?? '-' }}</strong> menuju <strong class="text-[#003EA7]">{{ $batch->tahunAjaranTujuan?->nama ?? '-' }}</strong>.
             </p>
         </div>
@@ -95,12 +95,27 @@
     </div>
 
     {{-- PROCESSED STUDENTS TABLE --}}
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden" x-data="{ search: '', filterStatus: '' }">
+        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                 <i class='bx bx-list-check text-primary-600 text-lg'></i>
                 <span>Daftar Siswa yang Diproses ({{ $batch->items->count() }} Data)</span>
             </h3>
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <i class='bx bx-search absolute left-3 top-2.5 text-slate-400 text-xs'></i>
+                    <input type="text" x-model="search" placeholder="Cari nama, NIS, rombel..."
+                        class="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white focus:ring-1 focus:ring-[#003EA7] w-48 sm:w-56">
+                </div>
+                <select x-model="filterStatus" class="px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 bg-white">
+                    <option value="">Semua Status</option>
+                    <option value="naik_kelas">Naik Kelas</option>
+                    <option value="tinggal_kelas">Tinggal Kelas</option>
+                    <option value="lulus">Lulus</option>
+                    <option value="pindah">Mutasi Pindah</option>
+                    <option value="keluar">Keluar / DO</option>
+                </select>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -119,7 +134,8 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($batch->items as $idx => $item)
-                        <tr class="hover:bg-slate-50/60 transition-colors">
+                        <tr x-show="(!search || '{{ strtolower(addslashes($item->siswa?->nama ?? '')) }} {{ $item->siswa?->nis ?? '' }} {{ strtolower(addslashes($item->kelasAsal?->nama_kelas ?? '')) }} {{ strtolower(addslashes($item->kelasTujuan?->nama_kelas ?? '')) }}'.includes(search.toLowerCase())) && (!filterStatus || '{{ $item->action }}' === filterStatus)"
+                            class="hover:bg-slate-50/60 transition-colors">
                             <td class="p-3.5 text-center text-slate-400 font-semibold">{{ $idx + 1 }}</td>
                             <td class="p-3.5">
                                 <a href="{{ route('siswa.show', $item->siswa_id) }}" class="font-bold text-slate-800 hover:text-[#003EA7] hover:underline">

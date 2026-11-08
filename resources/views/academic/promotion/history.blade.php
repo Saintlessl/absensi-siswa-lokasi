@@ -5,25 +5,25 @@
 @section('page-subtitle', 'Daftar Audit Batch Eksekusi Kenaikan Kelas, Tinggal Kelas, dan Kelulusan Massal')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.index') }}" class="hover:text-primary-600">Struktur Akademik</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.promotion.index') }}" class="hover:text-primary-600">Kenaikan Kelas</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Riwayat</li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li><a href="{{ route('academic.index') }}" class="hover:text-[#003EA7]">Struktur Akademik</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li><a href="{{ route('academic.promotion.index') }}" class="hover:text-[#003EA7]">Kenaikan Kelas</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li class="text-[#003EA7] font-medium">Riwayat</li>
 @endsection
 
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Riwayat Proses Kenaikan Kelas & Kelulusan</h2>
-            <p class="text-sm text-dark-400 mt-1">
+            <h2 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Riwayat Proses Kenaikan Kelas & Kelulusan</h2>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">
                 Catatan historis seluruh batch perpindahan tahun ajaran, kenaikan kelas, dan penuntasan kelulusan alumni SMK Negeri 1 Ciomas.
             </p>
         </div>
         <div class="flex items-center gap-2.5">
             <a href="{{ route('academic.promotion.index') }}"
-                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl text-xs font-bold shadow-lg shadow-primary-500/25 transition-all duration-200 hover:-translate-y-0.5">
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#003EA7] hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5">
                 <i class='bx bx-plus-circle text-base'></i>
                 <span>Mulai Kenaikan Kelas Baru</span>
             </a>

@@ -5,24 +5,24 @@
 @section('page-subtitle', 'Wizard 6-Langkah Perpindahan Tahun Ajaran, Kenaikan Kelas, dan Kelulusan Siswa')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.index') }}" class="hover:text-primary-600">Struktur Akademik</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Kenaikan Kelas</li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li><a href="{{ route('academic.index') }}" class="hover:text-[#003EA7]">Struktur Akademik</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400 text-sm'></i></li>
+    <li class="text-[#003EA7] font-medium">Kenaikan Kelas</li>
 @endsection
 
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Wizard Kenaikan Kelas, Tinggal Kelas & Kelulusan</h2>
-            <p class="text-sm text-dark-400 mt-1">
+            <h2 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Wizard Kenaikan Kelas, Tinggal Kelas & Kelulusan</h2>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">
                 Proses terstruktur multi-langkah perpindahan siswa antar tahun ajaran dengan menjaga keutuhan identitas kohort permanen dan riwayat wali kelas.
             </p>
         </div>
         <div class="flex items-center gap-2.5">
             <a href="{{ route('academic.promotion.history') }}"
                 class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-bold shadow-sm transition-all duration-200 hover:-translate-y-0.5">
-                <i class='bx bx-history text-base text-primary-600'></i>
+                <i class='bx bx-history text-base text-[#003EA7]'></i>
                 <span>Riwayat Proses Kenaikan</span>
             </a>
         </div>
@@ -253,7 +253,7 @@
                     <span>Langkah 3: Tentukan Keputusan Akademik Setiap Siswa</span>
                 </h3>
                 <p class="text-xs text-slate-500 mt-1">
-                    Sistem telah memberikan default cerdas (Kelas 10 $\rightarrow$ Naik 11, Kelas 11 $\rightarrow$ Naik 12, Kelas 12 $\rightarrow$ Kelulusan). Admin dapat mengubah status secara bebas.
+                    Sistem telah memberikan default cerdas (Kelas 10 &rarr; Naik 11, Kelas 11 &rarr; Naik 12, Kelas 12 &rarr; Kelulusan). Admin dapat mengubah status secara bebas.
                 </p>
             </div>
 
@@ -395,7 +395,7 @@
                 </p>
             </div>
 
-            <button type="button" @click="autoMapDestinationClasses()"
+            <button type="button" @click="autoMapDestinationClasses(true)"
                 class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 flex-shrink-0">
                 <i class='bx bx-magic-wand'></i>
                 <span>Auto-Map Otomatis</span>
@@ -634,6 +634,7 @@ function promotionWizard() {
         isConfirmed: false,
         originTaId: '{{ $activeTa?->id }}',
         destTaId: '',
+        academicYearsData: @json($academicYears->keyBy('id')->map(fn($ta) => ['id' => $ta->id, 'tahun_mulai' => (int) $ta->tahun_mulai, 'nama' => $ta->nama])),
         originClasses: [],
         selectedKelasIds: [],
         students: [],
@@ -713,7 +714,19 @@ function promotionWizard() {
         },
 
         async replicateStructure() {
-            if (!confirm('Salin struktur rombel kelas dari Tahun Ajaran Asal ke Tahun Ajaran Tujuan?')) return;
+            const confirmResult = await Swal.fire({
+                title: 'Salin Struktur Rombel?',
+                text: 'Struktur rombel kelas dari Tahun Ajaran Asal akan disalin secara otomatis ke Tahun Ajaran Tujuan.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#003EA7',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Salin Struktur',
+                cancelButtonText: 'Batal'
+            });
+
+            if (!confirmResult.isConfirmed) return;
+
             this.isLoading = true;
             try {
                 const res = await fetch(`{{ route('academic.promotion.replicate_classes') }}`, {
@@ -730,19 +743,70 @@ function promotionWizard() {
                 const data = await res.json();
                 if (data.success) {
                     this.destClasses = data.classes;
-                    alert(data.message);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message,
+                        confirmButtonColor: '#003EA7'
+                    });
                 } else {
-                    alert(data.message || 'Gagal menyalin struktur rombel');
+                    let errMsg = data.message || 'Gagal menyalin struktur rombel.';
+                    if (data.errors) {
+                        const errList = Object.values(data.errors).flat();
+                        if (errList.length > 0) errMsg = errList[0];
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyalin Rombel',
+                        text: errMsg,
+                        confirmButtonColor: '#003EA7'
+                    });
                 }
             } catch (err) {
-                alert('Terjadi kesalahan jaringan');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Jaringan',
+                    text: 'Terjadi kesalahan sistem atau jaringan saat menyalin rombel.',
+                    confirmButtonColor: '#003EA7'
+                });
             } finally {
                 this.isLoading = false;
             }
         },
 
         advanceToStep2() {
-            if (!this.originTaId || !this.destTaId) return;
+            if (!this.originTaId || !this.destTaId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Periode Belum Dipilih',
+                    text: 'Silakan tentukan Tahun Ajaran Asal dan Tahun Ajaran Tujuan.',
+                    confirmButtonColor: '#003EA7'
+                });
+                return;
+            }
+
+            if (this.originTaId === this.destTaId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Periode Tidak Boleh Sama',
+                    text: 'Tahun Ajaran Tujuan tidak boleh sama dengan Tahun Ajaran Asal.',
+                    confirmButtonColor: '#003EA7'
+                });
+                return;
+            }
+
+            const origTa = this.academicYearsData[this.originTaId];
+            const destTa = this.academicYearsData[this.destTaId];
+            if (origTa && destTa && destTa.tahun_mulai <= origTa.tahun_mulai) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Urutan Periode Tidak Valid',
+                    text: `Tahun ajaran tujuan (${destTa.nama}) harus secara kronologis lebih baru daripada tahun ajaran asal (${origTa.nama}).`,
+                    confirmButtonColor: '#003EA7'
+                });
+                return;
+            }
+
             if (this.destClasses.length === 0) {
                 this.loadDestClasses();
             }
@@ -758,7 +822,16 @@ function promotionWizard() {
         },
 
         async advanceToStep3() {
-            if (this.selectedKelasIds.length === 0) return;
+            if (this.selectedKelasIds.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Rombel Belum Dipilih',
+                    text: 'Pilih minimal satu rombongan belajar asal untuk diproses.',
+                    confirmButtonColor: '#003EA7'
+                });
+                return;
+            }
+
             this.isLoading = true;
             try {
                 const res = await fetch(`{{ route('academic.promotion.load_students') }}`, {
@@ -774,6 +847,16 @@ function promotionWizard() {
                 });
                 const data = await res.json();
                 if (data.success) {
+                    if (!data.students || data.students.length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tidak Ada Siswa Aktif',
+                            text: 'Tidak ada siswa dengan status aktif yang ditemukan pada rombel yang dipilih.',
+                            confirmButtonColor: '#003EA7'
+                        });
+                        return;
+                    }
+
                     this.students = data.students.map(s => ({
                         ...s,
                         action: s.default_action,
@@ -781,9 +864,26 @@ function promotionWizard() {
                         catatan: ''
                     }));
                     this.step = 3;
+                } else {
+                    let errMsg = data.message || 'Gagal memuat siswa.';
+                    if (data.errors) {
+                        const errList = Object.values(data.errors).flat();
+                        if (errList.length > 0) errMsg = errList[0];
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Memuat Data',
+                        text: errMsg,
+                        confirmButtonColor: '#003EA7'
+                    });
                 }
             } catch (err) {
-                alert('Gagal memuat siswa');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Sistem',
+                    text: 'Gagal memuat data siswa dari server.',
+                    confirmButtonColor: '#003EA7'
+                });
             } finally {
                 this.isLoading = false;
             }
@@ -824,7 +924,15 @@ function promotionWizard() {
 
         bulkSetAction(act, filterTingkat = null) {
             this.students.forEach(s => {
-                if (!filterTingkat || s.tingkat_asal === filterTingkat) {
+                if (filterTingkat && s.tingkat_asal !== filterTingkat) return;
+
+                if (act === 'naik_kelas') {
+                    if (s.tingkat_asal >= 12) {
+                        s.action = 'lulus';
+                    } else {
+                        s.action = 'naik_kelas';
+                    }
+                } else {
                     s.action = act;
                 }
             });
@@ -837,8 +945,10 @@ function promotionWizard() {
             });
         },
 
-        autoMapDestinationClasses() {
+        autoMapDestinationClasses(force = false) {
             this.students.forEach(s => {
+                if (!force && s.kelas_tujuan_id) return;
+
                 if (s.action === 'naik_kelas') {
                     const targetTingkat = s.tingkat_asal + 1;
                     const matched = this.destClasses.find(dc =>
@@ -869,7 +979,7 @@ function promotionWizard() {
         },
 
         advanceToStep4() {
-            this.autoMapDestinationClasses();
+            this.autoMapDestinationClasses(false);
             this.step = 4;
         },
 
@@ -877,13 +987,30 @@ function promotionWizard() {
             // Check if all active promoting students have destination class
             const unallocated = this.activePromotingStudents.filter(s => !s.kelas_tujuan_id);
             if (unallocated.length > 0) {
-                alert(`Terdapat ${unallocated.length} siswa berstatus naik/tinggal kelas yang belum dialokasikan ke rombel tujuan.`);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Alokasi Belum Lengkap',
+                    text: `Terdapat ${unallocated.length} siswa berstatus naik/tinggal kelas yang belum dialokasikan ke rombel tujuan.`,
+                    confirmButtonColor: '#003EA7'
+                });
                 return;
             }
             this.step = 5;
         },
 
         advanceToStep6() {
+            // Check for duplicate homeroom assignments
+            const assignedGurus = Object.values(this.homeroomAssignments).filter(Boolean);
+            const duplicates = assignedGurus.filter((item, index) => assignedGurus.indexOf(item) !== index);
+            if (duplicates.length > 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Wali Kelas Ganda',
+                    text: 'Satu guru tidak boleh ditugaskan sebagai wali kelas pada lebih dari satu rombel tujuan.',
+                    confirmButtonColor: '#003EA7'
+                });
+                return;
+            }
             this.step = 6;
         },
 
@@ -918,13 +1045,33 @@ function promotionWizard() {
 
                 const data = await res.json();
                 if (data.success) {
-                    alert(data.message);
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil Dieksekusi!',
+                        text: data.message,
+                        confirmButtonColor: '#003EA7'
+                    });
                     window.location.href = data.redirect_url;
                 } else {
-                    alert(data.message || 'Terjadi kegagalan saat mengeksekusi proses kenaikan kelas.');
+                    let errMsg = data.message || 'Terjadi kegagalan saat mengeksekusi proses kenaikan kelas.';
+                    if (data.errors) {
+                        const errList = Object.values(data.errors).flat();
+                        if (errList.length > 0) errMsg = errList[0];
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Eksekusi Gagal',
+                        text: errMsg,
+                        confirmButtonColor: '#003EA7'
+                    });
                 }
             } catch (err) {
-                alert('Terjadi kesalahan sistem saat mengirim data.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Sistem',
+                    text: 'Terjadi kesalahan sistem atau koneksi saat mengeksekusi data kenaikan kelas.',
+                    confirmButtonColor: '#003EA7'
+                });
             } finally {
                 this.isSubmitting = false;
             }
