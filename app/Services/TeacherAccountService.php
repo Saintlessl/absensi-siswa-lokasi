@@ -118,12 +118,12 @@ class TeacherAccountService
                 'nama'               => $data['nama'],
                 'mapel'              => $data['mapel'] ?? $guru->mapel,
                 'jenis_kelamin'      => $data['jenis_kelamin'] ?? $guru->jenis_kelamin,
-                'telepon'            => $data['telepon'] ?? null,
-                'alamat'             => $data['alamat'] ?? null,
+                'telepon'            => array_key_exists('telepon', $data) ? $data['telepon'] : $guru->telepon,
+                'alamat'             => array_key_exists('alamat', $data) ? $data['alamat'] : $guru->alamat,
                 'photo_path'         => $photoPath,
                 'status_kepegawaian' => $data['status_kepegawaian'] ?? $guru->status_kepegawaian,
                 'is_active'          => isset($data['is_active']) ? (bool) $data['is_active'] : $guru->is_active,
-                'catatan'            => $data['catatan'] ?? $guru->catatan,
+                'catatan'            => array_key_exists('catatan', $data) ? $data['catatan'] : $guru->catatan,
             ]);
 
             return $guru->fresh(['user']);

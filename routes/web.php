@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\AngkatanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BiometricEnrollmentController;
 use App\Http\Controllers\DashboardController;
@@ -121,7 +122,10 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Struktur Akademik & Ruangan
         Route::get('/qr-codes', [AbsensiController::class, 'qrCodes'])->name('absensi.qrcodes');
         Route::get('/struktur-akademik', [AcademicStructureController::class, 'index'])->name('academic.index');
+        Route::get('/struktur-akademik/alumni/{angkatan}', [AcademicStructureController::class, 'alumniCohort'])->name('academic.alumni.show');
+        Route::get('/struktur-akademik/alumni/{angkatan}/export-pdf', [AcademicStructureController::class, 'exportAlumniPdf'])->name('academic.alumni.export_pdf');
         Route::get('/struktur-akademik/{jurusan}', [AcademicStructureController::class, 'major'])->name('academic.major');
+        Route::get('/struktur-akademik/{jurusan}/alumni/{angkatan}', [AcademicStructureController::class, 'majorAlumni'])->name('academic.major.alumni');
         Route::get('/struktur-akademik/{jurusan}/tingkat/{tingkat}', [AcademicStructureController::class, 'level'])->name('academic.level');
         Route::get('/struktur-akademik/rombel/{kelas}', [AcademicStructureController::class, 'roomClass'])->name('academic.class');
         Route::get('/alokasi-ruangan', [RoomController::class, 'assignments'])->name('rooms.assignments');
@@ -164,6 +168,15 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         Route::post('/kelas/edit', [KelasController::class, 'edit'])->name('kelas.edit');
         Route::post('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update');
         Route::post('/kelas/delete/{id}', [KelasController::class, 'destroy'])->name('kelas.delete');
+
+        // Manajemen Angkatan & Status Kelulusan
+        Route::get('/angkatan', [AngkatanController::class, 'index'])->name('angkatan.index');
+        Route::post('/angkatan', [AngkatanController::class, 'store'])->name('angkatan.store');
+        Route::get('/angkatan/{id}', [AngkatanController::class, 'show'])->name('angkatan.show');
+        Route::post('/angkatan/edit', [AngkatanController::class, 'edit'])->name('angkatan.edit');
+        Route::post('/angkatan/{id}', [AngkatanController::class, 'update'])->name('angkatan.update');
+        Route::post('/angkatan/delete/{id}', [AngkatanController::class, 'destroy'])->name('angkatan.destroy');
+        Route::get('/angkatan/{id}/stats', [AngkatanController::class, 'stats'])->name('angkatan.stats');
 
         // Data Guru & Teacher Management Center
         Route::get('/guru', [GuruController::class, 'index'])->name('guru');

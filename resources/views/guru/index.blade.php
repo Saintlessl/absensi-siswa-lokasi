@@ -34,6 +34,32 @@
 
 @section('content')
     {{-- Flash Notifications --}}
+        @if(session('error'))
+        <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-800 text-sm font-semibold">
+            <div class="flex items-center gap-2">
+                <i class='bx bx-error-circle text-lg text-rose-600'></i>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-800"><i class='bx bx-x text-lg'></i></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">
+            <div class="flex items-center justify-between font-bold mb-1">
+                <span class="flex items-center gap-2">
+                    <i class='bx bx-error-circle text-lg text-rose-600'></i> Terdapat kesalahan pada input:
+                </span>
+                <button onclick="this.parentElement.parentElement.remove()" class="text-rose-600 hover:text-rose-800"><i class='bx bx-x text-lg'></i></button>
+            </div>
+            <ul class="list-disc list-inside text-xs text-rose-700 mt-1 space-y-0.5">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-sm font-semibold">
             <div class="flex items-center gap-2">
@@ -398,6 +424,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal('modal-inputguru');
+                closeModal('modal-editguru');
             }
         });
 
@@ -466,28 +493,104 @@
                 alert('Tautan aktivasi berhasil disalin ke clipboard!');
             });
         }
-    </script>
 
         function editGuru(id) {
-            document.getElementById('loadeditform').innerHTML =
-                '<div class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#003FA9] border-t-transparent"></div><p class="text-xs text-slate-500 mt-2">Memuat data guru...</p></div>';
+            const container = document.getElementById('loadeditform');
+            if (!container) return;
+
+            // 1. Tampilkan state loading
+            container.innerHTML = `
+                <div class="text-center py-10">
+                    <div class="inline-block animate-spin rounded-full h-9 w-9 border-4 border-[#003EA7] border-t-transparent"></div>
+                    <p class="text-xs font-semibold text-slate-500 mt-3">Memuat data guru...</p>
+                </div>`;
             openModal('modal-editguru');
 
-            fetch('/guru/edit', {
+            const tokenEl = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = tokenEl ? tokenEl.getAttribute('content') : '';
+
+            // 2. Request form edit ke backend
+            fetch('{{ route("guru.edit") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'Accept': 'text/html, text/plain, */*',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ id: id })
             })
-            .then(res => res.text())
+            .then(res => {
+                if (!res.ok) {
+                    if (res.status === 419) {
+                        throw new Error('Sesi Anda telah berakhir. Silakan muat ulang halaman atau login kembali.');
+                    }
+                    if (res.status === 404) {
+                        throw new Error('Data guru tidak ditemukan di sistem.');
+                    }
+                    if (res.status === 403) {
+                        throw new Error('Anda tidak memiliki izin untuk mengedit data ini.');
+                    }
+                    throw new Error('Terjadi kesalahan pada server (Status ' + res.status + '). Silakan coba lagi.');
+                }
+                return res.text();
+            })
             .then(html => {
-                document.getElementById('loadeditform').innerHTML = html;
+                // 3. Tampilkan form yang berhasil dimuat
+                container.innerHTML = html;
             })
             .catch(err => {
-                console.error(err);
-                document.getElementById('loadeditform').innerHTML = '<p class="text-rose-500 text-xs text-center py-4">Gagal memuat formulir edit.</p>';
+                console.error('Error loading edit form:', err);
+
+                let friendlyMsg = 'Terjadi kesalahan saat memuat formulir edit.';
+                if (!navigator.onLine) {
+                    friendlyMsg = 'Koneksi ke server gagal. Silakan periksa koneksi internet Anda.';
+                } else if (err && err.message) {
+                    friendlyMsg = err.message;
+                }
+
+                // 4. Render error state secara aman via DOM (tanpa innerHTML injection yang rentan)
+                container.innerHTML = '';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'text-center py-8 px-4';
+
+                const icon = document.createElement('i');
+                icon.className = 'bx bx-error-circle text-4xl text-rose-500 mb-2 block';
+
+                const title = document.createElement('h4');
+                title.className = 'text-sm font-bold text-slate-800 mb-1';
+                title.textContent = 'Gagal Memuat Formulir';
+
+                const desc = document.createElement('p');
+                desc.className = 'text-xs text-rose-600 max-w-sm mx-auto mb-4';
+                desc.textContent = friendlyMsg;
+
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'flex items-center justify-center gap-2';
+
+                const retryBtn = document.createElement('button');
+                retryBtn.type = 'button';
+                retryBtn.className = 'px-4 py-2 rounded-xl bg-[#003EA7] hover:bg-[#00338d] text-white text-xs font-bold transition shadow-sm';
+                retryBtn.textContent = 'Coba Lagi';
+                retryBtn.onclick = function() { editGuru(id); };
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.className = 'px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition';
+                cancelBtn.textContent = 'Tutup';
+                cancelBtn.onclick = function() { closeModal('modal-editguru'); };
+
+                btnGroup.appendChild(retryBtn);
+                btnGroup.appendChild(cancelBtn);
+
+                wrapper.appendChild(icon);
+                wrapper.appendChild(title);
+                wrapper.appendChild(desc);
+                wrapper.appendChild(btnGroup);
+
+                container.appendChild(wrapper);
             });
         }
-    @endpush
+    </script>
+@endpush

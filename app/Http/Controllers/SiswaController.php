@@ -60,6 +60,14 @@ class SiswaController extends Controller
             $query->where('kelas_id', $request->kelas_id);
         }
 
+        if ($request->filled('angkatan_id')) {
+            $query->where('angkatan_id', $request->angkatan_id);
+        }
+
+        if ($request->filled('status') && $request->status !== 'semua') {
+            $query->where('status', $request->status);
+        }
+
         $siswa = $query->orderBy('nama')->paginate(10)->appends($request->query());
 
         if ($user && $user->role === 'kaprog') {
@@ -70,13 +78,16 @@ class SiswaController extends Controller
             $kelas = Kelas::with('jurusan')->where('is_active', true)->orderBy('nama_kelas')->get();
         }
 
+        $angkatans = \App\Models\Angkatan::orderByDesc('nomor_angkatan')->get();
         $orangTuaExisting = OrangTua::with('siswa')->orderBy('nama')->get();
 
-        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting') + [
-            'search'     => $request->search ?? '',
-            'kelas_id'   => $request->kelas_id ?? '',
-            'jurusan_id' => $request->jurusan_id ?? '',
-            'tingkat'    => $request->tingkat ?? '',
+        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting', 'angkatans') + [
+            'search'      => $request->search ?? '',
+            'kelas_id'    => $request->kelas_id ?? '',
+            'jurusan_id'  => $request->jurusan_id ?? '',
+            'tingkat'     => $request->tingkat ?? '',
+            'angkatan_id' => $request->angkatan_id ?? '',
+            'status'      => $request->status ?? '',
         ]);
     }
 

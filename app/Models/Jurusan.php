@@ -45,6 +45,21 @@ class Jurusan extends Model
         return $this->hasMany(User::class);
     }
 
+    public function angkatans()
+    {
+        return $this->hasMany(Angkatan::class)->orderByDesc('nomor_angkatan');
+    }
+
+    public function activeAngkatans()
+    {
+        return $this->hasMany(Angkatan::class)->where('status', 'aktif')->orderByDesc('nomor_angkatan');
+    }
+
+    public function alumniAngkatans()
+    {
+        return $this->hasMany(Angkatan::class)->where('status', 'selesai')->orderByDesc('nomor_angkatan');
+    }
+
     public function getLogoUrlAttribute()
     {
         if ($this->logo_path) {

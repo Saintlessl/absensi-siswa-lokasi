@@ -249,7 +249,16 @@ class GuruController extends Controller
      */
     public function edit(Request $request)
     {
-        $guru = Guru::with('user')->findOrFail($request->id);
+        $id = $request->input('id') ?? $request->id;
+        if (!$id) {
+            return response('<div class="text-center py-6 text-rose-500 text-sm font-semibold">ID Guru tidak ditemukan.</div>', 400);
+        }
+
+        $guru = Guru::with('user')->find($id);
+        if (!$guru) {
+            return response('<div class="text-center py-6 text-rose-500 text-sm font-semibold">Data guru tidak ditemukan di sistem.</div>', 404);
+        }
+
         return view('guru.edit', compact('guru'));
     }
 
@@ -264,6 +273,7 @@ class GuruController extends Controller
             'nama'               => 'required|string|max:255',
             'nip'                => ['nullable', 'string', 'max:50', Rule::unique('gurus', 'nip')->ignore($guru->id)],
             'nuptk'              => ['nullable', 'string', 'max:50', Rule::unique('gurus', 'nuptk')->ignore($guru->id)],
+            'mapel'              => 'nullable|string|max:150',
             'email'              => ['required', 'email', Rule::unique('users', 'email')->ignore($guru->user_id)],
             'jenis_kelamin'      => 'required|in:L,P',
             'telepon'            => 'nullable|string|max:30',

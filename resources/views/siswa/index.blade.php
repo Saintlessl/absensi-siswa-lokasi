@@ -82,11 +82,36 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="w-full sm:w-44">
+                    <label class="block text-xs font-medium text-dark-600 mb-1">Angkatan</label>
+                    <select name="angkatan_id"
+                        class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                        <option value="">Semua Angkatan</option>
+                        @foreach ($angkatans as $akt)
+                            <option value="{{ $akt->id }}" {{ ($angkatan_id ?? '') == $akt->id ? 'selected' : '' }}>
+                                {{ $akt->nama_angkatan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="w-full sm:w-36">
+                    <label class="block text-xs font-medium text-dark-600 mb-1">Status</label>
+                    <select name="status"
+                        class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                        <option value="">Semua Status</option>
+                        <option value="aktif" {{ ($status ?? '') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="lulus" {{ ($status ?? '') === 'lulus' ? 'selected' : '' }}>Lulus (Alumni)</option>
+                        <option value="dalam_proses_kelulusan" {{ ($status ?? '') === 'dalam_proses_kelulusan' ? 'selected' : '' }}>Proses Lulus</option>
+                        <option value="tidak_lulus" {{ ($status ?? '') === 'tidak_lulus' ? 'selected' : '' }}>Tidak Lulus</option>
+                        <option value="pindah" {{ ($status ?? '') === 'pindah' ? 'selected' : '' }}>Pindah</option>
+                        <option value="keluar" {{ ($status ?? '') === 'keluar' ? 'selected' : '' }}>Keluar</option>
+                    </select>
+                </div>
                 <button type="submit"
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
                     <i class='bx bx-filter-alt'></i> Filter
                 </button>
-                @if ($search || $kelas_id || ($jurusan_id ?? ''))
+                @if ($search || $kelas_id || ($jurusan_id ?? '') || ($angkatan_id ?? '') || ($status ?? ''))
                     <a href="{{ route('siswa') }}"
                         class="px-4 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
                         Reset
@@ -145,11 +170,21 @@
                             <td class="px-6 py-4 text-sm text-center">
                                 <div class="inline-flex flex-col items-center gap-1">
                                     <span class="font-bold text-dark-800">{{ $s->kelas->nama_kelas ?? '-' }}</span>
-                                    @if ($s->kelas && $s->kelas->jurusan)
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-100 text-dark-600">
-                                            {{ $s->kelas->jurusan->kode_jurusan }}
-                                        </span>
-                                    @endif
+                                    <div class="flex items-center gap-1">
+                                        @if ($s->kelas && $s->kelas->jurusan)
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-100 text-dark-600">
+                                                {{ $s->kelas->jurusan->kode_jurusan }}
+                                            </span>
+                                        @endif
+                                        @if ($s->angkatan)
+                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-[#003EA7] border border-blue-200" title="{{ $s->angkatan->nama_angkatan }}">
+                                                Akt {{ $s->angkatan->nomor_angkatan }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border {{ $s->status_badge }}">
+                                        {{ $s->status_label }}
+                                    </span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm">

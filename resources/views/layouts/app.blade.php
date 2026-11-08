@@ -105,28 +105,191 @@
             background: #64748b;
         }
 
-        /* Sidebar scrollbar */
+        /* Sidebar scrollbar on the LEFT side (custom sleek WebKit, zero native arrows) */
+        .sidebar-scroll {
+            direction: rtl;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sidebar-scroll > * {
+            direction: ltr;
+        }
+
         .sidebar-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 3px !important;
+            height: 0 !important;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
         }
 
         .sidebar-scroll::-webkit-scrollbar-track {
-            background: transparent;
+            background: transparent !important;
         }
 
         .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-radius: 9999px !important;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.45) !important;
         }
 
         /* Smooth transitions */
         .sidebar-transition {
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .content-transition {
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar-transition,
+            .content-transition {
+                transition: none !important;
+            }
+        }
+
+        /* Collapsed Sidebar Styles (Width: 88px) */
+        #sidebar.sidebar-collapsed {
+            width: 88px !important;
+        }
+
+        #sidebar.sidebar-collapsed .sidebar-logo-container {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        #sidebar.sidebar-collapsed .sidebar-logo-text,
+        #sidebar.sidebar-collapsed .sidebar-label,
+        #sidebar.sidebar-collapsed .sidebar-section-title,
+        #sidebar.sidebar-collapsed .sidebar-chevron,
+        #sidebar.sidebar-collapsed .sidebar-submenu {
+            display: none !important;
+        }
+
+        /* Collapsed: remove nav horizontal padding */
+        #sidebar.sidebar-collapsed nav {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        /* Collapsed: reduce section spacing */
+        #sidebar.sidebar-collapsed nav > div {
+            margin-bottom: 8px !important;
+        }
+
+        /* Collapsed: nav link tile (proportional 44x44 pill matching rounded-xl of expanded) */
+        #sidebar.sidebar-collapsed .sidebar-nav-link {
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            padding: 0 !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 0 !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            transition: all 0.2s ease !important;
+        }
+
+        /* Collapsed: non-active nav link (transparent background) */
+        #sidebar.sidebar-collapsed .sidebar-nav-link:not(.active) {
+            background: transparent !important;
+        }
+
+        /* Collapsed: hover on non-active — subtle feedback */
+        #sidebar.sidebar-collapsed .sidebar-nav-link:not(.active):hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Collapsed: non-active icon color */
+        #sidebar.sidebar-collapsed .sidebar-nav-link:not(.active) i {
+            color: rgba(191, 219, 254, 0.9) !important;
+        }
+
+        /* Collapsed: hover icon color */
+        #sidebar.sidebar-collapsed .sidebar-nav-link:not(.active):hover i {
+            color: #ffffff !important;
+        }
+
+        /* Collapsed: ACTIVE nav link — pure white background (#ffffff), exact match with expanded sidebar */
+        #sidebar.sidebar-collapsed .sidebar-nav-link.active,
+        #sidebar.sidebar-collapsed .sidebar-nav-link.active:hover {
+            background: #ffffff !important;
+            color: #003FA9 !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+        }
+
+        /* Collapsed: ACTIVE icon — primary blue (#003FA9), exact match with expanded sidebar */
+        #sidebar.sidebar-collapsed .sidebar-nav-link.active i,
+        #sidebar.sidebar-collapsed .sidebar-nav-link.active:hover i {
+            color: #003FA9 !important;
+        }
+
+        /* Collapsed: REMOVE left vertical indicator bar and any pseudo-elements completely */
+        #sidebar.sidebar-collapsed .sidebar-nav-link::before,
+        #sidebar.sidebar-collapsed .sidebar-nav-link::after,
+        #sidebar.sidebar-collapsed .sidebar-nav-link.active::before,
+        #sidebar.sidebar-collapsed .sidebar-nav-link.active::after {
+            display: none !important;
+            content: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        /* Collapsed: icon size consistency, centering, and remove individual icon background */
+        #sidebar.sidebar-collapsed .sidebar-nav-link i:not(.sidebar-chevron) {
+            font-size: 22px !important;
+            margin: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        #sidebar.sidebar-collapsed .sidebar-chevron,
+        #sidebar.sidebar-collapsed .sidebar-nav-link .sidebar-chevron,
+        #sidebar.sidebar-collapsed .sidebar-nav-link i.sidebar-chevron {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+
+        /* Collapsed: inner wrapper centering (e.g. for dropdown buttons like Struktur Akademik) */
+        #sidebar.sidebar-collapsed .sidebar-nav-link > div {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100% !important;
+            gap: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Collapsed: center list items */
+        #sidebar.sidebar-collapsed ul.space-y-1 > li {
+            margin-top: 3px !important;
+            display: flex;
+            justify-content: center;
         }
 
         /* Glass morphism card */
@@ -264,9 +427,9 @@
     @stack('styles')
 </head>
 
-<body class="font-inter bg-[#003FA9] text-dark-800 antialiased min-h-screen">
+<body class="font-inter bg-[#003EA7] text-dark-800 antialiased min-h-screen">
 
-    <div id="app" class="flex min-h-screen bg-[#003FA9]">
+    <div id="app" class="flex min-h-screen bg-[#003EA7]">
 
         {{-- Sidebar Overlay (Mobile) --}}
         <div id="sidebar-overlay" class="fixed inset-0 bg-dark-950/50 backdrop-blur-sm z-40 hidden lg:hidden"
@@ -277,7 +440,7 @@
         @include('layouts.sidebar')
 
         {{-- Main Content Area --}}
-        <div id="main-content" class="flex-1 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003FA9]">
+        <div id="main-content" class="flex-1 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003EA7]">
 
             {{-- Floating Rounded Container --}}
             <div class="flex-1 bg-[#E2EDFF] rounded-[26px] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl">
@@ -326,7 +489,7 @@
 
     {{-- Global Scripts --}}
     <script>
-        // Sidebar Toggle
+        // Sidebar Toggle & Collapse Controller
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -339,24 +502,81 @@
                 document.body.classList.toggle('overflow-hidden');
             } else {
                 // Desktop: collapse/expand
-                sidebar.classList.toggle('lg:w-[272px]');
-                sidebar.classList.toggle('lg:w-[72px]');
-                mainContent.classList.toggle('lg:ml-[272px]');
-                mainContent.classList.toggle('lg:ml-[72px]');
-
-                const isCollapsed = sidebar.classList.contains('lg:w-[72px]');
-                document.querySelectorAll('.sidebar-label').forEach(el => {
-                    el.classList.toggle('lg:hidden', isCollapsed);
-                    el.classList.toggle('lg:opacity-0', isCollapsed);
-                });
-                document.querySelectorAll('.sidebar-section-title').forEach(el => {
-                    el.classList.toggle('lg:hidden', isCollapsed);
-                });
-                document.querySelectorAll('.sidebar-logo-text').forEach(el => {
-                    el.classList.toggle('lg:hidden', isCollapsed);
-                });
+                const isCurrentlyCollapsed = sidebar.classList.contains('sidebar-collapsed');
+                setSidebarCollapsed(!isCurrentlyCollapsed);
             }
         }
+
+        function setSidebarCollapsed(collapsed) {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            if (!sidebar || !mainContent) return;
+
+            if (collapsed) {
+                sidebar.classList.add('sidebar-collapsed');
+                sidebar.classList.remove('lg:w-[272px]');
+                sidebar.classList.add('lg:w-[88px]');
+                mainContent.classList.remove('lg:ml-[272px]');
+                mainContent.classList.add('lg:ml-[88px]');
+                try { localStorage.setItem('myskanic_sidebar_collapsed', '1'); } catch (e) {}
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                sidebar.classList.remove('lg:w-[88px]');
+                sidebar.classList.add('lg:w-[272px]');
+                mainContent.classList.remove('lg:ml-[88px]');
+                mainContent.classList.add('lg:ml-[272px]');
+                try { localStorage.setItem('myskanic_sidebar_collapsed', '0'); } catch (e) {}
+            }
+        }
+
+        // Initialize sidebar state on page load from localStorage (desktop only)
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth >= 1024) {
+                try {
+                    const saved = localStorage.getItem('myskanic_sidebar_collapsed');
+                    if (saved === '1') {
+                        setSidebarCollapsed(true);
+                    }
+                } catch (e) {}
+            }
+
+            // Setup Floating Tooltip for Collapsed Sidebar
+            const sidebarEl = document.getElementById('sidebar');
+            const tooltipEl = document.getElementById('sidebar-floating-tooltip');
+
+            if (sidebarEl && tooltipEl) {
+                sidebarEl.addEventListener('mouseover', (e) => {
+                    if (!sidebarEl.classList.contains('sidebar-collapsed')) {
+                        tooltipEl.classList.add('hidden', 'opacity-0');
+                        return;
+                    }
+                    const target = e.target.closest('.sidebar-nav-link');
+                    if (!target) return;
+                    const text = target.getAttribute('data-tooltip') || target.getAttribute('title');
+                    if (!text) return;
+
+                    const rect = target.getBoundingClientRect();
+                    tooltipEl.textContent = text;
+                    tooltipEl.style.top = `${rect.top + (rect.height / 2)}px`;
+                    tooltipEl.style.left = `${rect.right + 12}px`;
+                    tooltipEl.style.transform = 'translateY(-50%)';
+                    tooltipEl.classList.remove('hidden', 'opacity-0');
+                    tooltipEl.classList.add('opacity-100');
+                });
+
+                sidebarEl.addEventListener('mouseout', (e) => {
+                    const target = e.target.closest('.sidebar-nav-link');
+                    if (target) {
+                        tooltipEl.classList.add('opacity-0');
+                        setTimeout(() => {
+                            if (tooltipEl.classList.contains('opacity-0')) {
+                                tooltipEl.classList.add('hidden');
+                            }
+                        }, 120);
+                    }
+                });
+            }
+        });
 
         // Close sidebar on window resize (mobile → desktop)
         window.addEventListener('resize', () => {
@@ -387,6 +607,11 @@
             }
         });
     </script>
+
+    {{-- Global Floating Tooltip for Collapsed Sidebar --}}
+    <div id="sidebar-floating-tooltip"
+         class="fixed hidden z-[100] px-3 py-1.5 bg-slate-900/95 text-white text-xs font-semibold rounded-lg shadow-xl pointer-events-none transition-opacity duration-150 backdrop-blur-xs border border-white/10 select-none">
+    </div>
 
     {{-- Modals Stack --}}
     @stack('modals')
