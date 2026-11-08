@@ -141,10 +141,10 @@
         /* Subtle background pulse for the ornamental overlay */
         @keyframes bgPulse {
             0%, 100% {
-                opacity: 0.70;
+                opacity: 0.06;
             }
             50% {
-                opacity: 0.90;
+                opacity: 0.09;
             }
         }
 
@@ -179,6 +179,7 @@
             'logo_png'       => 'images/login/myskanic-logo.png',
             'pattern_svg'    => 'images/login/school-pattern.svg',
             'pattern'        => 'images/login/school-pattern.png',
+            'emblem'         => 'images/login/school-emblem-white.png',
             'student_chars'  => 'images/login/student-characters.png',
             'teacher_chars'  => 'images/login/teacher-characters.png',
             'partner_logos'  => 'images/login/school-partner-logos.png',
@@ -196,11 +197,11 @@
             ? asset($assets['logo_svg'])
             : (file_exists(public_path($assets['logo_png'])) ? asset($assets['logo_png']) : asset('img/logo.png'));
 
-        // Resolve pattern URL (prefers SVG vector overlay, then PNG, then fallback)
-        $patternUrl = file_exists(public_path($assets['pattern_svg']))
-            ? asset($assets['pattern_svg'])
-            : (file_exists(public_path($assets['pattern']))
-                ? asset($assets['pattern'])
+        // Resolve pattern URL (prefers seamless emblem pattern tile)
+        $patternUrl = file_exists(public_path($assets['pattern']))
+            ? asset($assets['pattern'])
+            : (file_exists(public_path($assets['pattern_svg']))
+                ? asset($assets['pattern_svg'])
                 : (file_exists(public_path($assets['fallback_batik'])) ? asset($assets['fallback_batik']) : null));
     @endphp
 
@@ -218,7 +219,7 @@
 
             {{-- Background Pattern Overlay with low opacity --}}
             <div class="absolute inset-0 pointer-events-none bg-pattern-subtle z-0"
-                 style="background-image: @if($patternUrl) url('{{ $patternUrl }}') @else url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E&quot;) @endif; background-size: cover; background-position: center; background-repeat: no-repeat;">
+                 style="background-image: @if($patternUrl) url('{{ $patternUrl }}') @else url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E&quot;) @endif; background-size: 280px 240px; background-repeat: repeat;">
             </div>
 
             {{-- LAYER 3: Dynamic Character Illustrations Anchored to Bottom --}}
