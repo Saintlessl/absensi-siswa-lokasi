@@ -12,7 +12,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Struktur Akademik & Program Keahlian</h2>
+            <h2 class="text-xl font-medium text-dark-800">Struktur Akademik & Program Keahlian</h2>
             <p class="text-sm text-dark-400 mt-1">
                 Pilih Jurusan untuk menelusuri Tingkat Kelas (10, 11, 12), Rombongan Belajar, atau telusuri arsip Angkatan Alumni.
             </p>

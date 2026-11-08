@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aktivasi Akun Guru - SMK Negeri</title>
+    <title>Aktivasi Akun Guru — MySkanic</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -100,7 +100,7 @@
         @endif
 
         <div class="mt-6 text-center text-[11px] text-dark-400">
-            &copy; {{ date('Y') }} Sistem Presensi Sekolah. All rights reserved.
+            &copy; {{ date('Y') }} MySkanic. All rights reserved.
         </div>
     </div>
 </body>

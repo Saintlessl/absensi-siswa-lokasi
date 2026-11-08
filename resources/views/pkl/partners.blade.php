@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Mitra DU/DI & Industri')
+@section('page-title', 'Mitra DU/DI & Tempat PKL')
+@section('page-subtitle', 'Database perusahaan mitra, geofencing lokasi presensi, dan kapasitas penempatan.')
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Mitra DU/DI & Tempat PKL</h1>
+            <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Mitra DU/DI & Tempat PKL</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Database perusahaan mitra, geofencing lokasi presensi, dan kapasitas penempatan.</p>
         </div>
         <button type="button" onclick="document.getElementById('modalTambahDudi').classList.remove('hidden')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition shadow-sm">

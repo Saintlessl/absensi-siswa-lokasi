@@ -7,6 +7,8 @@ use App\Models\HomeroomAssignment;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
+use App\Models\StudentEnrollment;
+use App\Models\TahunAjaran;
 use App\Models\TeacherSubjectAssignment;
 use App\Models\User;
 use Carbon\Carbon;
@@ -73,68 +75,188 @@ class TeacherAssignmentService
 
     /**
      * Assign a teacher as homeroom teacher (Wali Kelas) for a class in an academic year.
-     * Preserves assignment history by deactivating previous homeroom assignments for this class.
+     * Enforces:
+     * 1. Guru must be active.
+     * 2. Max 1 active homeroom per class per academic year.
+     * 3. Max 1 active class per teacher per academic year.
+     * 4. Deactivates previous homeroom without deleting historical records.
+     * 5. Freezes immutable snapshot on active student enrollments.
      */
-    public function assignHomeroom(int $guruId, int $kelasId, string $tahunAjaran = '2026/2027', ?string $catatan = null): HomeroomAssignment
-    {
-        return DB::transaction(function () use ($guruId, $kelasId, $tahunAjaran, $catatan) {
-            $guru = Guru::findOrFail($guruId);
+    public function assignHomeroom(
+        int $guruId,
+        int $kelasId,
+        string|int $tahunAjaran = '2026/2027',
+        ?string $catatan = null,
+        ?string $alasanPergantian = null,
+        ?Carbon $effectiveDate = null
+    ): HomeroomAssignment {
+        return DB::transaction(function () use ($guruId, $kelasId, $tahunAjaran, $catatan, $alasanPergantian, $effectiveDate) {
+            $guru = Guru::with('user')->findOrFail($guruId);
             $kelas = Kelas::findOrFail($kelasId);
 
-            // 1. Deactivate previous active homeroom assignments for this class in this academic year
-            HomeroomAssignment::where('kelas_id', $kelasId)
-                ->where('tahun_ajaran', $tahunAjaran)
-                ->where('is_active', true)
-                ->update([
-                    'is_active' => false,
-                    'ends_on'   => Carbon::today(),
+            // 1. Validation: Teacher must be active
+            if (!$guru->is_active || ($guru->user && $guru->user->status === 'inactive')) {
+                throw ValidationException::withMessages([
+                    'guru' => ["Guru {$guru->nama} berstatus nonaktif dan tidak dapat menerima penugasan wali kelas."],
                 ]);
+            }
 
-            // 2. Also deactivate any other active homeroom assignment for this teacher in the same academic year
-            HomeroomAssignment::where('guru_id', $guruId)
-                ->where('tahun_ajaran', $tahunAjaran)
+            // 2. Resolve Academic Year
+            $taModel = null;
+            if (is_numeric($tahunAjaran)) {
+                $taModel = TahunAjaran::find($tahunAjaran);
+            }
+            if (!$taModel && is_string($tahunAjaran)) {
+                $taModel = TahunAjaran::where('nama', $tahunAjaran)->first();
+            }
+            if (!$taModel) {
+                $taModel = TahunAjaran::where('is_active', true)->first();
+            }
+
+            $taId = $taModel?->id;
+            $taNama = $taModel ? $taModel->nama : (string) $tahunAjaran;
+            $effDate = $effectiveDate ?: Carbon::today();
+
+            // 3. Validation: Teacher cannot be homeroom for another class in the SAME academic year
+            $otherActive = HomeroomAssignment::where('guru_id', $guruId)
+                ->where(function ($q) use ($taId, $taNama) {
+                    if ($taId) {
+                        $q->where('tahun_ajaran_id', $taId);
+                    } else {
+                        $q->where('tahun_ajaran', $taNama);
+                    }
+                })
+                ->where('kelas_id', '!=', $kelasId)
                 ->where('is_active', true)
-                ->update([
-                    'is_active' => false,
-                    'ends_on'   => Carbon::today(),
-                ]);
+                ->first();
 
-            // 3. Create new active assignment
-            $assignment = HomeroomAssignment::create([
-                'guru_id'      => $guruId,
-                'kelas_id'     => $kelasId,
-                'tahun_ajaran' => $tahunAjaran,
-                'starts_on'    => Carbon::today(),
-                'is_active'    => true,
-                'catatan'      => $catatan,
+            if ($otherActive) {
+                $otherKelas = Kelas::find($otherActive->kelas_id);
+                throw ValidationException::withMessages([
+                    'guru' => ["Guru {$guru->nama} sudah menjadi wali kelas aktif untuk rombel {$otherKelas?->nama_kelas} pada tahun ajaran {$taNama}. Satu guru maksimal membina satu rombel dalam tahun ajaran yang sama."],
+                ]);
+            }
+
+            // 4. Find existing active homeroom for this class in this academic year
+            $existingAssignment = HomeroomAssignment::where('kelas_id', $kelasId)
+                ->where(function ($q) use ($taId, $taNama) {
+                    if ($taId) {
+                        $q->where('tahun_ajaran_id', $taId);
+                    } else {
+                        $q->where('tahun_ajaran', $taNama);
+                    }
+                })
+                ->where('is_active', true)
+                ->first();
+
+            // If same teacher already assigned, just update note and return
+            if ($existingAssignment && $existingAssignment->guru_id === $guruId) {
+                if ($catatan) {
+                    $existingAssignment->update(['catatan' => $catatan]);
+                }
+                $kelas->update(['wali_kelas' => $guru->nama]);
+                return $existingAssignment;
+            }
+
+            // 5. Deactivate previous teacher assignment (DO NOT DELETE — RETAIN FULL HISTORY)
+            if ($existingAssignment) {
+                $existingAssignment->update([
+                    'is_active'         => false,
+                    'ends_on'           => $effDate,
+                    'alasan_pergantian' => $alasanPergantian ?: 'Pergantian wali kelas oleh administrator',
+                ]);
+            }
+
+            // 6. Create new active assignment
+            $newAssignment = HomeroomAssignment::create([
+                'guru_id'         => $guruId,
+                'kelas_id'        => $kelasId,
+                'tahun_ajaran'    => $taNama,
+                'tahun_ajaran_id' => $taId,
+                'starts_on'       => $effDate,
+                'ends_on'         => null,
+                'is_active'       => true,
+                'catatan'         => $catatan,
             ]);
 
-            // 4. Synchronize legacy wali_kelas string on kelas table
+            // Link replaced assignment to successor
+            if ($existingAssignment) {
+                $existingAssignment->update(['replaced_by_assignment_id' => $newAssignment->id]);
+            }
+
+            // 7. Synchronize legacy wali_kelas string on kelas table
             $kelas->update(['wali_kelas' => $guru->nama]);
 
-            return $assignment;
+            // 8. Freeze / update snapshot on active student enrollments for this class & academic year
+            StudentEnrollment::where('kelas_id', $kelasId)
+                ->where('is_active', true)
+                ->where(function ($q) use ($taId, $taNama) {
+                    if ($taId) {
+                        $q->where('tahun_ajaran_id', $taId);
+                    } else {
+                        $q->where('tahun_ajaran', $taNama);
+                    }
+                })
+                ->update([
+                    'homeroom_assignment_id' => $newAssignment->id,
+                    'wali_kelas_guru_id'     => $guruId,
+                    'wali_kelas_nama'        => $guru->nama,
+                ]);
+
+            return $newAssignment;
         });
     }
 
     /**
-     * Remove or deactivate a homeroom assignment.
+     * Explicit replacement of homeroom teacher with confirmation data.
      */
-    public function removeHomeroomAssignment(int $assignmentId): void
+    public function replaceHomeroom(
+        int $kelasId,
+        int $newGuruId,
+        string|int $tahunAjaran,
+        string $alasanPergantian,
+        ?Carbon $effectiveDate = null
+    ): HomeroomAssignment {
+        return $this->assignHomeroom(
+            $newGuruId,
+            $kelasId,
+            $tahunAjaran,
+            "Pergantian wali kelas: {$alasanPergantian}",
+            $alasanPergantian,
+            $effectiveDate
+        );
+    }
+
+    /**
+     * Terminate or revoke homeroom assignment without successor (e.g. teacher resigned / reassigned).
+     * Preserves entire historical record.
+     */
+    public function terminateHomeroomAssignment(int $assignmentId, string $alasan = 'Penonaktifan penugasan wali kelas', ?Carbon $effectiveDate = null): void
     {
-        DB::transaction(function () use ($assignmentId) {
+        DB::transaction(function () use ($assignmentId, $alasan, $effectiveDate) {
             $assignment = HomeroomAssignment::findOrFail($assignmentId);
             $kelas = $assignment->kelas;
+            $effDate = $effectiveDate ?: Carbon::today();
 
             $assignment->update([
-                'is_active' => false,
-                'ends_on'   => Carbon::today(),
+                'is_active'         => false,
+                'ends_on'           => $effDate,
+                'alasan_pergantian' => $alasan,
             ]);
 
-            // If this was the active homeroom teacher on kelas, clear or set to "-"
+            // If this was active homeroom on kelas, clear to "-"
             if ($kelas && $assignment->guru && $kelas->wali_kelas === $assignment->guru->nama) {
                 $kelas->update(['wali_kelas' => '-']);
             }
         });
+    }
+
+    /**
+     * Legacy wrapper for backward compatibility.
+     */
+    public function removeHomeroomAssignment(int $assignmentId): void
+    {
+        $this->terminateHomeroomAssignment($assignmentId, 'Penugasan wali kelas diakhiri melalui panel guru');
     }
 
     /**

@@ -14,7 +14,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Manajemen Beban Kerja Mengajar</h2>
+            <h2 class="text-xl font-medium text-dark-800">Manajemen Beban Kerja Mengajar</h2>
             <p class="text-xs text-dark-400 mt-0.5">Pemantauan kepatuhan standar beban mengajar nasional (Target: 24 - 36 Jam Pelajaran / minggu).</p>
         </div>
         <div class="flex items-center gap-2">

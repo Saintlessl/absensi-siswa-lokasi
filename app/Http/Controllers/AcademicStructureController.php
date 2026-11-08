@@ -7,6 +7,7 @@ use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\StudentEnrollment;
+use App\Models\TahunAjaran;
 use App\Services\CohortManagementService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -51,10 +52,7 @@ class AcademicStructureController extends Controller
         }
 
         // Section A: Summary Angkatan Aktif (Tingkat 10, 11, 12 at school level)
-        $currentYear = (int) date('Y');
-        // Check academic year in active classes
-        $latestClass = Kelas::where('is_active', true)->whereNotNull('tahun_ajaran')->first();
-        $activeTahunAjaran = $latestClass?->tahun_ajaran ?? sprintf('%d/%d', $currentYear, $currentYear + 1);
+        $activeTahunAjaran = TahunAjaran::getActiveName();
         $baseYear = (int) explode('/', $activeTahunAjaran)[0];
 
         $activeCohortsSummary = [];
@@ -102,10 +100,8 @@ class AcademicStructureController extends Controller
     {
         $this->authorizeMajor($jurusan);
 
-        // Determine base academic year from active classes in this major
-        $currentYear = (int) date('Y');
-        $latestClass = $jurusan->kelas()->where('is_active', true)->whereNotNull('tahun_ajaran')->first();
-        $activeTahunAjaran = $latestClass?->tahun_ajaran ?? sprintf('%d/%d', $currentYear, $currentYear + 1);
+        // Determine base academic year
+        $activeTahunAjaran = TahunAjaran::getActiveName();
         $baseYear = (int) explode('/', $activeTahunAjaran)[0];
 
         // Section A: ANGKATAN AKTIF (Major-Specific Cohort)

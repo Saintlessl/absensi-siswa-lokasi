@@ -22,7 +22,7 @@
                 </span>
                 <span class="text-xs text-dark-400">&bull; Tingkat {{ $tingkat }}</span>
             </div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Rombongan Belajar (Rombel)</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Rombongan Belajar (Rombel)</h2>
             <p class="text-sm text-dark-400">Pilih salah satu rombel untuk membuka direktori siswa, histori penempatan, dan profil.</p>
         </div>
         <div class="flex items-center gap-2">

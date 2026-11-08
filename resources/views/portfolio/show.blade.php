@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', $portfolio->judul . ' - Etalase Karya')
+@section('page-title', $portfolio->judul)
+@section('page-subtitle', 'Detail Karya Portofolio Siswa')
 
 @section('content')
 <div class="space-y-6 max-w-5xl mx-auto">

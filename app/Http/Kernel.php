@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'biometric.enrolled' => \App\Http\Middleware\EnsureBiometricEnrolled::class,
+        'password.changed' => \App\Http\Middleware\EnsurePasswordChanged::class,
     ];
 }

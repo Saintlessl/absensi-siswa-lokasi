@@ -56,7 +56,9 @@ class SiswaExport implements FromCollection, WithHeadings, WithMapping, WithStyl
         return [
             'No',
             'NIS',
+            'NISN',
             'Nama Siswa',
+            'TTL',
             'Jenis Kelamin',
             'Kelas',
             'Email',
@@ -70,7 +72,9 @@ class SiswaExport implements FromCollection, WithHeadings, WithMapping, WithStyl
         return [
             $this->rowNumber,
             $siswa->nis,
+            $siswa->nisn ?? '-',
             $siswa->nama,
+            $siswa->ttl ?? '-',
             $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
             $siswa->kelas->nama_kelas ?? '-',
             $siswa->user->email ?? '-',

@@ -1,11 +1,13 @@
 @extends('layouts.app')
 
 @section('title', 'Rekor Kedisiplinan & Prestasi')
+@section('page-title', 'Kedisiplinan & Rekor Prestasi')
+@section('page-subtitle', 'Pemantauan skor kedisiplinan dan apresiasi penghargaan prestasi siswa di sekolah.')
 
 @section('content')
 <div class="space-y-6">
     <div>
-        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kedisiplinan & Rekor Prestasi</h1>
+        <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Kedisiplinan & Rekor Prestasi</h1>
         <p class="text-xs text-slate-500 font-medium mt-0.5">Pemantauan skor kedisiplinan dan apresiasi penghargaan prestasi siswa di sekolah.</p>
     </div>
 

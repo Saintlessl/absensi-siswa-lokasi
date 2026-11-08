@@ -1,11 +1,13 @@
 @extends('layouts.app')
 
 @section('title', 'Monitoring PKL & Magang Industri')
+@section('page-title', 'Monitoring PKL & Magang Industri')
+@section('page-subtitle', 'Pemantauan jurnal harian, logbook, dan presensi PKL siswa di industri.')
 
 @section('content')
 <div class="space-y-6">
     <div>
-        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Monitoring PKL & Magang Industri</h1>
+        <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Monitoring PKL & Magang Industri</h1>
         <p class="text-xs text-slate-500 font-medium mt-0.5">Pemantauan menyeluruh penempatan industri, kepatuhan presensi geofence, dan logbook siswa.</p>
     </div>
 

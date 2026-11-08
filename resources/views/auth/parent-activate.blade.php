@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Aktivasi Akun Orang Tua')
+@section('page-title', 'Aktivasi Akun Orang Tua')
+@section('page-subtitle', 'Tetapkan password pribadi akun orang tua siswa.')
 @section('content')
 <div class="max-w-md mx-auto mt-16 bg-white border border-dark-200 rounded-xl p-6">
     <h1 class="text-xl font-semibold text-dark-900">Aktivasi akun orang tua</h1>

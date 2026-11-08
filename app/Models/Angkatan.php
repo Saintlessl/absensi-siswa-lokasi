@@ -47,7 +47,9 @@ class Angkatan extends Model
             }
 
             if (empty($model->kode_angkatan) && !empty($model->nomor_angkatan)) {
-                $model->kode_angkatan = "AKT-{$model->nomor_angkatan}";
+                $jurusan = $model->jurusan ?? ($model->jurusan_id ? Jurusan::find($model->jurusan_id) : null);
+                $prefix = $jurusan?->kode_jurusan ? "{$jurusan->kode_jurusan}-" : '';
+                $model->kode_angkatan = "AKT-{$prefix}{$model->nomor_angkatan}";
             }
 
             if (empty($model->tahun_ajaran_masuk) && !empty($model->tahun_masuk)) {

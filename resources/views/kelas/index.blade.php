@@ -14,7 +14,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Rombongan Belajar (Rombel)</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Rombongan Belajar (Rombel)</h2>
             <p class="text-sm text-dark-400 mt-1">Struktur kelas hierarkis terstandarisasi berdasarkan Jurusan dan Tingkat.</p>
         </div>
         <button onclick="openModal('modal-inputkelas')"

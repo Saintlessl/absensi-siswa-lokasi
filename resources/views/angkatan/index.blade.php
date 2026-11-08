@@ -14,7 +14,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Angkatan & Siklus Siswa</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Angkatan & Siklus Siswa</h2>
             <p class="text-sm text-dark-400 mt-1">Master pengelompokan siswa sepanjang masa pendidikan, kenaikan kelas, hingga menjadi alumni.</p>
         </div>
         <button onclick="openModal('modal-inputangkatan')"

@@ -25,6 +25,10 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\AcademicStructureController;
 use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\AcademicCalendarController;
+use App\Http\Controllers\TahunAjaranController;
+use App\Http\Controllers\StudentImportController;
+use App\Http\Controllers\HomeroomManagementController;
+use App\Http\Controllers\AcademicPromotionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\WhatsAppLogController;
 use App\Http\Controllers\TeachingJournalController;
@@ -74,7 +78,7 @@ Route::post('/aktivasi-orang-tua/{token}', [ParentActivationController::class, '
 Route::get('/aktivasi-guru/{token}', [TeacherActivationController::class, 'show'])->name('teacher.activate.show');
 Route::post('/aktivasi-guru/{token}', [TeacherActivationController::class, 'store'])->name('teacher.activate.store');
 
-Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
+Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group(function () {
     // Shared Dashboard & Auth
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
@@ -110,14 +114,27 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
     });
 
     Route::middleware(['role:superadmin,admin,kaprog'])->group(function () {
-        // Data Siswa (Scoped for KAPROG)
+        // Data Siswa & Import
         Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa');
+        Route::get('/siswa/import', [StudentImportController::class, 'index'])->name('siswa.import');
+        Route::get('/siswa/import/template', [StudentImportController::class, 'downloadTemplate'])->name('siswa.import.template');
+        Route::post('/siswa/import/preview', [StudentImportController::class, 'preview'])->name('siswa.import.preview');
+        Route::post('/siswa/import/confirm', [StudentImportController::class, 'confirm'])->name('siswa.import.confirm');
+        Route::get('/siswa/import/batch/{id}/report', [StudentImportController::class, 'downloadReport'])->name('siswa.import.report');
+        Route::get('/siswa/{id}', [SiswaController::class, 'show'])->name('siswa.show')->whereNumber('id');
         Route::post('/siswa', [SiswaController::class, 'store'])->name('siswa.store');
         Route::post('/siswa/edit', [SiswaController::class, 'edit'])->name('siswa.edit');
-        Route::post('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
+        Route::match(['post', 'put'], '/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
         Route::post('/siswa/delete/{id}', [SiswaController::class, 'destroy'])->name('siswa.delete');
         Route::get('/siswa/export-pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
         Route::get('/siswa/export-excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
+
+        // Manajemen Wali Kelas (Homeroom Management)
+        Route::get('/akademik/wali-kelas', [HomeroomManagementController::class, 'index'])->name('academic.wali-kelas.index');
+        Route::post('/akademik/wali-kelas/assign', [HomeroomManagementController::class, 'assign'])->name('academic.wali-kelas.assign');
+        Route::post('/akademik/wali-kelas/replace', [HomeroomManagementController::class, 'replace'])->name('academic.wali-kelas.replace');
+        Route::post('/akademik/wali-kelas/terminate/{assignmentId}', [HomeroomManagementController::class, 'terminate'])->name('academic.wali-kelas.terminate');
+        Route::get('/akademik/wali-kelas/history', [HomeroomManagementController::class, 'history'])->name('academic.wali-kelas.history');
 
         // Struktur Akademik & Ruangan
         Route::get('/qr-codes', [AbsensiController::class, 'qrCodes'])->name('absensi.qrcodes');
@@ -140,6 +157,25 @@ Route::middleware(['auth:web', 'biometric.enrolled'])->group(function () {
         // Lokasi Sekolah & Radius Geofence GPS
         Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('lokasi_sekolah');
         Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('lokasi_sekolah.update');
+
+        // Master Tahun Ajaran (Global Academic Cycles)
+        Route::get('/tahun-ajaran', [TahunAjaranController::class, 'index'])->name('academic.tahun-ajaran.index');
+        Route::post('/tahun-ajaran', [TahunAjaranController::class, 'store'])->name('academic.tahun-ajaran.store');
+        Route::get('/tahun-ajaran/{id}/edit', [TahunAjaranController::class, 'edit'])->name('academic.tahun-ajaran.edit');
+        Route::post('/tahun-ajaran/{id}', [TahunAjaranController::class, 'update'])->name('academic.tahun-ajaran.update');
+        Route::post('/tahun-ajaran/{id}/activate', [TahunAjaranController::class, 'activate'])->name('academic.tahun-ajaran.activate');
+        Route::post('/tahun-ajaran/{id}/switch-semester', [TahunAjaranController::class, 'switchSemester'])->name('academic.tahun-ajaran.switch-semester');
+        Route::post('/tahun-ajaran/{id}/delete', [TahunAjaranController::class, 'destroy'])->name('academic.tahun-ajaran.destroy');
+
+        // Bulk Class Promotion & Graduation Wizard (Phase 5)
+        Route::get('/akademik/kenaikan-kelas', [AcademicPromotionController::class, 'index'])->name('academic.promotion.index');
+        Route::get('/akademik/kenaikan-kelas/origin-classes', [AcademicPromotionController::class, 'getOriginClasses'])->name('academic.promotion.origin_classes');
+        Route::post('/akademik/kenaikan-kelas/load-students', [AcademicPromotionController::class, 'loadStudents'])->name('academic.promotion.load_students');
+        Route::get('/akademik/kenaikan-kelas/destination-classes', [AcademicPromotionController::class, 'getDestinationClasses'])->name('academic.promotion.destination_classes');
+        Route::post('/akademik/kenaikan-kelas/replicate-classes', [AcademicPromotionController::class, 'replicateClasses'])->name('academic.promotion.replicate_classes');
+        Route::post('/akademik/kenaikan-kelas/execute', [AcademicPromotionController::class, 'execute'])->name('academic.promotion.execute');
+        Route::get('/akademik/kenaikan-kelas/riwayat', [AcademicPromotionController::class, 'history'])->name('academic.promotion.history');
+        Route::get('/akademik/kenaikan-kelas/riwayat/{id}', [AcademicPromotionController::class, 'show'])->name('academic.promotion.show');
 
         // Pengaturan Sekolah (jam masuk / jam pulang) & Kalender Akademik
         Route::get('/pengaturan-sekolah', [SchoolSettingController::class, 'index'])->name('settings.index');

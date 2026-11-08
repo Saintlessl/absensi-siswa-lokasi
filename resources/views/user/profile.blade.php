@@ -10,6 +10,20 @@
 @endsection
 
 @section('content')
+    @if ($user->must_change_password)
+        <div class="mb-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4 sm:p-5 flex items-start gap-4 text-amber-900">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
+                <i class='bx bx-shield-quarter text-2xl'></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-bold text-amber-900 text-base">Wajib Ganti Password</h4>
+                <p class="text-sm text-amber-800 mt-1 leading-relaxed">
+                    Demi keamanan akun dan integritas data sekolah, Anda diwajibkan mengubah kata sandi default sebelum dapat mengakses modul lain di aplikasi MySkanic. Silakan masukkan kata sandi baru pada formulir <strong>Ubah Password</strong> di bawah.
+                </p>
+            </div>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Sidebar Profil --}}

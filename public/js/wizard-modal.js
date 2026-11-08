@@ -39,9 +39,17 @@ function studentWizardModal() {
             nis: '',
             nama: '',
             jenis_kelamin: '',
+            tempat_lahir: '',
+            tanggal_lahir: '',
+            tahun_ajaran_id: '',
+            tahun_ajaran_name: '',
+            jalur_masuk: 'baru',
+            asal_sekolah: '',
             jurusan_id: '',
             jurusan_name: '',
-            tingkat: '',
+            angkatan_id: '',
+            angkatan_name: '',
+            tingkat: '10',
             kelas_id: '',
             kelas_name: '',
             email: '',
@@ -53,9 +61,55 @@ function studentWizardModal() {
             verified: false
         },
 
+        _syncLock: false,
+
         init() {
             window.addEventListener('wizard-photo-updated', (e) => {
                 this.photoPreviewUrl = e.detail ? e.detail.url : null;
+            });
+
+            // Watchers for instantaneous auto-detection and cascade synchronization
+            this.$watch('student.tahun_ajaran_id', (val) => {
+                if (!this._syncLock && val) {
+                    this.onTahunAjaranChange();
+                }
+            });
+
+            this.$watch('student.tingkat', (val) => {
+                if (!this._syncLock && val) {
+                    this.onTingkatChange();
+                }
+            });
+
+            this.$watch('student.jurusan_id', (val) => {
+                if (!this._syncLock) {
+                    this.onJurusanChange();
+                }
+            });
+
+            this.$watch('student.angkatan_id', (val) => {
+                if (!this._syncLock && val) {
+                    this.onAngkatanChange();
+                }
+            });
+
+            // Initialize default active Tahun Ajaran and dependent states
+            this.$nextTick(() => {
+                const taSelect = document.getElementById('modal_tahun_ajaran');
+                if (taSelect) {
+                    const activeOpt = Array.from(taSelect.options).find(o => 
+                        o.getAttribute('data-active') === '1' || o.text.includes('(Aktif)')
+                    );
+                    if (activeOpt && !this.student.tahun_ajaran_id) {
+                        this.student.tahun_ajaran_id = activeOpt.value;
+                        this.student.tahun_ajaran_name = activeOpt.text.trim();
+                        taSelect.value = activeOpt.value;
+                    } else if (taSelect.value) {
+                        this.student.tahun_ajaran_id = taSelect.value;
+                        this.student.tahun_ajaran_name = taSelect.options[taSelect.selectedIndex].text.trim();
+                    }
+                }
+                this.onTahunAjaranChange();
             });
         },
 
@@ -77,22 +131,238 @@ function studentWizardModal() {
             }
         },
 
-        updateDependentRombel() {
+        getActiveSchoolYear() {
+            const taSelect = document.getElementById('modal_tahun_ajaran');
+            if (!taSelect) return 2026;
+            const activeOpt = Array.from(taSelect.options).find(o => 
+                o.getAttribute('data-active') === '1' || o.text.includes('(Aktif)')
+            );
+            if (activeOpt) {
+                const yearAttr = activeOpt.getAttribute('data-tahun-mulai');
+                if (yearAttr) return parseInt(yearAttr, 10);
+                const m = activeOpt.text.match(/^(\d{4})/);
+                if (m) return parseInt(m[1], 10);
+            }
+            return 2026;
+        },
+
+        onTahunAjaranChange() {
+            if (this._syncLock) return;
+            this._syncLock = true;
+            try {
+                const taSelect = document.getElementById('modal_tahun_ajaran');
+                if (taSelect && taSelect.selectedIndex >= 0) {
+                    this.student.tahun_ajaran_id = taSelect.value;
+                    this.student.tahun_ajaran_name = taSelect.options[taSelect.selectedIndex].text.trim();
+                    const opt = taSelect.options[taSelect.selectedIndex];
+                    let entryYear = null;
+                    const yearAttr = opt.getAttribute('data-tahun-mulai');
+                    if (yearAttr) {
+                        entryYear = parseInt(yearAttr, 10);
+                    } else {
+                        const m = opt.text.match(/^(\d{4})/);
+                        if (m) entryYear = parseInt(m[1], 10);
+                    }
+
+                    if (entryYear) {
+                        const activeYear = this.getActiveSchoolYear();
+                        const diff = activeYear - entryYear;
+                        let deducedTingkat = '10';
+                        if (diff === 1) deducedTingkat = '11';
+                        else if (diff >= 2) deducedTingkat = '12';
+
+                        this.student.tingkat = deducedTingkat;
+                        const tingkatSelect = document.getElementById('modal_tingkat');
+                        if (tingkatSelect) tingkatSelect.value = deducedTingkat;
+                    }
+                }
+                this.updateDependentAngkatan();
+                this.updateDependentRombel();
+            } finally {
+                this._syncLock = false;
+            }
+        },
+
+        onTingkatChange() {
+            if (this._syncLock) return;
+            this._syncLock = true;
+            try {
+                const tingkatSelect = document.getElementById('modal_tingkat');
+                const tVal = parseInt(this.student.tingkat || (tingkatSelect ? tingkatSelect.value : '10'), 10);
+                this.student.tingkat = String(tVal);
+                if (tingkatSelect) tingkatSelect.value = String(tVal);
+
+                const activeYear = this.getActiveSchoolYear();
+                const expectedEntryYear = activeYear - (tVal - 10);
+
+                // Auto-select corresponding Tahun Ajaran Masuk
+                const taSelect = document.getElementById('modal_tahun_ajaran');
+                if (taSelect) {
+                    const matchedTa = Array.from(taSelect.options).find(o => {
+                        const y = o.getAttribute('data-tahun-mulai');
+                        if (y && parseInt(y, 10) === expectedEntryYear) return true;
+                        return o.text.startsWith(String(expectedEntryYear));
+                    });
+                    if (matchedTa) {
+                        this.student.tahun_ajaran_id = matchedTa.value;
+                        this.student.tahun_ajaran_name = matchedTa.text.trim();
+                        taSelect.value = matchedTa.value;
+                    }
+                }
+
+                this.updateDependentAngkatan();
+                this.updateDependentRombel();
+            } finally {
+                this._syncLock = false;
+            }
+        },
+
+        onAngkatanChange() {
+            if (this._syncLock) return;
+            this._syncLock = true;
+            try {
+                const angkatanSelect = document.getElementById('modal_angkatan');
+                if (!angkatanSelect || angkatanSelect.selectedIndex <= 0) {
+                    this.student.angkatan_name = '';
+                    return;
+                }
+                const selectedOpt = angkatanSelect.options[angkatanSelect.selectedIndex];
+                this.student.angkatan_id = selectedOpt.value;
+                this.student.angkatan_name = selectedOpt.text.trim();
+                const entryYear = parseInt(selectedOpt.getAttribute('data-tahun-masuk'), 10);
+
+                if (entryYear) {
+                    const activeYear = this.getActiveSchoolYear();
+                    const diff = activeYear - entryYear;
+                    let deducedTingkat = '10';
+                    if (diff === 1) deducedTingkat = '11';
+                    else if (diff >= 2) deducedTingkat = '12';
+
+                    this.student.tingkat = deducedTingkat;
+                    const tingkatSelect = document.getElementById('modal_tingkat');
+                    if (tingkatSelect) tingkatSelect.value = deducedTingkat;
+
+                    // Sync Tahun Ajaran
+                    const taSelect = document.getElementById('modal_tahun_ajaran');
+                    if (taSelect) {
+                        const matchedTa = Array.from(taSelect.options).find(o => {
+                            const y = o.getAttribute('data-tahun-mulai');
+                            if (y && parseInt(y, 10) === entryYear) return true;
+                            return o.text.startsWith(String(entryYear));
+                        });
+                        if (matchedTa) {
+                            this.student.tahun_ajaran_id = matchedTa.value;
+                            this.student.tahun_ajaran_name = matchedTa.text.trim();
+                            taSelect.value = matchedTa.value;
+                        }
+                    }
+                }
+                this.updateDependentRombel();
+            } finally {
+                this._syncLock = false;
+            }
+        },
+
+        onJurusanChange() {
             const jurSelect = document.getElementById('modal_jurusan');
             if (jurSelect && jurSelect.selectedIndex > 0) {
+                this.student.jurusan_id = jurSelect.value;
+                const parts = jurSelect.options[jurSelect.selectedIndex].text.split(' - ');
+                this.student.jurusan_name = parts[0].trim();
+            } else {
+                this.student.jurusan_id = '';
+                this.student.jurusan_name = '';
+            }
+            this.updateDependentAngkatan();
+            this.updateDependentRombel();
+        },
+
+        updateTahunAjaranName() {
+            this.onTahunAjaranChange();
+        },
+
+        updateAngkatanName() {
+            this.onAngkatanChange();
+        },
+
+        updateJalurMasuk() {
+            if (this.student.jalur_masuk === 'baru') {
+                this.student.asal_sekolah = '';
+            }
+            this.updateDependentAngkatan();
+            this.updateDependentRombel();
+        },
+
+        updateDependentAngkatan() {
+            const jurSelect = document.getElementById('modal_jurusan');
+            if (jurSelect && jurSelect.selectedIndex > 0) {
+                this.student.jurusan_id = jurSelect.value;
                 const parts = jurSelect.options[jurSelect.selectedIndex].text.split(' - ');
                 this.student.jurusan_name = parts[0].trim();
             } else {
                 this.student.jurusan_name = '';
             }
 
+            const angkatanSelect = document.getElementById('modal_angkatan');
+            if (!angkatanSelect) return;
+
+            const jId = String(this.student.jurusan_id || (jurSelect ? jurSelect.value : ''));
+            const tVal = parseInt(this.student.tingkat || '10', 10);
+
+            const activeYear = this.getActiveSchoolYear();
+            const expectedEntryYear = activeYear - (tVal - 10);
+
+            const options = angkatanSelect.querySelectorAll('option');
+            let matchedOption = null;
+
+            options.forEach(opt => {
+                if (!opt.value) {
+                    opt.hidden = false;
+                    return;
+                }
+                const optJ = opt.getAttribute('data-jurusan');
+                const optYear = parseInt(opt.getAttribute('data-tahun-masuk'), 10);
+                const matchJurusan = (!jId || optJ === jId);
+                opt.hidden = !matchJurusan;
+
+                if (matchJurusan && optYear === expectedEntryYear && !matchedOption) {
+                    matchedOption = opt;
+                }
+            });
+
+            // Auto-select matched cohort for this major & grade level
+            if (matchedOption) {
+                this.student.angkatan_id = matchedOption.value;
+                this.student.angkatan_name = matchedOption.text.trim();
+                angkatanSelect.value = matchedOption.value;
+            } else if (!jId) {
+                this.student.angkatan_id = '';
+                this.student.angkatan_name = '';
+                angkatanSelect.value = '';
+            } else {
+                const opt = angkatanSelect.options[angkatanSelect.selectedIndex];
+                if (opt && opt.value) {
+                    this.student.angkatan_name = opt.text.trim();
+                } else {
+                    this.student.angkatan_id = '';
+                    this.student.angkatan_name = '';
+                    angkatanSelect.value = '';
+                }
+            }
+        },
+
+        updateAngkatanName() {
+            this.onAngkatanChange();
+        },
+
+        updateDependentRombel() {
             const rombelSelect = document.getElementById('kelas_id');
             if (!rombelSelect) return;
 
             const jId = String(this.student.jurusan_id || '');
             const tVal = String(this.student.tingkat || '');
             const options = rombelSelect.querySelectorAll('option');
-            let hasValid = false;
+            let matchingOptions = [];
 
             options.forEach(opt => {
                 if (!opt.value) {
@@ -103,25 +373,32 @@ function studentWizardModal() {
                 const optT = opt.getAttribute('data-tingkat');
                 const match = (!jId || optJ === jId) && (!tVal || optT === tVal);
                 opt.hidden = !match;
-                if (match && opt.value === String(this.student.kelas_id)) {
-                    hasValid = true;
+                if (match) {
+                    matchingOptions.push(opt);
                 }
             });
 
-            if (!hasValid) {
-                this.student.kelas_id = '';
-                this.student.kelas_name = '';
-                rombelSelect.value = '';
+            const currentValid = matchingOptions.some(o => o.value === String(this.student.kelas_id));
+            if (!currentValid) {
+                if (matchingOptions.length === 1) {
+                    this.student.kelas_id = matchingOptions[0].value;
+                    this.student.kelas_name = matchingOptions[0].text.trim();
+                    rombelSelect.value = matchingOptions[0].value;
+                } else {
+                    this.student.kelas_id = '';
+                    this.student.kelas_name = '';
+                    rombelSelect.value = '';
+                }
             } else {
                 const opt = rombelSelect.options[rombelSelect.selectedIndex];
-                if (opt) this.student.kelas_name = opt.text;
+                if (opt) this.student.kelas_name = opt.text.trim();
             }
         },
 
         updateKelasName() {
             const rombelSelect = document.getElementById('kelas_id');
             if (rombelSelect && rombelSelect.selectedIndex > 0) {
-                this.student.kelas_name = rombelSelect.options[rombelSelect.selectedIndex].text;
+                this.student.kelas_name = rombelSelect.options[rombelSelect.selectedIndex].text.trim();
             } else {
                 this.student.kelas_name = '';
             }
@@ -147,8 +424,13 @@ function studentWizardModal() {
 
                 if (!isValid) return;
 
-                // Step 1 email validation
+                // Step 1 email & name sync validation
                 if (this.step === 1) {
+                    this.updateTahunAjaranName();
+                    this.updateDependentAngkatan();
+                    this.updateAngkatanName();
+                    this.updateDependentRombel();
+                    this.updateKelasName();
                     this.ensureEmailDomain();
                     if (!this.student.email.endsWith('@myskanic.com')) {
                         alert('Email akun siswa wajib berakhiran @myskanic.com');

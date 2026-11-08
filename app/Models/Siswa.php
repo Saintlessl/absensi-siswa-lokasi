@@ -25,11 +25,17 @@ class Siswa extends Model
         'nisn',
         'nama',
         'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
         'kelas_id',
         'angkatan_id',
+        'tahun_ajaran_masuk_id',
+        'tahun_ajaran_masuk',
         'tahun_masuk',
         'biometric_status',
         'status',
+        'jalur_masuk',
+        'asal_sekolah',
         'tanggal_kelulusan',
         'tahun_lulus',
         'tahun_ajaran_lulus',
@@ -40,10 +46,27 @@ class Siswa extends Model
     ];
 
     protected $casts = [
+        'tanggal_lahir'     => 'date',
         'tahun_masuk'       => 'integer',
         'tahun_lulus'       => 'integer',
         'tanggal_kelulusan' => 'date',
     ];
+
+    /**
+     * Get formatted Tempat, Tanggal Lahir (TTL).
+     */
+    public function getTtlAttribute(): ?string
+    {
+        if ($this->tempat_lahir && $this->tanggal_lahir) {
+            return "{$this->tempat_lahir}, " . $this->tanggal_lahir->translatedFormat('d F Y');
+        } elseif ($this->tempat_lahir) {
+            return $this->tempat_lahir;
+        } elseif ($this->tanggal_lahir) {
+            return $this->tanggal_lahir->translatedFormat('d F Y');
+        }
+
+        return null;
+    }
 
     /**
      * Public URL for the student's photo, mirroring Guru::getPhotoUrlAttribute.
@@ -97,6 +120,28 @@ class Siswa extends Model
     public function angkatan(): BelongsTo
     {
         return $this->belongsTo(Angkatan::class, 'angkatan_id');
+    }
+
+    public function tahunAjaranMasuk(): BelongsTo
+    {
+        return $this->belongsTo(TahunAjaran::class, 'tahun_ajaran_masuk_id');
+    }
+
+    public function getTahunAjaranMasukNamaAttribute(): string
+    {
+        if ($this->tahun_ajaran_masuk) {
+            return $this->tahun_ajaran_masuk;
+        }
+
+        if ($this->relationLoaded('tahunAjaranMasuk') && $this->tahunAjaranMasuk) {
+            return $this->tahunAjaranMasuk->nama;
+        }
+
+        if ($this->tahun_masuk) {
+            return "{$this->tahun_masuk}/" . ($this->tahun_masuk + 1);
+        }
+
+        return '-';
     }
 
     public function statusHistories(): HasMany
@@ -170,6 +215,11 @@ class Siswa extends Model
     {
         return $this->hasOne(StudentEnrollment::class, 'siswa_id')
             ->latestOfMany('id');
+    }
+
+    public function promotionItems(): HasMany
+    {
+        return $this->hasMany(AcademicPromotionItem::class, 'siswa_id');
     }
 
     /**

@@ -12,14 +12,27 @@ class Kelas extends Model
 {
     protected $table = 'kelas';
 
+    protected $attributes = [
+        'jumlah_siswa' => 0,
+    ];
+
     protected $fillable = [
         'jurusan_id',
         'qr_token',
         'nama_kelas',
         'jumlah_siswa',
-        'wali_kelas'
-        ,'tingkat','nomor_rombel','tahun_ajaran','is_active'
+        'wali_kelas',
+        'tingkat',
+        'nomor_rombel',
+        'tahun_ajaran',
+        'tahun_ajaran_id',
+        'is_active',
     ];
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class, 'tahun_ajaran_id');
+    }
 
     public function jurusan()
     {

@@ -61,6 +61,23 @@
             </div>
 
             <div>
+                <label for="tempat_lahir_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
+                    Tempat Lahir
+                </label>
+                <input type="text" name="tempat_lahir" id="tempat_lahir_edit" value="{{ $siswa->tempat_lahir }}" maxlength="100"
+                    class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                    placeholder="Contoh: Bogor" autocomplete="off">
+            </div>
+
+            <div>
+                <label for="tanggal_lahir_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
+                    Tanggal Lahir
+                </label>
+                <input type="date" name="tanggal_lahir" id="tanggal_lahir_edit" value="{{ $siswa->tanggal_lahir?->format('Y-m-d') }}"
+                    class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition">
+            </div>
+
+            <div>
                 <label for="jenis_kelamin_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
                     Jenis Kelamin <span class="text-rose-500">*</span>
                 </label>
@@ -77,16 +94,61 @@
             </div>
 
             <div>
+                <label for="jalur_masuk_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
+                    Jalur Pendaftaran <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                    <select name="jalur_masuk" id="jalur_masuk_edit" onchange="toggleEditAsalSekolah()" required
+                        class="w-full h-11 px-4 pr-10 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none">
+                        <option value="baru" {{ ($siswa->jalur_masuk ?? 'baru') === 'baru' ? 'selected' : '' }}>Siswa Baru (Tingkat 10)</option>
+                        <option value="pindahan" {{ ($siswa->jalur_masuk ?? '') === 'pindahan' ? 'selected' : '' }}>Siswa Pindahan / Mutasi Masuk</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-[#003FA9]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div id="wrapper_asal_sekolah_edit" class="{{ ($siswa->jalur_masuk ?? '') === 'pindahan' ? '' : 'hidden' }} md:col-span-2">
+                <label for="asal_sekolah_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
+                    Asal Sekolah Sebelumnya <span class="text-slate-400 font-normal text-xs">(Wajib untuk siswa pindahan)</span>
+                </label>
+                <input type="text" name="asal_sekolah" id="asal_sekolah_edit" value="{{ $siswa->asal_sekolah }}"
+                    class="w-full h-11 px-4 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition"
+                    placeholder="Contoh: SMP / SMK Asal" autocomplete="off">
+            </div>
+
+            <div>
                 <label for="jurusan_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
                     Jurusan (Program Keahlian) <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
-                    <select id="jurusan_edit" onchange="filterEditRombel()" required
+                    <select id="jurusan_edit" onchange="onEditJurusanChange()" required
                         class="w-full h-11 px-4 pr-10 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none">
                         <option value="">-- Pilih Jurusan --</option>
                         @foreach($jurusans as $j)
                             <option value="{{ $j->id }}" {{ ($siswa->kelas->jurusan_id ?? '') == $j->id ? 'selected' : '' }}>
                                 {{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-[#003FA9]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="angkatan_id_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
+                    Angkatan Per Jurusan <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                    <select name="angkatan_id" id="angkatan_id_edit" required
+                        class="w-full h-11 px-4 pr-10 rounded-xl bg-[#E2EDFF] border-none text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none">
+                        <option value="">-- Pilih Angkatan --</option>
+                        @foreach($angkatans ?? [] as $a)
+                            <option value="{{ $a->id }}" data-jurusan="{{ $a->jurusan_id }}" {{ $siswa->angkatan_id == $a->id ? 'selected' : '' }}>
+                                {{ $a->jurusan?->kode_jurusan ?? '' }} - {{ $a->nama_angkatan }} (Masuk {{ $a->tahun_masuk }})
                             </option>
                         @endforeach
                     </select>
@@ -248,6 +310,39 @@
         }
     }
 
+    function toggleEditAsalSekolah() {
+        const jalur = document.getElementById('jalur_masuk_edit').value;
+        const wrapper = document.getElementById('wrapper_asal_sekolah_edit');
+        if (wrapper) {
+            if (jalur === 'pindahan') {
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
+            }
+        }
+    }
+
+    function filterEditAngkatan() {
+        const jurusanId = document.getElementById('jurusan_edit').value;
+        const angkatanSelect = document.getElementById('angkatan_id_edit');
+        if (!angkatanSelect) return;
+
+        Array.from(angkatanSelect.options).forEach((opt) => {
+            if (!opt.value) return;
+            const optJurusan = opt.getAttribute('data-jurusan');
+            const match = !jurusanId || optJurusan === jurusanId;
+            opt.hidden = !match;
+            opt.disabled = !match;
+        });
+
+        if (angkatanSelect.selectedOptions[0] && angkatanSelect.selectedOptions[0].disabled) {
+            const firstAvailable = Array.from(angkatanSelect.options).find(o => !o.disabled && o.value);
+            if (firstAvailable) {
+                angkatanSelect.value = firstAvailable.value;
+            }
+        }
+    }
+
     function filterEditRombel() {
         const jurusanId = document.getElementById('jurusan_edit').value;
         const tingkat = document.getElementById('tingkat_edit').value;
@@ -276,4 +371,15 @@
             }
         }
     }
+
+    function onEditJurusanChange() {
+        filterEditAngkatan();
+        filterEditRombel();
+    }
+
+    // Run initial filter on load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterEditAngkatan();
+        filterEditRombel();
+    });
 </script>

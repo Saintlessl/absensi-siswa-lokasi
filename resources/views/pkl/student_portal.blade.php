@@ -1,11 +1,13 @@
 @extends('layouts.app')
 
 @section('title', 'Portal PKL Siswa')
+@section('page-title', 'Portal PKL Siswa')
+@section('page-subtitle', 'Informasi penempatan, presensi geofencing, dan pengisian logbook PKL.')
 
 @section('content')
 <div class="space-y-6">
     <div>
-        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Portal Magang & PKL Siswa</h1>
+        <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Portal Magang & PKL Siswa</h1>
         <p class="text-xs text-slate-500 font-medium mt-0.5">Presensi geofencing harian di tempat magang industri dan pengisian logbook kegiatan.</p>
     </div>
 

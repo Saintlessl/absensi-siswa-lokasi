@@ -21,7 +21,7 @@
             </div>
             <div>
                 <div class="flex items-center gap-2.5">
-                    <h2 class="text-xl font-bold text-dark-800">{{ $angkatan->nama_angkatan }}</h2>
+                    <h2 class="text-xl font-medium text-dark-800">{{ $angkatan->nama_angkatan }}</h2>
                     <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $angkatan->status_badge }} border">
                         {{ $angkatan->status_label }}
                     </span>

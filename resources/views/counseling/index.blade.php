@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Layanan Bimbingan Konseling (BK)')
+@section('page-title', 'Layanan Bimbingan & Konseling (BK)')
+@section('page-subtitle', 'Sesi bimbingan siswa, pendampingan perilaku, dan penanganan kasus.')
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Layanan Bimbingan & Konseling (BK)</h1>
+            <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Layanan Bimbingan & Konseling (BK)</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Sesi bimbingan siswa, pendampingan perilaku, dan penanganan kasus dengan proteksi kerahasiaan konseling.</p>
         </div>
         <div class="flex items-center gap-2">

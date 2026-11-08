@@ -123,6 +123,7 @@ class TeachingJournalController extends Controller
         $students = collect();
         if ($selectedKelas) {
             $students = Siswa::where('kelas_id', $selectedKelas->id)
+                ->where('status', 'aktif')
                 ->orderBy('nama')
                 ->get();
         }

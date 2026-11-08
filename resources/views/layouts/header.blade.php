@@ -19,13 +19,27 @@
             </button>
 
             {{-- Page Title --}}
+            @php
+                $resolvedHeaderTitle = View::hasSection('page-title')
+                    ? trim(View::yieldContent('page-title'))
+                    : (View::hasSection('title') ? trim(preg_replace('/(\s*[\x{2014}-]\s*MySkanic|\s*[\x{2014}-]\s*SMK Neg.*)/iu', '', View::yieldContent('title'))) : (request()->routeIs('dashboard') ? 'Dashboard' : ''));
+                if (empty($resolvedHeaderTitle)) {
+                    $resolvedHeaderTitle = request()->routeIs('dashboard') ? 'Dashboard' : 'Halaman';
+                }
+
+                $resolvedHeaderSubtitle = View::hasSection('page-subtitle')
+                    ? trim(View::yieldContent('page-subtitle'))
+                    : (request()->routeIs('dashboard') ? 'Absensi Siswa & Manajemen Sekolah' : '');
+            @endphp
             <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
-                    @yield('page-title', 'Dashboard')
+                <h2 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight leading-tight">
+                    {!! $resolvedHeaderTitle !!}
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5 font-normal">
-                    @yield('page-subtitle', 'Absensi Siswa & Manajemen Sekolah')
-                </p>
+                @if(!empty($resolvedHeaderSubtitle))
+                    <p class="text-xs text-slate-500 mt-0.5 font-normal">
+                        {!! $resolvedHeaderSubtitle !!}
+                    </p>
+                @endif
             </div>
         </div>
 

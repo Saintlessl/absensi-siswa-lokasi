@@ -19,7 +19,7 @@
                 <i class='bx bx-arrow-back text-lg'></i>
             </a>
             <div>
-                <h2 class="text-xl font-bold text-dark-800">{{ $kelas->nama_kelas }}</h2>
+                <h2 class="text-xl font-medium text-dark-800">{{ $kelas->nama_kelas }}</h2>
                 <p class="text-xs text-dark-400">Jurusan: {{ $kelas->jurusan->nama_jurusan ?? '-' }} &bull; Wali Kelas: {{ $kelas->wali_kelas ?? '-' }}</p>
             </div>
         </div>

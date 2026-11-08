@@ -13,16 +13,22 @@ class HomeroomAssignment extends Model
         'guru_id',
         'kelas_id',
         'tahun_ajaran',
+        'tahun_ajaran_id',
         'starts_on',
         'ends_on',
         'is_active',
         'catatan',
+        'alasan_pergantian',
+        'replaced_by_assignment_id',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'starts_on' => 'date',
         'ends_on'   => 'date',
+        'tahun_ajaran_id' => 'integer',
+        'kelas_id'  => 'integer',
+        'guru_id'   => 'integer',
     ];
 
     public function guru()
@@ -33,5 +39,20 @@ class HomeroomAssignment extends Model
     public function kelas()
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class, 'tahun_ajaran_id');
+    }
+
+    public function replacedBy()
+    {
+        return $this->belongsTo(HomeroomAssignment::class, 'replaced_by_assignment_id');
+    }
+
+    public function replaces()
+    {
+        return $this->hasOne(HomeroomAssignment::class, 'replaced_by_assignment_id');
     }
 }

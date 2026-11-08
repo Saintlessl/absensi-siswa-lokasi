@@ -17,7 +17,7 @@ class SchoolSettingController extends Controller
         return view('settings.index', [
             'jamMasuk'  => $settings['jam_masuk'] ?? '07:15',
             'jamPulang' => $settings['jam_pulang'] ?? '14:55',
-            'namaSekolah' => $settings['nama_sekolah'] ?? 'SMK Negeri',
+            'namaSekolah' => $settings['nama_sekolah'] ?? 'SMK Negri 1 Ciomas',
         ]);
     }
 

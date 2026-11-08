@@ -14,7 +14,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Jurusan (Program Keahlian)</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Jurusan (Program Keahlian)</h2>
             <p class="text-sm text-dark-400 mt-1">Kelola master program keahlian, logo, dan status keaktifan akademik.</p>
         </div>
         <button onclick="openModal('modal-inputjurusan')"

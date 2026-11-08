@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1024" width="100%" height="100%">
+  <defs>
+    <!-- Soft radial fade mask for subtle depth -->
+    <radialGradient id="fadeMaskGrad" cx="50%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2" />
+    </radialGradient>
+    
+    <!-- Linear vertical fade to blend into footer -->
+    <linearGradient id="verticalFade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="65%" stop-color="#ffffff" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1" />
+    </linearGradient>
+
+    <!-- Filter for soft glow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <g id="decorative-overlay" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+
+    <!-- 1. FLOWING TOPOGRAPHIC & ORGANIC CONTOUR WAVES (SWEEPING FROM EDGES) -->
+    <g stroke-opacity="0.08" stroke-width="1.8">
+      <!-- Wave Layer 1 -->
+      <path d="M-100,180 C200,80 450,260 720,160 C990,60 1250,220 1550,140" />
+      <path d="M-100,230 C220,130 470,310 720,210 C970,110 1230,270 1550,190" />
+      <path d="M-100,280 C240,180 490,360 720,260 C950,160 1210,320 1550,240" />
+      
+      <!-- Wave Layer 2 (Diagonal sweeps across upper quadrant) -->
+      <path d="M-50,420 C250,300 550,520 850,380 C1150,240 1350,450 1550,360" />
+      <path d="M-50,480 C270,360 570,580 850,440 C1130,300 1330,510 1550,420" />
+      <path d="M-50,540 C290,420 590,640 850,500 C1110,360 1310,570 1550,480" />
+    </g>
+
+    <g stroke-opacity="0.06" stroke-width="1.5">
+      <!-- Wave Layer 3 (Lower curves) -->
+      <path d="M-100,680 C300,520 600,780 950,620 C1250,480 1400,680 1550,600" />
+      <path d="M-100,740 C320,580 620,840 950,680 C1230,540 1380,740 1550,660" />
+      <path d="M-100,800 C340,640 640,900 950,740 C1210,600 1360,800 1550,720" />
+    </g>
+
+    <!-- 2. SUNDANESE BATIK MEGAMENDUNG CLOUD ACCENTS (Upper Left & Upper Right) -->
+    <!-- Left Batik Megamendung Cluster -->
+    <g stroke-opacity="0.09" stroke-width="2" transform="translate(60, 80) scale(1.1)">
+      <!-- Cloud 1 -->
+      <path d="M0,120 C30,90 70,85 105,100 C140,115 170,105 195,80 C220,55 250,55 275,70 C300,85 330,80 350,60" />
+      <path d="M15,135 C45,105 80,100 115,115 C150,130 180,120 205,95 C230,70 255,70 280,85 C300,97 325,93 345,75" />
+      <path d="M30,150 C60,120 90,115 125,130 C160,145 190,135 215,110 C240,85 260,85 285,100" />
+      <!-- Cloud swirl spirals -->
+      <path d="M110,108 C100,95 85,95 80,105 C75,115 85,125 95,120 C102,117 105,110 102,105" />
+      <path d="M200,88 C190,75 175,75 170,85 C165,95 175,105 185,100 C192,97 195,90 192,85" />
+    </g>
+
+    <!-- Right Batik Megamendung Cluster -->
+    <g stroke-opacity="0.09" stroke-width="2" transform="translate(920, 90) scale(1.1)">
+      <!-- Cloud 2 -->
+      <path d="M380,120 C350,90 310,85 275,100 C240,115 210,105 185,80 C160,55 130,55 105,70 C80,85 50,80 30,60" />
+      <path d="M365,135 C335,105 300,100 265,115 C230,130 200,120 175,95 C150,70 125,70 100,85 C80,97 55,93 35,75" />
+      <path d="M350,150 C320,120 290,115 255,130 C220,145 190,135 165,110 C140,85 120,85 95,100" />
+      <!-- Swirls -->
+      <path d="M270,108 C280,95 295,95 300,105 C305,115 295,125 285,120 C278,117 275,110 278,105" />
+      <path d="M180,88 C190,75 205,75 210,85 C215,95 205,105 195,100 C188,97 185,90 188,85" />
+    </g>
+
+    <!-- 3. CENTRAL SCHOOL CREST WATERMARK (SMKN 1 CIOMAS SHIELD MOTIF) -->
+    <g transform="translate(720, 290)" stroke-opacity="0.10" stroke-width="2">
+      <!-- Outer Decorative Halo & Rays -->
+      <circle cx="0" cy="0" r="160" stroke-opacity="0.06" stroke-dasharray="6,8" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="190" stroke-opacity="0.05" stroke-dasharray="4,12" stroke-width="1.2" />
+      <circle cx="0" cy="0" r="230" stroke-opacity="0.04" stroke-width="1" />
+
+      <!-- Center Gear Wheel (representing Vocational / Kejuruan / Teknik) -->
+      <g stroke-opacity="0.11" stroke-width="2">
+        <circle cx="0" cy="-10" r="62" />
+        <circle cx="0" cy="-10" r="48" stroke-opacity="0.07" stroke-dasharray="3,5" />
+        <!-- Gear cogs -->
+        <path d="M-6,-72 L6,-72 L5,-62 L-5,-62 Z" />
+        <path d="M-6,52 L6,52 L5,42 L-5,42 Z" />
+        <path d="M-72,-16 L-72,-4 L-62,-5 L-62,-15 Z" />
+        <path d="M52,-16 L52,-4 L42,-5 L42,-15 Z" />
+        <!-- Diagonal cogs -->
+        <path d="M-52,-56 L-43,-47 L-36,-54 L-45,-63 Z" />
+        <path d="M43,37 L52,46 L45,53 L36,44 Z" />
+        <path d="M43,-56 L52,-47 L45,-40 L36,-49 Z" />
+        <path d="M-52,37 L-43,46 L-36,39 L-45,30 Z" />
+      </g>
+
+      <!-- Stylized Wings (Left & Right - Kujang / Garuda SMKN 1 Ciomas Emblem) -->
+      <!-- Left Wing Plumes -->
+      <g stroke-opacity="0.11" stroke-width="2.2">
+        <path d="M-28,30 C-65,35 -105,10 -125,-40 C-115,-10 -90,15 -55,20 C-40,22 -30,26 -28,30 Z" />
+        <path d="M-26,42 C-70,55 -115,35 -145,-15 C-130,15 -100,42 -60,40 C-42,39 -30,40 -26,42 Z" />
+        <path d="M-22,54 C-65,75 -110,65 -150,25 C-130,52 -95,72 -55,62 C-38,58 -26,55 -22,54 Z" />
+        <path d="M-15,64 C-50,90 -90,90 -130,65 C-110,85 -75,98 -40,80 C-26,73 -18,67 -15,64 Z" />
+        <!-- Wing tip curl -->
+        <path d="M-125,-40 C-135,-65 -125,-85 -110,-75 C-100,-68 -108,-50 -120,-45" />
+      </g>
+
+      <!-- Right Wing Plumes -->
+      <g stroke-opacity="0.11" stroke-width="2.2">
+        <path d="M28,30 C65,35 105,10 125,-40 C115,-10 90,15 55,20 C40,22 30,26 28,30 Z" />
+        <path d="M26,42 C70,55 115,35 145,-15 C130,15 100,42 60,40 C42,39 30,40 26,42 Z" />
+        <path d="M22,54 C65,75 110,65 150,25 C130,52 95,72 55,62 C38,58 26,55 22,54 Z" />
+        <path d="M15,64 C50,90 90,90 130,65 C110,85 75,98 40,80 C26,73 18,67 15,64 Z" />
+        <!-- Wing tip curl -->
+        <path d="M125,-40 C135,-65 125,-85 110,-75 C100,-68 108,-50 120,-45" />
+      </g>
+
+      <!-- Central Shield Outline -->
+      <path d="M-75,-120 L75,-120 C85,-50 90,40 0,110 C-90,40 -85,-50 -75,-120 Z" stroke-opacity="0.08" stroke-width="1.8" />
+      
+      <!-- Mountain Peak Contour (Gunung Salak - Ciomas landmark) -->
+      <path d="M-30,-75 L-10,-102 L10,-82 L25,-96 L45,-75" stroke-opacity="0.10" stroke-width="2" />
+    </g>
+
+    <!-- 4. ORGANIC FLORAL & MANDALA SWIRLS (Corner flourishes) -->
+    <g stroke-opacity="0.07" stroke-width="1.6">
+      <!-- Bottom Left Flourish -->
+      <path d="M40,900 C120,820 180,850 220,780 C250,730 230,680 180,690 C140,700 130,750 165,770 C190,785 210,765 200,745" />
+      <!-- Bottom Right Flourish -->
+      <path d="M1400,900 C1320,820 1260,850 1220,780 C1190,730 1210,680 1260,690 C1300,700 1310,750 1275,770 C1250,785 1230,765 1240,745" />
+      <!-- Top Flourish -->
+      <path d="M620,30 C670,75 720,50 770,80 C800,100 830,75 870,90" />
+    </g>
+  </g>
+</svg>

@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Verifikasi Logbook PKL')
+@section('page-title', 'Verifikasi Logbook PKL')
+@section('page-subtitle', 'Verifikasi dan review catatan jurnal harian PKL oleh guru pembimbing.')
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Verifikasi Logbook PKL Siswa</h1>
+            <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Verifikasi Logbook PKL Siswa</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Penilaian dan verifikasi berkala jurnal aktivitas harian siswa bimbingan industri.</p>
         </div>
     </div>
@@ -148,7 +150,7 @@
 
 <script>
     function openReviewModal(id, aktivitas, status, catatan) {
-        document.getElementById('formReview').action = '/pkl/logbook/' + id + '/review';
+        document.getElementById('formReview').action = '{{ url('/pkl/logbook') }}/' + id + '/review';
         document.getElementById('modalAktivitas').textContent = aktivitas;
         document.getElementById('modalStatus').value = status === 'revision_requested' ? 'revision_requested' : 'approved';
         document.getElementById('modalCatatan').value = catatan || '';

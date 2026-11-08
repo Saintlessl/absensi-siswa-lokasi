@@ -14,7 +14,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Jadwal Mengajar Mingguan</h2>
+            <h2 class="text-xl font-medium text-dark-800">Jadwal Mengajar Mingguan</h2>
             <p class="text-xs text-dark-400 mt-0.5">Ruangan fisik dialokasikan secara realtime berdasarkan sistem rolling ruangan sekolah.</p>
         </div>
         <div class="flex items-center gap-2">

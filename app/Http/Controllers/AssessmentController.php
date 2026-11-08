@@ -294,6 +294,13 @@ class AssessmentController extends Controller
         $parent = $user->orangtua ?? \App\Models\OrangTua::where('user_id', $user->id)->firstOrFail();
         $siswa = $parent->siswa()->first();
 
+        if ($request->filled('siswa_id')) {
+            $selectedChild = $parent->siswa()->where('siswas.id', $request->siswa_id)->first();
+            if ($selectedChild) {
+                $siswa = $selectedChild;
+            }
+        }
+
         if (!$siswa) {
             return redirect()->route('dashboard')->with('error', 'Data siswa binaan belum terhubung.');
         }

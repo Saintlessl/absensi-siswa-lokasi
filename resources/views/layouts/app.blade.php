@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sistem Absensi Siswa SMK Negeri">
-    <title>@yield('title', 'Absensi Siswa') — SMK Negeri</title>
+    <meta name="description" content="MySkanic — Sistem Presensi, Informasi & Manajemen Akademik SMK Negeri 1 Ciomas">
+    <title>@yield('title', 'Dashboard') — MySkanic</title>
 
     {{-- Google Fonts: Inter (Formal & Professional) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
     {{-- Alpine.js for lightweight UI interactions --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     {{-- Reusable Wizard Modal System --}}
-    <script src="{{ asset('js/wizard-modal.js') }}"></script>
+    <script src="{{ asset('js/wizard-modal.js') }}?v={{ file_exists(public_path('js/wizard-modal.js')) ? filemtime(public_path('js/wizard-modal.js')) : time() }}"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -450,16 +450,28 @@
 
                 {{-- Page Content --}}
                 <main class="flex-1 px-4 sm:px-8 pb-8 pt-1">
-                    {{-- Breadcrumb --}}
-                    @hasSection('breadcrumb')
-                        <nav class="mb-5 fade-in" aria-label="Breadcrumb">
-                            <ol class="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium">
+                    {{-- Breadcrumb: Guaranteed on all pages --}}
+                    @if(!request()->routeIs('dashboard'))
+                        <nav class="mb-4 fade-in" aria-label="Breadcrumb">
+                            <ol class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500 font-medium flex-wrap">
                                 <li class="flex items-center gap-1">
-                                    <i class='bx bx-home text-base'></i>
+                                    <i class='bx bx-home text-base text-[#0052CC]'></i>
                                     <a href="{{ route('dashboard') }}"
                                         class="hover:text-[#0052CC] transition-colors">Dashboard</a>
                                 </li>
-                                @yield('breadcrumb')
+                                @hasSection('breadcrumb')
+                                    @yield('breadcrumb')
+                                @else
+                                    <li class="flex items-center gap-1.5">
+                                        <i class='bx bx-chevron-right text-slate-400 text-sm'></i>
+                                        @php
+                                            $resolvedBreadcrumbTitle = View::hasSection('page-title')
+                                                ? trim(View::yieldContent('page-title'))
+                                                : (View::hasSection('title') ? trim(preg_replace('/(\s*[\x{2014}-]\s*MySkanic|\s*[\x{2014}-]\s*SMK Neg.*)/iu', '', View::yieldContent('title'))) : 'Halaman');
+                                        @endphp
+                                        <span class="text-[#0052CC] font-medium">{!! !empty($resolvedBreadcrumbTitle) ? $resolvedBreadcrumbTitle : 'Halaman' !!}</span>
+                                    </li>
+                                @endif
                             </ol>
                         </nav>
                     @endif
@@ -480,7 +492,7 @@
                 {{-- Footer --}}
                 <footer class="border-t border-blue-200/50 bg-white/40 px-6 sm:px-8 py-3.5">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 font-medium">
-                        <p>&copy; {{ date('Y') }} Sistem Absensi Siswa SMK Negeri &bull; MySkanic</p>
+                        <p>&copy; {{ date('Y') }} MySkanic &bull; SMK Negeri 1 Ciomas</p>
                     </div>
                 </footer>
             </div>

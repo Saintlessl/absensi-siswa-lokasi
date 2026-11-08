@@ -20,7 +20,7 @@
                 </span>
                 <span class="text-xs text-dark-400">&bull; {{ $kelas->jurusan->nama_jurusan ?? '-' }}</span>
             </div>
-            <h2 class="text-xl font-bold text-dark-800">{{ $kelas->nama_kelas }}</h2>
+            <h2 class="text-xl font-medium text-dark-800">{{ $kelas->nama_kelas }}</h2>
         </div>
 
         {{-- Date Picker Filter --}}

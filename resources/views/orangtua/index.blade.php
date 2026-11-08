@@ -12,7 +12,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Orang Tua</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Orang Tua</h2>
             <p class="text-sm text-dark-400 mt-1">Kelola data orang tua yang terhubung dengan akun siswa.</p>
         </div>
         <a href="{{ route('siswa') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors"><i class='bx bx-user-plus text-lg'></i> Tambah melalui Data Siswa</a>

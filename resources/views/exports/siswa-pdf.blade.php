@@ -148,6 +148,7 @@
                 <th class="center" style="width: 35px;">No</th>
                 <th style="width: 80px;">NIS</th>
                 <th>Nama Siswa</th>
+                <th style="width: 140px;">Tempat, Tgl Lahir</th>
                 <th class="center" style="width: 55px;">L/P</th>
                 <th class="center" style="width: 80px;">Kelas</th>
                 <th>Email</th>
@@ -159,6 +160,7 @@
                     <td class="center">{{ $i + 1 }}</td>
                     <td>{{ $s->nis }}</td>
                     <td>{{ $s->nama }}</td>
+                    <td>{{ $s->ttl ?? '-' }}</td>
                     <td class="center">
                         <span class="badge badge-{{ strtolower($s->jenis_kelamin) }}">
                             {{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}

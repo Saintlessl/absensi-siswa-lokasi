@@ -14,7 +14,7 @@
 @section('content')
     <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Rombongan Belajar Anda</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Rombongan Belajar Anda</h2>
             <p class="text-xs text-dark-400 mt-0.5">Kelola informasi peserta didik pada rombel yang berada di bawah penugasan mengajar Anda.</p>
         </div>
         <a href="{{ route('teacher.schedule') }}"

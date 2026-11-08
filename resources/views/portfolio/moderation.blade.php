@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Kurasi Etalase Karya & TeFa')
+@section('page-title', 'Kurasi Portofolio & Teaching Factory')
+@section('page-subtitle', 'Verifikasi kualitas karya siswa sebelum dipamerkan secara terbuka.')
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kurasi Portofolio & Teaching Factory</h1>
+            <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Kurasi Portofolio & Teaching Factory</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Verifikasi kualitas karya siswa sebelum dipamerkan secara terbuka di etalase inovasi sekolah.</p>
         </div>
         <a href="{{ route('portfolio.index') }}" class="px-3.5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition">
@@ -162,7 +164,7 @@
 
 <script>
     function openModModal(id, judul, status, isTefa, notes) {
-        document.getElementById('formKurasi').action = '/etalase-karya/' + id + '/kurasi';
+        document.getElementById('formKurasi').action = '{{ url('/etalase-karya') }}/' + id + '/kurasi';
         document.getElementById('modJudul').textContent = judul;
         document.getElementById('modStatus').value = status === 'rejected' ? 'rejected' : 'approved';
         document.getElementById('modTefa').checked = Boolean(isTefa);

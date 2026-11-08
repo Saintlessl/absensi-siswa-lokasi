@@ -184,8 +184,8 @@
                             </div>
                         </div>
 
-                        {{-- Right Column: Form Inputs (5 Rows, width 565px, height 395px) --}}
-                        <div class="flex-1 flex flex-col justify-between h-[395px]">
+                        {{-- Right Column: Form Inputs (with 5-Level Dependent Dropdown) --}}
+                        <div class="flex-1 flex flex-col gap-3.5 max-h-[440px] overflow-y-auto pr-1">
                             {{-- Row 1: NISN (10 digit) | NIS --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <x-wizard.input label="NISN"
@@ -215,7 +215,23 @@
                                                 model="student.nama" />
                             </div>
 
-                            {{-- Row 3: Jenis Kelamin | Jurusan (Program Keahlian) --}}
+                            {{-- Row 3: Tempat Lahir & Tanggal Lahir (TTL) --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <x-wizard.input label="Tempat Lahir"
+                                                name="tempat_lahir"
+                                                id="input_tempat_lahir"
+                                                placeholder="Contoh : Bogor"
+                                                maxlength="100"
+                                                model="student.tempat_lahir" />
+
+                                <x-wizard.input label="Tanggal Lahir"
+                                                name="tanggal_lahir"
+                                                id="input_tanggal_lahir"
+                                                type="date"
+                                                model="student.tanggal_lahir" />
+                            </div>
+
+                            {{-- Row 4: Jenis Kelamin | Tahun Ajaran Masuk --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <x-wizard.select label="Jenis Kelamin"
                                                  name="jenis_kelamin"
@@ -227,34 +243,94 @@
                                     <option value="P">Perempuan</option>
                                 </x-wizard.select>
 
-                                <x-wizard.select label="Jurusan (Program Keahlian)"
-                                                 id="modal_jurusan"
-                                                 name="modal_filter_jurusan"
-                                                 placeholder="Pilih Jurusan"
+                                <x-wizard.select label="Tahun Ajaran Masuk"
+                                                 hint="Tahun kalender pendaftaran"
+                                                 name="tahun_ajaran_id"
+                                                 id="modal_tahun_ajaran"
+                                                 placeholder="Pilih Tahun Ajaran"
                                                  required
-                                                 model="student.jurusan_id"
-                                                 @change="updateDependentRombel()">
-                                    @foreach($jurusans as $j)
-                                        <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
+                                                 model="student.tahun_ajaran_id"
+                                                 @change="onTahunAjaranChange()">
+                                    @foreach($tahunAjarans ?? [] as $ta)
+                                        <option value="{{ $ta->id }}"
+                                                data-tahun-mulai="{{ $ta->tahun_mulai }}"
+                                                data-active="{{ $ta->is_active ? '1' : '0' }}"
+                                                {{ $ta->is_active ? 'selected' : '' }}>
+                                            {{ $ta->nama }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                                        </option>
                                     @endforeach
                                 </x-wizard.select>
                             </div>
 
-                            {{-- Row 4: Tingkat Kelas | Rombel --}}
+                            {{-- Row 4: Jalur Pendaftaran & Asal Sekolah (Jika Pindahan) --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <x-wizard.select label="Jalur Pendaftaran"
+                                                 name="jalur_masuk"
+                                                 id="modal_jalur_masuk"
+                                                 placeholder="Pilih Jalur"
+                                                 required
+                                                 model="student.jalur_masuk"
+                                                 @change="updateJalurMasuk()">
+                                    <option value="baru" selected>Siswa Reguler / Siswa Baru</option>
+                                    <option value="pindahan">Siswa Pindahan / Mutasi Masuk</option>
+                                </x-wizard.select>
+
+                                <div x-show="student.jalur_masuk === 'pindahan'">
+                                    <x-wizard.input label="Asal Sekolah Sebelumnya"
+                                                    name="asal_sekolah"
+                                                    id="input_asal_sekolah"
+                                                    placeholder="Contoh: SMP / SMK Asal"
+                                                    model="student.asal_sekolah" />
+                                </div>
+                            </div>
+
+                            {{-- Row 5: Jurusan (Program Keahlian) | Angkatan Per Jurusan --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <x-wizard.select label="Jurusan (Program Keahlian)"
+                                                 id="modal_jurusan"
+                                                 name="jurusan_id"
+                                                 placeholder="Pilih Jurusan"
+                                                 required
+                                                 model="student.jurusan_id"
+                                                 @change="onJurusanChange()">
+                                    @foreach($jurusans as $j)
+                                        <option value="{{ $j->id }}">{{ $j->kode_jurusan }} - {{ $j->nama_jurusan }}</option>
+                                    @endforeach
+                                </x-wizard.select>
+
+                                <x-wizard.select label="Angkatan Per Jurusan"
+                                                 id="modal_angkatan"
+                                                 name="angkatan_id"
+                                                 placeholder="Pilih Angkatan"
+                                                 required
+                                                 model="student.angkatan_id"
+                                                 @change="onAngkatanChange()">
+                                    @foreach($angkatans as $a)
+                                        <option value="{{ $a->id }}"
+                                                data-jurusan="{{ $a->jurusan_id }}"
+                                                data-tahun-masuk="{{ $a->tahun_masuk }}"
+                                                data-nomor="{{ $a->nomor_angkatan }}">
+                                            {{ $a->jurusan?->kode_jurusan ?? '' }} - {{ $a->nama_angkatan }} (Masuk {{ $a->tahun_masuk }})
+                                        </option>
+                                    @endforeach
+                                </x-wizard.select>
+                            </div>
+
+                            {{-- Row 6: Tingkat Kelas | Rombel --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <x-wizard.select label="Tingkat Kelas"
                                                  id="modal_tingkat"
-                                                 name="modal_filter_tingkat"
+                                                 name="tingkat"
                                                  placeholder="Pilih Tingkat"
                                                  required
                                                  model="student.tingkat"
-                                                 @change="updateDependentRombel()">
-                                    <option value="10">10</option>
-                                    <option value="11">11</option>
-                                    <option value="12">12</option>
+                                                 @change="onTingkatChange()">
+                                    <option value="10">Kelas 10</option>
+                                    <option value="11">Kelas 11</option>
+                                    <option value="12">Kelas 12</option>
                                 </x-wizard.select>
 
-                                <x-wizard.select label="Rombel"
+                                <x-wizard.select label="Rombongan Belajar (Rombel)"
                                                  name="kelas_id"
                                                  id="kelas_id"
                                                  placeholder="Pilih Rombel"
@@ -265,13 +341,13 @@
                                         <option value="{{ $k->id }}"
                                                 data-jurusan="{{ $k->jurusan_id }}"
                                                 data-tingkat="{{ $k->tingkat }}">
-                                            {{ $k->nama_kelas }}
+                                            {{ $k->nama_kelas }} (Wali: {{ $k->wali_kelas ?: '-' }})
                                         </option>
                                     @endforeach
                                 </x-wizard.select>
                             </div>
 
-                            {{-- Row 5: Akun Siswa (Email @myskanic.com & Password) --}}
+                            {{-- Row 7: Akun Siswa (Email @myskanic.com & Password) --}}
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <x-wizard.input label="Email Akun Siswa"
                                                 hint="akhiran @myskanic.com"
@@ -389,8 +465,8 @@
                                 </div>
                             </div>
 
-                            {{-- Right: Student Form Fields Review (5 rows matching Image 3) --}}
-                            <div class="flex-1 flex flex-col justify-between h-[395px]">
+                            {{-- Right: Student Form Fields Review --}}
+                            <div class="flex-1 flex flex-col gap-3.5 max-h-[440px] overflow-y-auto pr-1">
                                 {{-- Row 1: NISN | NIS --}}
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <x-wizard.review-field label="NISN" bind="student.nisn" />
@@ -402,20 +478,40 @@
                                     <x-wizard.review-field label="Nama Lengkap" bind="student.nama" />
                                 </div>
 
-                                {{-- Row 3: Jenis Kelamin | Jurusan --}}
+                                {{-- Row 3: Tempat & Tanggal Lahir (TTL) --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <x-wizard.review-field label="Tempat Lahir" bind="student.tempat_lahir || '-'" />
+                                    <x-wizard.review-field label="Tanggal Lahir" bind="student.tanggal_lahir || '-'" />
+                                </div>
+
+                                {{-- Row 4: Jenis Kelamin | Tahun Ajaran Masuk --}}
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <x-wizard.review-field label="Jenis Kelamin"
                                                            bind="student.jenis_kelamin === 'L' ? 'Laki - Laki' : (student.jenis_kelamin === 'P' ? 'Perempuan' : '-')" />
-                                    <x-wizard.review-field label="Jurusan (Program Keahlian)" bind="student.jurusan_name" />
+                                    <x-wizard.review-field label="Tahun Ajaran Masuk" bind="student.tahun_ajaran_name" />
                                 </div>
 
-                                {{-- Row 4: Tingkat Kelas | Rombel --}}
+                                {{-- Row 4: Jalur Pendaftaran | Asal Sekolah --}}
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <x-wizard.review-field label="Tingkat Kelas" bind="student.tingkat" />
-                                    <x-wizard.review-field label="Rombel" bind="student.kelas_name" />
+                                    <x-wizard.review-field label="Jalur Pendaftaran"
+                                                           bind="student.jalur_masuk === 'baru' ? 'Siswa Baru (Tingkat 10)' : 'Siswa Pindahan / Mutasi Masuk'" />
+                                    <x-wizard.review-field label="Asal Sekolah"
+                                                           bind="student.jalur_masuk === 'pindahan' ? (student.asal_sekolah || '-') : 'Siswa Baru (SMP/Sederajat)'" />
                                 </div>
 
-                                {{-- Row 5: Email Akun | Password --}}
+                                {{-- Row 5: Jurusan | Angkatan Per Jurusan --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <x-wizard.review-field label="Jurusan (Program Keahlian)" bind="student.jurusan_name" />
+                                    <x-wizard.review-field label="Angkatan Per Jurusan" bind="student.angkatan_name" />
+                                </div>
+
+                                {{-- Row 6: Tingkat Kelas | Rombel --}}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <x-wizard.review-field label="Tingkat Kelas" bind="'Kelas ' + (student.tingkat || '10')" />
+                                    <x-wizard.review-field label="Rombongan Belajar (Rombel)" bind="student.kelas_name" />
+                                </div>
+
+                                {{-- Row 7: Email Akun | Password --}}
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <x-wizard.review-field label="Email Akun Siswa" bind="student.email" />
                                     <x-wizard.review-field label="Password Akun" bind="student.password ? '••••••••' : '-'" />

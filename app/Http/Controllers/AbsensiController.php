@@ -552,7 +552,8 @@ class AbsensiController extends Controller
 
         $kelasIds = $jadwalHariIni->pluck('kelas_id')->unique();
 
-        $siswas = Siswa::whereIn('kelas_id', $kelasIds)
+        $siswas = Siswa::where('status', 'aktif')
+            ->whereIn('kelas_id', $kelasIds)
             ->with(['kelas', 'absensi' => function ($q) {
                 $q->whereDate('tanggal', date('Y-m-d'));
             }])

@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Kedisiplinan & Prestasi Siswa')
+@section('page-title', 'Kedisiplinan & Rekor Prestasi Siswa')
+@section('page-subtitle', 'Pencatatan pelanggaran tata tertib sekolah, poin kedisiplinan, dan penghargaan prestasi.')
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Kedisiplinan & Rekor Prestasi Siswa</h1>
+            <h1 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight">Kedisiplinan & Rekor Prestasi Siswa</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">Pencatatan pelanggaran tata tertib sekolah, poin kedisiplinan, dan penghargaan prestasi siswa.</p>
         </div>
         <div class="flex items-center gap-2">
@@ -332,7 +334,7 @@
 
 <script>
     function openStatusModal(id, currentStatus, currentAction) {
-        document.getElementById('formUpdateStatus').action = '/kedisiplinan/' + id + '/status';
+        document.getElementById('formUpdateStatus').action = '{{ url('/kedisiplinan') }}/' + id + '/status';
         document.getElementById('selectStatus').value = currentStatus === 'resolved' ? 'resolved' : 'verified';
         document.getElementById('textareaTindakLanjut').value = currentAction || '';
         document.getElementById('modalUpdateStatus').classList.remove('hidden');

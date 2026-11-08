@@ -89,9 +89,15 @@ class DashboardController extends Controller
             $orangTua = \App\Models\OrangTua::where('user_id', $user->id)->first();
 
             if ($orangTua) {
-                // Only resolve students through the explicit pivot; never use a
-                // legacy foreign key to infer authorization.
-                $siswa = $orangTua->siswa()->with('kelas')->first();
+                $allChildren = $orangTua->siswa()->with('kelas.jurusan')->get();
+                $siswa = $allChildren->first();
+                if ($request->filled('siswa_id')) {
+                    $selectedChild = $allChildren->firstWhere('id', (int) $request->siswa_id);
+                    if ($selectedChild) {
+                        $siswa = $selectedChild;
+                    }
+                }
+                $data['allChildren'] = $allChildren;
                 $data['siswa'] = $siswa;
 
                 $bulan = $request->bulan ?? date('m');
@@ -234,7 +240,9 @@ class DashboardController extends Controller
                     $homeroomKelas = $activeHomeroom->kelas;
                     $todayStr = $now->toDateString();
 
-                    $studentIds = Siswa::where('kelas_id', $homeroomKelas->id)->pluck('id');
+                    $studentIds = Siswa::where('kelas_id', $homeroomKelas->id)
+                        ->where('status', 'aktif')
+                        ->pluck('id');
                     $totalHomeroomStudents = $studentIds->count();
 
                     $todayAttendance = Absensi::whereIn('siswa_id', $studentIds)
@@ -255,6 +263,7 @@ class DashboardController extends Controller
                         ->pluck('siswa_id');
 
                     $attentionStudents = Siswa::where('kelas_id', $homeroomKelas->id)
+                        ->where('status', 'aktif')
                         ->whereNotIn('id', $hadirStudentIds)
                         ->limit(6)
                         ->get();

@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Exports\SiswaExport;
+use App\Models\Angkatan;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\OrangTua;
 use App\Models\Siswa;
-use App\Models\User;
+use App\Models\SiswaStatusHistory;
 use App\Models\StudentEnrollment;
+use App\Models\TahunAjaran;
+use App\Models\User;
+use App\Services\CohortManagementService;
 use App\Services\ParentAccountService;
+use App\Services\StudentAcademicHistoryService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaController extends Controller
@@ -78,16 +84,19 @@ class SiswaController extends Controller
             $kelas = Kelas::with('jurusan')->where('is_active', true)->orderBy('nama_kelas')->get();
         }
 
-        $angkatans = \App\Models\Angkatan::orderByDesc('nomor_angkatan')->get();
+        $angkatans = Angkatan::with('jurusan')->orderByDesc('nomor_angkatan')->get();
+        $tahunAjarans = TahunAjaran::orderByDesc('tahun_mulai')->get();
+        $activeTahunAjaran = TahunAjaran::getActive() ?? $tahunAjarans->first();
         $orangTuaExisting = OrangTua::with('siswa')->orderBy('nama')->get();
 
-        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting', 'angkatans') + [
-            'search'      => $request->search ?? '',
-            'kelas_id'    => $request->kelas_id ?? '',
-            'jurusan_id'  => $request->jurusan_id ?? '',
-            'tingkat'     => $request->tingkat ?? '',
-            'angkatan_id' => $request->angkatan_id ?? '',
-            'status'      => $request->status ?? '',
+        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting', 'angkatans', 'tahunAjarans', 'activeTahunAjaran') + [
+            'search'          => $request->search ?? '',
+            'kelas_id'        => $request->kelas_id ?? '',
+            'jurusan_id'      => $request->jurusan_id ?? '',
+            'tingkat'         => $request->tingkat ?? '',
+            'angkatan_id'     => $request->angkatan_id ?? '',
+            'tahun_ajaran_id' => $request->tahun_ajaran_id ?? '',
+            'status'          => $request->status ?? '',
         ]);
     }
 
@@ -113,30 +122,75 @@ class SiswaController extends Controller
         ]);
 
         $request->validate([
-            'nisn'             => 'nullable|string|max:20|unique:siswas,nisn',
-            'nis'              => 'required|string|max:20|unique:siswas,nis',
-            'nama'             => 'required|string|max:255',
-            'jenis_kelamin'    => 'required|in:L,P',
-            'kelas_id'         => 'required|exists:kelas,id',
-            'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'nisn'                 => 'nullable|string|max:20|unique:siswas,nisn',
+            'nis'                  => 'required|string|max:20|unique:siswas,nis',
+            'nama'                 => 'required|string|max:255',
+            'jenis_kelamin'        => 'required|in:L,P',
+            'tempat_lahir'         => 'nullable|string|max:100',
+            'tanggal_lahir'        => 'nullable|date',
+            'tahun_ajaran_id'      => 'nullable|exists:tahun_ajarans,id',
+            'jurusan_id'           => 'nullable|exists:jurusans,id',
+            'angkatan_id'          => 'nullable|exists:angkatans,id',
+            'tingkat'              => 'nullable|in:10,11,12',
+            'kelas_id'             => 'required|exists:kelas,id',
+            'jalur_masuk'          => 'nullable|in:baru,pindahan',
+            'asal_sekolah'         => 'nullable|string|max:150',
+            'photo'                => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'parent_name'          => 'required_without:existing_orangtua_id|nullable|string|max:255',
             'parent_jenis_kelamin' => 'required_without:existing_orangtua_id|nullable|in:L,P',
             'parent_phone'         => 'required_without:existing_orangtua_id|nullable|string|max:25',
             'parent_address'       => 'required_without:existing_orangtua_id|nullable|string|max:2000',
             'existing_orangtua_id' => 'nullable|exists:orang_tuas,id',
             'confirm_existing_parent' => $request->filled('existing_orangtua_id') ? 'required|accepted' : 'nullable',
-            'email'            => 'required|email|unique:users,email',
-            'password'         => 'required|min:6',
+            'email'                => 'required|email|unique:users,email',
+            'password'             => 'required|min:6',
         ], [
-            'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
+            'email.unique'                  => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
             'parent_phone.required_without' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
-            'nis.unique'                => 'NIS sudah terdaftar.',
-            'nisn.unique'               => 'NISN sudah terdaftar.',
+            'nis.unique'                    => 'NIS sudah terdaftar.',
+            'nisn.unique'                   => 'NISN sudah terdaftar.',
         ]);
 
-        $targetKelas = Kelas::with('jurusan')->findOrFail($request->kelas_id);
+        $targetKelas = Kelas::with(['jurusan', 'tahunAjaran'])->findOrFail($request->kelas_id);
         if (Auth::user() && Auth::user()->role === 'kaprog' && Auth::user()->jurusan_id !== $targetKelas->jurusan_id) {
             return back()->with('error', 'Akses ditolak: Anda hanya dapat menambahkan siswa ke jurusan Anda sendiri.')->withInput();
+        }
+
+        // Backend validation of relation chain
+        if ($request->filled('jurusan_id') && (int) $targetKelas->jurusan_id !== (int) $request->jurusan_id) {
+            return back()->withErrors(['kelas_id' => 'Rombel yang dipilih tidak sesuai dengan Jurusan yang dipilih.'])->withInput();
+        }
+
+        if ($request->filled('tingkat') && (int) $targetKelas->tingkat !== (int) $request->tingkat) {
+            return back()->withErrors(['kelas_id' => 'Rombel yang dipilih tidak sesuai dengan Tingkat Kelas yang dipilih.'])->withInput();
+        }
+
+        // Resolve Permanent Entry Academic Year (from selection)
+        $tahunAjaranMasuk = null;
+        if ($request->filled('tahun_ajaran_id')) {
+            $tahunAjaranMasuk = TahunAjaran::find($request->tahun_ajaran_id);
+        }
+
+        // Active operational academic year
+        $activeTa = TahunAjaran::getActive() ?? $targetKelas->tahunAjaran ?? TahunAjaran::first();
+        if (!$tahunAjaranMasuk) {
+            $tahunAjaranMasuk = $activeTa;
+        }
+
+        // Resolve Angkatan
+        $angkatan = null;
+        if ($request->filled('angkatan_id')) {
+            $angkatan = Angkatan::findOrFail($request->angkatan_id);
+            if ($angkatan->jurusan_id && (int) $angkatan->jurusan_id !== (int) $targetKelas->jurusan_id) {
+                return back()->withErrors(['angkatan_id' => 'Angkatan yang dipilih tidak sesuai dengan Jurusan rombel.'])->withInput();
+            }
+        }
+
+        if (!$angkatan) {
+            $baseYear = $tahunAjaranMasuk->tahun_mulai ?? (int) explode('/', $activeTa->nama)[0];
+            $tingkat = (int) ($targetKelas->tingkat ?: ($request->tingkat ?: 10));
+            $calculatedEntryYear = $baseYear - ($tingkat - 10);
+            $angkatan = app(CohortManagementService::class)->determineCohortByYear($calculatedEntryYear, $targetKelas->jurusan_id);
         }
 
         try {
@@ -150,30 +204,49 @@ class SiswaController extends Controller
                 $photoPath = $request->file('photo')->store('siswa-photos', 'public');
             }
 
-            $activationLink = DB::transaction(function () use ($request, $finalEmail, $parentPhone, $photoPath, $targetKelas) {
-            $user = User::create([
-                'name'     => $request->nama,
-                'email'    => $finalEmail,
-                'password' => Hash::make($request->password),
-                'role'     => 'siswa',
-            ]);
+            $activationLink = DB::transaction(function () use ($request, $finalEmail, $parentPhone, $photoPath, $targetKelas, $activeTa, $tahunAjaranMasuk, $angkatan) {
+                $user = User::create([
+                    'name'                 => $request->nama,
+                    'email'                => $finalEmail,
+                    'password'             => Hash::make($request->password),
+                    'must_change_password' => true,
+                    'role'                 => 'siswa',
+                ]);
 
-            $siswa = Siswa::create([
-                'user_id'          => $user->id,
-                'nisn'             => $request->nisn,
-                'nis'              => $request->nis,
-                'nama'             => $request->nama,
-                'jenis_kelamin'    => $request->jenis_kelamin,
-                'photo_path'       => $photoPath,
-                'kelas_id'         => $request->kelas_id,
-                'biometric_status' => 'not_enrolled',
-            ]);
-            $kelas = $targetKelas;
-            StudentEnrollment::create([
-                'siswa_id' => $siswa->id, 'kelas_id' => $kelas->id,
-                'tahun_ajaran' => $kelas->tahun_ajaran ?: now()->format('Y') . '/' . now()->addYear()->format('Y'),
-                'started_at' => now()->toDateString(), 'is_active' => true,
-            ]);
+                $entryYear = $angkatan?->tahun_masuk ?? $tahunAjaranMasuk->tahun_mulai ?? ((int) explode('/', $activeTa->nama)[0] - ((int)($targetKelas->tingkat ?: 10) - 10));
+                $isPindahan = $request->jalur_masuk === 'pindahan';
+
+                $siswa = Siswa::create([
+                    'user_id'               => $user->id,
+                    'nisn'                  => $request->nisn,
+                    'nis'                   => $request->nis,
+                    'nama'                  => $request->nama,
+                    'jenis_kelamin'         => $request->jenis_kelamin,
+                    'tempat_lahir'          => $request->tempat_lahir,
+                    'tanggal_lahir'         => $request->tanggal_lahir,
+                    'photo_path'            => $photoPath,
+                    'kelas_id'              => $targetKelas->id,
+                    'angkatan_id'           => $angkatan?->id,
+                    'tahun_ajaran_masuk_id' => $tahunAjaranMasuk->id,
+                    'tahun_ajaran_masuk'    => $tahunAjaranMasuk->nama,
+                    'tahun_masuk'           => $entryYear,
+                    'jalur_masuk'           => $isPindahan ? 'pindahan' : 'baru',
+                    'asal_sekolah'          => $request->asal_sekolah,
+                    'catatan_status'        => $isPindahan && !empty($request->asal_sekolah)
+                        ? 'Siswa pindahan dari ' . $request->asal_sekolah
+                        : 'Pendaftaran siswa baru',
+                    'biometric_status'      => 'not_enrolled',
+                    'status'                => 'aktif',
+                ]);
+
+                // Record initial enrollment & academic chronology using StudentAcademicHistoryService
+                app(StudentAcademicHistoryService::class)->recordInitialEnrollment(
+                    $siswa,
+                    $targetKelas,
+                    $activeTa,
+                    $tahunAjaranMasuk,
+                    Auth::user()
+                );
 
             if ($request->filled('existing_orangtua_id')) {
                 // A shared parent is only linked after an explicit admin confirmation;
@@ -229,15 +302,119 @@ class SiswaController extends Controller
         }
     }
 
+    /**
+     * Check authorization for viewing student profile and academic history.
+     */
+    private function assertCanViewSiswa(Siswa $siswa): void
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(401);
+        }
+
+        if (in_array($user->role, ['superadmin', 'admin'])) {
+            return;
+        }
+
+        if ($user->role === 'kaprog') {
+            $siswaJurusanId = $siswa->kelas?->jurusan_id ?? $siswa->angkatan?->jurusan_id;
+            if (!$user->jurusan_id || (int) $siswaJurusanId !== (int) $user->jurusan_id) {
+                abort(403, 'Akses ditolak: siswa ini bukan bagian dari jurusan Anda.');
+            }
+            return;
+        }
+
+        if ($user->role === 'siswa') {
+            if ((int) $siswa->user_id !== (int) $user->id) {
+                abort(403, 'Akses ditolak: Anda hanya dapat melihat profil Anda sendiri.');
+            }
+            return;
+        }
+
+        if ($user->role === 'orangtua') {
+            $isChild = $siswa->orangtua()->where('user_id', $user->id)->exists();
+            if (!$isChild) {
+                abort(403, 'Akses ditolak: Anda hanya dapat melihat profil anak Anda.');
+            }
+            return;
+        }
+
+        if ($user->role === 'guru') {
+            return;
+        }
+    }
+
+    /**
+     * Display student profile, permanent entry identity, and academic history timeline.
+     */
+    public function show(Request $request, $id)
+    {
+        $siswa = Siswa::with([
+            'user',
+            'kelas.jurusan',
+            'angkatan.jurusan',
+            'tahunAjaranMasuk',
+            'orangtua.user',
+            'enrollments.kelas.jurusan',
+            'enrollments.tahunAjaran',
+            'statusHistories.kelasAsal',
+            'statusHistories.kelasTujuan',
+            'statusHistories.tahunAjaranAsal',
+            'statusHistories.tahunAjaranTujuan',
+            'statusHistories.createdBy',
+        ])->findOrFail($id);
+
+        $this->assertCanViewSiswa($siswa);
+
+        $activeTahunAjaran = TahunAjaran::getActive() ?? TahunAjaran::first();
+        $tahunAjarans = TahunAjaran::orderByDesc('tahun_mulai')->get();
+
+        // Filters for timeline and history tabs
+        $selectedTa = $request->query('ta');
+        $selectedTingkat = $request->query('tingkat');
+        $selectedStatus = $request->query('status');
+        $selectedJenisPerubahan = $request->query('jenis_perubahan');
+
+        $enrollments = $siswa->enrollments()
+            ->with(['kelas.jurusan', 'tahunAjaran'])
+            ->when($selectedTa, fn($q) => $q->where(fn($sub) => $sub->where('tahun_ajaran', $selectedTa)->orWhere('tahun_ajaran_id', $selectedTa)))
+            ->when($selectedTingkat, fn($q) => $q->where('tingkat', $selectedTingkat))
+            ->when($selectedStatus, fn($q) => $q->where('status_enrollment', $selectedStatus))
+            ->orderBy('tingkat')
+            ->orderBy('id')
+            ->get();
+
+        $statusHistories = $siswa->statusHistories()
+            ->with(['kelasAsal', 'kelasTujuan', 'tahunAjaranAsal', 'tahunAjaranTujuan', 'createdBy'])
+            ->when($selectedJenisPerubahan, fn($q) => $q->where('jenis_perubahan', $selectedJenisPerubahan))
+            ->when($selectedTa, fn($q) => $q->where(fn($sub) => $sub->where('tahun_ajaran', $selectedTa)->orWhere('tahun_ajaran_tujuan_id', $selectedTa)->orWhere('tahun_ajaran_asal_id', $selectedTa)))
+            ->orderByDesc('tanggal_perubahan')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('siswa.show', compact(
+            'siswa',
+            'activeTahunAjaran',
+            'tahunAjarans',
+            'enrollments',
+            'statusHistories',
+            'selectedTa',
+            'selectedTingkat',
+            'selectedStatus',
+            'selectedJenisPerubahan'
+        ));
+    }
+
     public function edit(Request $request)
     {
-        $siswa = Siswa::with(['user', 'kelas.jurusan', 'orangtua.user'])->findOrFail($request->id);
+        $siswa = Siswa::with(['user', 'kelas.jurusan', 'orangtua.user', 'angkatan.jurusan'])->findOrFail($request->id);
         $this->assertCanManageSiswa($siswa);
         $kelas = Kelas::with('jurusan')->orderBy('nama_kelas')->get();
         $jurusans = Jurusan::orderBy('kode_jurusan')->get();
+        $angkatans = Angkatan::with('jurusan')->orderBy('nomor_angkatan', 'desc')->get();
         $studentEmail = $siswa->user?->email ?? '';
         $currentUsername = str_contains($studentEmail, '@') ? explode('@', $studentEmail)[0] : $studentEmail;
-        return view('siswa.edit', compact('siswa', 'kelas', 'jurusans', 'currentUsername'));
+        return view('siswa.edit', compact('siswa', 'kelas', 'jurusans', 'angkatans', 'currentUsername'));
     }
 
     public function update(Request $request, $id)
@@ -267,7 +444,12 @@ class SiswaController extends Controller
             'nis'              => ['required', 'string', 'max:20', Rule::unique('siswas', 'nis')->ignore($siswa->id)],
             'nama'             => 'required|string|max:255',
             'jenis_kelamin'    => 'required|in:L,P',
+            'tempat_lahir'     => 'nullable|string|max:100',
+            'tanggal_lahir'    => 'nullable|date',
             'kelas_id'         => 'required|exists:kelas,id',
+            'angkatan_id'      => 'nullable|exists:angkatans,id',
+            'jalur_masuk'      => 'nullable|in:baru,pindahan',
+            'asal_sekolah'     => 'nullable|string|max:150',
             'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'parent_name'          => 'required|string|max:255',
             'parent_jenis_kelamin' => 'nullable|in:L,P',
@@ -280,10 +462,18 @@ class SiswaController extends Controller
             'parent_phone.required' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
         ]);
 
+        $targetKelas = Kelas::with(['jurusan', 'tahunAjaran'])->findOrFail($request->kelas_id);
+
         if (Auth::user() && Auth::user()->role === 'kaprog') {
-            $targetKelas = Kelas::findOrFail($request->kelas_id);
             if (Auth::user()->jurusan_id !== $targetKelas->jurusan_id) {
                 return back()->with('error', 'Akses ditolak: Anda hanya dapat memindahkan siswa ke jurusan Anda sendiri.');
+            }
+        }
+
+        if ($request->filled('angkatan_id')) {
+            $akt = Angkatan::find($request->angkatan_id);
+            if ($akt && $akt->jurusan_id && (int) $akt->jurusan_id !== (int) $targetKelas->jurusan_id) {
+                return back()->withErrors(['angkatan_id' => 'Angkatan yang dipilih tidak sesuai dengan Jurusan rombel.'])->withInput();
             }
         }
 
@@ -307,7 +497,7 @@ class SiswaController extends Controller
                 $photoPath = $request->file('photo')->store('siswa-photos', 'public');
             }
 
-            DB::transaction(function () use ($request, $siswa, $finalEmail, $parentPhone, $photoPath) {
+            DB::transaction(function () use ($request, $siswa, $finalEmail, $parentPhone, $photoPath, $targetKelas) {
             $userData = [
                 'name'  => $request->nama,
                 'email' => $finalEmail,
@@ -322,20 +512,27 @@ class SiswaController extends Controller
             }
 
             $kelasChanged = (int) $siswa->kelas_id !== (int) $request->kelas_id;
+            $angkatanId = $request->angkatan_id ?: $siswa->angkatan_id;
+
             $siswa->update([
                 'nisn'             => $request->nisn,
                 'nis'              => $request->nis,
                 'nama'             => $request->nama,
                 'jenis_kelamin'    => $request->jenis_kelamin,
+                'tempat_lahir'     => $request->tempat_lahir,
+                'tanggal_lahir'    => $request->tanggal_lahir,
                 'photo_path'       => $photoPath,
                 'kelas_id'         => $request->kelas_id,
+                'angkatan_id'      => $angkatanId,
+                'jalur_masuk'      => $request->jalur_masuk ?? $siswa->jalur_masuk,
+                'asal_sekolah'     => $request->filled('asal_sekolah') ? $request->asal_sekolah : $siswa->asal_sekolah,
             ]);
             if ($kelasChanged) {
-                StudentEnrollment::where('siswa_id', $siswa->id)->where('is_active', true)->update(['is_active'=>false, 'ended_at'=>now()->toDateString()]);
-                $kelasBaru = Kelas::findOrFail($request->kelas_id);
-                StudentEnrollment::updateOrCreate(
-                    ['siswa_id'=>$siswa->id, 'tahun_ajaran'=>$kelasBaru->tahun_ajaran ?: now()->format('Y') . '/' . now()->addYear()->format('Y')],
-                    ['kelas_id'=>$kelasBaru->id, 'started_at'=>now()->toDateString(), 'ended_at'=>null, 'is_active'=>true]
+                app(StudentAcademicHistoryService::class)->transferClass(
+                    $siswa,
+                    $targetKelas,
+                    'Perubahan rombel kelas melalui edit data siswa',
+                    Auth::user()
                 );
             }
 
@@ -375,6 +572,11 @@ class SiswaController extends Controller
     {
         $siswa = Siswa::with('kelas')->findOrFail($id);
         $this->assertCanManageSiswa($siswa);
+
+        if ($siswa->promotionItems()->exists()) {
+            return redirect()->back()->with('error', "Siswa {$siswa->nama} memiliki catatan riwayat kenaikan kelas / kelulusan dan tidak dapat dihapus demi integritas data.");
+        }
+
         if ($siswa->user) {
             $siswa->user->delete(); // This should cascade and delete Siswa as well based on migration
         } else {

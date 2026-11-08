@@ -200,6 +200,12 @@
                                 <span>Overview Hierarki</span>
                             </a>
                             @if(in_array(Auth::user()->role, ['superadmin', 'admin']))
+                                <a href="{{ route('academic.tahun-ajaran.index') }}"
+                                    class="flex items-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors
+                                    {{ request()->routeIs('academic.tahun-ajaran.*') ? 'text-primary-400 bg-white/10 font-semibold' : 'text-dark-400 hover:text-white hover:bg-white/5' }}">
+                                    <i class='bx bx-calendar-star text-sm'></i>
+                                    <span>Tahun Ajaran</span>
+                                </a>
                                 <a href="{{ route('angkatan.index') }}"
                                 class="flex items-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors
                                 {{ request()->routeIs('angkatan*') ? 'text-primary-400 bg-white/10 font-semibold' : 'text-dark-400 hover:text-white hover:bg-white/5' }}">
@@ -217,6 +223,18 @@
                                     {{ request()->routeIs('kelas*') ? 'text-primary-400 bg-white/10 font-semibold' : 'text-dark-400 hover:text-white hover:bg-white/5' }}">
                                     <i class='bx bx-chalkboard text-sm'></i>
                                     <span>Tingkat & Rombel</span>
+                                </a>
+                                <a href="{{ route('academic.wali-kelas.index') }}"
+                                    class="flex items-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors
+                                    {{ request()->routeIs('academic.wali-kelas.*') ? 'text-primary-400 bg-white/10 font-semibold' : 'text-dark-400 hover:text-white hover:bg-white/5' }}">
+                                    <i class='bx bx-user-pin text-sm'></i>
+                                    <span>Manajemen Wali Kelas</span>
+                                </a>
+                                <a href="{{ route('academic.promotion.index') }}"
+                                    class="flex items-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors
+                                    {{ request()->routeIs('academic.promotion.*') ? 'text-primary-400 bg-white/10 font-semibold' : 'text-dark-400 hover:text-white hover:bg-white/5' }}">
+                                    <i class='bx bx-git-branch text-sm'></i>
+                                    <span>Kenaikan Kelas & Kelulusan</span>
                                 </a>
                             @endif
                         </div>

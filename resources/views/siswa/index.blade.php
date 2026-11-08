@@ -12,7 +12,7 @@
 @section('page-header')
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-xl font-bold text-dark-800">Daftar Siswa</h2>
+            <h2 class="text-xl font-medium text-dark-800">Daftar Siswa</h2>
             <p class="text-sm text-dark-400 mt-1">Kelola data siswa yang ada di sekolah.</p>
         </div>
         <div class="flex items-center gap-2">
@@ -26,6 +26,11 @@
                 class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/35 transition-all duration-200 hover:-translate-y-0.5">
                 <i class='bx bxs-file text-base'></i>
                 Excel
+            </a>
+            <a href="{{ route('siswa.import') }}"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#003EA7] hover:bg-[#002D7A] text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-700/25 hover:shadow-blue-700/35 transition-all duration-200 hover:-translate-y-0.5">
+                <i class='bx bx-cloud-upload text-base'></i>
+                Import Excel
             </a>
             <button onclick="openModal('modal-inputsiswa')"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 hover:-translate-y-0.5">
@@ -152,7 +157,9 @@
                                     </div>
                                     <div>
                                         <div class="font-bold text-dark-900">
-                                            {{ $s->nama }}
+                                            <a href="{{ route('siswa.show', $s->id) }}" class="hover:text-primary-600 transition">
+                                                {{ $s->nama }}
+                                            </a>
                                             @if ($s->jenis_kelamin === 'L')
                                                 <span class="text-xs font-semibold text-blue-600">(L)</span>
                                             @elseif ($s->jenis_kelamin === 'P')
@@ -161,6 +168,12 @@
                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Jenis kelamin belum diatur">Belum diatur</span>
                                             @endif
                                         </div>
+                                        @if ($s->tempat_lahir || $s->tanggal_lahir)
+                                            <div class="text-[11px] text-dark-500 flex items-center gap-1">
+                                                <i class='bx bx-calendar text-xs text-dark-400'></i>
+                                                <span>{{ $s->ttl }}</span>
+                                            </div>
+                                        @endif
                                         <div class="text-[11px] text-primary-600 flex items-center gap-1 font-mono">
                                             <i class='bx bx-envelope text-xs'></i> {{ $s->user->email ?? '-' }}
                                         </div>
@@ -201,6 +214,11 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-center">
                                 <div class="flex items-center justify-center gap-2">
+                                    <a href="{{ route('siswa.show', $s->id) }}"
+                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 transition-colors duration-200"
+                                        title="Profil & Riwayat Akademik">
+                                        <i class='bx bx-history text-lg'></i>
+                                    </a>
                                     <button onclick="editSiswa('{{ $s->id }}')"
                                         class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
                                         title="Edit Data">

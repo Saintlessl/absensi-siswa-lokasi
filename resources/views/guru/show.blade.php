@@ -19,7 +19,7 @@
                 <i class='bx bx-arrow-back text-lg'></i>
             </a>
             <div>
-                <h2 class="text-xl font-bold text-dark-800">{{ $guru->nama }}</h2>
+                <h2 class="text-xl font-medium text-dark-800">{{ $guru->nama }}</h2>
                 <p class="text-xs text-dark-400">NIP: {{ $guru->nip ?? '-' }} &bull; NUPTK: {{ $guru->nuptk ?? '-' }}</p>
             </div>
         </div>

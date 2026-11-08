@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Verifikasi Wajah Masuk — SMK Negeri</title>
+    <title>Verifikasi Wajah Masuk — MySkanic</title>
 
     {{-- Fonts & Icons --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -204,7 +204,7 @@
 
     {{-- Footer --}}
     <footer class="py-3 px-6 text-center text-slate-500 text-xs border-t border-slate-900">
-        &copy; {{ date('Y') }} SMK Negeri &bull; Keamanan Akun Biometrik Wajah & Multi-Device Control
+        &copy; {{ date('Y') }} MySkanic &bull; Keamanan Akun Biometrik Wajah & Multi-Device Control
     </footer>
 
     {{-- Face-API & Camera Engine --}}
