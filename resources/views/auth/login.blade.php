@@ -206,21 +206,22 @@
     @endphp
 
     {{-- Main Container: Full viewport height, split 50:50 on desktop, stacked on mobile --}}
-    <main class="relative w-full min-h-screen lg:h-screen lg:overflow-hidden bg-[#003FA9] flex flex-col lg:flex-row">
+    <main class="relative w-full min-h-screen lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row">
+
+        {{-- FULL-SCREEN ROYAL BLUE GRADIENT & WATERMARK PATTERN (Continuous behind all panels) --}}
+        <div class="absolute inset-0 bg-gradient-to-b from-[#003FA9] via-[#003580] to-[#002B75] z-0 pointer-events-none"></div>
+        <div class="absolute inset-0 pointer-events-none bg-pattern-subtle z-0"
+             style="background-image: @if($patternUrl) url('{{ $patternUrl }}') @else url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E&quot;) @endif; background-size: 280px 240px; background-repeat: repeat;">
+        </div>
 
         {{-- =========================================================================
-             PANEL BRANDING (ROYAL BLUE)
+             PANEL BRANDING (TRANSPARENT CONTAINER, SHOWS FULL BLUE BACKGROUND BEHIND)
              Desktop: Translates from 0% (Siswa) to +100% (Guru)
              Mobile: Top hero section
              ========================================================================= --}}
-        <section class="w-full lg:w-1/2 min-h-[500px] sm:min-h-[560px] lg:min-h-0 lg:h-full relative z-10 flex flex-col justify-between panel-transition bg-gradient-to-b from-[#003FA9] via-[#003580] to-[#002B75] overflow-hidden"
+        <section class="w-full lg:w-1/2 min-h-[500px] sm:min-h-[560px] lg:min-h-0 lg:h-full relative z-10 flex flex-col justify-between panel-transition bg-transparent"
                  :class="role === 'siswa' ? 'lg:translate-x-0' : 'lg:translate-x-full'"
                  aria-label="Panel Identitas Sekolah MySKANIC">
-
-            {{-- Background Pattern Overlay with low opacity --}}
-            <div class="absolute inset-0 pointer-events-none bg-pattern-subtle z-0"
-                 style="background-image: @if($patternUrl) url('{{ $patternUrl }}') @else url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E&quot;) @endif; background-size: 280px 240px; background-repeat: repeat;">
-            </div>
 
             {{-- LAYER 3: Dynamic Character Illustrations Anchored to Bottom --}}
             <div class="absolute inset-x-0 bottom-0 z-10 flex items-end justify-center pointer-events-none overflow-hidden h-[74%] sm:h-[78%] lg:h-[82%] max-h-[calc(100vh-175px)]">
@@ -307,34 +308,11 @@
                     </div>
                 </div>
 
-                {{-- Copyright & Desktop Social Icons Bar --}}
+                {{-- Copyright Line --}}
                 <div class="w-full flex items-center justify-center relative mt-1">
                     <p class="text-white/70 text-[11px] sm:text-xs font-normal tracking-wide text-center">
                         &copy; {{ date('Y') }} MySKANIC &bull; SMK Negeri 1 Ciomas
                     </p>
-
-                    {{-- Social Icons on Desktop (Aligned dynamically near the edge per screenshot reference, without background and enlarged) --}}
-                    <div class="hidden lg:flex flex-col items-center gap-3.5 absolute bottom-4 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] z-20"
-                         :class="role === 'siswa' ? 'right-4 xl:right-6' : 'left-4 xl:left-6'">
-                        <a href="https://instagram.com/smkn1ciomas_official" target="_blank" rel="noopener"
-                           aria-label="Instagram Resmi SMKN 1 Ciomas"
-                           class="text-white/80 hover:text-white transition-all duration-300 hover:scale-120 text-2xl drop-shadow-sm flex items-center justify-center p-1"
-                           title="Instagram">
-                            <i class="bx bxl-instagram"></i>
-                        </a>
-                        <a href="https://tiktok.com/@smkn1ciomas" target="_blank" rel="noopener"
-                           aria-label="TikTok Resmi SMKN 1 Ciomas"
-                           class="text-white/80 hover:text-white transition-all duration-300 hover:scale-120 text-2xl drop-shadow-sm flex items-center justify-center p-1"
-                           title="TikTok">
-                            <i class="bx bxl-tiktok"></i>
-                        </a>
-                        <a href="https://youtube.com/@smknegeri1ciomas" target="_blank" rel="noopener"
-                           aria-label="YouTube Resmi SMKN 1 Ciomas"
-                           class="text-white/80 hover:text-white transition-all duration-300 hover:scale-120 text-2xl drop-shadow-sm flex items-center justify-center p-1"
-                           title="YouTube">
-                            <i class="bx bxl-youtube"></i>
-                        </a>
-                    </div>
                 </div>
 
                 {{-- Social Icons on Mobile (< lg, without background and enlarged) --}}
@@ -359,6 +337,29 @@
                     </a>
                 </div>
             </footer>
+
+            {{-- Social Icons on Desktop (Aligned dynamically near inner edge with generous margin, never cut off) --}}
+            <div class="hidden lg:flex flex-col items-center gap-3.5 absolute bottom-6 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] z-30"
+                 :class="role === 'siswa' ? 'right-6 xl:right-8' : 'left-6 xl:left-8'">
+                <a href="https://instagram.com/smkn1ciomas_official" target="_blank" rel="noopener"
+                   aria-label="Instagram Resmi SMKN 1 Ciomas"
+                   class="text-white/80 hover:text-white transition-all duration-300 hover:scale-120 text-2xl drop-shadow-sm flex items-center justify-center p-1.5"
+                   title="Instagram">
+                    <i class="bx bxl-instagram"></i>
+                </a>
+                <a href="https://tiktok.com/@smkn1ciomas" target="_blank" rel="noopener"
+                   aria-label="TikTok Resmi SMKN 1 Ciomas"
+                   class="text-white/80 hover:text-white transition-all duration-300 hover:scale-120 text-2xl drop-shadow-sm flex items-center justify-center p-1.5"
+                   title="TikTok">
+                    <i class="bx bxl-tiktok"></i>
+                </a>
+                <a href="https://youtube.com/@smknegeri1ciomas" target="_blank" rel="noopener"
+                   aria-label="YouTube Resmi SMKN 1 Ciomas"
+                   class="text-white/80 hover:text-white transition-all duration-300 hover:scale-120 text-2xl drop-shadow-sm flex items-center justify-center p-1.5"
+                   title="YouTube">
+                    <i class="bx bxl-youtube"></i>
+                </a>
+            </div>
         </section>
 
 
