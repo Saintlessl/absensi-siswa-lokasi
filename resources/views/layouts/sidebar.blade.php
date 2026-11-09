@@ -1,6 +1,6 @@
 {{-- Sidebar --}}
 <aside id="sidebar"
-    class="fixed top-0 left-0 z-50 h-screen lg:w-[272px] w-[272px] -translate-x-full lg:translate-x-0 sidebar-transition bg-[#003EA7] border-r border-blue-900/30 flex flex-col shadow-none select-none">
+    class="fixed top-0 left-0 z-50 h-screen lg:w-[272px] w-[272px] -translate-x-full lg:translate-x-0 sidebar-transition bg-[#0052CC] border-r border-blue-900/30 flex flex-col shadow-none select-none">
 
     {{-- Logo Section --}}
     <div class="sidebar-logo-container flex items-center gap-3.5 px-6 pt-6 pb-4 transition-all duration-300">
