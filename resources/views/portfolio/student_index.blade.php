@@ -36,7 +36,7 @@
                 <div>
                     <div class="h-36 bg-slate-100 relative overflow-hidden flex items-center justify-center">
                         @if($port->cover_image_path)
-                            <img src="{{ asset('storage/' . $port->cover_image_path) }}" alt="{{ $port->judul }}" class="w-full h-full object-cover">
+                            <img src="{{ image_url($port->cover_image_path) }}" alt="{{ $port->judul }}" class="w-full h-full object-cover" loading="lazy">
                         @else
                             <div class="text-slate-400 font-bold text-xs uppercase">{{ $port->kategori }}</div>
                         @endif
@@ -149,8 +149,10 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Gambar Sampul / Screenshot (Maks. 3MB)</label>
-                        <input type="file" name="cover_image" accept="image/*"
+                        <input type="file" name="cover_image" accept="image/*" data-preview="#prevCoverPort"
                             class="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#E2EDFF] file:text-[#003FA9] hover:file:bg-blue-200">
+                        <img id="prevCoverPort" class="hidden mt-2 max-h-40 rounded-xl object-contain border border-slate-200" alt="Pratinjau gambar sampul">
+                        <p data-preview-error class="mt-1 text-[11px] font-semibold text-rose-600"></p>
                     </div>
                 </div>
 

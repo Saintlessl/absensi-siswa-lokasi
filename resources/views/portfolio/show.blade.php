@@ -18,9 +18,9 @@
 
     <!-- Main Detail Card -->
     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden space-y-6">
-        @if($portfolio->cover_image_path)
+        @if($u = image_url($portfolio->cover_image_path))
             <div class="w-full h-80 bg-slate-900 relative">
-                <img src="{{ asset('storage/' . $portfolio->cover_image_path) }}" alt="{{ $portfolio->judul }}" class="w-full h-full object-cover">
+                <img src="{{ $u }}" alt="{{ $portfolio->judul }}" class="w-full h-full object-cover" loading="lazy">
             </div>
         @endif
 

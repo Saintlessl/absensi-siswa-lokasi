@@ -56,8 +56,8 @@
                 <div>
                     <!-- Thumbnail Container -->
                     <div class="h-44 bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 relative overflow-hidden flex items-center justify-center">
-                        @if($port->cover_image_path)
-                            <img src="{{ asset('storage/' . $port->cover_image_path) }}" alt="{{ $port->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        @if($u = image_url($port->cover_image_path))
+                            <img src="{{ $u }}" alt="{{ $port->judul }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
                         @else
                             <div class="text-blue-400 flex flex-col items-center">
                                 <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>

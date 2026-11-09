@@ -145,9 +145,9 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            @if ($s->faceBiometric && $s->faceBiometric->sample_photo)
-                                                <img src="{{ asset('storage/' . $s->faceBiometric->sample_photo) }}"
-                                                    class="w-10 h-10 rounded-xl object-cover border border-dark-200 shadow-sm">
+                                            @if ($s->faceBiometric && $u = image_url($s->faceBiometric->sample_photo))
+                                                <img src="{{ $u }}"
+                                                    class="w-10 h-10 rounded-xl object-cover border border-dark-200 shadow-sm" loading="lazy">
                                             @else
                                                 <div class="w-10 h-10 rounded-xl bg-dark-100 text-dark-500 flex items-center justify-center font-bold text-xs">
                                                     {{ strtoupper(substr($s->nama, 0, 1)) }}

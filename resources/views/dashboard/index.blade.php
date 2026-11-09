@@ -739,8 +739,8 @@
                                     {{ $r->keterangan ?? ($r->keterangan_terlambat ?? '-') }}
                                 </td>
                                 <td class="px-6 py-3.5 text-center">
-                                    @if ($r->foto_masuk)
-                                        <img src="{{ asset('storage/' . $r->foto_masuk) }}" class="w-9 h-9 rounded-lg object-cover border border-dark-200 mx-auto shadow-sm">
+                                    @if ($u = image_url($r->foto_masuk))
+                                        <img src="{{ $u }}" class="w-9 h-9 rounded-lg object-cover border border-dark-200 mx-auto shadow-sm" loading="lazy">
                                     @else
                                         <span class="text-dark-300 text-xs">-</span>
                                     @endif

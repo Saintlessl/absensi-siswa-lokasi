@@ -681,6 +681,8 @@
         </script>
     @endif
 
+    @include('layouts.image-preview')
+
     @stack('scripts')
 </body>
 

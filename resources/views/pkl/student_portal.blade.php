@@ -145,7 +145,9 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 mb-1">Foto Bukti / Dokumentasi</label>
-                                <input type="file" name="foto_dokumentasi" accept="image/*" class="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700">
+                                <input type="file" name="foto_dokumentasi" accept="image/*" data-preview="#prevFotoLog" class="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700">
+                                <img id="prevFotoLog" class="hidden mt-2 h-24 w-24 rounded-xl object-cover border border-slate-200" alt="Pratinjau foto dokumentasi">
+                                <p data-preview-error class="mt-1 text-[10px] font-semibold text-rose-600"></p>
                             </div>
                         </div>
                         <div>
@@ -176,6 +178,11 @@
                                     </span>
                                 </div>
                                 <p class="text-xs text-slate-600">{{ $log->aktivitas }}</p>
+                                @if($u = image_url($log->foto_dokumentasi_path))
+                                    <a href="{{ $u }}" target="_blank" rel="noopener" class="inline-block">
+                                        <img src="{{ $u }}" alt="Foto dokumentasi" class="h-16 w-16 rounded-lg object-cover border border-slate-200 mt-1" loading="lazy">
+                                    </a>
+                                @endif
                                 @if($log->kompetensi_dipelajari)
                                     <div class="text-[11px] text-blue-700 font-medium">🎯 {{ $log->kompetensi_dipelajari }}</div>
                                 @endif

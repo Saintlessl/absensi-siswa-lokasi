@@ -142,9 +142,9 @@
                                 <span class="text-rose-600 font-semibold">{{ $absenHariIni->keterangan_terlambat }}</span>
                             @endif
                         </div>
-                        @if ($absenHariIni && $absenHariIni->foto_masuk)
+                        @if ($absenHariIni && $u = image_url($absenHariIni->foto_masuk ?? null))
                             <div class="mt-2 pt-2 border-t border-dark-100/60 flex items-center gap-2">
-                                <img src="{{ asset('storage/' . $absenHariIni->foto_masuk) }}" class="w-8 h-8 rounded-lg object-cover border border-dark-200">
+                                <img src="{{ $u }}" class="w-8 h-8 rounded-lg object-cover border border-dark-200" loading="lazy">
                                 <span class="text-[11px] text-dark-500">Foto selfie masuk terverifikasi</span>
                             </div>
                         @endif

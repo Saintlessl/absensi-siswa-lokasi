@@ -319,8 +319,10 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-dark-700 mb-1.5">Ganti Foto Profil</label>
-                        <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+                        <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" data-preview="#prevGuruPhoto"
                             class="w-full text-xs rounded-xl border-dark-200 bg-white px-3 py-2 text-dark-800 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700">
+                        <img id="prevGuruPhoto" class="hidden mt-2 h-20 w-20 rounded-xl object-cover border border-slate-200" alt="Pratinjau foto guru">
+                        <p data-preview-error class="mt-1 text-[11px] font-semibold text-rose-600"></p>
                     </div>
                 </div>
 

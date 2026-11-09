@@ -52,6 +52,11 @@
                                 @if($log->kompetensi_dipelajari)
                                     <span class="text-[10px] text-blue-600 font-medium">🎯 {{ $log->kompetensi_dipelajari }}</span>
                                 @endif
+                                @if($u = image_url($log->foto_dokumentasi_path))
+                                    <a href="{{ $u }}" target="_blank" rel="noopener" class="inline-block mt-1.5">
+                                        <img src="{{ $u }}" alt="Foto dokumentasi PKL" class="h-16 w-16 rounded-lg object-cover border border-slate-200 hover:opacity-80" loading="lazy">
+                                    </a>
+                                @endif
                             </td>
                             <td class="py-3 px-4 whitespace-nowrap">
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold 
