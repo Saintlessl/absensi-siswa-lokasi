@@ -68,7 +68,6 @@ class SchoolPilotDataSeeder extends Seeder
                 ['kode_jurusan' => 'PPLG'],
                 [
                     'nama_jurusan' => 'Pengembangan Perangkat Lunak dan Gim',
-                    'bidang'       => 'Teknologi Informasi',
                     'deskripsi'    => '[PILOT-CIOMAS] Program Keahlian Pengembangan Perangkat Lunak dan Gim',
                     'is_active'    => true,
                 ]
@@ -81,11 +80,9 @@ class SchoolPilotDataSeeder extends Seeder
                     'nomor_angkatan'  => 19,
                     'nama_angkatan'   => 'Angkatan 19 PPLG',
                     'kode_angkatan'   => 'AKT-PPLG-19',
-                    'tahun_ajaran'    => '2026/2027',
-                    'tahun_kelulusan' => 2029,
+                    'tahun_ajaran_masuk' => '2026/2027',
+                    'tahun_lulus_rencana' => 2029,
                     'status'          => 'aktif',
-                    'is_active'       => true,
-                    'is_alumni'       => false,
                 ]
             );
 
@@ -96,7 +93,6 @@ class SchoolPilotDataSeeder extends Seeder
                     'tingkat'         => 10,
                     'nomor_rombel'    => 1,
                     'jurusan_id'      => $jurusan->id,
-                    'angkatan_id'     => $angkatan->id,
                     'tahun_ajaran'    => '2026/2027',
                     'jumlah_siswa'    => 0,
                     'is_active'       => true,
