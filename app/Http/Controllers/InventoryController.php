@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use App\Models\InventoryBorrowing;
 use App\Models\InventoryItem;
 use App\Models\Jurusan;
@@ -126,10 +127,16 @@ class InventoryController extends Controller
     public function borrowingsIndex(Request $request)
     {
         $user = Auth::user();
-        $query = InventoryBorrowing::with(['item.jurusan', 'user', 'siswa.kelas']);
+        $query = InventoryBorrowing::with(['item.jurusan', 'user', 'siswa.kelas', 'peminjamGuru', 'pencatat']);
 
         if ($user->role === 'siswa') {
             $query->where('user_id', $user->id);
+        } elseif ($user->role === 'guru') {
+            $guru = Guru::where('user_id', $user->id)->first();
+            $query->where(function ($q) use ($user, $guru) {
+                $q->where('user_id', $user->id);
+                if ($guru) $q->orWhere('peminjam_guru_id', $guru->id);
+            });
         } elseif ($user->role === 'kaprog' && $user->jurusan_id) {
             $query->whereHas('item', function ($q) use ($user) {
                 $q->where('jurusan_id', $user->jurusan_id);
@@ -138,6 +145,28 @@ class InventoryController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('sumber')) {
+            $query->where('sumber_transaksi', $request->sumber === 'manual' ? 'manual_petugas' : 'mandiri');
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_pinjam', $request->tanggal);
+        }
+
+        if ($request->filled('peminjam')) {
+            $s = $request->peminjam;
+            $query->where(function ($q) use ($s) {
+                $q->whereHas('user', fn ($u) => $u->where('name', 'like', "%{$s}%"))
+                  ->orWhereHas('siswa', fn ($x) => $x->where('nama', 'like', "%{$s}%"))
+                  ->orWhereHas('peminjamGuru', fn ($x) => $x->where('nama', 'like', "%{$s}%"));
+            });
+        }
+
+        if ($request->filled('barang')) {
+            $b = $request->barang;
+            $query->whereHas('item', fn ($x) => $x->where('nama_barang', 'like', "%{$b}%")->orWhere('kode_barang', 'like', "%{$b}%"));
         }
 
         $borrowings = $query->latest('tanggal_pinjam')->latest('id')->paginate(20)->withQueryString();
@@ -297,6 +326,214 @@ class InventoryController extends Controller
         }
 
         return back()->with('success', "Pengembalian alat {$item->nama_barang} berhasil dicatat.");
+    }
+
+    /**
+     * Manual transaction recorded by a petugas on behalf of a siswa or guru.
+     * Skips the pending/approve flow: the tool physically leaves the desk now,
+     * so the row is created directly in 'borrowed' status with stok deducted
+     * atomically (SELECT ... FOR UPDATE) to prevent double-lending races.
+     */
+    public function manualBorrow(Request $request, InAppNotificationService $notifService)
+    {
+        $request->validate([
+            'jenis_peminjam'    => 'required|in:siswa,guru',
+            'siswa_id'          => 'required_if:jenis_peminjam,siswa|nullable|exists:siswas,id',
+            'guru_id'           => 'required_if:jenis_peminjam,guru|nullable|exists:gurus,id',
+            'inventory_item_id' => 'required|exists:inventory_items,id',
+            'jumlah'            => 'required|integer|min:1',
+            'tanggal_pinjam'    => 'required|date',
+            'rencana_kembali'   => 'required|date|after_or_equal:tanggal_pinjam',
+            'keperluan'         => 'required|string|max:500',
+        ]);
+
+        $user = Auth::user();
+        $item = InventoryItem::findOrFail($request->inventory_item_id);
+
+        // Kaprog may only lend out assets of their own department.
+        if ($user->role === 'kaprog' && $user->jurusan_id && $item->jurusan_id && (int) $item->jurusan_id !== (int) $user->jurusan_id) {
+            abort(403, 'Akses ditolak: Anda hanya berwenang mencatat peminjaman peralatan dari program keahlian Anda.');
+        }
+
+        if (in_array($item->kondisi, ['rusak_berat', 'maintenance']) || $item->status === 'afkir') {
+            return back()->withInput()->with('error', "Peralatan {$item->nama_barang} sedang {$item->kondisi} dan tidak dapat dipinjam.");
+        }
+
+        $peminjamUser = null;
+        $siswaId = null;
+        $guruId = null;
+
+        if ($request->jenis_peminjam === 'siswa') {
+            $siswa = Siswa::with('user')->findOrFail($request->siswa_id);
+            if ($siswa->status !== 'aktif') {
+                return back()->withInput()->with('error', 'Siswa tersebut tidak berstatus aktif.');
+            }
+            $siswaId = $siswa->id;
+            $peminjamUser = $siswa->user;
+        } else {
+            $guru = Guru::with('user')->findOrFail($request->guru_id);
+            $guruId = $guru->id;
+            $peminjamUser = $guru->user;
+        }
+
+        $borrowing = null;
+        $failed = false;
+
+        DB::transaction(function () use ($request, $item, $siswaId, $guruId, $peminjamUser, &$borrowing, &$failed) {
+            // Re-read the item under a row lock so concurrent manual entries
+            // cannot both pass the stock check.
+            $locked = InventoryItem::whereKey($item->id)->lockForUpdate()->first();
+
+            if ($locked->unit_tersedia < $request->jumlah) {
+                $failed = true;
+                return;
+            }
+
+            $newTersedia = $locked->unit_tersedia - $request->jumlah;
+
+            $borrowing = InventoryBorrowing::create([
+                'inventory_item_id' => $locked->id,
+                'user_id'           => $peminjamUser->id,
+                'siswa_id'          => $siswaId,
+                'peminjam_guru_id'  => $guruId,
+                'sumber_transaksi'  => 'manual_petugas',
+                'dicatat_oleh'      => Auth::id(),
+                'jumlah'            => $request->jumlah,
+                'tanggal_pinjam'    => $request->tanggal_pinjam,
+                'rencana_kembali'   => $request->rencana_kembali,
+                'keperluan'         => $request->keperluan,
+                'status'            => 'borrowed',
+                'decided_by'        => Auth::id(),
+                'kondisi_sebelum'   => $locked->kondisi === 'baik' ? 'baik' : 'rusak_ringan',
+            ]);
+
+            $locked->update([
+                'unit_tersedia' => $newTersedia,
+                'status'        => $newTersedia <= 0 ? 'dipinjam' : 'tersedia',
+            ]);
+        });
+
+        if ($failed || !$borrowing) {
+            return back()->withInput()->with('error', "Stok {$item->nama_barang} tidak mencukupi (tersedia: {$item->unit_tersedia}). Transaksi manual dibatalkan.");
+        }
+
+        if ($peminjamUser) {
+            $notifService->sendToUser(
+                $peminjamUser,
+                'Peminjaman Alat Dicatat Petugas',
+                "Petugas mencatat peminjaman {$item->nama_barang} x{$borrowing->jumlah} atas nama Anda (rencana kembali: {$borrowing->rencana_kembali->format('d/m/Y')}).",
+                'administrative'
+            );
+        }
+
+        return back()->with('success', "Transaksi manual tercatat: {$item->nama_barang} x{$borrowing->jumlah} dipinjamkan dan stok telah dikurangi.");
+    }
+
+    /**
+     * Manual return recorded by a petugas (walk-in hand-over).
+     * Idempotent per transaction: returned rows cannot be returned again.
+     */
+    public function manualReturn(Request $request, $id, InAppNotificationService $notifService)
+    {
+        $request->validate([
+            'kondisi_sesudah'      => 'required|in:baik,rusak_ringan,rusak_berat',
+            'tanggal_kembali'      => 'required|date',
+            'catatan_pengembalian' => 'nullable|string|max:500',
+        ]);
+
+        $borrowing = InventoryBorrowing::with(['item', 'user'])->findOrFail($id);
+        $item = $borrowing->item;
+
+        $user = Auth::user();
+        if ($user->role === 'kaprog' && $user->jurusan_id && $item->jurusan_id) {
+            abort_unless(
+                (int) $item->jurusan_id === (int) $user->jurusan_id,
+                403,
+                'Akses ditolak: Anda hanya berwenang memproses peralatan dari program keahlian Anda.'
+            );
+        }
+
+        // Anti double-credit: only an in-hand borrowing can be closed once.
+        if (!in_array($borrowing->status, ['approved', 'borrowed'], true)) {
+            return back()->with('error', "Transaksi ini sudah berstatus {$borrowing->status}; pengembalian tidak dapat dicatat dua kali.");
+        }
+
+        DB::transaction(function () use ($request, $borrowing, $item) {
+            $locked = InventoryItem::whereKey($item->id)->lockForUpdate()->first();
+            $kondisi = $request->kondisi_sesudah;
+
+            $borrowing->update([
+                'status'                => 'returned',
+                'tanggal_kembali'       => $request->tanggal_kembali,
+                'kondisi_sesudah'       => $kondisi,
+                'catatan_pengembalian'  => $request->catatan_pengembalian,
+            ]);
+
+            if ($kondisi === 'rusak_berat') {
+                $locked->update([
+                    'kondisi' => 'rusak_berat',
+                    'status'  => 'maintenance',
+                ]);
+            } else {
+                $locked->update([
+                    'unit_tersedia' => min($locked->unit_tersedia + $borrowing->jumlah, $locked->total_unit),
+                    'kondisi'       => $kondisi,
+                    'status'        => 'tersedia',
+                ]);
+            }
+        });
+
+        if ($borrowing->user) {
+            $notifService->sendToUser(
+                $borrowing->user,
+                'Pengembalian Alat Dicatat Petugas',
+                "Pengembalian {$item->nama_barang} telah dicatat petugas (Kondisi: {$request->kondisi_sesudah}).",
+                'administrative'
+            );
+        }
+
+        return back()->with('success', "Pengembalian manual {$item->nama_barang} berhasil dicatat dan stok dikembalikan.");
+    }
+
+    /**
+     * AJAX: siswa options for the manual borrow form (active only).
+     */
+    public function manualOptions(Request $request)
+    {
+        $user = Auth::user();
+        $kaprogJurusan = ($user->role === 'kaprog' && $user->jurusan_id) ? (int) $user->jurusan_id : null;
+        $q = trim((string) $request->input('q'));
+
+        $siswaQuery = Siswa::with('kelas:id,nama_kelas')->where('status', 'aktif');
+        if ($kaprogJurusan) {
+            $siswaQuery->whereHas('kelas', fn ($x) => $x->where('jurusan_id', $kaprogJurusan));
+        }
+        if ($q !== '') {
+            $siswaQuery->where(fn ($x) => $x->where('nama', 'like', "%{$q}%")->orWhere('nis', 'like', "%{$q}%"));
+        }
+        $siswas = $siswaQuery->orderBy('nama')->limit(30)->get(['id', 'nama', 'nis'])
+            ->map(fn ($s) => ['id' => $s->id, 'label' => $s->nama . ' — ' . ($s->kelas->nama_kelas ?? '-') . ($s->nis ? " (NIS {$s->nis})" : '')]);
+
+        $guruQuery = Guru::query()->whereHas('user', fn ($u) => $u->whereIn('role', ['guru', 'kaprog']));
+        if ($q !== '') {
+            $guruQuery->where(fn ($x) => $x->where('nama', 'like', "%{$q}%")->orWhere('nip', 'like', "%{$q}%"));
+        }
+        $gurus = $guruQuery->orderBy('nama')->limit(30)->get(['id', 'nama', 'nip'])
+            ->map(fn ($g) => ['id' => $g->id, 'label' => $g->nama . ($g->nip ? " (NIP {$g->nip})" : '')]);
+
+        $itemQuery = InventoryItem::query()->whereIn('status', ['tersedia', 'dipinjam']);
+        if ($kaprogJurusan) {
+            $itemQuery->where(fn ($x) => $x->where('jurusan_id', $kaprogJurusan)->orWhereNull('jurusan_id'));
+        }
+        $items = $itemQuery->orderBy('nama_barang')->get(['id', 'nama_barang', 'kode_barang', 'unit_tersedia', 'kondisi'])
+            ->map(fn ($i) => [
+                'id'      => $i->id,
+                'label'   => $i->nama_barang . ' (' . $i->kode_barang . ')',
+                'stok'    => (int) $i->unit_tersedia,
+                'kondisi' => $i->kondisi,
+            ]);
+
+        return response()->json(['siswa' => $siswas, 'guru' => $gurus, 'items' => $items]);
     }
 
     /**

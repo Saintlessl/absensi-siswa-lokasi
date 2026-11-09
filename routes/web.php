@@ -355,6 +355,7 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     Route::get('/inventaris', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/peminjaman-alat', [InventoryController::class, 'borrowingsIndex'])->name('inventory.borrowings');
     Route::post('/peminjaman-alat/ajukan', [InventoryController::class, 'requestBorrow'])->name('inventory.borrow.request');
+    Route::get('/peminjaman-alat/options', [InventoryController::class, 'manualOptions'])->name('inventory.manual.options');
 
     // Manajemen Aset & Verifikasi Peminjaman/Pengembalian (Superadmin, Admin, Kaprog, Guru)
     Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
@@ -363,6 +364,8 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
         Route::delete('/inventaris/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
         Route::post('/peminjaman-alat/{id}/approve', [InventoryController::class, 'approveBorrow'])->name('inventory.borrow.approve');
         Route::post('/peminjaman-alat/{id}/return', [InventoryController::class, 'returnItem'])->name('inventory.borrow.return');
+        Route::post('/peminjaman-alat/manual', [InventoryController::class, 'manualBorrow'])->name('inventory.borrow.manual');
+        Route::post('/peminjaman-alat/{id}/return-manual', [InventoryController::class, 'manualReturn'])->name('inventory.borrow.return.manual');
     });
 
     // Detail Aset (Ditempatkan setelah /inventaris/buat untuk mencegah routing collision {id}='buat')

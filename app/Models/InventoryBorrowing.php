@@ -14,6 +14,9 @@ class InventoryBorrowing extends Model
         'inventory_item_id',
         'user_id',
         'siswa_id',
+        'peminjam_guru_id',
+        'sumber_transaksi',
+        'dicatat_oleh',
         'jumlah',
         'tanggal_pinjam',
         'rencana_kembali',
@@ -35,6 +38,16 @@ class InventoryBorrowing extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
+    }
+
+    public function peminjamGuru(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class, 'peminjam_guru_id');
+    }
+
+    public function pencatat(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dicatat_oleh');
     }
 
     public function user(): BelongsTo
