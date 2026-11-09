@@ -166,7 +166,7 @@ class AcademicPromotionService
         }
 
         // Fallback: If no explicit enrollments exist for this TA, retrieve active siswas assigned to these classes
-        $directStudents = Siswa::with(['angkatan', 'kelas.jurusan', 'jurusan'])
+        $directStudents = Siswa::with(['angkatan', 'kelas.jurusan'])
             ->where('status', 'aktif')
             ->whereIn('kelas_id', $kelasIds)
             ->orderBy('kelas_id')

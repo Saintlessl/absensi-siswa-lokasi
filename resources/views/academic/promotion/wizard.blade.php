@@ -200,79 +200,138 @@
             </div>
             <div class="flex items-center gap-2" x-show="originClasses.length > 0">
                 <button type="button" @click="toggleSelectAllClasses()"
-                    class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all">
-                    <span x-text="selectedKelasIds.length > 0 && selectedKelasIds.length === originClassesWithStudents.length ? 'Batal Pilih Semua' : 'Pilih Semua Rombel Aktif'"></span>
+                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-2xs">
+                    <span x-text="selectedKelasIds.length > 0 ? 'Batal Pilih Semua (' + selectedKelasIds.length + ')' : 'Pilih Semua Rombel Aktif'"></span>
                 </button>
             </div>
         </div>
 
         {{-- Filter & Count Summary --}}
-        <div x-show="originClasses.length > 0" class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-xl text-xs">
+        <div x-show="originClasses.length > 0" class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs">
             <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-slate-400 font-bold text-[11px] uppercase mr-1">Filter:</span>
                 <button type="button" @click="filterTingkat = ''"
-                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    class="px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all cursor-pointer"
                     :class="filterTingkat === '' ? 'bg-[#003EA7] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
                     Semua (<span x-text="originClasses.length"></span>)
                 </button>
                 <button type="button" @click="filterTingkat = 'with_students'"
-                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    class="px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all cursor-pointer"
                     :class="filterTingkat === 'with_students' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
                     Ada Siswa (<span x-text="originClassesWithStudents.length"></span>)
                 </button>
                 <button type="button" @click="filterTingkat = 10"
-                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    class="px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all cursor-pointer"
                     :class="filterTingkat === 10 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
                     Kelas 10
                 </button>
                 <button type="button" @click="filterTingkat = 11"
-                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    class="px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all cursor-pointer"
                     :class="filterTingkat === 11 ? 'bg-sky-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
                     Kelas 11
                 </button>
                 <button type="button" @click="filterTingkat = 12"
-                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    class="px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all cursor-pointer"
                     :class="filterTingkat === 12 ? 'bg-amber-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
                     Kelas 12
                 </button>
             </div>
             <div class="text-[11px] text-slate-500 font-medium">
                 Terpilih: <strong class="text-[#003EA7]" x-text="selectedKelasIds.length"></strong> dari <strong x-text="originClasses.length"></strong> rombel
+                (<strong class="text-emerald-700" x-text="selectedActiveStudentCount"></strong> siswa aktif)
             </div>
         </div>
 
-        {{-- Class Grid Selection --}}
-        <div x-show="filteredOriginClasses.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-            <template x-for="c in filteredOriginClasses" :key="c.id">
-                <label class="p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-start gap-3"
-                    :class="selectedKelasIds.includes(c.id) ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-500/20 shadow-sm' : (c.total_siswa_aktif > 0 ? 'bg-slate-50/40 border-slate-200 hover:bg-slate-50' : 'bg-slate-50/20 border-slate-100 opacity-60')">
-                    <input type="checkbox" :value="c.id" x-model="selectedKelasIds"
-                        class="mt-1 rounded text-[#003EA7] focus:ring-[#003EA7]">
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="text-xs font-bold text-slate-800 truncate" x-text="c.nama_kelas"></span>
-                            <span class="text-[10px] px-1.5 py-0.5 rounded font-bold"
-                                :class="{
-                                    'bg-indigo-100 text-indigo-700': c.tingkat === 10,
-                                    'bg-sky-100 text-sky-700': c.tingkat === 11,
-                                    'bg-amber-100 text-amber-800': c.tingkat === 12
-                                }"
-                                x-text="'Tingkat ' + c.tingkat"></span>
+        {{-- Grouped by Jurusan & Tingkat (Ringkas & Terorganisir) --}}
+        <div x-show="groupedOriginClassesByJurusan.length > 0" class="space-y-4">
+            <template x-for="group in groupedOriginClassesByJurusan" :key="group.jurusan_id">
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden transition-all hover:border-slate-300">
+                    {{-- Header Jurusan --}}
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-black tracking-wider bg-[#003EA7] text-white shadow-xs"
+                                x-text="group.jurusan_kode"></span>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800 leading-tight" x-text="group.jurusan_nama"></h4>
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 mt-0.5">
+                                    <span><strong class="text-slate-700" x-text="group.classes.length"></strong> Rombel</span>
+                                    <span class="text-slate-300">&bull;</span>
+                                    <span :class="getClassesActiveStudentCount(group.classes) > 0 ? 'text-emerald-700 font-bold' : 'text-slate-500'">
+                                        <strong x-text="getClassesActiveStudentCount(group.classes)"></strong> Siswa Terdaftar
+                                    </span>
+                                    <span class="text-slate-300">&bull;</span>
+                                    <span>Terpilih: <strong class="text-[#003EA7]" x-text="getSelectedCountInGroup(group.classes)"></strong>/<span x-text="group.classes.length"></span> rombel</span>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-[11px] text-slate-500 mt-0.5 truncate" x-text="c.jurusan_nama"></p>
-                        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                            <span class="text-slate-400">Siswa Aktif:</span>
-                            <strong :class="c.total_siswa_aktif > 0 ? 'text-emerald-700 font-bold' : 'text-slate-400 font-normal'"
-                                x-text="c.total_siswa_aktif + ' Siswa'"></strong>
+                        <div class="flex items-center gap-2 self-start sm:self-center flex-shrink-0">
+                            <button type="button" @click="toggleJurusanClasses(group.classes)"
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                :class="isJurusanFullySelected(group.classes)
+                                    ? 'bg-blue-100 text-[#003EA7] hover:bg-blue-200 ring-1 ring-blue-300'
+                                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300 shadow-2xs'">
+                                <i class='bx' :class="isJurusanFullySelected(group.classes) ? 'bx-check-double text-base text-[#003EA7]' : 'bx-select-multiple text-base text-slate-500'"></i>
+                                <span x-text="isJurusanFullySelected(group.classes) ? 'Batal Pilih Jurusan' : 'Pilih Semua Jurusan Ini'"></span>
+                            </button>
                         </div>
-                        <div class="text-[10px] text-slate-400 truncate mt-0.5" x-text="'Wali: ' + (c.wali_kelas || '-')"></div>
                     </div>
-                </label>
+
+                    {{-- Body Tingkat Rows --}}
+                    <div class="p-3 sm:p-4 space-y-2.5">
+                        <template x-for="lvl in group.levels" :key="lvl.tingkat">
+                            <div class="flex flex-col md:flex-row md:items-center gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200/90 transition-colors">
+                                {{-- Tingkat Label & Quick Selector --}}
+                                <div class="flex items-center justify-between md:w-36 flex-shrink-0">
+                                    <button type="button" @click="toggleLevelClasses(lvl.classes)"
+                                        class="group/lvl inline-flex items-center gap-1.5 text-left cursor-pointer hover:opacity-85 transition-opacity"
+                                        :title="'Klik untuk memilih/membatalkan semua rombel Kelas ' + lvl.tingkat + ' di jurusan ini'">
+                                        <span class="w-2.5 h-2.5 rounded-full" :class="{
+                                            'bg-indigo-500 ring-2 ring-indigo-200': lvl.tingkat === 10,
+                                            'bg-sky-500 ring-2 ring-sky-200': lvl.tingkat === 11,
+                                            'bg-amber-500 ring-2 ring-amber-200': lvl.tingkat === 12
+                                        }"></span>
+                                        <span class="text-xs font-bold text-slate-700 group-hover/lvl:text-[#003EA7]" x-text="'Kelas ' + lvl.tingkat"></span>
+                                    </button>
+                                    <span class="text-[10px] text-slate-400 font-semibold md:mr-2">
+                                        (<span x-text="getSelectedCountInGroup(lvl.classes)"></span>/<span x-text="lvl.classes.length"></span>)
+                                    </span>
+                                </div>
+
+                                {{-- Class Chips / Pills --}}
+                                <div class="flex flex-wrap items-center gap-2 flex-1">
+                                    <template x-for="c in lvl.classes" :key="c.id">
+                                        <button type="button" @click="toggleClass(c.id)"
+                                            :title="c.wali_kelas ? (c.nama_kelas + ' — Wali: ' + c.wali_kelas) : c.nama_kelas"
+                                            class="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs border transition-all duration-150 select-none cursor-pointer text-left"
+                                            :class="isClassSelected(c.id)
+                                                ? 'bg-blue-50/95 border-blue-400 text-blue-950 font-bold ring-2 ring-blue-500/25 shadow-xs'
+                                                : (c.total_siswa_aktif > 0
+                                                    ? 'bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-slate-50 shadow-2xs'
+                                                    : 'bg-white/80 border-slate-200/70 text-slate-500 hover:border-slate-300 hover:text-slate-700')">
+                                            
+                                            <i class='bx text-sm transition-transform group-hover:scale-110 flex-shrink-0'
+                                                :class="isClassSelected(c.id) ? 'bxs-check-circle text-[#003EA7]' : 'bx-circle text-slate-300'"></i>
+
+                                            <span class="text-xs tracking-tight" x-text="c.nama_kelas"></span>
+
+                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
+                                                :class="c.total_siswa_aktif > 0
+                                                    ? (isClassSelected(c.id) ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-800')
+                                                    : 'bg-slate-100 text-slate-400'"
+                                                x-text="c.total_siswa_aktif + ' Siswa'">
+                                            </span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
             </template>
         </div>
 
         {{-- Empty state when no classes found in filtered view --}}
-        <div x-show="filteredOriginClasses.length === 0 && originClasses.length > 0" x-cloak
+        <div x-show="groupedOriginClassesByJurusan.length === 0 && originClasses.length > 0" x-cloak
             class="p-8 text-center text-slate-400 bg-slate-50 rounded-xl border border-slate-100">
             <p class="text-xs">Tidak ada rombel yang cocok dengan filter yang dipilih.</p>
         </div>
@@ -898,12 +957,122 @@ function promotionWizard() {
         },
 
         toggleSelectAllClasses() {
-            const targets = this.originClassesWithStudents.length > 0 ? this.originClassesWithStudents : this.originClasses;
-            if (this.selectedKelasIds.length === targets.length && targets.length > 0) {
-                this.selectedKelasIds = [];
+            const targets = this.filteredOriginClasses.length > 0 ? this.filteredOriginClasses : this.originClasses;
+            const targetIds = targets.map(c => Number(c.id));
+            const allSelected = targetIds.length > 0 && targetIds.every(id => this.isClassSelected(id));
+
+            if (allSelected) {
+                const targetSet = new Set(targetIds);
+                this.selectedKelasIds = this.selectedKelasIds.filter(id => !targetSet.has(Number(id)));
             } else {
-                this.selectedKelasIds = targets.map(c => c.id);
+                const newSet = new Set(this.selectedKelasIds.map(Number));
+                targetIds.forEach(id => newSet.add(id));
+                this.selectedKelasIds = Array.from(newSet);
             }
+        },
+
+        isClassSelected(id) {
+            const numId = Number(id);
+            return this.selectedKelasIds.some(x => Number(x) === numId);
+        },
+
+        toggleClass(id) {
+            const numId = Number(id);
+            const idx = this.selectedKelasIds.findIndex(x => Number(x) === numId);
+            if (idx > -1) {
+                this.selectedKelasIds.splice(idx, 1);
+            } else {
+                this.selectedKelasIds.push(numId);
+            }
+        },
+
+        isJurusanFullySelected(classes) {
+            if (!classes || classes.length === 0) return false;
+            return classes.every(c => this.isClassSelected(c.id));
+        },
+
+        toggleJurusanClasses(classes) {
+            if (!classes || classes.length === 0) return;
+            if (this.isJurusanFullySelected(classes)) {
+                const idsToRemove = new Set(classes.map(c => Number(c.id)));
+                this.selectedKelasIds = this.selectedKelasIds.filter(id => !idsToRemove.has(Number(id)));
+            } else {
+                const currentSet = new Set(this.selectedKelasIds.map(Number));
+                classes.forEach(c => currentSet.add(Number(c.id)));
+                this.selectedKelasIds = Array.from(currentSet);
+            }
+        },
+
+        isLevelFullySelected(classes) {
+            if (!classes || classes.length === 0) return false;
+            return classes.every(c => this.isClassSelected(c.id));
+        },
+
+        toggleLevelClasses(classes) {
+            if (!classes || classes.length === 0) return;
+            if (this.isLevelFullySelected(classes)) {
+                const idsToRemove = new Set(classes.map(c => Number(c.id)));
+                this.selectedKelasIds = this.selectedKelasIds.filter(id => !idsToRemove.has(Number(id)));
+            } else {
+                const currentSet = new Set(this.selectedKelasIds.map(Number));
+                classes.forEach(c => currentSet.add(Number(c.id)));
+                this.selectedKelasIds = Array.from(currentSet);
+            }
+        },
+
+        getClassesActiveStudentCount(classes) {
+            if (!classes) return 0;
+            return classes.reduce((sum, c) => sum + (c.total_siswa_aktif || 0), 0);
+        },
+
+        getSelectedCountInGroup(classes) {
+            if (!classes) return 0;
+            return classes.filter(c => this.isClassSelected(c.id)).length;
+        },
+
+        get selectedActiveStudentCount() {
+            return this.originClasses
+                .filter(c => this.isClassSelected(c.id))
+                .reduce((sum, c) => sum + (c.total_siswa_aktif || 0), 0);
+        },
+
+        get groupedOriginClassesByJurusan() {
+            const list = this.filteredOriginClasses;
+            const map = new Map();
+
+            list.forEach(c => {
+                const jId = c.jurusan_id || 0;
+                if (!map.has(jId)) {
+                    map.set(jId, {
+                        jurusan_id: jId,
+                        jurusan_kode: c.jurusan_kode || 'LAIN',
+                        jurusan_nama: c.jurusan_nama || 'Lainnya',
+                        classes: [],
+                        levelsMap: {}
+                    });
+                }
+                const grp = map.get(jId);
+                grp.classes.push(c);
+                const t = Number(c.tingkat) || 10;
+                if (!grp.levelsMap[t]) {
+                    grp.levelsMap[t] = [];
+                }
+                grp.levelsMap[t].push(c);
+            });
+
+            return Array.from(map.values()).map(grp => {
+                const sortedLevels = Object.keys(grp.levelsMap)
+                    .map(Number)
+                    .sort((a, b) => a - b)
+                    .map(lvl => ({
+                        tingkat: lvl,
+                        classes: grp.levelsMap[lvl].sort((a, b) => a.nama_kelas.localeCompare(b.nama_kelas, undefined, { numeric: true }))
+                    }));
+                return {
+                    ...grp,
+                    levels: sortedLevels
+                };
+            });
         },
 
         async advanceToStep3() {
@@ -991,7 +1160,7 @@ function promotionWizard() {
         },
 
         get selectedClassesInfo() {
-            return this.originClasses.filter(c => this.selectedKelasIds.includes(c.id));
+            return this.originClasses.filter(c => this.isClassSelected(c.id));
         },
 
         get filteredStudents() {
