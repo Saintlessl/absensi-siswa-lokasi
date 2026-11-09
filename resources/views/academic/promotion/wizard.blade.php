@@ -107,8 +107,8 @@
                         <strong class="text-slate-800" x-text="originClasses.length + ' Rombel'"></strong>
                     </div>
                     <div class="flex justify-between">
-                        <span>Status Sistem:</span>
-                        <span class="font-semibold text-emerald-600">Terdaftar di Basis Data</span>
+                        <span>Siswa Aktif Terdaftar:</span>
+                        <strong class="text-emerald-700" x-text="totalActiveStudentsInOrigin + ' Siswa'"></strong>
                     </div>
                 </div>
             </div>
@@ -164,9 +164,19 @@
             </button>
         </div>
 
+        {{-- Warning if no active students in selected origin TA --}}
+        <div x-show="originTaId && originClasses.length > 0 && totalActiveStudentsInOrigin === 0" x-cloak
+            class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2.5">
+            <i class='bx bx-info-circle text-amber-600 text-lg flex-shrink-0 mt-0.5'></i>
+            <div>
+                <p class="font-bold text-amber-900">Perhatian: Tidak Ada Siswa Aktif pada Tahun Ajaran Ini</p>
+                <p class="mt-0.5 text-amber-700">Tahun ajaran ini memiliki struktur rombel namun belum memiliki data siswa aktif. Kenaikan kelas hanya dapat diproses untuk tahun ajaran yang memiliki data siswa (misalnya: <strong>{{ $activeTa?->nama }}</strong>).</p>
+            </div>
+        </div>
+
         <div class="flex justify-end pt-4 border-t border-slate-100">
             <button type="button" @click="advanceToStep2()"
-                :disabled="!originTaId || !destTaId || originTaId === destTaId"
+                :disabled="!originTaId || !destTaId || originTaId === destTaId || originClasses.length === 0"
                 class="px-6 py-3 bg-[#003EA7] hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                 <span>Lanjut ke Langkah 2: Pilih Rombel Asal</span>
                 <i class='bx bx-chevron-right text-base'></i>
@@ -185,22 +195,57 @@
                     <span>Langkah 2: Pilih Rombongan Belajar (Rombel) Asal</span>
                 </h3>
                 <p class="text-xs text-slate-500 mt-1">
-                    Hanya siswa dengan <strong class="text-slate-700">enrollment aktif</strong> pada Tahun Ajaran Asal yang akan dimuat ke dalam wizard.
+                    Centang rombongan belajar yang ingin dievaluasi status kenaikan kelas atau kelulusannya.
                 </p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2" x-show="originClasses.length > 0">
                 <button type="button" @click="toggleSelectAllClasses()"
                     class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all">
-                    <span x-text="selectedKelasIds.length === originClasses.length ? 'Batal Pilih Semua' : 'Pilih Semua Rombel'"></span>
+                    <span x-text="selectedKelasIds.length > 0 && selectedKelasIds.length === originClassesWithStudents.length ? 'Batal Pilih Semua' : 'Pilih Semua Rombel Aktif'"></span>
                 </button>
             </div>
         </div>
 
+        {{-- Filter & Count Summary --}}
+        <div x-show="originClasses.length > 0" class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-xl text-xs">
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-slate-400 font-bold text-[11px] uppercase mr-1">Filter:</span>
+                <button type="button" @click="filterTingkat = ''"
+                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    :class="filterTingkat === '' ? 'bg-[#003EA7] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
+                    Semua (<span x-text="originClasses.length"></span>)
+                </button>
+                <button type="button" @click="filterTingkat = 'with_students'"
+                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    :class="filterTingkat === 'with_students' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
+                    Ada Siswa (<span x-text="originClassesWithStudents.length"></span>)
+                </button>
+                <button type="button" @click="filterTingkat = 10"
+                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    :class="filterTingkat === 10 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
+                    Kelas 10
+                </button>
+                <button type="button" @click="filterTingkat = 11"
+                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    :class="filterTingkat === 11 ? 'bg-sky-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
+                    Kelas 11
+                </button>
+                <button type="button" @click="filterTingkat = 12"
+                    class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all"
+                    :class="filterTingkat === 12 ? 'bg-amber-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'">
+                    Kelas 12
+                </button>
+            </div>
+            <div class="text-[11px] text-slate-500 font-medium">
+                Terpilih: <strong class="text-[#003EA7]" x-text="selectedKelasIds.length"></strong> dari <strong x-text="originClasses.length"></strong> rombel
+            </div>
+        </div>
+
         {{-- Class Grid Selection --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-            <template x-for="c in originClasses" :key="c.id">
+        <div x-show="filteredOriginClasses.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+            <template x-for="c in filteredOriginClasses" :key="c.id">
                 <label class="p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-start gap-3"
-                    :class="selectedKelasIds.includes(c.id) ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-500/20 shadow-sm' : 'bg-slate-50/40 border-slate-200 hover:bg-slate-50'">
+                    :class="selectedKelasIds.includes(c.id) ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-500/20 shadow-sm' : (c.total_siswa_aktif > 0 ? 'bg-slate-50/40 border-slate-200 hover:bg-slate-50' : 'bg-slate-50/20 border-slate-100 opacity-60')">
                     <input type="checkbox" :value="c.id" x-model="selectedKelasIds"
                         class="mt-1 rounded text-[#003EA7] focus:ring-[#003EA7]">
                     <div class="min-w-0 flex-1">
@@ -217,12 +262,35 @@
                         <p class="text-[11px] text-slate-500 mt-0.5 truncate" x-text="c.jurusan_nama"></p>
                         <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
                             <span class="text-slate-400">Siswa Aktif:</span>
-                            <strong class="text-slate-700" x-text="c.total_siswa_aktif + ' Siswa'"></strong>
+                            <strong :class="c.total_siswa_aktif > 0 ? 'text-emerald-700 font-bold' : 'text-slate-400 font-normal'"
+                                x-text="c.total_siswa_aktif + ' Siswa'"></strong>
                         </div>
-                        <div class="text-[10px] text-slate-400 truncate mt-0.5" x-text="'Wali: ' + c.wali_kelas"></div>
+                        <div class="text-[10px] text-slate-400 truncate mt-0.5" x-text="'Wali: ' + (c.wali_kelas || '-')"></div>
                     </div>
                 </label>
             </template>
+        </div>
+
+        {{-- Empty state when no classes found in filtered view --}}
+        <div x-show="filteredOriginClasses.length === 0 && originClasses.length > 0" x-cloak
+            class="p-8 text-center text-slate-400 bg-slate-50 rounded-xl border border-slate-100">
+            <p class="text-xs">Tidak ada rombel yang cocok dengan filter yang dipilih.</p>
+        </div>
+
+        {{-- Empty state when no classes found in origin TA --}}
+        <div x-show="originClasses.length === 0 && !isLoading" x-cloak
+            class="p-12 text-center text-slate-400 bg-slate-50/50 rounded-2xl border border-slate-200 space-y-3">
+            <div class="w-16 h-16 mx-auto rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-3xl">
+                <i class='bx bx-folder-open'></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800">Tidak Ada Rombel pada Tahun Ajaran yang Dipilih</h4>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">
+                Tahun Ajaran Asal yang Anda pilih belum memiliki struktur rombel kelas. Silakan kembali ke Langkah 1 dan pilih Tahun Ajaran yang memiliki data rombel aktif (misalnya: <strong>{{ $activeTa?->nama }}</strong>).
+            </p>
+            <button type="button" @click="step = 1"
+                class="px-4 py-2 bg-[#003EA7] hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                &larr; Kembali ke Langkah 1
+            </button>
         </div>
 
         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
@@ -643,6 +711,7 @@ function promotionWizard() {
         batchCatatan: '',
         searchStudent: '',
         filterKelasAsal: '',
+        filterTingkat: '',
 
         steps: [
             { number: 1, title: 'Tahun Ajaran' },
@@ -689,7 +758,12 @@ function promotionWizard() {
                 const data = await res.json();
                 if (data.success) {
                     this.originClasses = data.classes;
-                    this.selectedKelasIds = this.originClasses.map(c => c.id);
+                    const withStudents = this.originClasses.filter(c => c.total_siswa_aktif > 0);
+                    if (withStudents.length > 0) {
+                        this.selectedKelasIds = withStudents.map(c => c.id);
+                    } else {
+                        this.selectedKelasIds = this.originClasses.map(c => c.id);
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -807,6 +881,16 @@ function promotionWizard() {
                 return;
             }
 
+            if (this.originClasses.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tidak Ada Rombel',
+                    text: `Tahun Ajaran Asal (${origTa?.nama || ''}) belum memiliki struktur rombel kelas. Silakan pilih tahun ajaran yang memiliki data rombel.`,
+                    confirmButtonColor: '#003EA7'
+                });
+                return;
+            }
+
             if (this.destClasses.length === 0) {
                 this.loadDestClasses();
             }
@@ -814,10 +898,11 @@ function promotionWizard() {
         },
 
         toggleSelectAllClasses() {
-            if (this.selectedKelasIds.length === this.originClasses.length) {
+            const targets = this.originClassesWithStudents.length > 0 ? this.originClassesWithStudents : this.originClasses;
+            if (this.selectedKelasIds.length === targets.length && targets.length > 0) {
                 this.selectedKelasIds = [];
             } else {
-                this.selectedKelasIds = this.originClasses.map(c => c.id);
+                this.selectedKelasIds = targets.map(c => c.id);
             }
         },
 
@@ -887,6 +972,22 @@ function promotionWizard() {
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        get totalActiveStudentsInOrigin() {
+            return this.originClasses.reduce((sum, c) => sum + (c.total_siswa_aktif || 0), 0);
+        },
+
+        get originClassesWithStudents() {
+            return this.originClasses.filter(c => c.total_siswa_aktif > 0);
+        },
+
+        get filteredOriginClasses() {
+            if (!this.filterTingkat) return this.originClasses;
+            if (this.filterTingkat === 'with_students') {
+                return this.originClasses.filter(c => c.total_siswa_aktif > 0);
+            }
+            return this.originClasses.filter(c => c.tingkat == this.filterTingkat);
         },
 
         get selectedClassesInfo() {

@@ -58,25 +58,27 @@ class AcademicPromotionService
     {
         $originTa = TahunAjaran::findOrFail($originTaId);
 
-        // Fetch classes that have active enrollments in this academic year
+        // Fetch count of active enrollments in this academic year per class
         $activeEnrollments = StudentEnrollment::where('tahun_ajaran_id', $originTaId)
             ->where('is_active', true)
             ->select('kelas_id', DB::raw('count(*) as total_siswa'))
             ->groupBy('kelas_id')
             ->pluck('total_siswa', 'kelas_id');
 
-        $kelasIds = $activeEnrollments->keys();
+        // Fetch all classes tagged with this TA
+        $classes = Kelas::with(['jurusan', 'activeHomeroom.guru'])
+            ->where(function ($q) use ($originTaId, $originTa) {
+                $q->where('tahun_ajaran_id', $originTaId)
+                  ->orWhere('tahun_ajaran', $originTa->nama);
+            })
+            ->orderBy('tingkat')
+            ->orderBy('nama_kelas')
+            ->get();
 
-        if ($kelasIds->isEmpty()) {
-            // Also include classes tagged directly with this tahun_ajaran_id
+        // Fallback: If no classes specifically tagged for this TA, retrieve active classes
+        if ($classes->isEmpty()) {
             $classes = Kelas::with(['jurusan', 'activeHomeroom.guru'])
-                ->where('tahun_ajaran_id', $originTaId)
-                ->orderBy('tingkat')
-                ->orderBy('nama_kelas')
-                ->get();
-        } else {
-            $classes = Kelas::with(['jurusan', 'activeHomeroom.guru'])
-                ->whereIn('id', $kelasIds)
+                ->where('is_active', true)
                 ->orderBy('tingkat')
                 ->orderBy('nama_kelas')
                 ->get();
@@ -87,6 +89,13 @@ class AcademicPromotionService
                 ->where('tahun_ajaran_id', $originTaId)
                 ->where('is_active', true)
                 ->count();
+
+            // Also fallback to check direct siswa count if no enrollment records exist yet
+            if ($totalActive === 0) {
+                $totalActive = Siswa::where('kelas_id', $kelas->id)
+                    ->where('status', 'aktif')
+                    ->count();
+            }
 
             $homeroomName = $this->historyService->resolveHomeroomTeacherName($kelas->id, $originTaId);
 
@@ -119,11 +128,54 @@ class AcademicPromotionService
             ->orderBy('kelas_id')
             ->get();
 
-        return $enrollments->map(function ($enrollment) {
-            $siswa = $enrollment->siswa;
-            $currentTingkat = (int) ($enrollment->tingkat ?: $enrollment->kelas?->tingkat ?: 10);
+        if ($enrollments->isNotEmpty()) {
+            return $enrollments->map(function ($enrollment) {
+                $siswa = $enrollment->siswa;
+                $currentTingkat = (int) ($enrollment->tingkat ?: $enrollment->kelas?->tingkat ?: 10);
 
-            // Determine default smart action
+                // Determine default smart action
+                if ($currentTingkat >= 12) {
+                    $defaultAction = 'lulus';
+                    $recommendedTargetTingkat = null;
+                } else {
+                    $defaultAction = 'naik_kelas';
+                    $recommendedTargetTingkat = $currentTingkat + 1;
+                }
+
+                return [
+                    'enrollment_id'             => $enrollment->id,
+                    'siswa_id'                  => $siswa->id,
+                    'nis'                       => $siswa->nis,
+                    'nisn'                      => $siswa->nisn,
+                    'nama'                      => $siswa->nama,
+                    'jenis_kelamin'             => $siswa->jenis_kelamin,
+                    'kelas_asal_id'             => $enrollment->kelas_id,
+                    'kelas_asal_nama'           => $enrollment->kelas?->nama_kelas ?? '-',
+                    'tingkat_asal'              => $currentTingkat,
+                    'jurusan_id'                => $enrollment->jurusan_id ?: $siswa->jurusan_id,
+                    'jurusan_kode'              => $enrollment->jurusan?->kode_jurusan ?? $enrollment->kelas?->jurusan?->kode_jurusan ?? '-',
+                    'angkatan_id'               => $siswa->angkatan_id,
+                    'angkatan_nama'             => $siswa->angkatan?->nama_angkatan ?? ($siswa->tahun_masuk ? 'Angkatan ' . $siswa->tahun_masuk : '-'),
+                    'tahun_masuk'               => $siswa->tahun_masuk,
+                    'tahun_ajaran_masuk'        => $siswa->tahun_ajaran_masuk,
+                    'default_action'            => $defaultAction,
+                    'recommended_target_tingkat'=> $recommendedTargetTingkat,
+                    'wali_kelas_asal'           => $enrollment->wali_kelas_nama ?: '-',
+                ];
+            });
+        }
+
+        // Fallback: If no explicit enrollments exist for this TA, retrieve active siswas assigned to these classes
+        $directStudents = Siswa::with(['angkatan', 'kelas.jurusan', 'jurusan'])
+            ->where('status', 'aktif')
+            ->whereIn('kelas_id', $kelasIds)
+            ->orderBy('kelas_id')
+            ->get();
+
+        return $directStudents->map(function ($siswa) use ($originTaId) {
+            $currentTingkat = (int) ($siswa->kelas?->tingkat ?: 10);
+            $homeroomName = $this->historyService->resolveHomeroomTeacherName($siswa->kelas_id, $originTaId);
+
             if ($currentTingkat >= 12) {
                 $defaultAction = 'lulus';
                 $recommendedTargetTingkat = null;
@@ -133,24 +185,24 @@ class AcademicPromotionService
             }
 
             return [
-                'enrollment_id'             => $enrollment->id,
+                'enrollment_id'             => null,
                 'siswa_id'                  => $siswa->id,
                 'nis'                       => $siswa->nis,
                 'nisn'                      => $siswa->nisn,
                 'nama'                      => $siswa->nama,
                 'jenis_kelamin'             => $siswa->jenis_kelamin,
-                'kelas_asal_id'             => $enrollment->kelas_id,
-                'kelas_asal_nama'           => $enrollment->kelas?->nama_kelas ?? '-',
+                'kelas_asal_id'             => $siswa->kelas_id,
+                'kelas_asal_nama'           => $siswa->kelas?->nama_kelas ?? '-',
                 'tingkat_asal'              => $currentTingkat,
-                'jurusan_id'                => $enrollment->jurusan_id ?: $siswa->jurusan_id,
-                'jurusan_kode'              => $enrollment->jurusan?->kode_jurusan ?? $enrollment->kelas?->jurusan?->kode_jurusan ?? '-',
+                'jurusan_id'                => $siswa->jurusan_id ?: $siswa->kelas?->jurusan_id,
+                'jurusan_kode'              => $siswa->jurusan?->kode_jurusan ?? $siswa->kelas?->jurusan?->kode_jurusan ?? '-',
                 'angkatan_id'               => $siswa->angkatan_id,
                 'angkatan_nama'             => $siswa->angkatan?->nama_angkatan ?? ($siswa->tahun_masuk ? 'Angkatan ' . $siswa->tahun_masuk : '-'),
                 'tahun_masuk'               => $siswa->tahun_masuk,
                 'tahun_ajaran_masuk'        => $siswa->tahun_ajaran_masuk,
                 'default_action'            => $defaultAction,
                 'recommended_target_tingkat'=> $recommendedTargetTingkat,
-                'wali_kelas_asal'           => $enrollment->wali_kelas_nama ?: '-',
+                'wali_kelas_asal'           => $homeroomName ?: '-',
             ];
         });
     }
