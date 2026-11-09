@@ -269,13 +269,39 @@ class SiswaController extends Controller
             return $this->parentAccounts->issueActivation($parentUser);
             });
 
-            $message = 'Data siswa dan relasi orang tua berhasil disimpan.';
+            $message = 'Data siswa berhasil ditambahkan.';
             if ($activationLink) {
                 $message .= ' Akun orang tua menunggu aktivasi.';
             }
             return redirect()->back()->with('success', $message)->with('parent_activation_link', $activationLink);
-        } catch (\Throwable $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Log technical detail server-side; show a safe message to the user.
+            $sqlState = $e->errorInfo[0] ?? null;
+            logger()->warning('Siswa store failed (QueryException)', [
+                'user_id' => Auth::id(),
+                'nis' => $request->nis,
+                'endpoint' => $request->path(),
+                'sql_state' => $sqlState,
+                'message' => $e->getMessage(),
+            ]);
+            $isDuplicate = ($sqlState === '23000') || str_contains($e->getMessage(), 'Duplicate entry');
+            if ($isDuplicate) {
+                return back()->withErrors([
+                    'nis' => 'Data duplikat terdeteksi: NIS/NISN/email sudah digunakan siswa lain.',
+                ])->withInput();
+            }
+            return back()->with('error', 'Gagal menyimpan data siswa karena masalah database. Data tidak ada yang tersimpan sebagian.')->withInput();
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             report($e);
+            return back()->with('error', 'Anda tidak memiliki izin untuk melakukan tindakan ini.')->withInput();
+        } catch (\Throwable $e) {
+            logger()->error('Siswa store failed', [
+                'user_id' => Auth::id(),
+                'nis' => $request->nis,
+                'endpoint' => $request->path(),
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
             return back()->with('error', 'Gagal menambahkan data siswa dan orang tua. Tidak ada data parsial yang disimpan.')->withInput();
         }
     }
