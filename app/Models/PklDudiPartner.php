@@ -21,6 +21,7 @@ class PklDudiPartner extends Model
         'latitude',
         'longitude',
         'radius_meter',
+        'kuota_siswa',
         'jurusan_id',
         'status',
     ];
@@ -29,6 +30,7 @@ class PklDudiPartner extends Model
         'latitude'     => 'float',
         'longitude'    => 'float',
         'radius_meter' => 'integer',
+        'kuota_siswa'  => 'integer',
     ];
 
     public function jurusan()

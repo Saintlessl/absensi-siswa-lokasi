@@ -43,6 +43,9 @@
                         <th class="py-3 px-4">Guru Pembimbing</th>
                         <th class="py-3 px-4">Periode</th>
                         <th class="py-3 px-4">Status</th>
+                        @if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
+                        <th class="py-3 px-4 text-right">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs">
@@ -70,10 +73,37 @@
                                     {{ strtoupper($pl->status) }}
                                 </span>
                             </td>
+                            @if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
+                            <td class="py-3 px-4">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <button type="button"
+                                        data-placement='@js([
+                                            "id" => $pl->id,
+                                            "siswa_id" => $pl->siswa_id,
+                                            "siswa_nama" => $pl->siswa->nama ?? null,
+                                            "jurusan_id" => $pl->siswa?->kelas?->jurusan_id,
+                                            "kelas_id" => $pl->siswa?->kelas_id,
+                                            "pkl_dudi_partner_id" => $pl->pkl_dudi_partner_id,
+                                            "guru_pembimbing_id" => $pl->guru_pembimbing_id,
+                                            "tanggal_mulai" => $pl->tanggal_mulai?->format('Y-m-d'),
+                                            "tanggal_selesai" => $pl->tanggal_selesai?->format('Y-m-d'),
+                                            "status" => $pl->status,
+                                            "catatan" => $pl->catatan,
+                                        ])'
+                                        onclick="openEditPlacement(this.dataset.placement)"
+                                        class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-[10px] font-bold hover:bg-blue-100 transition">Edit</button>
+                                    <form method="POST" action="{{ route('pkl.placements.destroy', $pl->id) }}"
+                                          onsubmit="return confirm('Batalkan/hapus penempatan {{ $pl->siswa->nama ?? 'siswa ini' }}?\n\nJika sudah ada riwayat logbook/presensi, sistem akan mengubah status menjadi WITHDRAWN (riwayat tetap tersimpan).');">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold hover:bg-rose-100 transition">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 text-xs">Belum ada penempatan siswa PKL.</td>
+                            <td colspan="{{ in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']) ? 7 : 6 }}" class="py-8 text-center text-slate-400 text-xs">Belum ada penempatan siswa PKL.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -113,26 +143,39 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('pkl.placements.store') }}">
+            <form method="POST" action="{{ route('pkl.placements.store') }}" id="formTambahPenempatan">
                 @csrf
                 <div class="px-8 py-6 space-y-4">
+                    @php $capJ = auth()->user()->guru?->activeKaprogAssignment?->jurusan_id ?? (auth()->user()->role === 'kaprog' ? auth()->user()->jurusan_id : null); @endphp
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Siswa <span class="text-rose-500">*</span></label>
-                        <select name="siswa_id" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
-                            <option value="">-- Pilih Siswa --</option>
-                            @foreach($siswas as $s)
-                                <option value="{{ $s->id }}">{{ $s->nama }} ({{ $s->kelas->nama_kelas ?? 'Kelas' }})</option>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">1. Pilih Jurusan <span class="text-rose-500">*</span></label>
+                        <select id="selJurusan" onchange="onJurusanChange(this.value)" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none" {{ $capJ ? 'disabled' : 'required' }}>
+                            <option value="">-- Pilih Jurusan --</option>
+                            @foreach($jurusans as $j)
+                                <option value="{{ $j->id }}">{{ $j->nama_jurusan }} ({{ $j->kode_jurusan }})</option>
                             @endforeach
+                        </select>
+                        <input type="hidden" name="jurusan_id" id="hdnJurusan" value="{{ $capJ ?? ($jurusans->count() === 1 ? $jurusans->first()->id : '') }}">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">2. Rombel Kelas 12 <span class="text-rose-500">*</span></label>
+                        <select name="kelas_id" id="selRombel" onchange="onRombelChange(this.value)" class="w-full h-11 text-sm rounded-xl border-0 bg-slate-100 px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none disabled:text-slate-400" disabled>
+                            <option value="">-- Pilih jurusan dulu --</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Mitra DU/DI <span class="text-rose-500">*</span></label>
-                        <select name="pkl_dudi_partner_id" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
-                            <option value="">-- Pilih Perusahaan Industri --</option>
-                            @foreach($partners as $pr)
-                                <option value="{{ $pr->id }}">{{ $pr->nama_dudi }} ({{ $pr->kota }})</option>
-                            @endforeach
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">3. Pilih Siswa <span class="text-rose-500">*</span></label>
+                        <select name="siswa_id" id="selSiswa" class="w-full h-11 text-sm rounded-xl border-0 bg-slate-100 px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none disabled:text-slate-400" disabled required>
+                            <option value="">-- Pilih rombel dulu --</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">4. Mitra Industri <span class="text-rose-500">*</span></label>
+                        <select name="pkl_dudi_partner_id" id="selMitra" class="w-full h-11 text-sm rounded-xl border-0 bg-slate-100 px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none disabled:text-slate-400" disabled required>
+                            <option value="">-- Pilih jurusan dulu --</option>
                         </select>
                     </div>
 
@@ -183,4 +226,190 @@
     </div>
 </div>
 @endif
+
+{{-- Modal Edit Penempatan --}}
+@if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
+<div id="modalEditPenempatan" class="hidden fixed inset-0 z-[60] overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalEditPenempatan').classList.add('hidden')"></div>
+    <div class="relative flex items-center justify-center min-h-full p-4">
+        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden">
+            <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Edit Penempatan PKL</h2>
+                        <p class="text-xs font-semibold text-[#003FA9] mt-1">Perbarui mitra, pembimbing, periode & status penempatan</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('modalEditPenempatan').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/60 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <form method="POST" id="formEditPenempatan" action="">
+                @csrf @method('PUT')
+                <div class="px-8 py-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Siswa</label>
+                        <input type="text" id="edit_siswa_display" readonly class="w-full h-11 text-sm rounded-xl border-0 bg-slate-100 px-4 text-slate-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Mitra Industri <span class="text-rose-500">*</span></label>
+                        <select name="pkl_dudi_partner_id" id="edit_selMitra" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                            <option value="">-- Memuat mitra... --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Guru Pembimbing Sekolah</label>
+                        <select name="guru_pembimbing_id" id="edit_selGuru" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                            <option value="">-- Tanpa Pembimbing --</option>
+                            @foreach($gurus as $g)
+                                <option value="{{ $g->id }}">{{ $g->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                            <input type="date" name="tanggal_mulai" id="edit_tanggal_mulai" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                            <input type="date" name="tanggal_selesai" id="edit_tanggal_selesai" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Status <span class="text-rose-500">*</span></label>
+                            <select name="status" id="edit_status" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                                <option value="active">ACTIVE (berjalan)</option>
+                                <option value="completed">COMPLETED (selesai)</option>
+                                <option value="withdrawn">WITHDRAWN (dibatalkan)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Catatan Khusus</label>
+                        <textarea name="catatan" id="edit_catatan" rows="2" class="w-full text-sm rounded-xl border-0 bg-[#E2EDFF] p-4 focus:ring-2 focus:ring-[#003FA9] resize-none"></textarea>
+                    </div>
+                </div>
+                <div class="px-8 py-5 border-t border-blue-100/60 flex items-center justify-between">
+                    <button type="button" onclick="document.getElementById('modalEditPenempatan').classList.add('hidden')"
+                        class="px-5 py-2.5 rounded-full text-sm font-bold text-[#003FA9] hover:bg-blue-50 transition-colors">Batal</button>
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#003FA9] text-white text-sm font-bold hover:bg-[#00297A] transition-colors shadow-lg shadow-blue-500/25">
+                        <i class='bx bx-check text-lg'></i><span>Simpan Perubahan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+<script>
+const PKL_BASE = '{{ url("/pkl") }}';
+
+function setPklOptions(sel, items, placeholder, selectedId) {
+    sel.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = ''; ph.textContent = placeholder;
+    sel.appendChild(ph);
+    items.forEach(it => {
+        const o = document.createElement('option');
+        o.value = it.id;
+        o.textContent = it.label;
+        if (String(selectedId) === String(it.id)) o.selected = true;
+        sel.appendChild(o);
+    });
+}
+
+async function pklFetch(url) {
+    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+}
+
+function fillMitraLabels(list) {
+    return list.map(m => ({
+        id: m.id,
+        label: m.nama + ' (' + (m.kota || '-') + ')' + (m.kuota ? ' — sisa ' + m.sisa + '/' + m.kuota : '')
+    }));
+}
+
+async function loadRombel(selJurusanId, prefillKelas, prefillSiswa) {
+    const selR = document.getElementById('selRombel');
+    const selS = document.getElementById('selSiswa');
+    const selM = document.getElementById('selMitra');
+    if (!selR) return;
+    setOptionsDown(selS, selM);
+    if (!selJurusanId) { setPklOptions(selR, [], '-- Pilih jurusan dulu --'); selR.disabled = true; return; }
+    selR.disabled = true; setPklOptions(selR, [], 'Memuat rombel...');
+    try {
+        const j = await pklFetch(PKL_BASE + '/options/rombel?jurusan_id=' + selJurusanId);
+        if (!j.data.length) { setPklOptions(selR, [], j.message || 'Tidak ada rombel kelas 12'); selR.disabled = true; return; }
+        setPklOptions(selR, j.data.map(k => ({ id: k.id, label: k.nama })), '-- Pilih Rombel --', prefillKelas);
+        selR.disabled = false;
+        if (prefillKelas) await onRombelChange(prefillKelas, prefillSiswa);
+        const jm = await pklFetch(PKL_BASE + '/options/mitra?jurusan_id=' + selJurusanId);
+        setPklOptions(selM, fillMitraLabels(jm.data), '-- Pilih Mitra --');
+        selM.disabled = !jm.data.length;
+        if (!jm.data.length) setPklOptions(selM, [], jm.message || 'Tidak ada mitra tersedia');
+    } catch (e) {
+        setPklOptions(selR, [], 'Gagal memuat data, coba lagi');
+    }
+}
+
+function setOptionsDown(selS, selM) {
+    if (selS) { selS.disabled = true; setPklOptions(selS, [], '-- Pilih rombel dulu --'); }
+    if (selM) { selM.disabled = true; setPklOptions(selM, [], '-- Tunggu --'); }
+}
+
+function onJurusanChange(val) {
+    const h = document.getElementById('hdnJurusan');
+    if (h && !document.getElementById('selJurusan').disabled) h.value = val || '';
+    setOptionsDown(document.getElementById('selSiswa'), document.getElementById('selMitra'));
+    loadRombel(val);
+}
+
+async function onRombelChange(val, prefillSiswa) {
+    const selS = document.getElementById('selSiswa');
+    if (!selS) return;
+    if (!val) { selS.disabled = true; setPklOptions(selS, [], '-- Pilih rombel dulu --'); return; }
+    selS.disabled = true; setPklOptions(selS, [], 'Memuat siswa...');
+    try {
+        const j = await pklFetch(PKL_BASE + '/options/siswa?kelas_id=' + val);
+        if (!j.data.length) { setPklOptions(selS, [], j.message || 'Tidak ada siswa eligible'); selS.disabled = true; return; }
+        setPklOptions(selS, j.data.map(s => ({ id: s.id, label: s.nama + ' (NIS: ' + (s.nis || '-') + ')' })), '-- Pilih Siswa --', prefillSiswa);
+        selS.disabled = false;
+    } catch (e) { setPklOptions(selS, [], 'Gagal memuat siswa'); }
+}
+
+function openEditPlacement(raw) {
+    const p = JSON.parse(raw);
+    document.getElementById('formEditPenempatan').action = PKL_BASE + '/penempatan/' + p.id;
+    document.getElementById('edit_siswa_display').value = (p.siswa_nama || 'Siswa #' + p.siswa_id);
+    document.getElementById('edit_tanggal_mulai').value = p.tanggal_mulai || '';
+    document.getElementById('edit_tanggal_selesai').value = p.tanggal_selesai || '';
+    document.getElementById('edit_catatan').value = p.catatan || '';
+    document.getElementById('edit_status').value = p.status || 'active';
+    document.getElementById('edit_selGuru').value = p.guru_pembimbing_id || '';
+    (async () => {
+        const sel = document.getElementById('edit_selMitra');
+        setPklOptions(sel, [], 'Memuat mitra...');
+        try {
+            const j = await pklFetch(PKL_BASE + '/options/mitra' + (p.jurusan_id ? '?jurusan_id=' + p.jurusan_id : ''));
+            setPklOptions(sel, fillMitraLabels(j.data), '-- Pilih Mitra --', p.pkl_dudi_partner_id);
+        } catch (e) { setPklOptions(sel, [], 'Gagal memuat mitra'); }
+    })();
+    document.getElementById('modalEditPenempatan').classList.remove('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const selJ = document.getElementById('selJurusan');
+    if (!selJ) return;
+    const hidden = document.getElementById('hdnJurusan');
+    const fixed = hidden ? hidden.value : '';
+    if (fixed) {
+        if (!selJ.disabled) { selJ.value = fixed; }
+        loadRombel(fixed);
+    }
+});
+</script>
 @endpush

@@ -375,8 +375,15 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
         Route::get('/pkl/mitra-industri', [PklController::class, 'partnersIndex'])->name('pkl.partners.index');
         Route::post('/pkl/mitra-industri', [PklController::class, 'partnerStore'])->name('pkl.partners.store');
+        Route::put('/pkl/mitra-industri/{id}', [PklController::class, 'partnerUpdate'])->name('pkl.partners.update');
+        Route::delete('/pkl/mitra-industri/{id}', [PklController::class, 'partnerDestroy'])->name('pkl.partners.destroy');
         Route::get('/pkl/penempatan', [PklController::class, 'placementsIndex'])->name('pkl.placements.index');
         Route::post('/pkl/penempatan', [PklController::class, 'placementStore'])->name('pkl.placements.store');
+        Route::put('/pkl/penempatan/{id}', [PklController::class, 'placementUpdate'])->name('pkl.placements.update');
+        Route::delete('/pkl/penempatan/{id}', [PklController::class, 'placementDestroy'])->name('pkl.placements.destroy');
+        Route::get('/pkl/options/rombel', [PklController::class, 'optionRombel'])->name('pkl.options.rombel');
+        Route::get('/pkl/options/siswa', [PklController::class, 'optionSiswa'])->name('pkl.options.siswa');
+        Route::get('/pkl/options/mitra', [PklController::class, 'optionMitra'])->name('pkl.options.mitra');
         Route::get('/pkl/monitoring', [PklController::class, 'monitoringDashboard'])->name('pkl.monitoring');
         Route::get('/pkl/verifikasi-logbook', [PklController::class, 'advisorLogbookIndex'])->name('pkl.advisor.logbooks');
         Route::post('/pkl/logbook/{id}/review', [PklController::class, 'advisorLogbookReview'])->name('pkl.advisor.review');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Jurusan;
+use App\Models\Kelas;
 use App\Models\PklAttendance;
 use App\Models\PklDudiPartner;
 use App\Models\PklLogbook;
@@ -18,6 +19,22 @@ use Illuminate\Support\Facades\Storage;
 class PklController extends Controller
 {
     /**
+     * Resolve the department id a KAPROG actually manages.
+     * Server-side authority: active assignment table first, users.jurusan_id as fallback.
+     * Returns null for non-kaprog users.
+     */
+    protected function managedJurusanId(?User $user): ?int
+    {
+        if (!$user || $user->role !== 'kaprog') {
+            return null;
+        }
+
+        $assignment = $user->guru?->activeKaprogAssignment;
+
+        return $assignment?->jurusan_id ?? ($user->jurusan_id ? (int) $user->jurusan_id : null);
+    }
+
+    /**
      * DUDI Partners List (Admin / Kaprog)
      */
     public function partnersIndex(Request $request)
@@ -25,15 +42,23 @@ class PklController extends Controller
         $user = Auth::user();
         $query = PklDudiPartner::with(['jurusan', 'placements']);
 
-        if ($user->role === 'kaprog' && $user->jurusan_id) {
-            $query->where(function ($q) use ($user) {
-                $q->where('jurusan_id', $user->jurusan_id)
+        $kaprogJurusan = $this->managedJurusanId($user);
+        if ($kaprogJurusan) {
+            $query->where(function ($q) use ($kaprogJurusan) {
+                $q->where('jurusan_id', $kaprogJurusan)
                   ->orWhereNull('jurusan_id');
             });
         }
 
         if ($request->filled('jurusan_id')) {
-            $query->where('jurusan_id', $request->jurusan_id);
+            $jurusanFilter = (int) $request->jurusan_id;
+            // Kaprog may never browse another department's partners, even shared "all jurusan" rows.
+            if ($kaprogJurusan && $jurusanFilter !== $kaprogJurusan) {
+                $jurusanFilter = $kaprogJurusan;
+            }
+            $query->where(function ($q) use ($jurusanFilter) {
+                $q->where('jurusan_id', $jurusanFilter)->orWhereNull('jurusan_id');
+            });
         }
 
         if ($request->filled('search')) {
@@ -47,8 +72,9 @@ class PklController extends Controller
 
         $partners = $query->orderBy('nama_dudi')->paginate(15)->withQueryString();
         $jurusans = Jurusan::orderBy('nama_jurusan')->get();
+        $kaprogManagedJurusanId = $kaprogJurusan;
 
-        return view('pkl.partners', compact('partners', 'jurusans'));
+        return view('pkl.partners', compact('partners', 'jurusans', 'kaprogManagedJurusanId'));
     }
 
     /**
@@ -68,8 +94,18 @@ class PklController extends Controller
             'latitude'        => 'nullable|numeric|between:-90,90',
             'longitude'       => 'nullable|numeric|between:-180,180',
             'radius_meter'    => 'nullable|integer|min:20|max:5000',
+            'kuota_siswa'     => 'nullable|integer|min:1|max:1000',
             'jurusan_id'      => 'nullable|exists:jurusans,id',
+            'status'          => 'nullable|in:aktif,nonaktif',
         ]);
+
+        // Kaprog-created partners are always bound to their own department.
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        if ($kaprogJurusan) {
+            if ($request->filled('jurusan_id') && (int) $request->jurusan_id !== $kaprogJurusan) {
+                return back()->withInput()->with('error', 'Akses ditolak: Anda hanya dapat mendaftarkan mitra untuk jurusan yang Anda kepalai.');
+            }
+        }
 
         $partner = PklDudiPartner::create([
             'nama_dudi'       => $request->nama_dudi,
@@ -83,12 +119,222 @@ class PklController extends Controller
             'latitude'        => $request->latitude,
             'longitude'       => $request->longitude,
             'radius_meter'    => $request->radius_meter ?? 150,
-            'jurusan_id'      => $request->jurusan_id,
-            'status'          => 'aktif',
+            'kuota_siswa'     => $request->kuota_siswa,
+            'jurusan_id'      => $kaprogJurusan ?? $request->jurusan_id,
+            'status'          => $request->status === 'nonaktif' ? 'nonaktif' : 'aktif',
         ]);
 
         return redirect()->route('pkl.partners.index')
             ->with('success', "Mitra DU/DI {$partner->nama_dudi} berhasil didaftarkan.");
+    }
+
+    /**
+     * Update DUDI Partner
+     */
+    public function partnerUpdate(Request $request, $id)
+    {
+        $partner = PklDudiPartner::findOrFail($id);
+
+        $request->validate([
+            'nama_dudi'       => 'required|string|max:200',
+            'bidang_industri' => 'required|string|max:150',
+            'alamat'          => 'required|string',
+            'kota'            => 'required|string|max:100',
+            'kontak_person'   => 'required|string|max:100',
+            'email'           => 'nullable|email|max:150',
+            'telepon'         => 'nullable|string|max:30',
+            'pembimbing_dudi' => 'nullable|string|max:150',
+            'latitude'        => 'nullable|numeric|between:-90,90',
+            'longitude'       => 'nullable|numeric|between:-180,180',
+            'radius_meter'    => 'nullable|integer|min:20|max:5000',
+            'kuota_siswa'     => 'nullable|integer|min:1|max:1000',
+            'jurusan_id'      => 'nullable|exists:jurusans,id',
+            'status'          => 'required|in:aktif,nonaktif',
+        ]);
+
+        // Kaprog may only touch partners of their own department (or shared rows),
+        // and may never move a partner into/out of another department.
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        if ($kaprogJurusan) {
+            if ($partner->jurusan_id && (int) $partner->jurusan_id !== $kaprogJurusan) {
+                abort(403, 'Akses ditolak: mitra ini bukan bagian dari jurusan yang Anda kepalai.');
+            }
+            if ($request->filled('jurusan_id') && (int) $request->jurusan_id !== $kaprogJurusan) {
+                return back()->withInput()->with('error', 'Akses ditolak: Anda hanya dapat menempatkan mitra pada jurusan yang Anda kepalai.');
+            }
+        }
+
+        // Never allow a quota below the students already placed there.
+        if ($request->filled('kuota_siswa')) {
+            $activeNow = $partner->placements()->where('status', 'active')->count();
+            if ((int) $request->kuota_siswa < $activeNow) {
+                return back()->withInput()->with('error', "Kuota tidak boleh kurang dari siswa yang sedang PKL di mitra ini ({$activeNow} aktif).");
+            }
+        }
+
+        $partner->update([
+            'nama_dudi'       => $request->nama_dudi,
+            'bidang_industri' => $request->bidang_industri,
+            'alamat'          => $request->alamat,
+            'kota'            => $request->kota,
+            'kontak_person'   => $request->kontak_person,
+            'email'           => $request->email,
+            'telepon'         => $request->telepon,
+            'pembimbing_dudi' => $request->pembimbing_dudi,
+            'latitude'        => $request->latitude,
+            'longitude'       => $request->longitude,
+            'radius_meter'    => $request->radius_meter ?? 150,
+            'kuota_siswa'     => $request->kuota_siswa,
+            'jurusan_id'      => $kaprogJurusan ?? ($request->jurusan_id ?: null),
+            'status'          => $request->status,
+        ]);
+
+        return redirect()->route('pkl.partners.index')
+            ->with('success', "Mitra DU/DI {$partner->nama_dudi} berhasil diperbarui.");
+    }
+
+    /**
+     * Delete DUDI Partner (blocked while active placements exist)
+     */
+    public function partnerDestroy($id)
+    {
+        $partner = PklDudiPartner::findOrFail($id);
+
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        if ($kaprogJurusan && $partner->jurusan_id && (int) $partner->jurusan_id !== $kaprogJurusan) {
+            abort(403, 'Akses ditolak: mitra ini bukan bagian dari jurusan yang Anda kepalai.');
+        }
+
+        $activeCount = $partner->placements()->where('status', 'active')->count();
+        $totalCount  = $partner->placements()->count();
+
+        if ($activeCount > 0) {
+            return back()->with('error', "Mitra tidak dapat dihapus: masih digunakan oleh {$activeCount} penempatan PKL aktif. Alihkan penempatannya terlebih dahulu atau nonaktifkan mitra.");
+        }
+
+        // History-safe guard: placements/logbooks keep an FK to the partner; deleting the
+        // row would erase PKL history via cascade. Suggest deactivation instead.
+        if ($totalCount > 0) {
+            return back()->with('error', "Mitra masih terikat {$totalCount} riwayat penempatan PKL. Gunakan status NONAKTIF agar riwayat siswa tetap tersimpan.");
+        }
+
+        $partner->delete();
+
+        return redirect()->route('pkl.partners.index')
+            ->with('success', "Mitra DU/DI {$partner->nama_dudi} berhasil dihapus.");
+    }
+
+    /**
+     * AJAX: kelas-12 rombel options for a department (jurusan).
+     * Kaprog is clamped server-side to their own department.
+     */
+    public function optionRombel(Request $request)
+    {
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        $jurusanId = $kaprogJurusan ?? (int) $request->jurusan_id;
+        if (!$jurusanId) {
+            return response()->json(['data' => [], 'message' => 'Pilih jurusan terlebih dahulu.']);
+        }
+
+        $rombels = Kelas::query()
+            ->where('jurusan_id', $jurusanId)
+            ->where('tingkat', 12)
+            ->where('is_active', true)
+            ->orderBy('nama_kelas')
+            ->get(['id', 'nama_kelas', 'tingkat', 'jumlah_siswa'])
+            ->map(fn ($k) => [
+                'id'          => $k->id,
+                'nama'        => $k->nama_kelas,
+                'jumlah'      => (int) $k->jumlah_siswa,
+            ]);
+
+        return response()->json([
+            'data'    => $rombels,
+            'message' => $rombels->isEmpty() ? 'Tidak ada rombel kelas 12 aktif untuk jurusan ini.' : null,
+        ]);
+    }
+
+    /**
+     * AJAX: PKL-eligible siswa of a rombel.
+     * Eligible = status aktif + enrolled in that kelas-12 rombel + no active placement.
+     */
+    public function optionSiswa(Request $request)
+    {
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        $kelasId = (int) $request->kelas_id;
+
+        $kelas = Kelas::find($kelasId);
+        if (!$kelas || (int) $kelas->tingkat !== 12) {
+            return response()->json(['data' => [], 'message' => 'Rombel tidak valid atau bukan kelas 12.']);
+        }
+        if ($kaprogJurusan && (int) $kelas->jurusan_id !== $kaprogJurusan) {
+            abort(403, 'Akses ditolak: rombel ini bukan dari jurusan yang Anda kepalai.');
+        }
+
+        $placedIds = PklPlacement::where('status', 'active')->pluck('siswa_id');
+
+        $siswas = Siswa::query()
+            ->where('status', 'aktif')
+            ->where(function ($q) use ($kelasId) {
+                $q->where('kelas_id', $kelasId)
+                  ->orWhereHas('activeEnrollment', fn ($e) => $e->where('kelas_id', $kelasId));
+            })
+            ->whereNotIn('id', $placedIds)
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'nis'])
+            ->map(fn ($s) => ['id' => $s->id, 'nama' => $s->nama, 'nis' => $s->nis]);
+
+        return response()->json([
+            'data'    => $siswas,
+            'message' => $siswas->isEmpty() ? 'Semua siswa di rombel ini sudah memiliki penempatan aktif atau data belum tersedia.' : null,
+        ]);
+    }
+
+    /**
+     * AJAX: partners eligible for a department (active, matching jurusan, quota available).
+     */
+    public function optionMitra(Request $request)
+    {
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        if ($request->filled('jurusan_id') && !$kaprogJurusan) {
+            $jurusanId = (int) $request->jurusan_id;
+        } else {
+            $jurusanId = $kaprogJurusan;
+        }
+
+        $query = PklDudiPartner::query()->where('status', 'aktif')
+            ->where(function ($q) use ($jurusanId, $kaprogJurusan) {
+                if ($jurusanId) {
+                    $q->whereNull('jurusan_id')->orWhere('jurusan_id', $jurusanId);
+                }
+            });
+
+        $partners = $query->orderBy('nama_dudi')->get();
+
+        $activeCounts = PklPlacement::where('status', 'active')
+            ->whereIn('pkl_dudi_partner_id', $partners->pluck('id'))
+            ->selectRaw('pkl_dudi_partner_id, count(*) c')
+            ->groupBy('pkl_dudi_partner_id')
+            ->pluck('c', 'pkl_dudi_partner_id');
+
+        $data = $partners->map(function ($p) use ($activeCounts) {
+            $used = (int) ($activeCounts[$p->id] ?? 0);
+            $kuota = $p->kuota_siswa ? (int) $p->kuota_siswa : null;
+            return [
+                'id'         => $p->id,
+                'nama'       => $p->nama_dudi,
+                'kota'       => $p->kota,
+                'kuota'      => $kuota,
+                'used'       => $used,
+                'sisa'       => $kuota === null ? null : max(0, $kuota - $used),
+                'penuh'      => $kuota !== null && $used >= $kuota,
+            ];
+        })->reject(fn ($p) => $p['penuh'])->values();
+
+        return response()->json([
+            'data'    => $data,
+            'message' => $data->isEmpty() ? 'Tidak ada mitra aktif dengan kuota tersisa untuk jurusan ini.' : null,
+        ]);
     }
 
     /**
@@ -99,9 +345,10 @@ class PklController extends Controller
         $user = Auth::user();
         $query = PklPlacement::with(['siswa.kelas', 'partner', 'guruPembimbing']);
 
-        if ($user->role === 'kaprog' && $user->jurusan_id) {
-            $query->whereHas('siswa.kelas', function ($q) use ($user) {
-                $q->where('jurusan_id', $user->jurusan_id);
+        $kaprogJurusan = $this->managedJurusanId($user);
+        if ($kaprogJurusan) {
+            $query->whereHas('siswa.kelas', function ($q) use ($kaprogJurusan) {
+                $q->where('jurusan_id', $kaprogJurusan);
             });
         } elseif ($user->role === 'guru') {
             $query->where('guru_pembimbing_id', $user->id);
@@ -118,9 +365,77 @@ class PklController extends Controller
         $placements = $query->latest('id')->paginate(20)->withQueryString();
         $partners = PklDudiPartner::where('status', 'aktif')->orderBy('nama_dudi')->get();
         $gurus = User::whereIn('role', ['guru', 'kaprog'])->orderBy('name')->get();
-        $siswas = Siswa::with('kelas')->orderBy('nama')->get();
+        $jurusans = Jurusan::orderBy('nama_jurusan')->get();
+        $kaprogManagedJurusanId = $this->managedJurusanId($user);
+        if ($kaprogManagedJurusanId) {
+            $jurusans = $jurusans->where('id', $kaprogManagedJurusanId)->values();
+        }
 
-        return view('pkl.placements', compact('placements', 'partners', 'gurus', 'siswas'));
+        return view('pkl.placements', compact('placements', 'partners', 'gurus', 'jurusans', 'kaprogManagedJurusanId'));
+    }
+
+    /**
+     * Resolve & validate the Jurusan -> Rombel -> Siswa chain server-side.
+     * Returns ['siswa' => Siswa, 'kelas' => Kelas] or throws InvalidArgumentException
+     * with an end-user message. Kaprog scope is enforced here, never trusted from input.
+     */
+    protected function validatePlacementChain(int $siswaId, ?int $jurusanId, ?int $kelasId): array
+    {
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+
+        $siswa = Siswa::with('kelas')->find($siswaId);
+        if (!$siswa) {
+            throw new \InvalidArgumentException('Siswa tidak ditemukan.');
+        }
+        if ($siswa->status !== 'aktif') {
+            throw new \InvalidArgumentException('Siswa tidak memenuhi syarat PKL (status tidak aktif).');
+        }
+
+        // Authoritative rombel: active enrollment first, siswa.kelas_id fallback.
+        $enrollment = $siswa->activeEnrollment ?: $siswa->latestEnrollment;
+        $kelasIdEffective = $enrollment?->kelas_id ?: $siswa->kelas_id;
+        $kelas = $kelasIdEffective ? Kelas::find($kelasIdEffective) : $siswa->kelas;
+
+        if (!$kelas) {
+            throw new \InvalidArgumentException('Siswa belum memiliki rombel aktif, tidak dapat ditempatkan PKL.');
+        }
+        if ((int) $kelas->tingkat !== 12) {
+            throw new \InvalidArgumentException('PKL hanya untuk siswa kelas 12. Rombel siswa ini tingkat ' . $kelas->tingkat . '.');
+        }
+        if ($kelasId && (int) $kelasId !== (int) $kelas->id) {
+            throw new \InvalidArgumentException('Siswa tidak sesuai rombel yang dipilih.');
+        }
+        if ($jurusanId && (int) $jurusanId !== (int) $kelas->jurusan_id) {
+            throw new \InvalidArgumentException('Jurusan tidak sesuai dengan rombel siswa.');
+        }
+        if ($kaprogJurusan && (int) $kelas->jurusan_id !== $kaprogJurusan) {
+            throw new \RuntimeException('ACCESS_DENIED');
+        }
+
+        return ['siswa' => $siswa, 'kelas' => $kelas];
+    }
+
+    /**
+     * Enforce partner eligibility: active, jurusan-compatible, quota free.
+     */
+    protected function validatePartnerForPlacement(PklDudiPartner $partner, $kelas, int $excludePlacementId = 0): ?string
+    {
+        if ($partner->status !== 'aktif') {
+            return 'Mitra industri tidak aktif. Pilih mitra lain.';
+        }
+        if ($partner->jurusan_id && (int) $partner->jurusan_id !== (int) $kelas->jurusan_id) {
+            return 'Mitra tidak sesuai dengan jurusan siswa.';
+        }
+        if ($partner->kuota_siswa) {
+            $used = PklPlacement::where('pkl_dudi_partner_id', $partner->id)
+                ->where('status', 'active')
+                ->where('id', '!=', $excludePlacementId)
+                ->count();
+            if ($used >= (int) $partner->kuota_siswa) {
+                return 'Kapasitas mitra penuh (' . $partner->kuota_siswa . ' siswa). Penempatan baru akan melampaui kuota.';
+            }
+        }
+        return null;
     }
 
     /**
@@ -129,6 +444,8 @@ class PklController extends Controller
     public function placementStore(Request $request)
     {
         $request->validate([
+            'jurusan_id'          => 'nullable|exists:jurusans,id',
+            'kelas_id'            => 'nullable|exists:kelas,id',
             'siswa_id'            => 'required|exists:siswas,id',
             'pkl_dudi_partner_id' => 'required|exists:pkl_dudi_partners,id',
             'guru_pembimbing_id'  => 'nullable|exists:users,id',
@@ -137,18 +454,34 @@ class PklController extends Controller
             'catatan'             => 'nullable|string',
         ]);
 
-        // Check if student already has an active placement
-        $activeExists = PklPlacement::where('siswa_id', $request->siswa_id)
-            ->where('status', 'active')
-            ->exists();
+        try {
+            $chain = $this->validatePlacementChain(
+                (int) $request->siswa_id,
+                $request->jurusan_id ? (int) $request->jurusan_id : null,
+                $request->kelas_id ? (int) $request->kelas_id : null
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->with('error', 'Akses ditolak: Anda hanya dapat menempatkan siswa dari jurusan yang Anda kepalai.');
+        }
 
+        $siswa = $chain['siswa'];
+
+        $activeExists = PklPlacement::where('siswa_id', $siswa->id)->where('status', 'active')->exists();
         if ($activeExists) {
-            return back()->with('error', 'Siswa tersebut masih memiliki penempatan PKL berstatus aktif.');
+            return back()->withInput()->with('error', 'Siswa tersebut sudah memiliki penempatan PKL aktif.');
+        }
+
+        $partner = PklDudiPartner::findOrFail($request->pkl_dudi_partner_id);
+        $quotaError = $this->validatePartnerForPlacement($partner, $chain['kelas']);
+        if ($quotaError) {
+            return back()->withInput()->with('error', $quotaError);
         }
 
         $placement = PklPlacement::create([
-            'siswa_id'            => $request->siswa_id,
-            'pkl_dudi_partner_id' => $request->pkl_dudi_partner_id,
+            'siswa_id'            => $siswa->id,
+            'pkl_dudi_partner_id' => $partner->id,
             'guru_pembimbing_id'  => $request->guru_pembimbing_id,
             'tanggal_mulai'       => $request->tanggal_mulai,
             'tanggal_selesai'     => $request->tanggal_selesai,
@@ -157,7 +490,103 @@ class PklController extends Controller
         ]);
 
         return redirect()->route('pkl.placements.index')
-            ->with('success', "Penempatan PKL untuk siswa berhasil diterbitkan.");
+            ->with('success', "Penempatan PKL untuk {$siswa->nama} di {$partner->nama_dudi} berhasil disimpan.");
+    }
+
+    /**
+     * Update Placement
+     */
+    public function placementUpdate(Request $request, $id)
+    {
+        $placement = PklPlacement::with('siswa')->findOrFail($id);
+
+        // Kaprog may only edit placements inside their department.
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        if ($kaprogJurusan) {
+            $jurusanSiswa = $placement->siswa?->kelas?->jurusan_id
+                ?: $placement->siswa?->activeEnrollment?->kelas?->jurusan_id;
+            if ((int) $jurusanSiswa !== $kaprogJurusan) {
+                abort(403, 'Akses ditolak: penempatan ini bukan dari jurusan yang Anda kepalai.');
+            }
+        }
+
+        $request->validate([
+            'pkl_dudi_partner_id' => 'required|exists:pkl_dudi_partners,id',
+            'guru_pembimbing_id'  => 'nullable|exists:users,id',
+            'tanggal_mulai'       => 'required|date',
+            'tanggal_selesai'     => 'required|date|after_or_equal:tanggal_mulai',
+            'catatan'             => 'nullable|string',
+            'status'              => 'required|in:active,completed,withdrawn',
+        ]);
+
+        $siswa = Siswa::with('kelas')->find($placement->siswa_id);
+        if (!$siswa) {
+            return back()->with('error', 'Data siswa pada penempatan ini tidak ditemukan.');
+        }
+
+        $partner = PklDudiPartner::findOrFail($request->pkl_dudi_partner_id);
+        $kelas = $siswa->kelas ?: $siswa->activeEnrollment?->kelas ?: $siswa->rombel_terakhir;
+        if (!$kelas) {
+            return back()->with('error', 'Siswa tidak memiliki rombel untuk validasi mitra.');
+        }
+        $quotaError = $this->validatePartnerForPlacement($partner, $kelas, (int) $placement->id);
+        if ($quotaError) {
+            return back()->withInput()->with('error', $quotaError);
+        }
+
+        if ($request->status === 'active') {
+            $otherActive = PklPlacement::where('siswa_id', $siswa->id)
+                ->where('status', 'active')
+                ->where('id', '!=', $placement->id)
+                ->exists();
+            if ($otherActive) {
+                return back()->withInput()->with('error', 'Siswa sudah memiliki penempatan aktif lain.');
+            }
+        }
+
+        $placement->update([
+            'pkl_dudi_partner_id' => $partner->id,
+            'guru_pembimbing_id'  => $request->guru_pembimbing_id,
+            'tanggal_mulai'       => $request->tanggal_mulai,
+            'tanggal_selesai'     => $request->tanggal_selesai,
+            'status'              => $request->status,
+            'catatan'             => $request->catatan,
+        ]);
+
+        return redirect()->route('pkl.placements.index')
+            ->with('success', "Penempatan PKL {$siswa->nama} berhasil diperbarui.");
+    }
+
+    /**
+     * Destroy / cancel Placement. History (logbook/attendance) is preserved:
+     * hard delete only allowed when no PKL activity exists yet, otherwise it
+     * becomes a 'withdrawn' cancellation.
+     */
+    public function placementDestroy($id)
+    {
+        $placement = PklPlacement::with('siswa')->findOrFail($id);
+
+        $kaprogJurusan = $this->managedJurusanId(Auth::user());
+        if ($kaprogJurusan) {
+            $siswa = $placement->siswa;
+            $jurusanSiswa = $siswa?->kelas?->jurusan_id ?: $siswa?->activeEnrollment?->kelas?->jurusan_id;
+            if ((int) $jurusanSiswa !== $kaprogJurusan) {
+                abort(403, 'Akses ditolak: penempatan ini bukan dari jurusan yang Anda kepalai.');
+            }
+        }
+
+        $hasHistory = $placement->logbooks()->exists() || $placement->attendances()->exists();
+
+        if ($hasHistory) {
+            $placement->update(['status' => 'withdrawn']);
+            return redirect()->route('pkl.placements.index')->with('success',
+                "Penempatan PKL {$placement->siswa?->nama} dibatalkan (status WITHDRAWN). Riwayat logbook & presensi tetap tersimpan.");
+        }
+
+        $placement->delete();
+
+        return redirect()->route('pkl.placements.index')
+            ->with('success', 'Penempatan PKL tanpa riwayat berhasil dihapus permanen.');
     }
 
     /**
@@ -329,10 +758,13 @@ class PklController extends Controller
             $query->whereHas('placement', function ($q) use ($user) {
                 $q->where('guru_pembimbing_id', $user->id);
             });
-        } elseif ($user->role === 'kaprog' && $user->jurusan_id) {
-            $query->whereHas('placement.siswa.kelas', function ($q) use ($user) {
-                $q->where('jurusan_id', $user->jurusan_id);
-            });
+        } else {
+            $kaprogJurusan = $this->managedJurusanId($user);
+            if ($kaprogJurusan) {
+                $query->whereHas('placement.siswa.kelas', function ($q) use ($kaprogJurusan) {
+                    $q->where('jurusan_id', $kaprogJurusan);
+                });
+            }
         }
 
         if ($request->filled('status')) {
@@ -366,12 +798,15 @@ class PklController extends Controller
                 403,
                 'Akses ditolak: Anda bukan guru pembimbing yang ditugaskan untuk siswa ini.'
             );
-        } elseif ($user->role === 'kaprog' && $user->jurusan_id) {
-            abort_unless(
-                $logbook->placement?->siswa?->kelas && (int) $logbook->placement->siswa->kelas->jurusan_id === (int) $user->jurusan_id,
-                403,
-                'Akses ditolak: Siswa ini bukan dari jurusan yang Anda kepalai.'
-            );
+        } else {
+            $kaprogJurusan = $this->managedJurusanId($user);
+            if ($kaprogJurusan) {
+                abort_unless(
+                    $logbook->placement?->siswa?->kelas && (int) $logbook->placement->siswa->kelas->jurusan_id === $kaprogJurusan,
+                    403,
+                    'Akses ditolak: Siswa ini bukan dari jurusan yang Anda kepalai.'
+                );
+            }
         }
 
         $logbook->update([

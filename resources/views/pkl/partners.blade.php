@@ -82,6 +82,42 @@
                     <span class="text-slate-500 font-medium">Siswa Aktif: <strong class="text-blue-700">{{ $p->placements->where('status', 'active')->count() }}</strong></span>
                     <span class="text-xs text-blue-600 font-bold">{{ $p->jurusan->kode_jurusan ?? 'Semua Jurusan' }}</span>
                 </div>
+
+                @if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                        data-partner='@js([
+                            "id" => $p->id,
+                            "nama_dudi" => $p->nama_dudi,
+                            "bidang_industri" => $p->bidang_industri,
+                            "alamat" => $p->alamat,
+                            "kota" => $p->kota,
+                            "kontak_person" => $p->kontak_person,
+                            "email" => $p->email,
+                            "telepon" => $p->telepon,
+                            "pembimbing_dudi" => $p->pembimbing_dudi,
+                            "latitude" => $p->latitude,
+                            "longitude" => $p->longitude,
+                            "radius_meter" => $p->radius_meter,
+                            "kuota_siswa" => $p->kuota_siswa,
+                            "jurusan_id" => $p->jurusan_id,
+                            "status" => $p->status,
+                        ])'
+                        onclick="openEditDudi(this.dataset.partner)"
+                        class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-[11px] font-bold hover:bg-blue-100 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9l-2.732-2.732a2 2 0 01-.414-.828l-.828-2.414 2.414-.828a2 2 0 01.828-.414l6.328-6.328z"/></svg>
+                        Edit
+                    </button>
+                    <form method="POST" action="{{ route('pkl.partners.destroy', $p->id) }}" class="flex-1"
+                          onsubmit="return confirm('Hapus mitra \'{{ $p->nama_dudi }}\'?\n\nTindakan ini tidak dapat dibatalkan. Mitra yang masih dipakai penempatan PKL akan ditolak sistem secara otomatis.');">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-[11px] font-bold hover:bg-rose-100 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+                @endif
             </div>
         @empty
             <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-dashed border-slate-200">
@@ -180,6 +216,12 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Kuota Siswa PKL <span class="text-[10px] font-semibold text-slate-400">(kosongkan = tanpa batas)</span></label>
+                        <input type="number" name="kuota_siswa" min="1" max="1000" placeholder="Contoh: 10"
+                            class="w-full h-11 text-sm font-mono rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Jurusan Terkait</label>
                         <select name="jurusan_id" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
                             <option value="">Terbuka untuk Semua Jurusan</option>
@@ -206,4 +248,140 @@
         </div>
     </div>
 </div>
+
+{{-- Modal Edit DU/DI --}}
+<div id="modalEditDudi" class="hidden fixed inset-0 z-[60] overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalEditDudi').classList.add('hidden')"></div>
+    <div class="relative flex items-center justify-center min-h-full p-4">
+        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden">
+            <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Edit Mitra Industri (DU/DI)</h2>
+                        <p class="text-xs font-semibold text-[#003FA9] mt-1">Perbarui data mitra & titik lokasi presensi</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('modalEditDudi').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/60 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <form method="POST" id="formEditDudi" action="">
+                @csrf @method('PUT')
+                <div class="px-8 py-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Perusahaan / Industri <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama_dudi" id="edit_nama_dudi" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Bidang Industri <span class="text-rose-500">*</span></label>
+                            <input type="text" name="bidang_industri" id="edit_bidang_industri" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kota / Kabupaten <span class="text-rose-500">*</span></label>
+                            <input type="text" name="kota" id="edit_kota" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Alamat Lengkap <span class="text-rose-500">*</span></label>
+                        <textarea name="alamat" id="edit_alamat" rows="2" required class="w-full text-sm rounded-xl border-0 bg-[#E2EDFF] p-4 focus:ring-2 focus:ring-[#003FA9] resize-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kontak Person (PIC) <span class="text-rose-500">*</span></label>
+                            <input type="text" name="kontak_person" id="edit_kontak_person" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">No. WhatsApp / HP</label>
+                            <input type="text" name="telepon" id="edit_telepon" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Email</label>
+                            <input type="email" name="email" id="edit_email" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Pembimbing Industri</label>
+                            <input type="text" name="pembimbing_dudi" id="edit_pembimbing_dudi" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Latitude</label>
+                            <input type="number" step="any" name="latitude" id="edit_latitude" class="w-full h-11 text-sm font-mono rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Longitude</label>
+                            <input type="number" step="any" name="longitude" id="edit_longitude" class="w-full h-11 text-sm font-mono rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Radius (m)</label>
+                            <input type="number" name="radius_meter" id="edit_radius_meter" class="w-full h-11 text-sm font-mono rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kuota Siswa PKL <span class="text-[10px] font-semibold text-slate-400">(kosongkan = tanpa batas)</span></label>
+                            <input type="number" name="kuota_siswa" id="edit_kuota_siswa" min="1" max="1000" class="w-full h-11 text-sm font-mono rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Mitra <span class="text-rose-500">*</span></label>
+                            <select name="status" id="edit_status" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                                <option value="aktif">AKTIF</option>
+                                <option value="nonaktif">NONAKTIF</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Jurusan Terkait</label>
+                            <select name="jurusan_id" id="edit_jurusan_id" class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
+                                <option value="">Terbuka untuk Semua Jurusan</option>
+                                @foreach($jurusans as $j)
+                                    <option value="{{ $j->id }}">{{ $j->nama_jurusan }} ({{ $j->kode_jurusan }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-8 py-5 border-t border-blue-100/60 flex items-center justify-between">
+                    <button type="button" onclick="document.getElementById('modalEditDudi').classList.add('hidden')"
+                        class="px-5 py-2.5 rounded-full text-sm font-bold text-[#003FA9] hover:bg-blue-50 transition-colors">Batal</button>
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#003FA9] text-white text-sm font-bold hover:bg-[#00297A] transition-colors shadow-lg shadow-blue-500/25">
+                        <i class='bx bx-check text-lg'></i><span>Simpan Perubahan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditDudi(raw) {
+    const p = JSON.parse(raw);
+    document.getElementById('formEditDudi').action = '/pkl/mitra-industri/' + p.id;
+    const set = (id, v) => { document.getElementById(id).value = (v === null || v === undefined) ? '' : v; };
+    set('edit_nama_dudi', p.nama_dudi);
+    set('edit_bidang_industri', p.bidang_industri);
+    set('edit_kota', p.kota);
+    set('edit_alamat', p.alamat);
+    set('edit_kontak_person', p.kontak_person);
+    set('edit_telepon', p.telepon);
+    set('edit_email', p.email);
+    set('edit_pembimbing_dudi', p.pembimbing_dudi);
+    set('edit_latitude', p.latitude);
+    set('edit_longitude', p.longitude);
+    set('edit_radius_meter', p.radius_meter);
+    set('edit_kuota_siswa', p.kuota_siswa);
+    set('edit_status', p.status);
+    const sel = document.getElementById('edit_jurusan_id');
+    sel.value = p.jurusan_id || '';
+    @if(auth()->user()->role === 'kaprog')
+    // Kaprog: jurusan terkunci ke jurusannya (server tetap verifikasi ulang)
+    const managed = {{ $kaprogManagedJurusanId ?? 'null' }};
+    if (managed) { sel.value = String(managed); sel.disabled = true; }
+    @endif
+    document.getElementById('modalEditDudi').classList.remove('hidden');
+}
+</script>
 @endpush
