@@ -662,6 +662,25 @@
         </script>
     @endif
 
+    @if ($errors->any())
+        <script>
+            (function () {
+                const items = @js($errors->all());
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Data belum tersimpan',
+                    html: '<ul style="text-align:left;margin:0;padding-left:18px">'
+                        + items.map(e => '<li>' + String(e).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</li>').join('')
+                        + '</ul>',
+                    confirmButtonColor: '#2563eb',
+                    customClass: {
+                        popup: 'font-inter'
+                    }
+                });
+            })();
+        </script>
+    @endif
+
     @stack('scripts')
 </body>
 
