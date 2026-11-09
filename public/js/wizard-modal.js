@@ -64,6 +64,22 @@ function studentWizardModal() {
         _syncLock: false,
 
         init() {
+            // After a failed submit, Blade exposes old() input on window:
+            // rehydrate Alpine state and reopen the modal so nothing is lost.
+            if (window.__siswaWizardRecover) {
+                Object.entries(window.__siswaWizardRecover).forEach(([k, v]) => {
+                    if (v === null || v === undefined) return;
+                    this.student[k] = String(v);
+                    const el = document.getElementById(k) || document.getElementById('modal_' + k);
+                    if (el && (el.tagName === 'SELECT' || el.tagName === 'INPUT')) el.value = String(v);
+                });
+                if (window.__siswaWizardRecover.confirm_parent_verified) this.student.verified = true;
+            }
+            if (window.__siswaWizardReopen) {
+                window.openModal(this.modalId);
+                delete window.__siswaWizardReopen;
+            }
+
             window.addEventListener('wizard-photo-updated', (e) => {
                 this.photoPreviewUrl = e.detail ? e.detail.url : null;
             });

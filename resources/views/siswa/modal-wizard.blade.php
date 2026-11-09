@@ -1,4 +1,21 @@
 {{-- Exact Design Implementation: Multi-Step Modal Form for Siswa --}}
+@if ($errors->any())
+    @php
+        $wizardRecover = collect(old())->only([
+            'nisn', 'nis', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+            'tahun_ajaran_id', 'jalur_masuk', 'asal_sekolah', 'jurusan_id', 'angkatan_id',
+            'tingkat', 'kelas_id', 'email', 'password', 'parent_name',
+            'parent_jenis_kelamin', 'parent_phone', 'parent_address', 'existing_orangtua_id',
+            'confirm_parent_verified',
+        ]);
+    @endphp
+    <script>
+        // Rehydrate wizard state after a failed submit so the admin does not
+        // lose typed data and the modal reopens on the same page load.
+        window.__siswaWizardRecover = @json($wizardRecover);
+        window.__siswaWizardReopen = true;
+    </script>
+@endif
 <div id="modal-inputsiswa"
      x-data="studentWizardModal()"
      x-cloak

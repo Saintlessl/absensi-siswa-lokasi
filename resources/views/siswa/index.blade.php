@@ -436,10 +436,10 @@
             });
         });
 
-        // Form Validation (Add)
+        // Form Validation (Add) — fields live inside the wizard with id="input_*"
         document.getElementById('frmSiswa').addEventListener('submit', function(e) {
-            const nis = document.getElementById('nis').value;
-            const nama = document.getElementById('nama').value;
+            const nis = (document.getElementById('input_nis') || {value:''}).value.trim();
+            const nama = (document.getElementById('input_nama') || {value:''}).value.trim();
 
             if (!nis || !nama) {
                 e.preventDefault();
