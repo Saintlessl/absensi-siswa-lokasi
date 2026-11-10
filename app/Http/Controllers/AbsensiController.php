@@ -207,28 +207,33 @@ class AbsensiController extends Controller
             ], 400);
         }
 
-        // 3. Verifikasi Biometrik WAJIB — anti titip absen.
-        //    Tanpa verifikasi wajah yang cocok, presensi ditolak.
-        $verification = $this->biometricService->verify(
-            $siswa,
-            $request->face_descriptor,
-            $request->challenge_token,
-            $request->liveness_proof ?? [],
-            $request->ip(),
-            $request->userAgent(),
-            $tipe
-        );
+        // 3. Verifikasi Biometrik WAJIB — anti titip absen (Kecuali siswa dengan dispensasi/bebas biometrik).
+        if ($siswa->is_biometric_exempt) {
+            $confidence = 100.0;
+            $livenessScore = 1.0;
+            $isBiometricVerified = true;
+        } else {
+            $verification = $this->biometricService->verify(
+                $siswa,
+                $request->face_descriptor,
+                $request->challenge_token,
+                $request->liveness_proof ?? [],
+                $request->ip(),
+                $request->userAgent(),
+                $tipe
+            );
 
-        if (!$verification['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => $verification['message'] ?? 'Verifikasi wajah gagal. Presensi tidak dicatat.',
-            ], 422);
+            if (!$verification['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $verification['message'] ?? 'Verifikasi wajah gagal. Presensi tidak dicatat.',
+                ], 422);
+            }
+
+            $confidence = (float) ($verification['confidence'] ?? 0.0);
+            $livenessScore = (float) ($verification['liveness_score'] ?? 0.0);
+            $isBiometricVerified = true;
         }
-
-        $confidence = (float) ($verification['confidence'] ?? 0.0);
-        $livenessScore = (float) ($verification['liveness_score'] ?? 0.0);
-        $isBiometricVerified = true;
 
         // 4. Simpan Foto Selfie Base64
         $fotoData = $request->foto;

@@ -31,8 +31,8 @@ class EnsureBiometricEnrolled
 
         $siswa = Siswa::with('faceBiometric')->where('user_id', $user->id)->first();
 
-        if (!$siswa) {
-            // Student record not found, proceed to normal handling or logout
+        if (!$siswa || $siswa->is_biometric_exempt) {
+            // Student record not found or exempt from biometric verification
             return $next($request);
         }
 

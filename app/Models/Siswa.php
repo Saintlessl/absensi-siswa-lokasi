@@ -33,6 +33,7 @@ class Siswa extends Model
         'tahun_ajaran_masuk',
         'tahun_masuk',
         'biometric_status',
+        'is_biometric_exempt',
         'status',
         'jalur_masuk',
         'asal_sekolah',
@@ -46,10 +47,11 @@ class Siswa extends Model
     ];
 
     protected $casts = [
-        'tanggal_lahir'     => 'date',
-        'tahun_masuk'       => 'integer',
-        'tahun_lulus'       => 'integer',
-        'tanggal_kelulusan' => 'date',
+        'tanggal_lahir'        => 'date',
+        'tahun_masuk'          => 'integer',
+        'tahun_lulus'          => 'integer',
+        'tanggal_kelulusan'    => 'date',
+        'is_biometric_exempt'  => 'boolean',
     ];
 
     /**
@@ -357,6 +359,10 @@ class Siswa extends Model
      */
     public function isBiometricEnrolled(): bool
     {
+        if ($this->is_biometric_exempt) {
+            return true;
+        }
+
         return $this->biometric_status === 'enrolled'
             && $this->faceBiometric()
                 ->where('is_active', true)
@@ -366,6 +372,10 @@ class Siswa extends Model
 
     public function isFaceRegistered(): bool
     {
+        if ($this->is_biometric_exempt) {
+            return true;
+        }
+
         return $this->isBiometricEnrolled();
     }
 

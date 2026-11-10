@@ -98,6 +98,14 @@ class AuthController extends Controller
             return back()->with('error', 'Profil data siswa tidak ditemukan. Hubungi pihak sekolah.');
         }
 
+        // Case A0: Student is officially exempt from biometric face verification (Testing / Special Exemption)
+        if ($siswa->is_biometric_exempt) {
+            Auth::login($user, $request->has('remember'));
+            $request->session()->regenerate();
+
+            return redirect()->route('dashboard')->with('success', 'Selamat datang kembali, ' . $siswa->nama . '!');
+        }
+
         // Case A: Student has NOT completed First-Login Biometric Enrollment yet
         if (!$siswa->isBiometricEnrolled()) {
             Auth::login($user, $request->has('remember'));

@@ -450,7 +450,12 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
 if (app()->environment('local')) {
     Route::get('/dev-login', function (\Illuminate\Http\Request $request) {
         $role = $request->query('role', 'admin');
-        if ($role === 'kaprog') {
+        if ($role === 'siswa') {
+            $user = \App\Models\User::where('role', 'siswa')
+                ->whereHas('siswa', fn($q) => $q->where('is_biometric_exempt', true))
+                ->first()
+                ?? \App\Models\User::where('role', 'siswa')->first();
+        } elseif ($role === 'kaprog') {
             $user = \App\Models\User::where('role', 'kaprog')->first() ?? \App\Models\User::where('role', 'admin')->first();
         } else {
             $user = \App\Models\User::where('role', 'admin')->first();
