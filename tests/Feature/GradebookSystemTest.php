@@ -9,6 +9,7 @@ use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Siswa;
+use App\Models\TeacherSubjectAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,6 +17,27 @@ use Tests\TestCase;
 class GradebookSystemTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_buku_nilai_index_and_create_pages_render_for_assigned_teacher(): void
+    {
+        // Regression: AssessmentController queried MataPelajaran::whereHas('subjectAssignments')
+        // but the model only defined assignments() => BadMethodCallException => 500 on /buku-nilai.
+        $teacherUser = User::factory()->create(['role' => 'guru', 'name' => 'Pak Haris']);
+        $guru = Guru::create(['user_id' => $teacherUser->id, 'nip' => '199001012015011000', 'nama' => 'Pak Haris']);
+        $mapel = MataPelajaran::create(['nama_mapel' => 'Dasar Pemrograman', 'kode_mapel' => 'DP00']);
+        $kelas = Kelas::create(['nama_kelas' => '12 PPLG 1', 'jumlah_siswa' => 30]);
+
+        TeacherSubjectAssignment::create([
+            'guru_id' => $guru->id,
+            'mata_pelajaran_id' => $mapel->id,
+            'kelas_id' => $kelas->id,
+            'tahun_ajaran' => '2026/2027',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($teacherUser)->get('/buku-nilai')->assertSuccessful();
+        $this->actingAs($teacherUser)->get('/buku-nilai/buat')->assertSuccessful();
+    }
 
     public function test_teacher_can_create_assessment_and_scores_are_initialized()
     {

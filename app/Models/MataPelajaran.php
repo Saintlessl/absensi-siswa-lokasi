@@ -26,6 +26,13 @@ class MataPelajaran extends Model
         return $this->hasMany(TeacherSubjectAssignment::class, 'mata_pelajaran_id');
     }
 
+    // Alias used by AssessmentController (gradebook) — same relation as assignments().
+    // Without this, Buku Nilai 500s: Call to undefined method MataPelajaran::subjectAssignments().
+    public function subjectAssignments()
+    {
+        return $this->assignments();
+    }
+
     public function jadwals()
     {
         return $this->hasMany(Jadwal::class, 'mata_pelajaran_id');
