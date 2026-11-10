@@ -438,42 +438,42 @@
         </div>
 
         {{-- Students Table --}}
-        <div class="overflow-x-auto border border-slate-100 rounded-xl">
-            <table class="w-full text-left text-xs text-slate-700">
-                <thead class="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
-                    <tr>
-                        <th class="p-3 w-12 text-center">No</th>
-                        <th class="p-3">Siswa & Kohort Permanen</th>
-                        <th class="p-3">Rombel Asal</th>
-                        <th class="p-3 w-48">Keputusan Status</th>
-                        <th class="p-3">Keterangan / Alasan</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">SISWA & KOHORT PERMANEN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL ASAL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-48">KEPUTUSAN STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KETERANGAN / ALASAN</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     <template x-for="(s, idx) in filteredStudents" :key="s.siswa_id">
-                        <tr class="hover:bg-blue-50/30 transition-colors">
-                            <td class="p-3 text-center text-slate-400 font-semibold" x-text="idx + 1"></td>
-                            <td class="p-3">
-                                <div class="font-bold text-slate-800" x-text="s.nama"></div>
-                                <div class="text-[11px] text-slate-500 font-mono" x-text="'NIS: ' + s.nis + ' | NISN: ' + (s.nisn || '-')"></div>
-                                <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5">
-                                    <span class="px-1.5 py-0.2 bg-slate-100 rounded text-slate-600 font-semibold" x-text="s.angkatan_nama"></span>
-                                    <span>Masuk: <strong x-text="s.tahun_ajaran_masuk || s.tahun_masuk"></strong></span>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-center text-slate-400 font-medium text-xs" x-text="idx + 1"></td>
+                            <td class="py-4 px-4">
+                                <div class="font-bold text-slate-900 text-xs sm:text-sm" x-text="s.nama"></div>
+                                <div class="text-[11px] text-slate-400 font-mono" x-text="'NIS: ' + s.nis + ' | NISN: ' + (s.nisn || '-')"></div>
+                                <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-700 font-semibold text-[11px]" x-text="s.angkatan_nama"></span>
+                                    <span>Masuk: <strong class="text-slate-700" x-text="s.tahun_ajaran_masuk || s.tahun_masuk"></strong></span>
                                 </div>
                             </td>
-                            <td class="p-3">
-                                <span class="font-semibold text-slate-800" x-text="s.kelas_asal_nama"></span>
-                                <div class="text-[10px] text-slate-400" x-text="'Tingkat ' + s.tingkat_asal + ' • ' + s.jurusan_kode"></div>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold text-slate-800 text-xs sm:text-sm" x-text="s.kelas_asal_nama"></span>
+                                <div class="text-[11px] text-slate-400" x-text="'Tingkat ' + s.tingkat_asal + ' • ' + s.jurusan_kode"></div>
                             </td>
-                            <td class="p-3">
+                            <td class="py-4 px-4">
                                 <select x-model="s.action" @change="onStudentActionChange(s)"
-                                    class="w-full px-3 py-1.5 text-xs rounded-lg border font-bold transition-all"
+                                    class="w-full px-3 py-2 text-xs rounded-xl border-0 font-bold transition-all shadow-xs"
                                     :class="{
-                                        'bg-blue-50 text-blue-700 border-blue-200': s.action === 'naik_kelas',
-                                        'bg-amber-50 text-amber-800 border-amber-200': s.action === 'tinggal_kelas',
-                                        'bg-emerald-50 text-emerald-800 border-emerald-200': s.action === 'lulus',
-                                        'bg-purple-50 text-purple-800 border-purple-200': s.action === 'pindah',
-                                        'bg-rose-50 text-rose-800 border-rose-200': s.action === 'keluar'
+                                        'bg-[#EFF5FF] text-[#003FA9]': s.action === 'naik_kelas',
+                                        'bg-amber-50 text-amber-800': s.action === 'tinggal_kelas',
+                                        'bg-emerald-50 text-emerald-800': s.action === 'lulus',
+                                        'bg-purple-50 text-purple-800': s.action === 'pindah',
+                                        'bg-rose-50 text-rose-800': s.action === 'keluar'
                                     }">
                                     <option value="naik_kelas">Naik Kelas</option>
                                     <option value="tinggal_kelas">Tinggal Kelas</option>
@@ -482,9 +482,9 @@
                                     <option value="keluar">Keluar / Drop Out</option>
                                 </select>
                             </td>
-                            <td class="p-3">
+                            <td class="py-4 px-4">
                                 <input type="text" x-model="s.catatan" placeholder="Catatan opsional..."
-                                    class="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white">
+                                    class="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-[#003FA9] outline-none">
                             </td>
                         </tr>
                     </template>
@@ -553,37 +553,37 @@
         </div>
 
         {{-- Student Allocation Table --}}
-        <div class="overflow-x-auto border border-slate-100 rounded-xl">
-            <table class="w-full text-left text-xs text-slate-700">
-                <thead class="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
-                    <tr>
-                        <th class="p-3 w-12 text-center">No</th>
-                        <th class="p-3">Siswa</th>
-                        <th class="p-3">Rombel Asal</th>
-                        <th class="p-3">Status Keputusan</th>
-                        <th class="p-3 w-64">Rombel Tujuan (T.A. Baru)</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL ASAL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATUS KEPUTUSAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-64">ROMBEL TUJUAN (T.A. BARU)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     <template x-for="(s, idx) in activePromotingStudents" :key="s.siswa_id">
-                        <tr class="hover:bg-blue-50/30 transition-colors">
-                            <td class="p-3 text-center text-slate-400 font-semibold" x-text="idx + 1"></td>
-                            <td class="p-3">
-                                <div class="font-bold text-slate-800" x-text="s.nama"></div>
-                                <div class="text-[11px] text-slate-500 font-mono" x-text="'NIS: ' + s.nis"></div>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-center text-slate-400 font-medium text-xs" x-text="idx + 1"></td>
+                            <td class="py-4 px-4">
+                                <div class="font-bold text-slate-900 text-xs sm:text-sm" x-text="s.nama"></div>
+                                <div class="text-[11px] text-slate-400 font-mono" x-text="'NIS: ' + s.nis"></div>
                             </td>
-                            <td class="p-3">
-                                <span class="font-semibold text-slate-800" x-text="s.kelas_asal_nama"></span>
-                                <div class="text-[10px] text-slate-400" x-text="'Tingkat ' + s.tingkat_asal"></div>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold text-slate-800 text-xs sm:text-sm" x-text="s.kelas_asal_nama"></span>
+                                <div class="text-[11px] text-slate-400" x-text="'Tingkat ' + s.tingkat_asal"></div>
                             </td>
-                            <td class="p-3">
-                                <span class="px-2.5 py-1 rounded-md text-[11px] font-bold"
-                                    :class="s.action === 'naik_kelas' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'"
+                            <td class="py-4 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                                    :class="s.action === 'naik_kelas' ? 'bg-[#003FA9] text-white' : 'bg-amber-500 text-white'"
                                     x-text="s.action === 'naik_kelas' ? 'Naik Kelas' : 'Tinggal Kelas'"></span>
                             </td>
-                            <td class="p-3">
+                            <td class="py-4 px-4">
                                 <select x-model="s.kelas_tujuan_id"
-                                    class="w-full px-3 py-1.5 text-xs rounded-lg border font-semibold"
+                                    class="w-full px-3 py-2 text-xs rounded-xl border font-semibold shadow-xs"
                                     :class="!s.kelas_tujuan_id ? 'border-rose-300 bg-rose-50/30 text-rose-700' : 'border-slate-200 bg-white text-slate-800'">
                                     <option value="">-- Pilih Rombel Tujuan --</option>
                                     <template x-for="dc in destClasses" :key="dc.id">

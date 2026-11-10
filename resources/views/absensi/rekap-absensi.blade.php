@@ -62,93 +62,63 @@
 
         {{-- Tabel Rekap --}}
         <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
-            <div class="overflow-x-auto custom-scrollbar">
+            <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-12 text-center">
-                                No</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">NIS</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Siswa
-                            </th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">
-                                Kelas</th>
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center bg-emerald-50/50">
-                                <span class="inline-flex items-center gap-1 text-emerald-700"><i
-                                        class='bx bx-check-shield'></i> Hadir</span>
-                            </th>
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center bg-blue-50/50">
-                                <span class="inline-flex items-center gap-1 text-blue-700"><i class='bx bx-envelope'></i>
-                                    Izin</span>
-                            </th>
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center bg-amber-50/50">
-                                <span class="inline-flex items-center gap-1 text-amber-700"><i
-                                        class='bx bx-plus-medical'></i> Sakit</span>
-                            </th>
-                            <th
-                                class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center bg-rose-50/50">
-                                <span class="inline-flex items-center gap-1 text-rose-700"><i class='bx bx-x-circle'></i>
-                                    Alpa</span>
-                            </th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NAMA SISWA</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">KELAS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">HADIR</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">IZIN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">SAKIT</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">ALPA</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-dark-200/50">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($rekap as $r)
-                            <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                                <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $rekap->firstItem() + $loop->index }}</td>
-                                <td class="px-6 py-4 text-sm font-mono text-dark-600">{{ $r['siswa']->nis }}</td>
-                                <td class="px-6 py-4">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">{{ $rekap->firstItem() + $loop->index }}</td>
+                                <td class="py-4 px-4 font-mono font-bold text-slate-900 text-xs sm:text-sm">{{ $r['siswa']->nis }}</td>
+                                <td class="py-4 px-4">
                                     <div class="flex items-center gap-3">
-                                        <div
-                                            class="flex-shrink-0 w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xs uppercase">
+                                        <div class="flex-shrink-0 w-8 h-8 rounded-xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center font-bold text-xs uppercase">
                                             {{ substr($r['siswa']->nama, 0, 1) }}
                                         </div>
-                                        <span class="text-sm font-bold text-dark-800">{{ $r['siswa']->nama }}</span>
+                                        <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ $r['siswa']->nama }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-bold text-dark-700 text-center">
+                                <td class="py-4 px-4 text-center font-bold text-slate-900 font-mono text-xs sm:text-sm">
                                     {{ $r['siswa']->kelas->nama_kelas ?? '-' }}
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="inline-flex items-center justify-center min-w-[32px] px-2 py-1 rounded-lg text-xs font-bold {{ $r['hadir'] > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-dark-50 text-dark-400' }}">
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-xs font-bold {{ $r['hadir'] > 0 ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400' }}">
                                         {{ $r['hadir'] }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="inline-flex items-center justify-center min-w-[32px] px-2 py-1 rounded-lg text-xs font-bold {{ $r['izin'] > 0 ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-dark-50 text-dark-400' }}">
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-xs font-bold {{ $r['izin'] > 0 ? 'bg-[#003FA9] text-white' : 'bg-slate-100 text-slate-400' }}">
                                         {{ $r['izin'] }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="inline-flex items-center justify-center min-w-[32px] px-2 py-1 rounded-lg text-xs font-bold {{ $r['sakit'] > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-dark-50 text-dark-400' }}">
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-xs font-bold {{ $r['sakit'] > 0 ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400' }}">
                                         {{ $r['sakit'] }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span
-                                        class="inline-flex items-center justify-center min-w-[32px] px-2 py-1 rounded-lg text-xs font-bold {{ $r['alpa'] > 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-dark-50 text-dark-400' }}">
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-xs font-bold {{ $r['alpa'] > 0 ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-400' }}">
                                         {{ $r['alpa'] }}
                                     </span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <div
-                                            class="w-16 h-16 mb-4 rounded-full bg-dark-100 flex items-center justify-center">
-                                            <i class='bx bx-bar-chart-alt-2 text-3xl text-dark-400'></i>
-                                        </div>
-                                        <h3 class="text-sm font-medium text-dark-900">Belum ada data siswa</h3>
-                                        <p class="mt-1 text-sm text-dark-500">Tidak ada siswa terdaftar di sistem.</p>
-                                    </div>
+                                <td colspan="8" class="py-12 text-center text-slate-400">
+                                    <i class='bx bx-bar-chart-alt-2 text-4xl mb-2 text-slate-300'></i>
+                                    <h3 class="font-semibold text-sm text-slate-600">Belum ada data rekap siswa</h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">Tidak ditemukan data absensi untuk filter yang dipilih.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -158,7 +128,7 @@
 
             {{-- Pagination --}}
             @if ($rekap->hasPages())
-                <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                     {{ $rekap->links() }}
                 </div>
             @endif

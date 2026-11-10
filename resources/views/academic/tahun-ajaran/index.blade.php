@@ -195,85 +195,83 @@
     </div>
 
     {{-- SECTION: TABEL DATA TAHUN AJARAN --}}
-    <div class="bg-white rounded-2xl border border-dark-100 shadow-xs overflow-hidden mb-6">
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden p-6 mb-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-dark-100 bg-dark-50/60 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                        <th class="px-5 py-3.5 w-12 text-center">No</th>
-                        <th class="px-5 py-3.5">Tahun Ajaran & Periode</th>
-                        <th class="px-5 py-3.5 text-center">Semester Aktif</th>
-                        <th class="px-5 py-3.5 text-center">Jumlah Rombel</th>
-                        <th class="px-5 py-3.5 text-center">Enrollment Siswa</th>
-                        <th class="px-5 py-3.5 text-center">Status</th>
-                        <th class="px-5 py-3.5 text-center">Catatan</th>
-                        <th class="px-5 py-3.5 text-center w-40">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TAHUN AJARAN & PERIODE</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">SEMESTER AKTIF</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">JUMLAH ROMBEL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">ENROLLMENT SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">CATATAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-36">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($tahunAjarans as $index => $ta)
-                        <tr class="hover:bg-blue-50/30 transition {{ $ta->is_active ? 'bg-blue-50/20' : '' }}">
-                            <td class="px-5 py-4 text-center font-semibold text-dark-500">
+                        <tr class="hover:bg-slate-50/70 transition-colors {{ $ta->is_active ? 'bg-blue-50/30' : '' }}">
+                            <td class="py-4 px-4 text-center font-medium text-xs text-slate-400">
                                 {{ $tahunAjarans->firstItem() + $index }}
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="py-4 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg {{ $ta->is_active ? 'bg-[#003EA7] text-white' : 'bg-dark-100 text-dark-600' }} flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-xl {{ $ta->is_active ? 'bg-[#003FA9] text-white' : 'bg-[#EFF5FF] text-[#003FA9]' }} flex items-center justify-center font-bold text-sm shrink-0">
                                         <i class='bx bx-calendar'></i>
                                     </div>
                                     <div>
-                                        <span class="font-bold text-dark-800 text-sm font-mono block">
+                                        <span class="font-bold text-slate-900 text-xs sm:text-sm font-mono block">
                                             {{ $ta->nama }}
                                         </span>
-                                        <span class="text-[11px] text-dark-400">
+                                        <span class="text-[11px] text-slate-400 font-normal">
                                             {{ $ta->tanggal_mulai ? $ta->tanggal_mulai->format('d/m/Y') : '-' }} s.d {{ $ta->tanggal_selesai ? $ta->tanggal_selesai->format('d/m/Y') : '-' }}
                                         </span>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold {{ $ta->semester_aktif === 'ganjil' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-indigo-50 text-indigo-700 border border-indigo-200' }}">
-                                    <i class='bx {{ $ta->semester_aktif === 'ganjil' ? 'bx-sun' : 'bx-moon' }} text-xs'></i>
+                            <td class="py-4 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $ta->semester_aktif === 'ganjil' ? 'bg-[#EFF5FF] text-[#003FA9]' : 'bg-slate-100 text-slate-700' }}">
                                     Semester {{ ucfirst($ta->semester_aktif) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-4 text-center font-semibold text-dark-700">
+                            <td class="py-4 px-4 text-center font-semibold text-slate-800 text-xs sm:text-sm">
                                 {{ $ta->kelas_count }} Rombel
                             </td>
-                            <td class="px-5 py-4 text-center font-semibold text-dark-700">
+                            <td class="py-4 px-4 text-center font-semibold text-slate-800 text-xs sm:text-sm">
                                 {{ $ta->enrollments_count }} Siswa
                             </td>
-                            <td class="px-5 py-4 text-center">
+                            <td class="py-4 px-4 text-center">
                                 @if($ta->is_active)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
                                         AKTIF
                                     </span>
                                 @elseif($ta->status === 'selesai')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
                                         Selesai
                                     </span>
                                 @elseif($ta->status === 'draft')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
                                         Draft
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-zinc-100 text-zinc-600 border border-zinc-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-600">
                                         Diarsipkan
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-center text-dark-500 max-w-xs truncate" title="{{ $ta->catatan }}">
+                            <td class="py-4 px-4 text-center text-xs text-slate-400 max-w-xs truncate" title="{{ $ta->catatan }}">
                                 {{ $ta->catatan ?: '-' }}
                             </td>
-                            <td class="px-5 py-4 text-center">
-                                <div class="inline-flex items-center gap-1.5">
+                            <td class="py-4 px-4 text-center">
+                                <div class="inline-flex items-center justify-center gap-1.5">
                                     @if(!$ta->is_active && in_array($user->role, ['superadmin', 'admin']))
                                         <form action="{{ route('academic.tahun-ajaran.activate', $ta->id) }}" method="POST"
-                                              onsubmit="return confirm('Aktifkan Tahun Ajaran {{ $ta->nama }} sebagai periode operasional sekolah? Periode aktif lain akan otomatis dinonaktifkan.');">
+                                              onsubmit="return confirm('Aktifkan Tahun Ajaran {{ $ta->nama }} sebagai periode operasional sekolah? Periode aktif lain akan otomatis dinonaktifkan.');" class="inline">
                                             @csrf
                                             <button type="submit"
-                                                class="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition"
+                                                class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1 transition shadow-sm"
                                                 title="Aktifkan Periode Ini">
                                                 <i class='bx bx-check-double text-sm'></i>
                                                 <span>Aktifkan</span>
@@ -283,20 +281,19 @@
 
                                     @if(in_array($user->role, ['superadmin', 'admin']))
                                         <button type="button" onclick="editTahunAjaran({{ json_encode($ta) }})"
-                                            class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#003EA7] border border-blue-200 hover:bg-blue-100 text-xs font-semibold flex items-center gap-1 transition"
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
                                             title="Edit Periode">
-                                            <i class='bx bx-edit text-sm'></i>
-                                            <span>Edit</span>
+                                            <i class='bx bx-edit text-lg'></i>
                                         </button>
 
                                         @if(!$ta->is_active && $ta->kelas_count === 0 && $ta->enrollments_count === 0)
                                             <form action="{{ route('academic.tahun-ajaran.destroy', $ta->id) }}" method="POST"
-                                                  onsubmit="return confirm('Hapus permanen data Tahun Ajaran {{ $ta->nama }}?');">
+                                                  onsubmit="return confirm('Hapus permanen data Tahun Ajaran {{ $ta->nama }}?');" class="inline">
                                                 @csrf
                                                 <button type="submit"
-                                                    class="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 text-xs transition"
+                                                    class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                                     title="Hapus Periode Kosong">
-                                                    <i class='bx bx-trash text-sm'></i>
+                                                    <i class='bx bx-trash text-lg'></i>
                                                 </button>
                                             </form>
                                         @endif
@@ -306,10 +303,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-12">
-                                <i class='bx bx-calendar-x text-5xl text-dark-300 block mb-2'></i>
-                                <h4 class="font-bold text-dark-700 text-sm">Tidak ada data tahun ajaran</h4>
-                                <p class="text-xs text-dark-400 mt-1">Data tahun ajaran belum dibuat atau tidak ditemukan sesuai filter pencarian.</p>
+                            <td colspan="8" class="text-center py-12 text-slate-400">
+                                <i class='bx bx-calendar-x text-4xl mb-2 text-slate-300'></i>
+                                <h4 class="font-semibold text-slate-600 text-sm">Tidak ada data tahun ajaran</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Data tahun ajaran belum dibuat atau tidak ditemukan sesuai filter pencarian.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -318,7 +315,7 @@
         </div>
 
         @if($tahunAjarans->hasPages())
-            <div class="px-5 py-4 border-t border-dark-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $tahunAjarans->links() }}
             </div>
         @endif

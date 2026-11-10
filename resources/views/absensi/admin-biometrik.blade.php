@@ -14,44 +14,44 @@
 
         {{-- 4 Stat Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-5 flex items-center justify-between">
+            <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-dark-400 uppercase tracking-wider">Total Siswa</p>
-                    <h3 class="text-2xl font-black text-dark-800 mt-1">{{ $totalSiswa }}</h3>
-                    <p class="text-[11px] text-dark-500 mt-0.5">Seluruh 33 Kelas</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Siswa</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1">{{ $totalSiswa }}</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Seluruh 33 Kelas</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-2xl font-bold">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#003FA9] flex items-center justify-center text-2xl font-bold">
                     <i class='bx bx-group'></i>
                 </div>
             </div>
 
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-5 flex items-center justify-between">
+            <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-dark-400 uppercase tracking-wider">Terdaftar Biometrik</p>
-                    <h3 class="text-2xl font-black text-emerald-600 mt-1">{{ $totalRegistered }}</h3>
-                    <p class="text-[11px] text-emerald-700 mt-0.5">{{ $totalSiswa > 0 ? round(($totalRegistered / $totalSiswa) * 100) : 0 }}% terverifikasi</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Terdaftar Biometrik</p>
+                    <h3 class="text-2xl font-bold text-emerald-600 mt-1">{{ $totalRegistered }}</h3>
+                    <p class="text-[11px] text-emerald-600 mt-0.5">{{ $totalSiswa > 0 ? round(($totalRegistered / $totalSiswa) * 100) : 0 }}% terverifikasi</p>
                 </div>
                 <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold">
                     <i class='bx bx-check-shield'></i>
                 </div>
             </div>
 
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-5 flex items-center justify-between">
+            <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-dark-400 uppercase tracking-wider">Belum Terdaftar</p>
-                    <h3 class="text-2xl font-black text-amber-600 mt-1">{{ $totalUnregistered }}</h3>
-                    <p class="text-[11px] text-amber-700 mt-0.5">Perlu registrasi wajah</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Belum Terdaftar</p>
+                    <h3 class="text-2xl font-bold text-amber-600 mt-1">{{ $totalUnregistered }}</h3>
+                    <p class="text-[11px] text-amber-600 mt-0.5">Perlu registrasi wajah</p>
                 </div>
                 <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold">
                     <i class='bx bx-user-x'></i>
                 </div>
             </div>
 
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-5 flex items-center justify-between">
+            <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-dark-400 uppercase tracking-wider">Percobaan Mencurigakan</p>
-                    <h3 class="text-2xl font-black text-rose-600 mt-1">{{ $totalSuspicious }}</h3>
-                    <p class="text-[11px] text-rose-700 mt-0.5">Hari ini (Gagal Match/Spoof)</p>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Percobaan Mencurigakan</p>
+                    <h3 class="text-2xl font-bold text-rose-600 mt-1">{{ $totalSuspicious }}</h3>
+                    <p class="text-[11px] text-rose-600 mt-0.5">Hari ini (Gagal Match/Spoof)</p>
                 </div>
                 <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl font-bold">
                     <i class='bx bx-shield-x'></i>
@@ -60,14 +60,14 @@
         </div>
 
         {{-- Tabs Navigation --}}
-        <div class="flex items-center gap-2 border-b border-dark-200">
+        <div class="flex items-center gap-2 border-b border-slate-100">
             <a href="{{ route('admin.biometrik', ['tab' => 'students']) }}"
-                class="px-5 py-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 {{ $activeTab === 'students' ? 'border-primary-600 text-primary-600' : 'border-transparent text-dark-500 hover:text-dark-800' }}">
+                class="px-5 py-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 {{ $activeTab === 'students' ? 'border-[#003FA9] text-[#003FA9]' : 'border-transparent text-slate-400 hover:text-slate-700' }}">
                 <i class='bx bx-user-check text-lg'></i>
                 <span>Status Biometrik Siswa</span>
             </a>
             <a href="{{ route('admin.biometrik', ['tab' => 'logs']) }}"
-                class="px-5 py-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 {{ $activeTab === 'logs' ? 'border-primary-600 text-primary-600' : 'border-transparent text-dark-500 hover:text-dark-800' }}">
+                class="px-5 py-3 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 {{ $activeTab === 'logs' ? 'border-[#003FA9] text-[#003FA9]' : 'border-transparent text-slate-400 hover:text-slate-700' }}">
                 <i class='bx bx-receipt text-lg'></i>
                 <span>Audit Log Verifikasi</span>
                 @if ($totalSuspicious > 0)
@@ -78,20 +78,20 @@
 
         {{-- TAB 1: DAFTAR BIOMETRIK SISWA --}}
         @if ($activeTab === 'students')
-            <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
                 {{-- Filter Bar --}}
-                <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/40">
+                <div class="pb-5 mb-5 border-b border-slate-100">
                     <form action="{{ route('admin.biometrik') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <input type="hidden" name="tab" value="students">
                         <div>
-                            <label class="block text-xs font-medium text-dark-600 mb-1">Cari Siswa</label>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Cari Siswa</label>
                             <input type="text" name="search" value="{{ request('search') }}"
-                                class="w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                                class="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9]"
                                 placeholder="Nama atau NIS...">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-dark-600 mb-1">Filter Kelas</label>
-                            <select name="kelas_id" class="w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Filter Kelas</label>
+                            <select name="kelas_id" class="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9]">
                                 <option value="">Semua Kelas</option>
                                 @foreach ($kelasList as $k)
                                     <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
@@ -101,8 +101,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-dark-600 mb-1">Status Biometrik</label>
-                            <select name="status_biometrik" class="w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Status Biometrik</label>
+                            <select name="status_biometrik" class="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9]">
                                 <option value="">Semua Status</option>
                                 <option value="enrolled" {{ in_array(request('status_biometrik'), ['enrolled', 'registered']) ? 'selected' : '' }}>Enrolled (Aktif)</option>
                                 <option value="not_enrolled" {{ in_array(request('status_biometrik'), ['not_enrolled', 'unregistered']) ? 'selected' : '' }}>Belum Enroll</option>
@@ -111,11 +111,11 @@
                             </select>
                         </div>
                         <div class="flex items-end gap-2">
-                            <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 h-[38px]">
+                            <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-[#003FA9] hover:bg-blue-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 h-[38px]">
                                 <i class='bx bx-filter-alt'></i> Filter
                             </button>
                             @if (request()->hasAny(['search', 'kelas_id', 'status_biometrik']))
-                                <a href="{{ route('admin.biometrik', ['tab' => 'students']) }}" class="py-2 px-3 rounded-xl border border-dark-200 text-dark-600 hover:bg-dark-100 text-xs font-medium h-[38px] flex items-center">
+                                <a href="{{ route('admin.biometrik', ['tab' => 'students']) }}" class="py-2 px-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium h-[38px] flex items-center">
                                     Reset
                                 </a>
                             @endif
@@ -127,85 +127,85 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-dark-50/50 border-b border-dark-200/50 text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                                <th class="px-6 py-4 w-12 text-center">No</th>
-                                <th class="px-6 py-4">Siswa</th>
-                                <th class="px-6 py-4">Kelas & Jurusan</th>
-                                <th class="px-6 py-4 text-center">Status Biometrik</th>
-                                <th class="px-6 py-4 text-center">Kualitas Template</th>
-                                <th class="px-6 py-4">Tgl Registrasi</th>
-                                <th class="px-6 py-4 text-center w-36">Aksi</th>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">No</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Siswa</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kelas & Jurusan</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status Biometrik</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Kualitas Template</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tgl Registrasi</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-36">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-dark-200/50 text-sm">
+                        <tbody class="divide-y divide-slate-100 text-sm">
                             @forelse ($siswas as $s)
-                                <tr class="hover:bg-dark-50/50 transition-colors">
-                                    <td class="px-6 py-4 text-center text-dark-500 font-medium">
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-4 px-4 text-center text-slate-400 text-xs">
                                         {{ $siswas->firstItem() + $loop->index }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="py-4 px-4">
                                         <div class="flex items-center gap-3">
                                             @if ($s->faceBiometric && $u = image_url($s->faceBiometric->sample_photo))
                                                 <img src="{{ $u }}"
-                                                    class="w-10 h-10 rounded-xl object-cover border border-dark-200 shadow-sm" loading="lazy">
+                                                    class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm" loading="lazy">
                                             @else
-                                                <div class="w-10 h-10 rounded-xl bg-dark-100 text-dark-500 flex items-center justify-center font-bold text-xs">
+                                                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs">
                                                     {{ strtoupper(substr($s->nama, 0, 1)) }}
                                                 </div>
                                             @endif
                                             <div>
-                                                <p class="font-bold text-dark-800 leading-tight">{{ $s->nama }}</p>
-                                                <p class="text-xs text-dark-500">NIS: {{ $s->nis }}</p>
+                                                <p class="font-semibold text-slate-800 leading-tight">{{ $s->nama }}</p>
+                                                <p class="text-xs text-slate-400 mt-0.5">NIS: {{ $s->nis }}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <p class="font-medium text-dark-800">{{ $s->kelas->nama_kelas ?? '-' }}</p>
-                                        <p class="text-xs text-dark-400">{{ $s->kelas->jurusan->kode_jurusan ?? '' }}</p>
+                                    <td class="py-4 px-4">
+                                        <p class="font-medium text-slate-800">{{ $s->kelas->nama_kelas ?? '-' }}</p>
+                                        <p class="text-xs text-slate-400">{{ $s->kelas->jurusan->kode_jurusan ?? '' }}</p>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="py-4 px-4 text-center">
                                         @php
                                             $bStatus = $s->biometric_status ?? ($s->faceBiometric && $s->faceBiometric->is_active ? 'enrolled' : 'not_enrolled');
                                         @endphp
                                         @if ($bStatus === 'enrolled')
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                <i class='bx bx-check-shield'></i> Enrolled
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
+                                                Enrolled
                                             </span>
                                         @elseif ($bStatus === 'needs_re_enrollment')
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200">
-                                                <i class='bx bx-refresh'></i> Re-Enroll
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">
+                                                Re-Enroll
                                             </span>
                                         @elseif ($bStatus === 'suspended')
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                                <i class='bx bx-block'></i> Suspended
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-600 text-white">
+                                                Suspended
                                             </span>
                                         @elseif ($bStatus === 'pending')
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                                <i class='bx bx-loader-alt'></i> Pending
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#003FA9] text-white">
+                                                Pending
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                                <i class='bx bx-time'></i> Belum Enroll
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">
+                                                Belum Enroll
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="py-4 px-4 text-center">
                                         @if ($s->faceBiometric && $s->faceBiometric->quality_score)
                                             <span class="font-bold text-emerald-600 text-xs">{{ round($s->faceBiometric->quality_score) }}%</span>
                                         @else
-                                            <span class="text-dark-400 text-xs">-</span>
+                                            <span class="text-slate-400 text-xs">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-xs text-dark-600">
+                                    <td class="py-4 px-4 text-xs text-slate-600">
                                         {{ $s->faceBiometric && ($s->faceBiometric->enrolled_at ?? $s->faceBiometric->registered_at) ? ($s->faceBiometric->enrolled_at ?? $s->faceBiometric->registered_at)->translatedFormat('d/m/Y H:i') : '-' }}
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center gap-1.5">
+                                    <td class="py-4 px-4 text-center">
+                                        <div class="flex items-center justify-center gap-1">
                                             {{-- Bantu Pendaftaran Wajah via Perangkat Sekolah / Lab --}}
                                             @if ($bStatus !== 'enrolled')
                                                 <a href="{{ route('admin.biometrik.assisted_enroll', ['id' => $s->id]) }}"
                                                     title="Bantu Pendaftaran Wajah (Perangkat Sekolah / Lab)"
-                                                    class="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition">
                                                     <i class='bx bx-desktop text-base'></i>
                                                 </a>
                                             @endif
@@ -216,7 +216,7 @@
                                                     onsubmit="return confirm(@js('Minta siswa ' . $s->nama . ' untuk mendaftarkan ulang wajahnya saat login berikutnya?'));">
                                                     @csrf
                                                     <button type="submit" title="Minta Registrasi Ulang Wajah"
-                                                        class="p-2 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100 transition-colors">
+                                                        class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition">
                                                         <i class='bx bx-refresh text-base'></i>
                                                     </button>
                                                 </form>
@@ -228,7 +228,7 @@
                                                     onsubmit="return confirm('{{ $s->biometric_status === 'suspended' ? 'Aktifkan kembali biometrik siswa ini?' : 'Suspend biometrik siswa ini?' }}');">
                                                     @csrf
                                                     <button type="submit" title="{{ $s->biometric_status === 'suspended' ? 'Aktifkan Biometrik' : 'Suspend Biometrik' }}"
-                                                        class="p-2 rounded-lg {{ $s->biometric_status === 'suspended' ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200' }} transition-colors">
+                                                        class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
                                                         <i class='bx {{ $s->biometric_status === 'suspended' ? 'bx-play-circle' : 'bx-pause-circle' }} text-base'></i>
                                                     </button>
                                                 </form>
@@ -240,7 +240,7 @@
                                                     onsubmit="return confirm('Apakah Anda yakin ingin mereset biometrik wajah siswa ini? Data biometrik akan dihapus dan siswa wajib merekam ulang wajahnya.');">
                                                     @csrf
                                                     <button type="submit" title="Reset Biometrik Permanen (Superadmin Only)"
-                                                        class="p-2 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors">
+                                                        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
                                                         <i class='bx bx-reset text-base'></i>
                                                     </button>
                                                 </form>
@@ -249,7 +249,7 @@
                                             {{-- Presensi Manual Fallback --}}
                                             <button type="button" onclick='openManualOverrideModal({{ $s->id }}, @js($s->nama))'
                                                 title="Presensi Manual (Kasus Darurat/Disabilitas)"
-                                                class="p-2 rounded-lg text-primary-600 bg-primary-50 hover:bg-primary-100 transition-colors">
+                                                class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition">
                                                 <i class='bx bx-edit text-base'></i>
                                             </button>
                                         </div>
@@ -257,8 +257,14 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center text-dark-400 text-sm">
-                                        Tidak ada data siswa yang cocok dengan filter.
+                                    <td colspan="7" class="py-12 text-center text-slate-400">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                                <i class='bx bx-user-x text-2xl text-slate-400'></i>
+                                            </div>
+                                            <p class="text-sm font-medium text-slate-600">Tidak ada data siswa</p>
+                                            <p class="text-xs text-slate-400 mt-1">Tidak ada data siswa yang cocok dengan filter yang dipilih.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
@@ -267,7 +273,7 @@
                 </div>
 
                 @if ($siswas->hasPages())
-                    <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/20">
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                         {{ $siswas->links() }}
                     </div>
                 @endif
@@ -276,14 +282,14 @@
 
         {{-- TAB 2: AUDIT LOG VERIFIKASI --}}
         @if ($activeTab === 'logs')
-            <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
                 {{-- Filter Log Bar --}}
-                <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/40">
+                <div class="pb-5 mb-5 border-b border-slate-100">
                     <form action="{{ route('admin.biometrik') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input type="hidden" name="tab" value="logs">
                         <div>
-                            <label class="block text-xs font-medium text-dark-600 mb-1">Filter Status Log</label>
-                            <select name="log_status" class="w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Filter Status Log</label>
+                            <select name="log_status" class="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9]">
                                 <option value="">Semua Status Log</option>
                                 <option value="success" {{ request('log_status') === 'success' ? 'selected' : '' }}>Sukses Verifikasi</option>
                                 <option value="failed_match" {{ request('log_status') === 'failed_match' ? 'selected' : '' }}>Gagal Match (Beda Orang / Titip Absen)</option>
@@ -293,16 +299,16 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-dark-600 mb-1">Tanggal</label>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal</label>
                             <input type="date" name="log_date" value="{{ request('log_date') }}"
-                                class="w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none">
+                                class="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9]">
                         </div>
                         <div class="flex items-end gap-2">
-                            <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold transition-all h-[38px] flex items-center justify-center gap-1.5">
+                            <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-[#003FA9] hover:bg-blue-700 text-white text-xs font-bold transition h-[38px] flex items-center justify-center gap-1.5">
                                 <i class='bx bx-filter-alt'></i> Terapkan
                             </button>
                             @if (request()->hasAny(['log_status', 'log_date']))
-                                <a href="{{ route('admin.biometrik', ['tab' => 'logs']) }}" class="py-2 px-3 rounded-xl border border-dark-200 text-dark-600 hover:bg-dark-100 text-xs font-medium h-[38px] flex items-center">
+                                <a href="{{ route('admin.biometrik', ['tab' => 'logs']) }}" class="py-2 px-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium h-[38px] flex items-center">
                                     Reset
                                 </a>
                             @endif
@@ -313,75 +319,81 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-dark-50/50 border-b border-dark-200/50 text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                                <th class="px-6 py-4">Waktu</th>
-                                <th class="px-6 py-4">Siswa</th>
-                                <th class="px-6 py-4 text-center">Sesi</th>
-                                <th class="px-6 py-4 text-center">Hasil Status</th>
-                                <th class="px-6 py-4 text-center">Kemiripan / Jarak</th>
-                                <th class="px-6 py-4">Catatan / Alasan</th>
-                                <th class="px-6 py-4">IP Address</th>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Waktu</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Siswa</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Sesi</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Hasil Status</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Kemiripan / Jarak</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Catatan / Alasan</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">IP Address</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-dark-200/50 text-xs">
+                        <tbody class="divide-y divide-slate-100 text-xs">
                             @forelse ($logs as $log)
-                                <tr class="hover:bg-dark-50/50 transition-colors {{ in_array($log->status, ['failed_match', 'failed_liveness']) ? 'bg-rose-50/30' : '' }}">
-                                    <td class="px-6 py-4 text-dark-500 whitespace-nowrap">
+                                <tr class="hover:bg-slate-50/70 transition-colors {{ in_array($log->status, ['failed_match', 'failed_liveness']) ? 'bg-rose-50/30' : '' }}">
+                                    <td class="py-4 px-4 text-slate-500 whitespace-nowrap">
                                         {{ $log->created_at->format('d/m/Y H:i:s') }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <p class="font-bold text-dark-800">{{ $log->siswa->nama ?? 'Siswa' }}</p>
-                                        <p class="text-dark-400 text-[11px]">{{ $log->siswa->kelas->nama_kelas ?? '-' }}</p>
+                                    <td class="py-4 px-4">
+                                        <p class="font-semibold text-slate-800 text-sm">{{ $log->siswa->nama ?? 'Siswa' }}</p>
+                                        <p class="text-slate-400 text-xs mt-0.5">{{ $log->siswa->kelas->nama_kelas ?? '-' }}</p>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="px-2 py-0.5 rounded text-[11px] font-bold uppercase {{ $log->session_type === 'masuk' ? 'bg-emerald-100 text-emerald-800' : ($log->session_type === 'pulang' ? 'bg-primary-100 text-primary-800' : 'bg-purple-100 text-purple-800') }}">
+                                    <td class="py-4 px-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 uppercase">
                                             {{ $log->session_type }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="py-4 px-4 text-center">
                                         @if ($log->status === 'success')
-                                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-600 text-white">
                                                 Sukses
                                             </span>
                                         @elseif ($log->status === 'failed_match')
-                                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200" title="Beda Orang / Titip Absen">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-600 text-white" title="Beda Orang / Titip Absen">
                                                 Wajah Beda
                                             </span>
                                         @elseif ($log->status === 'failed_liveness')
-                                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200" title="Indikasi Foto/Video">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500 text-white" title="Indikasi Foto/Video">
                                                 Liveness Gagal
                                             </span>
                                         @elseif ($log->status === 'manual_override')
-                                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#003FA9] text-white">
                                                 Manual
                                             </span>
                                         @else
-                                            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-dark-100 text-dark-700">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-200 text-slate-700">
                                                 {{ $log->status }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-center font-mono">
+                                    <td class="py-4 px-4 text-center font-mono">
                                         @if ($log->confidence_score !== null)
                                             <span class="font-bold {{ $log->confidence_score >= 70 ? 'text-emerald-600' : 'text-rose-600' }}">
                                                 {{ round($log->confidence_score, 1) }}%
                                             </span>
-                                            <span class="text-dark-400 text-[10px]">({{ round($log->euclidean_distance, 3) }})</span>
+                                            <span class="text-slate-400 text-[10px]">({{ round($log->euclidean_distance, 3) }})</span>
                                         @else
-                                            <span class="text-dark-400">-</span>
+                                            <span class="text-slate-400">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-dark-600 max-w-xs truncate" title="{{ $log->failure_reason }}">
+                                    <td class="py-4 px-4 text-slate-600 max-w-xs truncate" title="{{ $log->failure_reason }}">
                                         {{ $log->failure_reason ?? '-' }}
                                     </td>
-                                    <td class="px-6 py-4 font-mono text-dark-400 text-[11px]">
+                                    <td class="py-4 px-4 font-mono text-slate-400 text-[11px]">
                                         {{ $log->ip_address ?? '-' }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center text-dark-400 text-sm">
-                                        Belum ada rekaman audit log verifikasi.
+                                    <td colspan="7" class="py-12 text-center text-slate-400">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                                <i class='bx bx-receipt text-2xl text-slate-400'></i>
+                                            </div>
+                                            <p class="text-sm font-medium text-slate-600">Belum ada rekaman audit log</p>
+                                            <p class="text-xs text-slate-400 mt-1">Belum ada rekaman audit log verifikasi pada periode ini.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
@@ -390,7 +402,7 @@
                 </div>
 
                 @if ($logs->hasPages())
-                    <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/20">
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                         {{ $logs->links() }}
                     </div>
                 @endif

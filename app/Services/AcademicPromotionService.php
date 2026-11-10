@@ -128,51 +128,54 @@ class AcademicPromotionService
             ->orderBy('kelas_id')
             ->get();
 
-        if ($enrollments->isNotEmpty()) {
-            return $enrollments->map(function ($enrollment) {
-                $siswa = $enrollment->siswa;
-                $currentTingkat = (int) ($enrollment->tingkat ?: $enrollment->kelas?->tingkat ?: 10);
+        $enrolledStudents = $enrollments->map(function ($enrollment) {
+            $siswa = $enrollment->siswa;
+            $currentTingkat = (int) ($enrollment->tingkat ?: $enrollment->kelas?->tingkat ?: 10);
 
-                // Determine default smart action
-                if ($currentTingkat >= 12) {
-                    $defaultAction = 'lulus';
-                    $recommendedTargetTingkat = null;
-                } else {
-                    $defaultAction = 'naik_kelas';
-                    $recommendedTargetTingkat = $currentTingkat + 1;
-                }
+            // Determine default smart action
+            if ($currentTingkat >= 12) {
+                $defaultAction = 'lulus';
+                $recommendedTargetTingkat = null;
+            } else {
+                $defaultAction = 'naik_kelas';
+                $recommendedTargetTingkat = $currentTingkat + 1;
+            }
 
-                return [
-                    'enrollment_id'             => $enrollment->id,
-                    'siswa_id'                  => $siswa->id,
-                    'nis'                       => $siswa->nis,
-                    'nisn'                      => $siswa->nisn,
-                    'nama'                      => $siswa->nama,
-                    'jenis_kelamin'             => $siswa->jenis_kelamin,
-                    'kelas_asal_id'             => $enrollment->kelas_id,
-                    'kelas_asal_nama'           => $enrollment->kelas?->nama_kelas ?? '-',
-                    'tingkat_asal'              => $currentTingkat,
-                    'jurusan_id'                => $enrollment->jurusan_id ?: $siswa->jurusan_id,
-                    'jurusan_kode'              => $enrollment->jurusan?->kode_jurusan ?? $enrollment->kelas?->jurusan?->kode_jurusan ?? '-',
-                    'angkatan_id'               => $siswa->angkatan_id,
-                    'angkatan_nama'             => $siswa->angkatan?->nama_angkatan ?? ($siswa->tahun_masuk ? 'Angkatan ' . $siswa->tahun_masuk : '-'),
-                    'tahun_masuk'               => $siswa->tahun_masuk,
-                    'tahun_ajaran_masuk'        => $siswa->tahun_ajaran_masuk,
-                    'default_action'            => $defaultAction,
-                    'recommended_target_tingkat'=> $recommendedTargetTingkat,
-                    'wali_kelas_asal'           => $enrollment->wali_kelas_nama ?: '-',
-                ];
-            });
-        }
+            return [
+                'enrollment_id'             => $enrollment->id,
+                'siswa_id'                  => $siswa->id,
+                'nis'                       => $siswa->nis,
+                'nisn'                      => $siswa->nisn,
+                'nama'                      => $siswa->nama,
+                'jenis_kelamin'             => $siswa->jenis_kelamin,
+                'kelas_asal_id'             => $enrollment->kelas_id,
+                'kelas_asal_nama'           => $enrollment->kelas?->nama_kelas ?? '-',
+                'tingkat_asal'              => $currentTingkat,
+                'jurusan_id'                => $enrollment->jurusan_id ?: ($enrollment->kelas?->jurusan_id ?? $siswa->jurusan_id),
+                'jurusan_kode'              => $enrollment->jurusan?->kode_jurusan ?? $enrollment->kelas?->jurusan?->kode_jurusan ?? ($siswa->jurusan?->kode_jurusan ?? '-'),
+                'angkatan_id'               => $siswa->angkatan_id,
+                'angkatan_nama'             => $siswa->angkatan?->nama_angkatan ?? ($siswa->tahun_masuk ? 'Angkatan ' . $siswa->tahun_masuk : '-'),
+                'tahun_masuk'               => $siswa->tahun_masuk,
+                'tahun_ajaran_masuk'        => $siswa->tahun_ajaran_masuk,
+                'default_action'            => $defaultAction,
+                'recommended_target_tingkat'=> $recommendedTargetTingkat,
+                'wali_kelas_asal'           => $enrollment->wali_kelas_nama ?: '-',
+            ];
+        });
 
-        // Fallback: If no explicit enrollments exist for this TA, retrieve active siswas assigned to these classes
+        // Complement with active students assigned to these classes who do not yet have an enrollment for this TA
+        $enrolledSiswaIds = $enrollments->pluck('siswa_id')->filter()->all();
+
         $directStudents = Siswa::with(['angkatan', 'kelas.jurusan'])
             ->where('status', 'aktif')
             ->whereIn('kelas_id', $kelasIds)
+            ->when(!empty($enrolledSiswaIds), function ($q) use ($enrolledSiswaIds) {
+                $q->whereNotIn('id', $enrolledSiswaIds);
+            })
             ->orderBy('kelas_id')
             ->get();
 
-        return $directStudents->map(function ($siswa) use ($originTaId) {
+        $directMapped = $directStudents->map(function ($siswa) use ($originTaId) {
             $currentTingkat = (int) ($siswa->kelas?->tingkat ?: 10);
             $homeroomName = $this->historyService->resolveHomeroomTeacherName($siswa->kelas_id, $originTaId);
 
@@ -194,8 +197,8 @@ class AcademicPromotionService
                 'kelas_asal_id'             => $siswa->kelas_id,
                 'kelas_asal_nama'           => $siswa->kelas?->nama_kelas ?? '-',
                 'tingkat_asal'              => $currentTingkat,
-                'jurusan_id'                => $siswa->jurusan_id ?: $siswa->kelas?->jurusan_id,
-                'jurusan_kode'              => $siswa->jurusan?->kode_jurusan ?? $siswa->kelas?->jurusan?->kode_jurusan ?? '-',
+                'jurusan_id'                => $siswa->kelas?->jurusan_id ?? $siswa->jurusan_id,
+                'jurusan_kode'              => $siswa->kelas?->jurusan?->kode_jurusan ?? ($siswa->jurusan?->kode_jurusan ?? '-'),
                 'angkatan_id'               => $siswa->angkatan_id,
                 'angkatan_nama'             => $siswa->angkatan?->nama_angkatan ?? ($siswa->tahun_masuk ? 'Angkatan ' . $siswa->tahun_masuk : '-'),
                 'tahun_masuk'               => $siswa->tahun_masuk,
@@ -205,6 +208,8 @@ class AcademicPromotionService
                 'wali_kelas_asal'           => $homeroomName ?: '-',
             ];
         });
+
+        return $enrolledStudents->concat($directMapped)->values();
     }
 
     /**

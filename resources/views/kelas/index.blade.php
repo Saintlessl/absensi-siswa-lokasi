@@ -66,73 +66,62 @@
         </div>
 
         {{-- Table Container --}}
-        <div class="overflow-x-auto custom-scrollbar">
+        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-14 text-center">No</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Rombel</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Tingkat</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Jurusan</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Tahun Ajaran</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Wali Kelas</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Kapasitas</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NAMA ROMBEL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">TINGKAT</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JURUSAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TAHUN AJARAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">WALI KELAS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">KAPASITAS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-28">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/50">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($kelas as $k)
-                        @php
-                            $badgeColor = match(strtoupper($k->jurusan->kode_jurusan ?? '')) {
-                                'PPLG' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
-                                'ANIMASI' => 'bg-purple-100 text-purple-700 border-purple-200',
-                                'TPFL' => 'bg-amber-100 text-amber-800 border-amber-200',
-                                'TO' => 'bg-rose-100 text-rose-700 border-rose-200',
-                                'BCF' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                                default => 'bg-blue-100 text-blue-700 border-blue-200',
-                            };
-                        @endphp
-                        <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $kelas->firstItem() + $loop->index }}</td>
-                            <td class="px-6 py-4 text-sm font-bold text-dark-900 font-mono">
-                                <a href="{{ route('academic.class', $k) }}" class="hover:text-primary-600 transition-colors inline-flex items-center gap-1.5">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">{{ $kelas->firstItem() + $loop->index }}</td>
+                            <td class="py-4 px-4">
+                                <a href="{{ route('academic.class', $k) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition font-mono text-xs sm:text-sm inline-flex items-center gap-1.5">
                                     {{ $k->nama_kelas }}
-                                    <i class='bx bx-link-external text-xs text-dark-400'></i>
+                                    <i class='bx bx-link-external text-xs text-slate-400'></i>
                                 </a>
                             </td>
-                            <td class="px-6 py-4 text-sm text-center">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-dark-100 text-dark-800">
-                                    Kelas {{ $k->tingkat ?: '-' }}
-                                </span>
+                            <td class="py-4 px-4 text-center font-semibold text-slate-800 text-xs sm:text-sm">
+                                Kelas {{ $k->tingkat ?: '-' }}
                             </td>
-                            <td class="px-6 py-4 text-sm">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold border {{ $badgeColor }}">
-                                    {{ $k->jurusan->kode_jurusan ?? '-' }}
-                                </span>
+                            <td class="py-4 px-4 font-bold text-slate-900 font-mono text-xs sm:text-sm">
+                                {{ $k->jurusan->kode_jurusan ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 text-xs font-mono text-dark-600">
+                            <td class="py-4 px-4 text-xs font-mono text-slate-600">
                                 {{ $k->tahun_ajaran ?: '2026/2027' }}
                             </td>
-                            <td class="px-6 py-4 text-sm text-dark-700">
-                                {{ $k->wali_kelas }}
+                            <td class="py-4 px-4 font-medium text-slate-800 text-xs sm:text-sm">
+                                {{ $k->wali_kelas ?: '-' }}
                             </td>
-                            <td class="px-6 py-4 text-sm text-center">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700">
-                                    {{ $k->jumlah_siswa }} Siswa
-                                </span>
+                            <td class="py-4 px-4 text-center font-semibold text-slate-800 text-xs sm:text-sm">
+                                {{ $k->jumlah_siswa }} Siswa
                             </td>
-                            <td class="px-6 py-4 text-sm text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    <button onclick="editKelas('{{ $k->id }}')"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
-                                        title="Edit Data">
-                                        <i class='bx bx-edit-alt text-lg'></i>
+                            <td class="py-4 px-4 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <a href="{{ route('academic.class', $k) }}"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
+                                        title="Detail Rombel">
+                                        <i class='bx bx-info-circle text-lg'></i>
+                                    </a>
+                                    <button type="button" onclick="editKelas('{{ $k->id }}')"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
+                                        title="Edit Rombel">
+                                        <i class='bx bx-edit text-lg'></i>
                                     </button>
                                     <form action="{{ route('kelas.delete', ['id' => $k->id]) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="button"
-                                            class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 transition-colors duration-200"
-                                            title="Hapus Data">
+                                            class="delete-confirm p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                            title="Hapus Rombel">
                                             <i class='bx bx-trash text-lg'></i>
                                         </button>
                                     </form>
@@ -141,14 +130,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <div class="w-12 h-12 rounded-full bg-dark-100 flex items-center justify-center text-dark-400 mb-3">
-                                        <i class='bx bx-home-alt text-2xl'></i>
-                                    </div>
-                                    <h3 class="text-sm font-semibold text-dark-800">Belum Ada Data Rombel</h3>
-                                    <p class="text-xs text-dark-400 mt-1">Silakan tambahkan rombongan belajar baru.</p>
-                                </div>
+                            <td colspan="8" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-home-alt text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Belum Ada Data Rombel</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Silakan tambahkan rombongan belajar baru.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -158,7 +143,7 @@
 
         {{-- Pagination --}}
         @if ($kelas->hasPages())
-            <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $kelas->links() }}
             </div>
         @endif

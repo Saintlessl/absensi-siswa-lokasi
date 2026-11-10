@@ -206,41 +206,41 @@
 
         {{-- Valid Preview Table --}}
         <div>
-            <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Sampel Data Valid yang Akan Diproses (Menampilkan maks. 50 data):</h4>
-            <div class="border border-slate-200 rounded-xl overflow-x-auto max-h-96">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 sticky top-0">
+            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sampel Data Valid yang Akan Diproses (Menampilkan maks. 50 data):</h4>
+            <div class="border border-slate-100 rounded-2xl overflow-x-auto max-h-96">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-white border-b border-slate-100 sticky top-0">
                         <tr>
-                            <th class="px-3 py-2.5">No</th>
-                            <th class="px-3 py-2.5">NISN / NIS</th>
-                            <th class="px-3 py-2.5">Nama Lengkap</th>
-                            <th class="px-3 py-2.5">L/P</th>
-                            <th class="px-3 py-2.5">T.A. Masuk</th>
-                            <th class="px-3 py-2.5">Tingkat & Rombel</th>
-                            <th class="px-3 py-2.5">Status Siswa</th>
-                            <th class="px-3 py-2.5">T.A. Enrollment</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">No</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NISN / NIS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Nama Lengkap</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">L/P</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">T.A. Masuk</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tingkat & Rombel</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status Siswa</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">T.A. Enrollment</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         <template x-for="(row, idx) in validationResult.valid_rows" :key="idx">
-                            <tr class="hover:bg-slate-50/70">
-                                <td class="px-3 py-2 text-slate-400 font-mono" x-text="idx + 1"></td>
-                                <td class="px-3 py-2 font-mono font-medium text-slate-700">
-                                    <span x-text="row.nis"></span>
-                                    <span x-show="row.nisn" class="text-slate-400 block text-[10px]" x-text="row.nisn"></span>
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 text-slate-400 font-mono text-center text-xs" x-text="idx + 1"></td>
+                                <td class="py-4 px-4 font-mono font-medium text-slate-700 text-xs">
+                                    <span class="font-bold text-slate-800" x-text="row.nis"></span>
+                                    <span x-show="row.nisn" class="text-slate-400 block text-[10px]" x-text="'NISN: ' + row.nisn"></span>
                                 </td>
-                                <td class="px-3 py-2 font-semibold text-slate-800" x-text="row.nama"></td>
-                                <td class="px-3 py-2" x-text="row.jenis_kelamin"></td>
-                                <td class="px-3 py-2 font-medium text-blue-700" x-text="row.tahun_ajaran_masuk"></td>
-                                <td class="px-3 py-2 font-medium text-slate-700">
-                                    <span class="px-2 py-0.5 rounded bg-slate-100 font-bold" x-text="'Kelas ' + row.tingkat"></span>
+                                <td class="py-4 px-4 font-semibold text-slate-800" x-text="row.nama"></td>
+                                <td class="py-4 px-4 text-center font-semibold text-xs" x-text="row.jenis_kelamin"></td>
+                                <td class="py-4 px-4 font-medium text-[#003FA9]" x-text="row.tahun_ajaran_masuk"></td>
+                                <td class="py-4 px-4 font-medium text-slate-700">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 font-semibold text-xs text-slate-700" x-text="'Kelas ' + row.tingkat"></span>
                                 </td>
-                                <td class="px-3 py-2">
-                                    <span class="px-2 py-0.5 rounded text-[11px] font-bold"
-                                        :class="row.status === 'aktif' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-purple-50 text-purple-700 border border-purple-200'"
+                                <td class="py-4 px-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                        :class="row.status === 'aktif' ? 'bg-emerald-600 text-white' : 'bg-purple-600 text-white'"
                                         x-text="row.status.toUpperCase()"></span>
                                 </td>
-                                <td class="px-3 py-2 text-slate-600 font-medium" x-text="row.tahun_ajaran_enr"></td>
+                                <td class="py-4 px-4 text-slate-600 font-medium text-xs" x-text="row.tahun_ajaran_enr"></td>
                             </tr>
                         </template>
                     </tbody>

@@ -148,91 +148,101 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/70 border-b border-dark-100 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                        <th class="px-5 py-4">No</th>
-                        <th class="px-5 py-4">Nama Siswa</th>
-                        <th class="px-5 py-4">NIS</th>
-                        <th class="px-5 py-4">Status Presensi</th>
-                        <th class="px-5 py-4">Jam Masuk</th>
-                        <th class="px-5 py-4">Jam Pulang</th>
-                        <th class="px-5 py-4">Keterlambatan</th>
-                        <th class="px-5 py-4">Kontak Ortu</th>
-                        <th class="px-5 py-4">Notifikasi WA</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NAMA SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATUS PRESENSI</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JAM MASUK</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JAM PULANG</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KETERLAMBATAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KONTAK ORTU</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">NOTIFIKASI WA</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-100/60">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($students as $idx => $s)
                         @php
                             $rec = $attendanceRecords->get($s->id);
                             $wa = $waLogs->get($s->id);
                         @endphp
-                        <tr class="hover:bg-dark-50/30 transition">
-                            <td class="px-5 py-3.5 font-mono text-dark-400">{{ $idx + 1 }}</td>
-                            <td class="px-5 py-3.5">
-                                <span class="font-bold text-dark-900 block">{{ $s->nama }}</span>
-                                <span class="text-[10px] text-dark-400">{{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 font-medium text-xs text-slate-400 text-center">{{ $idx + 1 }}</td>
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 block text-xs sm:text-sm">{{ $s->nama }}</span>
+                                <span class="text-[11px] text-slate-400">{{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
                             </td>
-                            <td class="px-5 py-3.5 font-mono text-dark-600">{{ $s->nis }}</td>
-                            <td class="px-5 py-3.5">
+                            <td class="py-4 px-4 font-mono font-bold text-slate-900 text-xs sm:text-sm">{{ $s->nis }}</td>
+                            <td class="py-4 px-4">
                                 @if($rec)
                                     @if(strtolower((string) $rec->status) === 'hadir')
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
                                             Hadir
                                         </span>
                                     @elseif(strtolower((string) $rec->status) === 'izin')
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#003FA9] text-white">
                                             Izin
                                         </span>
                                     @elseif(strtolower((string) $rec->status) === 'sakit')
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
                                             Sakit
                                         </span>
                                     @else
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white">
                                             Alfa
                                         </span>
                                     @endif
                                 @else
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-dark-100 text-dark-500">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
                                         Belum Absen
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3.5 font-mono text-dark-600">
+                            <td class="py-4 px-4 font-mono text-xs text-slate-700 font-bold">
                                 {{ $rec && $rec->jam_masuk ? \Carbon\Carbon::parse($rec->jam_masuk)->format('H:i') : '-' }}
                             </td>
-                            <td class="px-5 py-3.5 font-mono text-dark-600">
+                            <td class="py-4 px-4 font-mono text-xs text-slate-700 font-bold">
                                 {{ $rec && $rec->jam_pulang ? \Carbon\Carbon::parse($rec->jam_pulang)->format('H:i') : '-' }}
                             </td>
-                            <td class="px-5 py-3.5">
+                            <td class="py-4 px-4">
                                 @if($rec && $rec->menit_terlambat > 0)
-                                    <span class="text-amber-700 font-bold font-mono text-[11px]">
+                                    <span class="text-amber-700 font-bold font-mono text-xs">
                                         +{{ $rec->menit_terlambat }} menit
                                     </span>
                                 @else
-                                    <span class="text-dark-400 text-[11px]">-</span>
+                                    <span class="text-slate-400 text-xs">-</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3.5">
-                                <span class="font-medium text-dark-800 block text-[11px]">{{ $s->orangtua->first()?->nama ?? '-' }}</span>
-                                <span class="font-mono text-[10px] text-dark-400">{{ $s->orangtua->first()?->telepon ?? '-' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 block text-xs sm:text-sm">{{ $s->orangtua->first()?->nama ?? '-' }}</span>
+                                @if($s->orangtua->first()?->telepon)
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $s->orangtua->first()->telepon) }}" target="_blank"
+                                       class="text-[#003FA9] hover:underline font-bold text-xs inline-flex items-center gap-1 font-mono">
+                                        {{ $s->orangtua->first()->telepon }}
+                                    </a>
+                                @else
+                                    <span class="text-[11px] text-slate-400 font-mono">-</span>
+                                @endif
                             </td>
-                            <td class="px-5 py-3.5">
+                            <td class="py-4 px-4 text-center">
                                 @if($wa)
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-max">
-                                        <i class='bx bx-check-double text-xs'></i> Terkirim
+                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                                        <i class='bx bx-check-double text-base'></i>
+                                        <span>Terkirim</span>
                                     </span>
                                 @else
-                                    <span class="text-dark-400 text-[11px] italic">-</span>
+                                    <span class="text-slate-400 text-xs">-</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-5 py-8 text-center text-dark-400">
-                                Tidak ada data siswa di kelas binaan ini.
+                            <td colspan="9" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-group text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Tidak ada data siswa di kelas binaan ini</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Siswa belum terdaftar pada rombel yang Anda ampu.</p>
                             </td>
                         </tr>
                     @endforelse

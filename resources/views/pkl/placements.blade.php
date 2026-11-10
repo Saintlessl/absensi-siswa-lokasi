@@ -32,70 +32,78 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden p-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4">Siswa</th>
-                        <th class="py-3 px-4">Kelas</th>
-                        <th class="py-3 px-4">Perusahaan Mitra</th>
-                        <th class="py-3 px-4">Guru Pembimbing</th>
-                        <th class="py-3 px-4">Periode</th>
-                        <th class="py-3 px-4">Status</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KELAS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PERUSAHAAN MITRA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">GURU PEMBIMBING</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PERIODE</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATUS</th>
                         @if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-24">AKSI</th>
                         @endif
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($placements as $pl)
-                        <tr class="hover:bg-blue-50/40 transition">
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $pl->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-[10px] text-slate-400">NIS: {{ $pl->siswa->nis ?? '-' }}</span>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 text-xs sm:text-sm block">{{ $pl->siswa->nama ?? 'Siswa' }}</span>
+                                <span class="text-[11px] text-slate-400 font-normal">NIS: {{ $pl->siswa->nis ?? '-' }}</span>
                             </td>
-                            <td class="py-3 px-4 font-semibold text-slate-600">
+                            <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
                                 {{ $pl->siswa->kelas->nama_kelas ?? '-' }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-blue-700 block">{{ $pl->partner->nama_dudi ?? '-' }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $pl->partner->kota ?? '' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 hover:text-[#003FA9] transition block text-xs sm:text-sm">{{ $pl->partner->nama_dudi ?? '-' }}</span>
+                                <span class="text-[11px] text-slate-400 font-normal">{{ $pl->partner->kota ?? '' }}</span>
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="text-slate-700 font-medium">{{ $pl->guruPembimbing->name ?? 'Belum Ditugaskan' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="text-slate-800 font-medium text-xs sm:text-sm">{{ $pl->guruPembimbing->name ?? 'Belum Ditugaskan' }}</span>
                             </td>
-                            <td class="py-3 px-4 text-[11px] text-slate-500">
+                            <td class="py-4 px-4 text-xs text-slate-600 font-mono">
                                 {{ $pl->tanggal_mulai ? $pl->tanggal_mulai->format('d M Y') : '' }} s/d {{ $pl->tanggal_selesai ? $pl->tanggal_selesai->format('d M Y') : '' }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $pl->status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                            <td class="py-4 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $pl->status === 'active' ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' }}">
                                     {{ strtoupper($pl->status) }}
                                 </span>
                             </td>
                             @if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
-                            <td class="py-3 px-4">
+                            <td class="py-4 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <button type="button"
-                                        data-placement='@js([
-                                            "id" => $pl->id,
-                                            "siswa_id" => $pl->siswa_id,
-                                            "siswa_nama" => $pl->siswa->nama ?? null,
-                                            "jurusan_id" => $pl->siswa?->kelas?->jurusan_id,
-                                            "kelas_id" => $pl->siswa?->kelas_id,
-                                            "pkl_dudi_partner_id" => $pl->pkl_dudi_partner_id,
-                                            "guru_pembimbing_id" => $pl->guru_pembimbing_id,
-                                            "tanggal_mulai" => $pl->tanggal_mulai?->format('Y-m-d'),
-                                            "tanggal_selesai" => $pl->tanggal_selesai?->format('Y-m-d'),
-                                            "status" => $pl->status,
-                                            "catatan" => $pl->catatan,
-                                        ])'
+                                        data-placement="{{ json_encode([
+                                            'id' => $pl->id,
+                                            'siswa_id' => $pl->siswa_id,
+                                            'siswa_nama' => $pl->siswa->nama ?? null,
+                                            'jurusan_id' => $pl->siswa?->kelas?->jurusan_id,
+                                            'kelas_id' => $pl->siswa?->kelas_id,
+                                            'pkl_dudi_partner_id' => $pl->pkl_dudi_partner_id,
+                                            'guru_pembimbing_id' => $pl->guru_pembimbing_id,
+                                            'tanggal_mulai' => $pl->tanggal_mulai?->format('Y-m-d'),
+                                            'tanggal_selesai' => $pl->tanggal_selesai?->format('Y-m-d'),
+                                            'status' => $pl->status,
+                                            'catatan' => $pl->catatan,
+                                        ]) }}"
                                         onclick="openEditPlacement(this.dataset.placement)"
-                                        class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-[10px] font-bold hover:bg-blue-100 transition">Edit</button>
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
+                                        title="Edit Penempatan">
+                                        <i class='bx bx-edit text-lg'></i>
+                                    </button>
                                     <form method="POST" action="{{ route('pkl.placements.destroy', $pl->id) }}"
-                                          onsubmit="return confirm('Batalkan/hapus penempatan {{ $pl->siswa->nama ?? 'siswa ini' }}?\n\nJika sudah ada riwayat logbook/presensi, sistem akan mengubah status menjadi WITHDRAWN (riwayat tetap tersimpan).');">
+                                          onsubmit="return confirm('Batalkan/hapus penempatan {{ $pl->siswa->nama ?? 'siswa ini' }}?\n\nJika sudah ada riwayat logbook/presensi, sistem akan mengubah status menjadi WITHDRAWN (riwayat tetap tersimpan).');"
+                                          class="inline">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-600 text-[10px] font-bold hover:bg-rose-100 transition">Hapus</button>
+                                        <button type="submit"
+                                            class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                            title="Hapus Penempatan">
+                                            <i class='bx bx-trash text-lg'></i>
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -103,14 +111,18 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']) ? 7 : 6 }}" class="py-8 text-center text-slate-400 text-xs">Belum ada penempatan siswa PKL.</td>
+                            <td colspan="{{ in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']) ? 7 : 6 }}" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-briefcase text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Belum ada penempatan siswa PKL</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Plotting siswa ke mitra DU/DI untuk memulai penugasan.</p>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($placements->hasPages())
-            <div class="p-4 border-t border-slate-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $placements->links() }}
             </div>
         @endif
@@ -302,7 +314,9 @@
     </div>
 </div>
 @endif
+@endpush
 
+@push('scripts')
 <script>
 const PKL_BASE = '{{ url("/pkl") }}';
 
@@ -382,7 +396,7 @@ async function onRombelChange(val, prefillSiswa) {
 }
 
 function openEditPlacement(raw) {
-    const p = JSON.parse(raw);
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
     document.getElementById('formEditPenempatan').action = PKL_BASE + '/penempatan/' + p.id;
     document.getElementById('edit_siswa_display').value = (p.siswa_nama || 'Siswa #' + p.siswa_id);
     document.getElementById('edit_tanggal_mulai').value = p.tanggal_mulai || '';

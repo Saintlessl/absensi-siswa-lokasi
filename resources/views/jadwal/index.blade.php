@@ -63,52 +63,43 @@
         </div>
 
         {{-- Table Container --}}
-        <div class="overflow-x-auto custom-scrollbar">
+        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">
-                            No</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Kelas</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Hari</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Jam
-                        </th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Guru
-                        </th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Mata
-                            Pelajaran</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">
-                            Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KELAS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">HARI</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">JAM</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">GURU PENGAJAR</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MATA PELAJARAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-28">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/50">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($jadwal as $s)
-                        <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $jadwal->firstItem() + $loop->index }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-800">{{ $s->kelas->nama_kelas }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-800">{{ $s->hari }}</td>
-
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">{{ $jadwal->firstItem() + $loop->index }}</td>
+                            <td class="py-4 px-4 font-bold text-slate-900 font-mono text-xs sm:text-sm">{{ $s->kelas->nama_kelas }}</td>
+                            <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">{{ $s->hari }}</td>
+                            <td class="py-4 px-4 text-xs font-mono font-bold text-slate-700 text-center">
                                 {{ \Carbon\Carbon::parse($s->jam_mulai)->format('H:i') }} -
                                 {{ \Carbon\Carbon::parse($s->jam_selesai)->format('H:i') }}
                             </td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-800 text-center">{{ $s->guru->nama }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-800 text-center">{{ $s->mata_pelajaran }}
-                            </td>
-
-                            <td class="px-6 py-4 text-sm text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    <button onclick="editJadwal('{{ $s->id }}')"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
-                                        title="Edit Data">
-                                        <i class='bx bx-edit-alt text-lg'></i>
+                            <td class="py-4 px-4 font-medium text-slate-800 text-xs sm:text-sm">{{ $s->guru->nama }}</td>
+                            <td class="py-4 px-4 font-semibold text-slate-900 text-xs sm:text-sm">{{ $s->mata_pelajaran }}</td>
+                            <td class="py-4 px-4 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button type="button" onclick="editJadwal('{{ $s->id }}')"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
+                                        title="Edit Jadwal">
+                                        <i class='bx bx-edit text-lg'></i>
                                     </button>
-                                    <form action="{{ route('jadwal.delete', ['id' => $s->id]) }}" method="POST"
-                                        class="inline">
+                                    <form action="{{ route('jadwal.delete', ['id' => $s->id]) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="button"
-                                            class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 transition-colors duration-200"
-                                            title="Hapus Data">
+                                            class="delete-confirm p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                            title="Hapus Jadwal">
                                             <i class='bx bx-trash text-lg'></i>
                                         </button>
                                     </form>
@@ -117,14 +108,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <div class="w-16 h-16 mb-4 rounded-full bg-dark-100 flex items-center justify-center">
-                                        <i class='bx bx-calendar-x text-3xl text-dark-400'></i>
-                                    </div>
-                                    <h3 class="text-sm font-medium text-dark-900">Belum ada data jadwal</h3>
-                                    <p class="mt-1 text-sm text-dark-500">Silakan tambah data jadwal baru.</p>
-                                </div>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-calendar-x text-4xl mb-2 text-slate-300'></i>
+                                <h3 class="font-semibold text-sm text-slate-600">Belum ada data jadwal</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Silakan tambah data jadwal pelajaran baru.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -134,7 +121,7 @@
 
         {{-- Pagination --}}
         @if ($jadwal->hasPages())
-            <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $jadwal->links() }}
             </div>
         @endif

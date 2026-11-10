@@ -24,64 +24,76 @@
     @endif
 
     <!-- Table -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4">Karya Proyek</th>
-                        <th class="py-3 px-4">Kreator & Kelas</th>
-                        <th class="py-3 px-4">Program Keahlian</th>
-                        <th class="py-3 px-4">Kategori</th>
-                        <th class="py-3 px-4">Status Saat Ini</th>
-                        <th class="py-3 px-4 text-right">Keputusan Kurasi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Karya Proyek</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kreator & Kelas</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Program Keahlian</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kategori</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status Saat Ini</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Keputusan Kurasi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($portfolios as $port)
-                        <tr class="hover:bg-blue-50/20 transition">
-                            <td class="py-3 px-4 max-w-xs">
-                                <span class="font-bold text-slate-800 block">{{ $port->judul }}</span>
-                                <p class="text-[11px] text-slate-500 line-clamp-1">{{ $port->deskripsi }}</p>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 max-w-xs">
+                                <span class="font-semibold text-slate-800 block text-sm">{{ $port->judul }}</span>
+                                <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">{{ $port->deskripsi }}</p>
                                 @if($port->demo_url)
-                                    <a href="{{ $port->demo_url }}" target="_blank" class="text-[10px] text-blue-600 font-bold hover:underline">Tautan Demo &rarr;</a>
+                                    <a href="{{ $port->demo_url }}" target="_blank" class="text-xs text-[#003FA9] font-medium hover:underline inline-flex items-center gap-1 mt-1">
+                                        Tautan Demo <i class='bx bx-right-arrow-alt'></i>
+                                    </a>
                                 @endif
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $port->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $port->siswa->kelas->nama_kelas ?? '' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold text-slate-800 block">{{ $port->siswa->nama ?? 'Siswa' }}</span>
+                                <span class="text-xs text-slate-400 mt-0.5 block">{{ $port->siswa->kelas->nama_kelas ?? '' }}</span>
                             </td>
-                            <td class="py-3 px-4 font-semibold text-blue-700">
+                            <td class="py-4 px-4 font-semibold text-[#003FA9]">
                                 {{ $port->jurusan->kode_jurusan ?? '-' }}
                             </td>
-                            <td class="py-3 px-4 uppercase text-[10px] text-slate-600 font-bold">
+                            <td class="py-4 px-4 uppercase text-xs text-slate-600 font-medium">
                                 {{ str_replace('_', ' ', $port->kategori) }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold 
-                                    {{ $port->status === 'approved' ? 'bg-emerald-50 text-emerald-700' : ($port->status === 'rejected' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700') }}">
+                            <td class="py-4 px-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
+                                    {{ $port->status === 'approved' ? 'bg-emerald-600 text-white' : ($port->status === 'rejected' ? 'bg-rose-600 text-white' : 'bg-amber-500 text-white') }}">
                                     {{ strtoupper($port->status) }}
                                 </span>
                                 @if($port->is_tefa_product)
-                                    <span class="block text-[9px] text-amber-700 font-bold mt-0.5">🌟 TeFa Product</span>
+                                    <span class="block text-xs text-amber-600 font-semibold mt-1">🌟 TeFa Product</span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <button type="button" onclick="openModModal({{ $port->id }}, '{{ addslashes($port->judul) }}', '{{ $port->status }}', {{ $port->is_tefa_product ? 'true' : 'false' }}, '{{ addslashes($port->moderation_notes ?? '') }}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition shadow-xs">
-                                    Kurasi
+                            <td class="py-4 px-4 text-right whitespace-nowrap">
+                                <button type="button" onclick="openModModal({{ $port->id }}, '{{ addslashes($port->judul) }}', '{{ $port->status }}', {{ $port->is_tefa_product ? 'true' : 'false' }}, '{{ addslashes($port->moderation_notes ?? '') }}')"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition inline-flex items-center gap-1 text-xs font-semibold"
+                                    title="Kurasi Karya">
+                                    <i class='bx bx-check-shield text-base'></i> Kurasi
                                 </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 text-xs">Tidak ada karya yang menunggu kurasi saat ini.</td>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-collection text-2xl text-slate-400'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600">Tidak ada karya</p>
+                                    <p class="text-xs text-slate-400 mt-1">Tidak ada karya yang menunggu kurasi saat ini.</p>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($portfolios->hasPages())
-            <div class="p-4 border-t border-slate-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $portfolios->links() }}
             </div>
         @endif

@@ -5,173 +5,194 @@
 @section('page-subtitle', 'Direktori data siswa terdaftar pada rombel ini')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.index') }}" class="hover:text-primary-600 transition-colors">Struktur Akademik</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.major', $kelas->jurusan) }}" class="hover:text-primary-600 transition-colors font-mono font-bold">{{ $kelas->jurusan->kode_jurusan ?? 'UMUM' }}</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.level', ['jurusan' => $kelas->jurusan_id, 'tingkat' => $kelas->tingkat]) }}" class="hover:text-primary-600 transition-colors font-bold">Kelas {{ $kelas->tingkat }}</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium font-mono font-bold">{{ $kelas->nama_kelas }}</li>
-@endsection
-
-@section('page-header')
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold border border-primary-200 bg-primary-50 text-primary-700 font-mono">
-                    {{ $kelas->jurusan->kode_jurusan ?? '-' }}
-                </span>
-                <span class="text-xs text-dark-400">&bull; Tahun Ajaran {{ $kelas->tahun_ajaran ?: '2026/2027' }}</span>
-                <span class="text-xs text-dark-400">&bull; Wali: <strong>{{ $kelas->wali_kelas }}</strong></span>
-            </div>
-            <h2 class="text-xl font-black text-dark-900 font-mono">{{ $kelas->nama_kelas }}</h2>
-            <p class="text-xs text-dark-500 mt-0.5">Daftar siswa yang aktif terdaftar dalam rombongan belajar ini.</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('academic.level', ['jurusan' => $kelas->jurusan_id, 'tingkat' => $kelas->tingkat]) }}"
-                class="px-3.5 py-2 border border-dark-200 rounded-xl text-dark-600 hover:bg-dark-50 text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
-                <i class='bx bx-arrow-back'></i> Kembali ke Rombel
-            </a>
-            <a href="{{ route('siswa') }}?kelas_id={{ $kelas->id }}"
-                class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
-                <i class='bx bx-user-plus'></i> Kelola di Direktori Siswa
-            </a>
-        </div>
-    </div>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li><a href="{{ route('academic.index') }}" class="text-slate-500 hover:text-[#003FA9] transition">Struktur Akademik</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li><a href="{{ route('academic.major', $kelas->jurusan) }}" class="text-slate-500 hover:text-[#003FA9] transition font-bold">{{ $kelas->jurusan->nama_jurusan ?? 'Jurusan' }}</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li><a href="{{ route('academic.level', ['jurusan' => $kelas->jurusan_id, 'tingkat' => $kelas->tingkat]) }}" class="text-slate-500 hover:text-[#003FA9] transition font-bold">Kelas {{ $kelas->tingkat }}</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li class="text-[#003FA9] font-semibold">{{ $kelas->nama_kelas }}</li>
 @endsection
 
 @section('content')
-    {{-- Active Room Allocation Alert Banner --}}
-    @php
-        $activeAssignment = $kelas->roomAssignments()->where('status', 'active')->whereDate('starts_on', '<=', now())->where(function($q) {
-            $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', now());
-        })->with('room')->first();
-    @endphp
+    {{-- Main Container Card --}}
+    <div class="bg-white rounded-[28px] p-6 sm:p-8 shadow-sm border border-slate-100 space-y-6">
 
-    @if ($activeAssignment && $activeAssignment->room)
-        <div class="mb-6 p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 flex items-center justify-between gap-4 shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl flex-shrink-0">
-                    <i class='bx bx-building-house'></i>
+        {{-- Header Section: Rombel Detail --}}
+        <div class="border border-slate-100 rounded-[24px] p-6 sm:p-7 bg-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-3 py-1 rounded-xl bg-[#EFF5FF] text-[#003FA9] text-xs font-bold">
+                        Kelas {{ $kelas->tingkat }}
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold font-mono">
+                        {{ $kelas->jurusan->kode_jurusan ?? '-' }}
+                    </span>
+                    <span class="text-xs text-slate-400">
+                        &bull; T.A. {{ $kelas->tahun_ajaran ?: '2026/2027' }}
+                    </span>
                 </div>
-                <div>
-                    <p class="text-xs font-semibold text-indigo-700 uppercase tracking-wider">Alokasi Ruangan Fisik Saat Ini</p>
-                    <p class="text-sm font-bold text-indigo-950">
-                        {{ $activeAssignment->room->name }} ({{ $activeAssignment->room->code }}) &bull; {{ $activeAssignment->room->building ?: 'Gedung Utama' }}
-                    </p>
-                </div>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    {{ $kelas->nama_kelas }}
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+                    Wali Kelas: <strong class="text-slate-700 font-semibold">{{ $kelas->wali_kelas ?: 'Belum ditentukan' }}</strong>
+                </p>
             </div>
-            <a href="{{ route('rooms.assignments') }}" class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline whitespace-nowrap">
-                Lihat Jadwal Rolling Ruangan &rarr;
-            </a>
-        </div>
-    @endif
-
-    {{-- Filter Bar --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-4 mb-6">
-        <form action="{{ route('academic.class', $kelas) }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3">
-            <div class="flex-1 w-full relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class='bx bx-search text-dark-400 text-lg'></i>
-                </div>
-                <input type="text" name="search" value="{{ $search }}"
-                    class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                    placeholder="Cari nama siswa, NIS, atau NISN...">
-            </div>
-            <button type="submit"
-                class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-1.5 whitespace-nowrap">
-                <i class='bx bx-filter-alt'></i> Cari
-            </button>
-            @if ($search)
-                <a href="{{ route('academic.class', $kelas) }}"
-                    class="px-4 py-2.5 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
-                    Reset
+            <div class="flex items-center gap-2.5 self-start sm:self-center">
+                <a href="{{ route('academic.level', ['jurusan' => $kelas->jurusan_id, 'tingkat' => $kelas->tingkat]) }}"
+                    class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs inline-flex items-center gap-2 transition">
+                    <i class='bx bx-arrow-back text-sm'></i>
+                    <span>Kembali ke Rombel</span>
                 </a>
-            @endif
-        </form>
-    </div>
+                <a href="{{ route('siswa') }}?kelas_id={{ $kelas->id }}"
+                    class="px-4 py-2.5 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white font-bold text-xs inline-flex items-center gap-2 shadow-sm transition">
+                    <i class='bx bx-user text-sm'></i>
+                    <span>Kelola di Direktori Siswa</span>
+                </a>
+            </div>
+        </div>
 
-    {{-- Table Siswa --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 bg-white overflow-hidden shadow-sm">
-        <div class="overflow-x-auto custom-scrollbar">
+        {{-- Active Room Allocation Alert Banner --}}
+        @php
+            $activeAssignment = $kelas->roomAssignments()->where('status', 'active')->whereDate('starts_on', '<=', now())->where(function($q) {
+                $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', now());
+            })->with('room')->first();
+        @endphp
+
+        @if ($activeAssignment && $activeAssignment->room)
+            <div class="p-4 rounded-2xl bg-[#EFF5FF] border border-blue-100 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-[#003FA9] text-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
+                        <i class='bx bx-building-house'></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-bold text-[#003FA9] uppercase tracking-wider">Alokasi Ruangan Fisik Saat Ini</p>
+                        <p class="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">
+                            {{ $activeAssignment->room->name }} ({{ $activeAssignment->room->code }}) &bull; {{ $activeAssignment->room->building ?: 'Gedung Utama' }}
+                        </p>
+                    </div>
+                </div>
+                <a href="{{ route('rooms.assignments') }}" class="text-xs font-bold text-[#003FA9] hover:underline whitespace-nowrap">
+                    Lihat Jadwal Rolling Ruangan &rarr;
+                </a>
+            </div>
+        @endif
+
+        {{-- Search Bar --}}
+        <form action="{{ route('academic.class', $kelas) }}" method="GET">
+            <div class="flex items-center gap-3">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class='bx bx-search text-base'></i>
+                    </div>
+                    <input type="text" name="search" value="{{ $search }}"
+                        class="w-full h-11 pl-10 pr-4 rounded-xl bg-[#EFF5FF] border-0 text-slate-800 text-xs font-medium placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9] outline-none transition"
+                        placeholder="Cari nama siswa, NIS, atau NISN...">
+                </div>
+                <button type="submit"
+                    class="h-11 px-6 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition">
+                    <span>Cari</span>
+                </button>
+                @if ($search)
+                    <a href="{{ route('academic.class', $kelas) }}"
+                        class="h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold inline-flex items-center transition">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+
+        {{-- Table Siswa (Clean typography matching Data Siswa) --}}
+        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-14 text-center">No</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Identitas Siswa</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">NIS / NISN</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Akun Siswa</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Kontak Orang Tua</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Biometrik</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">IDENTITAS SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS / NISN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKUN SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KONTAK ORANG TUA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">BIOMETRIK</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/50">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($siswa as $s)
-                        <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $siswa->firstItem() + $loop->index }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-900">
+                        <tr class="hover:bg-[#EFF5FF]/40 transition">
+                            {{-- No --}}
+                            <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">
+                                {{ $siswa->firstItem() + $loop->index }}
+                            </td>
+
+                            {{-- Identitas Siswa --}}
+                            <td class="py-4 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-primary-100 border border-primary-200 flex items-center justify-center overflow-hidden flex-shrink-0 text-primary-700 font-bold text-sm">
-                                        @if ($s->photo_url)
-                                            <img src="{{ $s->photo_url }}" alt="{{ $s->nama }}" class="w-full h-full object-cover">
-                                        @else
-                                            {{ strtoupper(substr($s->nama, 0, 1)) }}
-                                        @endif
+                                    <div class="w-9 h-9 rounded-full bg-[#003FA9] text-white flex-shrink-0 flex items-center justify-center text-xs font-extrabold shadow-sm">
+                                        {{ strtoupper(substr($s->nama, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="font-bold text-dark-900">{{ $s->nama }}</div>
-                                        <div class="text-[11px] text-dark-400">
-                                            Jenis Kelamin: <span class="font-medium text-dark-600">{{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                                        <a href="{{ route('siswa.show', $s->id) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition block text-xs sm:text-sm">
+                                            {{ $s->nama }}
+                                        </a>
+                                        <div class="text-[11px] text-slate-400">
+                                            {{ $s->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
                                         </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm font-mono">
-                                <div class="font-bold text-dark-800">{{ $s->nis }}</div>
-                                <div class="text-[11px] text-dark-400">NISN: {{ $s->nisn ?: '-' }}</div>
+
+                            {{-- NIS / NISN --}}
+                            <td class="py-4 px-4 font-mono">
+                                <div class="font-bold text-slate-900 text-xs sm:text-sm">{{ $s->nis }}</div>
+                                <div class="text-[11px] text-slate-400">NISN: {{ $s->nisn ?: '-' }}</div>
                             </td>
-                            <td class="px-6 py-4 text-xs font-mono text-dark-600">
-                                <span class="text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
-                                    {{ $s->user->email ?? '-' }}
-                                </span>
+
+                            {{-- Akun Siswa --}}
+                            <td class="py-4 px-4 font-mono text-xs text-slate-600">
+                                {{ $s->user->email ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 text-sm">
+
+                            {{-- Kontak Orang Tua --}}
+                            <td class="py-4 px-4">
                                 @php
                                     $parent = $s->orangtua->first();
                                     $parentPhone = $parent->telepon ?? $s->no_telp_orangtua;
                                 @endphp
                                 @if ($parentPhone)
-                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $parentPhone) }}" target="_blank"
+                                        class="text-[#003FA9] hover:underline font-bold text-xs inline-flex items-center gap-1 font-mono">
                                         <i class='bx bxl-whatsapp text-emerald-600 text-sm'></i>
                                         <span>{{ $parentPhone }}</span>
-                                    </div>
+                                    </a>
                                 @else
-                                    <span class="text-xs text-dark-400 italic">Belum ada nomor WA</span>
+                                    <span class="text-xs text-slate-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-sm text-center">
+
+                            {{-- Biometrik --}}
+                            <td class="py-4 px-4 text-center">
                                 @if ($s->faceBiometric)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-600 text-white inline-flex items-center gap-1">
                                         <i class='bx bx-check-circle'></i> Terdaftar
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                        <i class='bx bx-time'></i> Belum Rekam
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-400 text-white inline-flex items-center gap-1">
+                                        <i class='bx bx-time'></i> Belum
                                     </span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="6" class="py-12 px-4 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <div class="w-12 h-12 rounded-full bg-dark-100 flex items-center justify-center text-dark-400 mb-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
                                         <i class='bx bx-user text-2xl'></i>
                                     </div>
-                                    <h3 class="text-sm font-semibold text-dark-800">Belum Ada Siswa di Rombel Ini</h3>
-                                    <p class="text-xs text-dark-400 mt-1 max-w-sm mx-auto">
-                                        Siswa belum ditambahkan atau belum dialokasikan ke kelas {{ $kelas->nama_kelas }}.
+                                    <h3 class="text-sm font-bold text-slate-800">Belum Ada Siswa di Rombel Ini</h3>
+                                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                                        Siswa belum dialokasikan ke kelas {{ $kelas->nama_kelas }}.
                                     </p>
                                 </div>
                             </td>
@@ -182,9 +203,10 @@
         </div>
 
         @if ($siswa->hasPages())
-            <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+            <div class="pt-6 border-t border-slate-100">
                 {{ $siswa->links() }}
             </div>
         @endif
+
     </div>
 @endsection

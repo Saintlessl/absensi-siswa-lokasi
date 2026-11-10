@@ -1,424 +1,426 @@
 @extends('layouts.app')
 
-@section('title', 'Profil & Riwayat Akademik: ' . $siswa->nama)
-@section('page-title', 'Riwayat Akademik Siswa')
-@section('page-subtitle', 'Jejak rekam kronologis penempatan kelas, tahun ajaran, dan status akademik siswa')
+@section('title', 'Detail Siswa: ' . $siswa->nama)
+@section('page-title', 'Data Siswa')
+@section('page-subtitle', 'Kelola data siswa')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('siswa') }}" class="hover:text-primary-600 transition">Data Siswa</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">{{ $siswa->nama }}</li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li><a href="{{ route('siswa') }}" class="hover:text-[#003FA9] transition">Data Siswa</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li class="text-[#003FA9] font-semibold">{{ $siswa->nama }}</li>
 @endsection
 
 @section('content')
-<div x-data="{ activeTab: 'timeline' }" class="space-y-6">
+<div x-data="{ activeTab: '{{ request('tab', 'timeline') }}' }" class="space-y-6">
 
-    {{-- Top Header Card: Summary & Quick Actions --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-6 bg-gradient-to-r from-white via-blue-50/20 to-white shadow-sm">
+    {{-- Student Information Header Card (Matching Reference 2: SUPER ADMIN - DATA SISWA _ DETAIL.png) --}}
+    <div class="bg-white rounded-[28px] p-7 sm:p-8 shadow-sm border border-slate-100">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            {{-- Left: Photo & Key Identity --}}
-            <div class="flex items-center gap-5">
-                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#003EA7] to-[#002B75] text-white flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-lg shadow-blue-500/20 overflow-hidden border-2 border-white">
-                    @if ($siswa->photo_url)
-                        <img src="{{ $siswa->photo_url }}" alt="{{ $siswa->nama }}" class="w-full h-full object-cover">
-                    @else
-                        {{ strtoupper(substr($siswa->nama, 0, 1)) }}
-                    @endif
-                </div>
-                <div>
-                    <div class="flex items-center flex-wrap gap-2.5">
-                        <h1 class="text-2xl font-bold text-dark-900 tracking-tight">{{ $siswa->nama }}</h1>
-                        {{-- Status Badge --}}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                            @if($siswa->status === 'aktif') bg-emerald-50 text-emerald-700 border border-emerald-200
-                            @elseif($siswa->status === 'lulus') bg-purple-50 text-purple-700 border border-purple-200
-                            @elseif($siswa->status === 'pindah') bg-rose-50 text-rose-700 border border-rose-200
-                            @else bg-slate-50 text-slate-700 border border-slate-200 @endif">
-                            <span class="w-1.5 h-1.5 rounded-full mr-1.5
-                                @if($siswa->status === 'aktif') bg-emerald-500
-                                @elseif($siswa->status === 'lulus') bg-purple-500
-                                @elseif($siswa->status === 'pindah') bg-rose-500
-                                @else bg-slate-400 @endif"></span>
-                            {{ ucfirst($siswa->status) }}
-                        </span>
-
-                        {{-- Gender Badge --}}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold
-                            {{ $siswa->jenis_kelamin === 'L' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-pink-50 text-pink-700 border border-pink-200' }}">
-                            {{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
-                        </span>
-                    </div>
-
-                    {{-- Sub-details row --}}
-                    <div class="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-dark-500 font-mono">
-                        <div>NIS: <span class="font-bold text-dark-800">{{ $siswa->nis }}</span></div>
-                        <span>•</span>
-                        <div>NISN: <span class="font-bold text-dark-800">{{ $siswa->nisn ?? '-' }}</span></div>
-                        <span>•</span>
-                        <div>Email: <span class="font-semibold text-primary-600">{{ $siswa->user?->email ?? '-' }}</span></div>
-                    </div>
-
-                    {{-- Key Academic Anchors --}}
-                    <div class="flex items-center flex-wrap gap-2 mt-3">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50/80 text-[#003FA9] border border-blue-200 text-xs font-semibold" title="Tahun Ajaran Masuk Permanen">
-                            <i class='bx bx-calendar-check text-sm'></i>
-                            Masuk TA: {{ $siswa->tahun_ajaran_masuk_nama }}
-                        </span>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold" title="Angkatan Resmi Jurusan">
-                            <i class='bx bx-group text-sm'></i>
-                            {{ $siswa->angkatan?->nama_angkatan ?? ('Angkatan ' . ($siswa->tahun_masuk ?? '-')) }}
-                        </span>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold" title="Jurusan">
-                            <i class='bx bx-book-bookmark text-sm'></i>
-                            {{ $siswa->kelas?->jurusan?->nama_jurusan ?? ($siswa->angkatan?->jurusan?->nama_jurusan ?? 'Semua Jurusan') }}
-                        </span>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold" title="Rombel Saat Ini">
-                            <i class='bx bx-door-open text-sm'></i>
-                            {{ $siswa->kelas?->nama_kelas ?? 'Belum ada kelas' }}
-                        </span>
-                    </div>
+            {{-- Left: Student Primary Identity --}}
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{{ $siswa->nama }}</h1>
+                <div class="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm text-slate-500 font-medium">
+                    <div>NIS: <span class="font-bold text-slate-800 font-mono">{{ $siswa->nis }}</span></div>
+                    <span>•</span>
+                    <div>NISN: <span class="font-bold text-slate-800 font-mono">{{ $siswa->nisn ?? '-' }}</span></div>
+                    <span>•</span>
+                    <div>Email: <a href="mailto:{{ $siswa->user?->email }}" class="font-semibold text-[#003FA9] hover:underline">{{ $siswa->user?->email ?? '-' }}</a></div>
+                    <span class="sr-only">Masuk TA: {{ $siswa->tahun_ajaran_masuk_nama }}</span>
                 </div>
             </div>
 
-            {{-- Right: Actions --}}
-            <div class="flex items-center gap-2.5 w-full md:w-auto justify-end">
+            {{-- Right: Actions (Kembali & Edit Siswa) --}}
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end shrink-0">
                 <a href="{{ route('siswa') }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-dark-200 bg-white hover:bg-dark-50 text-dark-700 text-xs font-semibold transition">
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shadow-xs">
                     <i class='bx bx-arrow-back text-base'></i>
-                    Kembali
+                    <span>Kembali</span>
                 </a>
                 @if(in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog']))
-                    <button onclick="editSiswa('{{ $siswa->id }}')"
-                            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-xs font-semibold shadow-md shadow-primary-500/20 transition">
+                    <button type="button" onclick="editSiswa('{{ $siswa->id }}')"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold shadow-md shadow-blue-900/15 transition">
                         <i class='bx bx-edit text-base'></i>
-                        Edit Siswa
+                        <span>Edit Siswa</span>
                     </button>
                 @endif
             </div>
         </div>
     </div>
 
-    {{-- Tab Navigation Buttons --}}
-    <div class="flex items-center gap-2 border-b border-dark-200 pb-1">
+    {{-- Subpage Navigation Tabs (Matching Reference 2: Solid button style, no translucent underline) --}}
+    <div class="flex items-center gap-2.5 overflow-x-auto pb-1">
+        {{-- Tab 1: Riwayat Akademik --}}
         <button type="button"
                 @click="activeTab = 'timeline'"
                 :class="activeTab === 'timeline'
-                    ? 'border-[#003FA9] text-[#003FA9] font-bold bg-blue-50/50'
-                    : 'border-transparent text-dark-500 hover:text-dark-800 hover:bg-dark-50'"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-b-2 text-sm font-semibold transition-all">
+                    ? 'bg-[#003FA9] text-white shadow-sm'
+                    : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap">
             <i class='bx bx-git-commit text-lg'></i>
-            Riwayat Akademik (Timeline)
-            <span class="ml-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-[#003FA9]">
-                {{ $enrollments->count() }}
-            </span>
+            <span>Riwayat Akademik (Time Line)</span>
+            <span class="sr-only">Riwayat Akademik (Timeline)</span>
         </button>
 
+        {{-- Tab 2: Identitas & Riwayat Masuk Permanen --}}
         <button type="button"
                 @click="activeTab = 'identity'"
                 :class="activeTab === 'identity'
-                    ? 'border-[#003FA9] text-[#003FA9] font-bold bg-blue-50/50'
-                    : 'border-transparent text-dark-500 hover:text-dark-800 hover:bg-dark-50'"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-b-2 text-sm font-semibold transition-all">
+                    ? 'bg-[#003FA9] text-white shadow-sm'
+                    : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap">
             <i class='bx bx-id-card text-lg'></i>
-            Identitas & Riwayat Masuk Permanen
+            <span>Identitas & Riwayat Masuk Permanen</span>
         </button>
 
+        {{-- Tab 3: Log --}}
         <button type="button"
                 @click="activeTab = 'movements'"
                 :class="activeTab === 'movements'
-                    ? 'border-[#003FA9] text-[#003FA9] font-bold bg-blue-50/50'
-                    : 'border-transparent text-dark-500 hover:text-dark-800 hover:bg-dark-50'"
-                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-b-2 text-sm font-semibold transition-all">
+                    ? 'bg-[#003FA9] text-white shadow-sm'
+                    : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap">
             <i class='bx bx-history text-lg'></i>
-            Log Perubahan Akademik
-            <span class="ml-1 px-2 py-0.5 rounded-full text-xs bg-dark-100 text-dark-700">
-                {{ $statusHistories->count() }}
-            </span>
+            <span>Log</span>
         </button>
     </div>
 
-    {{-- ==================== TAB 1: ACADEMIC TIMELINE ==================== --}}
+    {{-- ==================== TAB 1: RIWAYAT AKADEMIK (TIME LINE) ==================== --}}
     <div x-show="activeTab === 'timeline'" class="space-y-6">
 
-        {{-- Filter Bar for Timeline --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-dark-50/40">
-            <form action="{{ route('siswa.show', $siswa->id) }}" method="GET" class="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="tab" value="timeline">
-
+        {{-- Filter Bar for Timeline (Matching Reference 2) --}}
+        <form action="{{ route('siswa.show', $siswa->id) }}" method="GET">
+            <input type="hidden" name="tab" value="timeline">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
                 {{-- Filter Tahun Ajaran --}}
-                <div class="flex-1 min-w-[160px]">
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Tahun Ajaran</label>
-                    <select name="ta" class="w-full h-10 px-3 rounded-xl bg-white border border-dark-200 text-xs font-medium focus:ring-2 focus:ring-[#003FA9]/30 outline-none">
-                        <option value="">Semua Tahun Ajaran</option>
-                        @foreach($tahunAjarans as $ta)
-                            <option value="{{ $ta->nama }}" {{ $selectedTa == $ta->nama ? 'selected' : '' }}>
-                                {{ $ta->nama }} {{ $ta->is_active ? '(Aktif)' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div class="flex-1">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Tahun Ajaran</label>
+                    <div class="relative">
+                        <select name="ta" class="w-full h-11 px-4 pr-8 rounded-xl bg-[#EFF5FF] border-0 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none">
+                            <option value="">Semua Tahun Ajaran</option>
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->nama }}" {{ $selectedTa == $ta->nama ? 'selected' : '' }}>
+                                    {{ $ta->nama }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <i class='bx bx-chevron-down absolute right-3 top-3.5 text-slate-400 pointer-events-none text-sm'></i>
+                    </div>
                 </div>
 
                 {{-- Filter Tingkat --}}
-                <div class="w-32">
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Tingkat</label>
-                    <select name="tingkat" class="w-full h-10 px-3 rounded-xl bg-white border border-dark-200 text-xs font-medium focus:ring-2 focus:ring-[#003FA9]/30 outline-none">
-                        <option value="">Semua</option>
-                        <option value="10" {{ $selectedTingkat == '10' ? 'selected' : '' }}>Kelas 10</option>
-                        <option value="11" {{ $selectedTingkat == '11' ? 'selected' : '' }}>Kelas 11</option>
-                        <option value="12" {{ $selectedTingkat == '12' ? 'selected' : '' }}>Kelas 12</option>
-                    </select>
+                <div class="w-full sm:w-36">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Tingkat</label>
+                    <div class="relative">
+                        <select name="tingkat" class="w-full h-11 px-4 pr-8 rounded-xl bg-[#EFF5FF] border-0 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none">
+                            <option value="">Semua</option>
+                            <option value="10" {{ $selectedTingkat == '10' ? 'selected' : '' }}>Kelas 10</option>
+                            <option value="11" {{ $selectedTingkat == '11' ? 'selected' : '' }}>Kelas 11</option>
+                            <option value="12" {{ $selectedTingkat == '12' ? 'selected' : '' }}>Kelas 12</option>
+                        </select>
+                        <i class='bx bx-chevron-down absolute right-3 top-3.5 text-slate-400 pointer-events-none text-sm'></i>
+                    </div>
                 </div>
 
                 {{-- Filter Status Enrollment --}}
-                <div class="w-40">
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Status Enrollment</label>
-                    <select name="status" class="w-full h-10 px-3 rounded-xl bg-white border border-dark-200 text-xs font-medium focus:ring-2 focus:ring-[#003FA9]/30 outline-none">
-                        <option value="">Semua Status</option>
-                        <option value="aktif" {{ $selectedStatus == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="selesai" {{ $selectedStatus == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                        <option value="tinggal_kelas" {{ $selectedStatus == 'tinggal_kelas' ? 'selected' : '' }}>Tinggal Kelas</option>
-                        <option value="lulus" {{ $selectedStatus == 'lulus' ? 'selected' : '' }}>Lulus</option>
-                    </select>
+                <div class="w-full sm:w-44">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Status Enrollment</label>
+                    <div class="relative">
+                        <select name="status" class="w-full h-11 px-4 pr-8 rounded-xl bg-[#EFF5FF] border-0 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-[#003FA9] transition appearance-none">
+                            <option value="">Semua Status</option>
+                            <option value="aktif" {{ $selectedStatus == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="selesai" {{ $selectedStatus == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            <option value="tinggal_kelas" {{ $selectedStatus == 'tinggal_kelas' ? 'selected' : '' }}>Tinggal Kelas</option>
+                            <option value="lulus" {{ $selectedStatus == 'lulus' ? 'selected' : '' }}>Lulus</option>
+                        </select>
+                        <i class='bx bx-chevron-down absolute right-3 top-3.5 text-slate-400 pointer-events-none text-sm'></i>
+                    </div>
                 </div>
 
+                {{-- Filter Actions --}}
                 <div class="flex items-center gap-2">
-                    <button type="submit" class="h-10 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold transition">
+                    <button type="submit" class="h-11 px-6 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold transition shadow-sm">
                         Terapkan
                     </button>
                     @if($selectedTa || $selectedTingkat || $selectedStatus)
-                        <a href="{{ route('siswa.show', $siswa->id) }}" class="h-10 px-3 rounded-xl border border-dark-200 bg-white hover:bg-dark-50 text-dark-600 text-xs font-semibold flex items-center transition">
+                        <a href="{{ route('siswa.show', $siswa->id) }}" class="h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold flex items-center transition">
                             Reset
                         </a>
                     @endif
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
 
-        {{-- Chronological Vertical Timeline --}}
-        <div class="relative pl-6 sm:pl-8 border-l-2 border-blue-200 ml-4 sm:ml-6 space-y-8 my-4">
+        {{-- Vertical Accent Bar Timeline (Matching Reference 1 & 2) --}}
+        <div class="space-y-6 my-6">
             @forelse($enrollments as $enr)
-                <div class="relative group">
-                    {{-- Node Bullet --}}
-                    <div class="absolute -left-[33px] sm:-left-[41px] top-1.5 w-6 h-6 rounded-full border-2 bg-white flex items-center justify-center
-                        {{ $enr->is_active ? 'border-emerald-500 text-emerald-600 ring-4 ring-emerald-100 shadow-md' : 'border-blue-400 text-blue-500' }}">
-                        @if($enr->is_active)
-                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                        @else
-                            <i class='bx bx-check text-sm font-bold'></i>
-                        @endif
-                    </div>
+                <div class="flex items-stretch gap-3.5 sm:gap-5" x-data="{ showDetail: false }">
+                    {{-- 1. Left: Vertical Accent Bar (Full Height, Independent Per Item) --}}
+                    <div class="w-2.5 sm:w-3 shrink-0 rounded-full {{ $enr->is_active ? 'bg-[#003FA9]' : 'bg-[#BCD4FF]' }}"></div>
 
-                    {{-- Timeline Card --}}
-                    <div class="glass-card rounded-2xl border p-5 transition-all duration-200
-                        {{ $enr->is_active ? 'border-emerald-300 bg-emerald-50/15 shadow-sm ring-1 ring-emerald-200' : 'border-dark-200/70 bg-white hover:border-blue-200 hover:shadow-sm' }}"
-                         x-data="{ showDetail: false }">
+                    {{-- 2. Right: Card Informasi Riwayat Akademik --}}
+                    @if($enr->is_active)
+                        {{-- Active Current Enrollment Card (SOLID ROYAL BLUE) --}}
+                        <div class="flex-1 rounded-2xl p-6 sm:p-7 bg-[#003FA9] text-white shadow-xl transition-all">
+                            {{-- Badges row (Matching Reference 2) --}}
+                            <div class="flex items-center flex-wrap gap-2.5 mb-2">
+                                <span class="px-4 py-1 rounded-full text-xs font-bold bg-white text-[#003FA9]">
+                                    TA {{ $enr->tahun_ajaran }}
+                                </span>
+                                <span class="sr-only">Tahun Ajaran {{ $enr->tahun_ajaran }}</span>
+                                <span class="px-4 py-1 rounded-full text-xs font-semibold text-white border border-white inline-flex items-center">
+                                    Enrollment Aktif Berjalan
+                                </span>
+                            </div>
 
-                        {{-- Card Header --}}
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-dark-100">
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider
-                                    {{ $enr->is_active ? 'bg-emerald-600 text-white' : 'bg-[#003FA9] text-white' }}">
-                                    Tahun Ajaran {{ $enr->tahun_ajaran }}
-                                </span>
-                                <span class="text-sm font-bold text-dark-800">
-                                    Kelas {{ $enr->tingkat }}
-                                </span>
-                                @if($enr->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
-                                        Enrollment Aktif Berjalan
+                            {{-- Large Title --}}
+                            <h3 class="text-2xl font-extrabold text-white mt-2 mb-4 tracking-tight">Kelas {{ $enr->tingkat }}</h3>
+
+                            {{-- Horizontal Information Columns --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                <div>
+                                    <span class="text-blue-200 block mb-1 font-medium">Rombongan Belajar</span>
+                                    <span class="text-white font-bold text-sm block">{{ $enr->kelas?->nama_kelas ?? '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-blue-200 block mb-1 font-medium">Wali kelas</span>
+                                    <span class="text-white font-bold text-sm block">{{ $enr->wali_kelas_nama ?: '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-blue-200 block mb-1 font-medium">Rentang Tanggal Penempatan</span>
+                                    <span class="text-white font-bold text-sm block">
+                                        {{ $enr->started_at ? $enr->started_at->format('d/m/Y') : '-' }} s.d Sekarang
                                     </span>
+                                </div>
+                                <div class="flex items-end justify-start md:justify-end">
+                                    <button type="button" @click="showDetail = !showDetail"
+                                            class="text-white hover:text-blue-100 font-bold text-xs inline-flex items-center gap-1 transition">
+                                        <span x-text="showDetail ? 'Tutup Detail' : 'Buka Detail'"></span>
+                                        <i class='bx text-sm' :class="showDetail ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Expandable Detail Drawer --}}
+                            <div x-show="showDetail" x-collapse class="mt-4 pt-4 border-t border-white/20 space-y-2 text-xs">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <span class="text-blue-200 block">ID Enrollment:</span>
+                                        <span class="font-mono text-white font-semibold">ENR-{{ str_pad($enr->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-blue-200 block">Jurusan & Kohort:</span>
+                                        <span class="font-semibold text-white">
+                                            {{ $enr->jurusan?->kode_jurusan ?? ($siswa->kelas?->jurusan?->kode_jurusan ?? '-') }}
+                                            • {{ $enr->angkatan?->nama_angkatan ?? ($siswa->angkatan?->nama_angkatan ?? '-') }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="text-blue-200 block">Status Operasional:</span>
+                                        <span class="font-semibold text-white">Sedang Berjalan (Active)</span>
+                                    </div>
+                                </div>
+                                @if($enr->catatan)
+                                    <div class="mt-2 pt-2 border-t border-white/20">
+                                        <span class="text-blue-200 font-semibold">Catatan Histori:</span>
+                                        <p class="text-white/90 italic mt-0.5">{{ $enr->catatan }}</p>
+                                    </div>
                                 @endif
                             </div>
-
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border {{ $enr->status_badge }}">
-                                    {{ $enr->status_label }}
-                                </span>
-                                <button type="button"
-                                        @click="showDetail = !showDetail"
-                                        class="text-xs text-primary-600 hover:text-primary-800 font-semibold inline-flex items-center gap-1 transition">
-                                    <span x-text="showDetail ? 'Tutup Detail' : 'Buka Detail'"></span>
-                                    <i class='bx text-sm' :class="showDetail ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
-                                </button>
-                            </div>
                         </div>
-
-                        {{-- Card Grid Details --}}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4 text-xs">
-                            <div>
-                                <span class="text-dark-400 block mb-0.5 font-medium">Rombongan Belajar (Rombel)</span>
-                                <span class="text-dark-900 font-bold text-sm">
-                                    {{ $enr->kelas?->nama_kelas ?? '-' }}
+                    @else
+                        {{-- Completed Past Enrollment Card --}}
+                        <div class="flex-1 rounded-2xl p-6 sm:p-7 bg-white text-slate-800 shadow-sm border border-slate-100 transition-all">
+                            {{-- Badges row (Matching Reference 2) --}}
+                            <div class="flex items-center flex-wrap gap-2.5 mb-2">
+                                <span class="px-4 py-1 rounded-full text-xs font-bold bg-[#003FA9] text-white">
+                                    TA {{ $enr->tahun_ajaran }}
                                 </span>
+                                <span class="sr-only">Tahun Ajaran {{ $enr->tahun_ajaran }}</span>
                             </div>
 
-                            <div>
-                                <span class="text-dark-400 block mb-0.5 font-medium">Wali Kelas Pada Periode Ini</span>
-                                <span class="text-dark-900 font-semibold flex items-center gap-1">
-                                    <i class='bx bx-user-voice text-primary-600'></i>
-                                    {{ $enr->wali_kelas_nama }}
-                                </span>
-                            </div>
+                            {{-- Large Title --}}
+                            <h3 class="text-2xl font-extrabold text-slate-800 mt-2 mb-4 tracking-tight">Kelas {{ $enr->tingkat }}</h3>
 
-                            <div>
-                                <span class="text-dark-400 block mb-0.5 font-medium">Jurusan & Kohort</span>
-                                <span class="text-dark-800 font-medium">
-                                    {{ $enr->jurusan?->kode_jurusan ?? ($siswa->kelas?->jurusan?->kode_jurusan ?? '-') }}
-                                    • {{ $enr->angkatan?->nama_angkatan ?? ($siswa->angkatan?->nama_angkatan ?? '-') }}
-                                </span>
-                            </div>
-
-                            <div>
-                                <span class="text-dark-400 block mb-0.5 font-medium">Rentang Tanggal Penempatan</span>
-                                <span class="text-dark-700 font-mono">
-                                    {{ $enr->started_at ? $enr->started_at->format('d/m/Y') : '-' }} s.d
-                                    {{ $enr->ended_at ? $enr->ended_at->format('d/m/Y') : ($enr->is_active ? 'Sekarang' : '-') }}
-                                </span>
-                            </div>
-                        </div>
-
-                        {{-- Expandable Detail Drawer --}}
-                        <div x-show="showDetail" x-collapse class="mt-4 pt-4 border-t border-dark-100 bg-dark-50/50 rounded-xl p-4 space-y-2">
-                            <h4 class="text-xs font-bold text-dark-800 uppercase tracking-wider mb-2">Informasi Lengkap Penempatan</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            {{-- Horizontal Information Columns --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                                 <div>
-                                    <span class="text-dark-400 block">ID Enrollment:</span>
-                                    <span class="font-mono text-dark-700 font-semibold">ENR-{{ str_pad($enr->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="text-slate-400 block mb-1 font-medium">Rombongan Belajar</span>
+                                    <span class="text-slate-800 font-bold text-sm block">{{ $enr->kelas?->nama_kelas ?? '-' }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-dark-400 block">Status Operasional:</span>
-                                    <span class="font-semibold text-dark-800">{{ $enr->is_active ? 'Sedang Berjalan (Active)' : 'Selesai / Diarsipkan' }}</span>
+                                    <span class="text-slate-400 block mb-1 font-medium">Wali kelas</span>
+                                    <span class="text-slate-800 font-bold text-sm block">{{ $enr->wali_kelas_nama ?: '-' }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-dark-400 block">Dicatat Pada:</span>
-                                    <span class="text-dark-700">{{ $enr->created_at ? $enr->created_at->translatedFormat('d F Y H:i') : '-' }}</span>
+                                    <span class="text-slate-400 block mb-1 font-medium">Rentang Tanggal Penempatan</span>
+                                    <span class="text-slate-800 font-bold text-sm block">
+                                        {{ $enr->started_at ? $enr->started_at->format('d/m/Y') : '-' }} s.d {{ $enr->ended_at ? $enr->ended_at->format('d/m/Y') : 'Selesai' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-end justify-start md:justify-end">
+                                    <button type="button" @click="showDetail = !showDetail"
+                                            class="text-slate-600 hover:text-[#003FA9] font-bold text-xs inline-flex items-center gap-1 transition">
+                                        <span x-text="showDetail ? 'Tutup Detail' : 'Buka Detail'"></span>
+                                        <i class='bx text-sm' :class="showDetail ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                                    </button>
                                 </div>
                             </div>
-                            @if($enr->catatan)
-                                <div class="mt-2 pt-2 border-t border-dark-200/50 text-xs">
-                                    <span class="text-dark-400 font-semibold">Catatan Histori:</span>
-                                    <p class="text-dark-700 italic mt-0.5">{{ $enr->catatan }}</p>
+
+                            {{-- Expandable Detail Drawer --}}
+                            <div x-show="showDetail" x-collapse class="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <span class="text-slate-400 block">ID Enrollment:</span>
+                                        <span class="font-mono text-slate-800 font-semibold">ENR-{{ str_pad($enr->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Jurusan & Kohort:</span>
+                                        <span class="font-semibold text-slate-800">
+                                            {{ $enr->jurusan?->kode_jurusan ?? ($siswa->kelas?->jurusan?->kode_jurusan ?? '-') }}
+                                            • {{ $enr->angkatan?->nama_angkatan ?? ($siswa->angkatan?->nama_angkatan ?? '-') }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Status Operasional:</span>
+                                        <span class="font-semibold text-slate-800">Selesai / Diarsipkan</span>
+                                    </div>
                                 </div>
-                            @endif
+                                @if($enr->catatan)
+                                    <div class="mt-2 pt-2 border-t border-slate-100">
+                                        <span class="text-slate-400 font-semibold">Catatan Histori:</span>
+                                        <p class="text-slate-700 italic mt-0.5">{{ $enr->catatan }}</p>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             @empty
-                <div class="glass-card rounded-2xl border border-dark-200 p-8 text-center text-dark-500">
-                    <i class='bx bx-folder-open text-4xl mb-2 text-dark-400'></i>
-                    <p class="font-semibold">Belum ada riwayat enrollment yang sesuai filter.</p>
+                <div class="bg-white rounded-2xl p-8 border border-slate-100 text-center text-slate-500 shadow-sm">
+                    <i class='bx bx-folder-open text-4xl mb-2 text-slate-300'></i>
+                    <p class="font-bold text-slate-700 text-sm">Belum ada riwayat enrollment yang sesuai filter.</p>
+                    <p class="text-xs text-slate-400 mt-1">Siswa ini belum memiliki catatan mutasi atau promosi kelas.</p>
                 </div>
             @endforelse
         </div>
     </div>
 
-    {{-- ==================== TAB 2: IDENTITAS PERMANEN ==================== --}}
+    {{-- ==================== TAB 2: IDENTITAS & RIWAYAT MASUK PERMANEN ==================== --}}
     <div x-show="activeTab === 'identity'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {{-- Card 1: Riwayat Masuk Permanen (Immutable Anchors) --}}
-        <div class="glass-card rounded-2xl border border-blue-200/70 p-6 bg-white shadow-sm space-y-5">
-            <div class="flex items-center gap-3 pb-3 border-b border-dark-100">
+        <div class="bg-white rounded-[28px] p-7 sm:p-8 shadow-sm border border-slate-100 space-y-6">
+            <div class="pb-4 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#003FA9] flex items-center justify-center text-xl font-bold">
                     <i class='bx bx-award'></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-dark-900">Identitas & Riwayat Masuk Permanen</h3>
-                    <p class="text-xs text-dark-400">Informasi autentik pertama kali siswa diterima di SMK Negeri 1 Ciomas</p>
+                    <h3 class="text-base font-bold text-slate-900 tracking-tight">Riwayat Pendaftaran & Masuk Permanen</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Informasi autentik pertama kali siswa diterima di sekolah</p>
                 </div>
             </div>
 
             <div class="space-y-4 text-xs">
-                {{-- Tahun Ajaran Masuk Permanen --}}
-                <div class="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200 flex items-center justify-between">
+                <div class="p-4 rounded-2xl bg-[#EFF5FF] flex items-center justify-between">
                     <div>
-                        <span class="text-dark-500 block font-medium">Tahun Ajaran Masuk Permanen</span>
-                        <span class="text-base font-extrabold text-[#003FA9] tracking-tight">
+                        <span class="text-slate-500 block font-medium">Tahun Ajaran Masuk Permanen</span>
+                        <span class="text-lg font-extrabold text-[#003FA9] tracking-tight">
                             {{ $siswa->tahun_ajaran_masuk_nama }}
                         </span>
                     </div>
-                    <span class="px-2.5 py-1 rounded-lg bg-[#003FA9] text-white font-bold text-xs">
+                    <span class="px-3 py-1 rounded-lg bg-[#003FA9] text-white font-bold text-xs">
                         Permanen
                     </span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="p-3 rounded-xl bg-dark-50/60 border border-dark-100">
-                        <span class="text-dark-400 block font-medium">Tahun Masuk Kalender</span>
-                        <span class="font-bold text-dark-900 text-sm font-mono">{{ $siswa->tahun_masuk }}</span>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <span class="text-slate-400 block font-medium">Tahun Masuk Kalender</span>
+                        <span class="font-bold text-slate-900 text-sm font-mono">{{ $siswa->tahun_masuk }}</span>
                     </div>
 
-                    <div class="p-3 rounded-xl bg-dark-50/60 border border-dark-100">
-                        <span class="text-dark-400 block font-medium">Jalur Pendaftaran</span>
-                        <span class="font-bold text-dark-900 text-sm">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <span class="text-slate-400 block font-medium">Jalur Pendaftaran</span>
+                        <span class="font-bold text-slate-900 text-sm">
                             {{ $siswa->jalur_masuk === 'pindahan' ? 'Siswa Pindahan / Mutasi' : 'Siswa Baru (Reguler)' }}
                         </span>
                     </div>
                 </div>
 
                 @if($siswa->jalur_masuk === 'pindahan')
-                    <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-200">
-                        <span class="text-amber-700 block font-medium">Asal Sekolah Sebelumnya</span>
-                        <span class="font-bold text-dark-900 text-sm">{{ $siswa->asal_sekolah ?: '-' }}</span>
+                    <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                        <span class="text-amber-800 block font-medium">Asal Sekolah Sebelumnya</span>
+                        <span class="font-bold text-slate-900 text-sm">{{ $siswa->asal_sekolah ?: '-' }}</span>
                     </div>
                 @endif
 
-                <div class="p-3 rounded-xl bg-dark-50/60 border border-dark-100">
-                    <span class="text-dark-400 block font-medium">Jurusan Resmi (Program Keahlian)</span>
-                    <span class="font-bold text-dark-900 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span class="text-slate-400 block font-medium">Jurusan Resmi (Program Keahlian)</span>
+                    <span class="font-bold text-slate-900 text-sm">
                         {{ $siswa->kelas?->jurusan?->nama_jurusan ?? ($siswa->angkatan?->jurusan?->nama_jurusan ?? '-') }}
                         ({{ $siswa->kelas?->jurusan?->kode_jurusan ?? ($siswa->angkatan?->jurusan?->kode_jurusan ?? '-') }})
                     </span>
                 </div>
 
-                <div class="p-3 rounded-xl bg-dark-50/60 border border-dark-100">
-                    <span class="text-dark-400 block font-medium">Angkatan Kohort Resmi</span>
-                    <span class="font-bold text-dark-900 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span class="text-slate-400 block font-medium">Angkatan Kohort Resmi</span>
+                    <span class="font-bold text-slate-900 text-sm">
                         {{ $siswa->angkatan?->nama_angkatan ?? '-' }}
-                        <span class="text-dark-400 font-normal">(Kode: {{ $siswa->angkatan?->kode_angkatan ?? '-' }})</span>
+                        <span class="text-slate-400 font-normal">(Kode: {{ $siswa->angkatan?->kode_angkatan ?? '-' }})</span>
                     </span>
                 </div>
 
-                <div class="p-3 rounded-xl bg-dark-50/60 border border-dark-100">
-                    <span class="text-dark-400 block font-medium">Catatan Pendaftaran Awal</span>
-                    <span class="text-dark-800">{{ $siswa->catatan_status ?: 'Terdaftar resmi sebagai siswa baru.' }}</span>
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <span class="text-slate-400 block font-medium">Catatan Pendaftaran Awal</span>
+                    <span class="text-slate-800 font-medium">{{ $siswa->catatan_status ?: 'Terdaftar resmi sebagai siswa baru.' }}</span>
                 </div>
             </div>
         </div>
 
-        {{-- Card 2: Biodata Pribadi & Kontak Wali --}}
+        {{-- Card 2: Biodata Diri Siswa & Data Kontak Wali --}}
         <div class="space-y-6">
             {{-- Biodata Pribadi --}}
-            <div class="glass-card rounded-2xl border border-dark-200/70 p-6 bg-white shadow-sm space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b border-dark-100">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold">
+            <div class="bg-white rounded-[28px] p-7 sm:p-8 shadow-sm border border-slate-100 space-y-4">
+                <div class="pb-4 border-b border-slate-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#003FA9] flex items-center justify-center text-xl font-bold">
                         <i class='bx bx-user'></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-dark-900">Biodata Pribadi Siswa</h3>
-                        <p class="text-xs text-dark-400">Identitas kependudukan dan informasi akun</p>
+                        <h3 class="text-base font-bold text-slate-900 tracking-tight">Biodata Pribadi Siswa</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Identitas kependudukan dan status siswa</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="grid grid-cols-2 gap-4 text-xs">
                     <div>
-                        <span class="text-dark-400 block font-medium">Tempat, Tanggal Lahir (TTL)</span>
-                        <span class="font-bold text-dark-900">{{ $siswa->ttl ?? '-' }}</span>
+                        <span class="text-slate-400 block font-medium">Tempat, Tanggal Lahir (TTL)</span>
+                        <span class="font-bold text-slate-900 text-sm">{{ $siswa->ttl ?? '-' }}</span>
                     </div>
                     <div>
-                        <span class="text-dark-400 block font-medium">Jenis Kelamin</span>
-                        <span class="font-bold text-dark-900">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                        <span class="text-slate-400 block font-medium">Jenis Kelamin</span>
+                        <span class="font-bold text-slate-900 text-sm">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
                     </div>
                     <div>
-                        <span class="text-dark-400 block font-medium">Nomor WhatsApp Siswa</span>
-                        <span class="font-bold text-dark-900 font-mono">{{ $siswa->no_telp_siswa ?? '-' }}</span>
+                        <span class="text-slate-400 block font-medium">Nomor WhatsApp Siswa</span>
+                        <span class="font-bold text-slate-900 font-mono text-sm">{{ $siswa->no_telp_siswa ?? '-' }}</span>
                     </div>
                     <div>
-                        <span class="text-dark-400 block font-medium">Status Biometrik Wajah</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold
-                            {{ $siswa->biometric_status === 'enrolled' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
+                        <span class="text-slate-400 block font-medium">Status Akademik</span>
+                        <span class="font-bold text-sm {{ $siswa->status === 'aktif' ? 'text-emerald-600' : 'text-slate-800' }}">
+                            {{ ucfirst($siswa->status) }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-medium">Biometrik Wajah</span>
+                        <span class="font-bold text-sm {{ $siswa->biometric_status === 'enrolled' ? 'text-emerald-600' : 'text-slate-600' }}">
                             {{ $siswa->biometric_status === 'enrolled' ? 'Terdaftar' : 'Belum Terdaftar' }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-medium">Pengecualian Wajah</span>
+                        <span class="font-bold text-sm {{ $siswa->is_biometric_exempt ? 'text-[#003FA9]' : 'text-slate-600' }}">
+                            {{ $siswa->is_biometric_exempt ? 'Ya (Bebas)' : 'Tidak (Wajib)' }}
                         </span>
                     </div>
                 </div>
@@ -426,150 +428,250 @@
 
             {{-- Informasi Orang Tua / Wali --}}
             @php $parent = $siswa->orangtua->first(); @endphp
-            <div class="glass-card rounded-2xl border border-dark-200/70 p-6 bg-white shadow-sm space-y-4">
-                <div class="flex items-center gap-3 pb-3 border-b border-dark-100">
-                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-xl font-bold">
+            <div class="bg-white rounded-[28px] p-7 sm:p-8 shadow-sm border border-slate-100 space-y-4">
+                <div class="pb-4 border-b border-slate-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#003FA9] flex items-center justify-center text-xl font-bold">
                         <i class='bx bx-group'></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-dark-900">Data Orang Tua / Wali</h3>
-                        <p class="text-xs text-dark-400">Kontak utama monitoring presensi & akademik</p>
+                        <h3 class="text-base font-bold text-slate-900 tracking-tight">Data Orang Tua / Wali</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Kontak utama monitoring presensi & akademik</p>
                     </div>
                 </div>
 
                 @if($parent)
                     <div class="space-y-3 text-xs">
                         <div>
-                            <span class="text-dark-400 block font-medium">Nama Lengkap Orang Tua / Wali</span>
-                            <span class="font-bold text-dark-900 text-sm">{{ $parent->nama }}</span>
+                            <span class="text-slate-400 block font-medium">Nama Lengkap Orang Tua / Wali</span>
+                            <span class="font-bold text-slate-900 text-sm">{{ $parent->nama }}</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <span class="text-dark-400 block font-medium">Nomor WhatsApp</span>
-                                <span class="font-bold text-dark-900 font-mono flex items-center gap-1">
-                                    <i class='bx bxl-whatsapp text-emerald-600 text-base'></i>
-                                    {{ $parent->telepon ?? '-' }}
-                                </span>
+                                <span class="text-slate-400 block font-medium">Nomor WhatsApp</span>
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $parent->telepon) }}" target="_blank"
+                                   class="font-bold text-[#003FA9] hover:underline font-mono text-sm block">
+                                    {{ $parent->telepon }}
+                                </a>
                             </div>
                             <div>
-                                <span class="text-dark-400 block font-medium">Hubungan / Gender</span>
-                                <span class="font-bold text-dark-900">
-                                    {{ $parent->jenis_kelamin === 'L' ? 'Laki-laki (Ayah)' : ($parent->jenis_kelamin === 'P' ? 'Perempuan (Ibu)' : '-') }}
-                                </span>
+                                <span class="text-slate-400 block font-medium">Hubungan</span>
+                                <span class="font-bold text-slate-900 text-sm">{{ $parent->hubungan ?: 'Orang Tua' }}</span>
                             </div>
                         </div>
                         <div>
-                            <span class="text-dark-400 block font-medium">Alamat Tempat Tinggal</span>
-                            <span class="text-dark-800">{{ $parent->alamat ?? '-' }}</span>
+                            <span class="text-slate-400 block font-medium">Alamat Tempat Tinggal</span>
+                            <span class="font-medium text-slate-800 text-sm">{{ $parent->alamat ?: '-' }}</span>
                         </div>
                     </div>
                 @else
-                    <p class="text-xs text-dark-400 italic">Data orang tua belum dikaitkan.</p>
+                    <div class="p-4 rounded-2xl bg-slate-50 text-slate-400 text-xs text-center font-medium">
+                        Belum ada data orang tua / wali yang ditautkan ke siswa ini.
+                    </div>
                 @endif
             </div>
         </div>
     </div>
 
     {{-- ==================== TAB 3: LOG PERUBAHAN AKADEMIK ==================== --}}
-    <div x-show="activeTab === 'movements'" class="space-y-4">
-
-        {{-- Filter Bar for Movements --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-dark-50/40">
-            <form action="{{ route('siswa.show', $siswa->id) }}" method="GET" class="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="tab" value="movements">
-
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-xs font-semibold text-dark-700 mb-1">Jenis Perubahan</label>
-                    <select name="jenis_perubahan" class="w-full h-10 px-3 rounded-xl bg-white border border-dark-200 text-xs font-medium focus:ring-2 focus:ring-[#003FA9]/30 outline-none">
-                        <option value="">Semua Peristiwa Akademik</option>
-                        <option value="registrasi_baru" {{ $selectedJenisPerubahan == 'registrasi_baru' ? 'selected' : '' }}>Registrasi Siswa Baru</option>
-                        <option value="mutasi_masuk" {{ $selectedJenisPerubahan == 'mutasi_masuk' ? 'selected' : '' }}>Mutasi Masuk (Pindahan)</option>
-                        <option value="kenaikan_kelas" {{ $selectedJenisPerubahan == 'kenaikan_kelas' ? 'selected' : '' }}>Kenaikan Kelas</option>
-                        <option value="tinggal_kelas" {{ $selectedJenisPerubahan == 'tinggal_kelas' ? 'selected' : '' }}>Tinggal Kelas</option>
-                        <option value="pindah_rombel" {{ $selectedJenisPerubahan == 'pindah_rombel' ? 'selected' : '' }}>Perpindahan Rombel</option>
-                        <option value="kelulusan" {{ $selectedJenisPerubahan == 'kelulusan' ? 'selected' : '' }}>Kelulusan</option>
-                        <option value="mutasi_keluar" {{ $selectedJenisPerubahan == 'mutasi_keluar' ? 'selected' : '' }}>Mutasi Keluar</option>
-                    </select>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button type="submit" class="h-10 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold transition">
-                        Filter Log
-                    </button>
-                    @if($selectedJenisPerubahan)
-                        <a href="{{ route('siswa.show', $siswa->id) }}" class="h-10 px-3 rounded-xl border border-dark-200 bg-white hover:bg-dark-50 text-dark-600 text-xs font-semibold flex items-center transition">
-                            Reset
-                        </a>
-                    @endif
-                </div>
-            </form>
+    <div x-show="activeTab === 'movements'" class="bg-white rounded-[28px] p-7 sm:p-8 shadow-sm border border-slate-100">
+        <div class="pb-4 border-b border-slate-100 mb-6 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 tracking-tight">Log Aktivitas & Perubahan Akademik</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Jejak audit kronologis mutasi, kenaikan kelas, dan perubahan status akademik</p>
+            </div>
+            <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">
+                Total: {{ $statusHistories->count() }} Catatan
+            </span>
         </div>
 
-        {{-- Audit Table --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-dark-100 bg-dark-50/50 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                            <th class="px-5 py-3.5">Tanggal</th>
-                            <th class="px-5 py-3.5">Jenis Peristiwa</th>
-                            <th class="px-5 py-3.5">Asal (Kelas & Wali)</th>
-                            <th class="px-5 py-3.5">Tujuan (Kelas & Wali)</th>
-                            <th class="px-5 py-3.5">Keterangan / Alasan</th>
-                            <th class="px-5 py-3.5">Dicatat Oleh</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">WAKTU</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JENIS PERUBAHAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL ASAL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL TUJUAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ALASAN / CATATAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKTOR</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                    @forelse($statusHistories as $hist)
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 font-mono text-slate-500 whitespace-nowrap text-xs">
+                                {{ $hist->tanggal_perubahan ? $hist->tanggal_perubahan->format('d/m/Y') : ($hist->created_at ? $hist->created_at->format('d/m/Y') : '-') }}
+                            </td>
+                            <td class="py-4 px-4 whitespace-nowrap font-bold text-slate-800">
+                                {{ $hist->jenis_perubahan_label }}
+                            </td>
+                            <td class="py-4 px-4">
+                                @if($hist->kelasAsal || $hist->tahun_ajaran_asal)
+                                    <div class="font-semibold text-slate-800">{{ $hist->kelasAsal?->nama_kelas ?? '-' }}</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">TA: {{ $hist->tahun_ajaran_asal ?? '-' }}</div>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
+                            <td class="py-4 px-4">
+                                @if($hist->kelasTujuan || $hist->tahun_ajaran_tujuan)
+                                    <div class="font-semibold text-slate-800">{{ $hist->kelasTujuan?->nama_kelas ?? '-' }}</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">TA: {{ $hist->tahun_ajaran_tujuan ?? '-' }}</div>
+                                @elseif($hist->sekolah_tujuan)
+                                    <span class="font-bold text-rose-600">{{ $hist->sekolah_tujuan }}</span>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="text-slate-700 font-medium">{{ $hist->alasan ?: '-' }}</div>
+                                @if($hist->catatan)
+                                    <div class="text-xs text-slate-400 italic mt-0.5">{{ $hist->catatan }}</div>
+                                @endif
+                            </td>
+                            <td class="py-4 px-4 whitespace-nowrap text-slate-600 font-medium text-xs">
+                                {{ $hist->createdBy?->name ?? 'Sistem' }}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-dark-100 text-xs text-dark-700">
-                        @forelse($statusHistories as $hist)
-                            <tr class="hover:bg-dark-50/40 transition">
-                                <td class="px-5 py-3.5 font-mono text-dark-600 whitespace-nowrap">
-                                    {{ $hist->tanggal_perubahan ? $hist->tanggal_perubahan->format('d/m/Y') : ($hist->created_at ? $hist->created_at->format('d/m/Y') : '-') }}
-                                </td>
-                                <td class="px-5 py-3.5 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold border {{ $hist->jenis_perubahan_badge }}">
-                                        {{ $hist->jenis_perubahan_label }}
-                                    </span>
-                                </td>
-                                <td class="px-5 py-3.5">
-                                    @if($hist->kelasAsal || $hist->tahun_ajaran_asal)
-                                        <div class="font-semibold text-dark-900">{{ $hist->kelasAsal?->nama_kelas ?? '-' }}</div>
-                                        <div class="text-[11px] text-dark-400">TA: {{ $hist->tahun_ajaran_asal ?? '-' }} • Wali: {{ $hist->wali_kelas_asal ?? '-' }}</div>
-                                    @else
-                                        <span class="text-dark-400">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3.5">
-                                    @if($hist->kelasTujuan || $hist->tahun_ajaran_tujuan)
-                                        <div class="font-semibold text-dark-900">{{ $hist->kelasTujuan?->nama_kelas ?? '-' }}</div>
-                                        <div class="text-[11px] text-dark-400">TA: {{ $hist->tahun_ajaran_tujuan ?? '-' }} • Wali: {{ $hist->wali_kelas_tujuan ?? '-' }}</div>
-                                    @elseif($hist->sekolah_tujuan)
-                                        <span class="font-semibold text-rose-700">{{ $hist->sekolah_tujuan }}</span>
-                                    @else
-                                        <span class="text-dark-400">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3.5">
-                                    <div class="text-dark-800">{{ $hist->alasan ?: '-' }}</div>
-                                    @if($hist->catatan)
-                                        <div class="text-[11px] text-dark-400 italic">{{ $hist->catatan }}</div>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3.5 whitespace-nowrap text-dark-500 font-medium">
-                                    {{ $hist->createdBy?->name ?? 'Sistem' }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-5 py-8 text-center text-dark-400">
-                                    Belum ada catatan log perubahan akademik.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-history text-2xl text-slate-400'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600">Belum ada catatan log</p>
+                                    <p class="text-xs text-slate-400 mt-1">Belum ada catatan log perubahan akademik siswa ini.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
 @endsection
+
+@push('modals')
+    {{-- Modal Edit Siswa (Design System) --}}
+    <div id="modal-editsiswa" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onclick="closeModal('modal-editsiswa')"></div>
+
+        {{-- Modal Positioning Container --}}
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
+            <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                {{-- Header --}}
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Siswa</h2>
+                        <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full mt-1.5 inline-block">
+                            Perbarui Profil, Akun & Relasi Orang Tua
+                        </span>
+                    </div>
+                    <button type="button" onclick="closeModal('modal-editsiswa')"
+                        class="text-[#94A3B8] hover:text-[#0F172A] p-1.5 rounded-lg transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="h-px bg-[#D8E6FC] mt-4 mb-6"></div>
+
+                {{-- Body (Loaded via AJAX) --}}
+                <div id="loadeditform"></div>
+            </div>
+        </div>
+    </div>
+@endpush
+
+@push('scripts')
+<script>
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function editSiswa(id) {
+        fetch('/siswa/edit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('loadeditform').innerHTML = html;
+            openModal('modal-editsiswa');
+
+            const formObj = document.getElementById('frmEditSiswa');
+            if (formObj) attachEditFormListener(formObj);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: 'Terjadi kesalahan saat memuat form edit.',
+                customClass: {
+                    popup: 'font-inter'
+                }
+            });
+        });
+    }
+
+    function attachEditFormListener(form) {
+        form.addEventListener('submit', function(e) {
+            const nis = document.getElementById('nis_edit')?.value;
+            const nama = document.getElementById('nama_edit')?.value;
+
+            if (!nis || !nama) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Oops!',
+                    text: 'Data wajib Harus Diisi!',
+                    icon: 'warning',
+                    confirmButtonColor: '#003FA9',
+                    confirmButtonText: 'Tutup',
+                    customClass: {
+                        popup: 'font-inter rounded-2xl',
+                        confirmButton: 'rounded-xl'
+                    }
+                });
+            }
+        });
+    }
+
+    function previewEditStudentPhoto(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const container = document.getElementById('preview_edit_photo_container');
+                if (container) {
+                    container.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+@endpush

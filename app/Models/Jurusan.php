@@ -62,6 +62,13 @@ class Jurusan extends Model
 
     public function getLogoUrlAttribute()
     {
+        if ($this->logo_path && file_exists(public_path('storage/' . $this->logo_path))) {
+            return asset('storage/' . $this->logo_path);
+        }
+        $localPath = 'images/jurusan/' . strtolower($this->kode_jurusan) . '.png';
+        if (file_exists(public_path($localPath))) {
+            return asset($localPath);
+        }
         if ($this->logo_path) {
             return asset('storage/' . $this->logo_path);
         }

@@ -123,39 +123,39 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 uppercase text-[10px] font-semibold tracking-wider">
-                                <th class="py-2.5 px-3">No</th>
-                                <th class="py-2.5 px-3">NIS</th>
-                                <th class="py-2.5 px-3">Nama Siswa</th>
-                                <th class="py-2.5 px-3 text-center">Status Kehadiran Sesi</th>
-                                <th class="py-2.5 px-3">Catatan</th>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NAMA SISWA</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS KEHADIRAN SESI</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">CATATAN</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-slate-100 text-sm">
                             @foreach($students as $idx => $st)
-                                <tr class="hover:bg-slate-50/60">
-                                    <td class="py-2 px-3 text-slate-400 font-mono">{{ $idx + 1 }}</td>
-                                    <td class="py-2 px-3 text-slate-500 font-mono">{{ $st->nis }}</td>
-                                    <td class="py-2 px-3 font-semibold text-slate-800">{{ $st->nama }}</td>
-                                    <td class="py-2 px-3 text-center">
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-4 px-4 text-slate-400 text-xs font-medium text-center">{{ $idx + 1 }}</td>
+                                    <td class="py-4 px-4 font-mono font-bold text-slate-900 text-xs sm:text-sm">{{ $st->nis }}</td>
+                                    <td class="py-4 px-4 font-bold text-slate-900 text-xs sm:text-sm">{{ $st->nama }}</td>
+                                    <td class="py-4 px-4 text-center">
                                         <div class="inline-flex items-center gap-2">
                                             @foreach(['hadir' => 'H', 'terlambat' => 'T', 'izin' => 'I', 'sakit' => 'S', 'alpa' => 'A'] as $statKey => $statLabel)
                                                 <label class="cursor-pointer">
                                                     <input type="radio" name="attendances[{{ $st->id }}][status]" value="{{ $statKey }}"
                                                         {{ $statKey === 'hadir' ? 'checked' : '' }}
                                                         class="peer sr-only att-radio-{{ $statKey }}">
-                                                    <span class="w-7 h-7 rounded-lg inline-flex items-center justify-center text-xs font-bold border border-slate-200 text-slate-600 peer-checked:bg-[#0052CC] peer-checked:text-white peer-checked:border-[#0052CC] transition-colors">
+                                                    <span class="w-8 h-8 rounded-xl inline-flex items-center justify-center text-xs font-bold border border-slate-200 text-slate-600 peer-checked:bg-[#003FA9] peer-checked:text-white peer-checked:border-[#003FA9] transition-colors shadow-xs">
                                                         {{ $statLabel }}
                                                     </span>
                                                 </label>
                                             @endforeach
                                         </div>
                                     </td>
-                                    <td class="py-2 px-3">
+                                    <td class="py-4 px-4">
                                         <input type="text" name="attendances[{{ $st->id }}][catatan]" placeholder="Keterangan..."
-                                            class="w-full text-[11px] rounded-lg border-slate-200 focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-slate-50/30 py-1 px-2">
+                                            class="w-full text-xs rounded-xl border border-slate-200 focus:border-[#003FA9] focus:ring-1 focus:ring-[#003FA9] bg-white py-2 px-3 outline-none">
                                     </td>
                                 </tr>
                             @endforeach

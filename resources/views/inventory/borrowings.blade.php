@@ -7,147 +7,147 @@
 <div class="space-y-6">
 
     {{-- Top Action & Filter Bar --}}
-    <div class="bg-white rounded-2xl p-4 shadow-sm border border-blue-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <form method="GET" action="{{ route('inventory.borrowings') }}" class="flex items-center gap-2 flex-wrap">
-            <select name="status" class="text-xs rounded-xl border-slate-200 focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-slate-50/50 py-1.5 px-3">
+            <select name="status" class="text-sm rounded-xl border border-slate-200 focus:border-[#003FA9] focus:ring-2 focus:ring-[#003FA9]/20 bg-slate-50/50 focus:bg-white text-slate-800 py-2 px-3 transition">
                 <option value="">Semua Status Transaksi</option>
                 <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
                 <option value="borrowed" {{ request('status') === 'borrowed' ? 'selected' : '' }}>Sedang Dipinjam</option>
                 <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Sudah Dikembalikan</option>
             </select>
 
-            <select name="sumber" class="text-xs rounded-xl border-slate-200 focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-slate-50/50 py-1.5 px-3">
+            <select name="sumber" class="text-sm rounded-xl border border-slate-200 focus:border-[#003FA9] focus:ring-2 focus:ring-[#003FA9]/20 bg-slate-50/50 focus:bg-white text-slate-800 py-2 px-3 transition">
                 <option value="">Semua Sumber</option>
                 <option value="mandiri" {{ request('sumber') === 'mandiri' ? 'selected' : '' }}>Pengajuan Mandiri</option>
                 <option value="manual" {{ request('sumber') === 'manual' ? 'selected' : '' }}>Manual oleh Petugas</option>
             </select>
 
-            <input type="date" name="tanggal" value="{{ request('tanggal') }}" title="Filter tanggal pinjam" class="text-xs rounded-xl border-slate-200 focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-slate-50/50 py-1.5 px-3">
-            <input type="text" name="peminjam" value="{{ request('peminjam') }}" placeholder="Nama peminjam..." class="text-xs rounded-xl border-slate-200 focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-slate-50/50 py-1.5 px-3 w-32">
-            <input type="text" name="barang" value="{{ request('barang') }}" placeholder="Nama/kode barang..." class="text-xs rounded-xl border-slate-200 focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-slate-50/50 py-1.5 px-3 w-36">
+            <input type="date" name="tanggal" value="{{ request('tanggal') }}" title="Filter tanggal pinjam" class="text-sm rounded-xl border border-slate-200 focus:border-[#003FA9] focus:ring-2 focus:ring-[#003FA9]/20 bg-slate-50/50 focus:bg-white text-slate-800 py-2 px-3 transition">
+            <input type="text" name="peminjam" value="{{ request('peminjam') }}" placeholder="Nama peminjam..." class="text-sm rounded-xl border border-slate-200 focus:border-[#003FA9] focus:ring-2 focus:ring-[#003FA9]/20 bg-slate-50/50 focus:bg-white text-slate-800 py-2 px-3 w-36 transition">
+            <input type="text" name="barang" value="{{ request('barang') }}" placeholder="Nama/kode barang..." class="text-sm rounded-xl border border-slate-200 focus:border-[#003FA9] focus:ring-2 focus:ring-[#003FA9]/20 bg-slate-50/50 focus:bg-white text-slate-800 py-2 px-3 w-40 transition">
 
-            <button type="submit" class="py-1.5 px-3 rounded-xl bg-[#0052CC] text-white text-xs font-semibold hover:bg-[#003FA9] transition-colors">
+            <button type="submit" class="py-2 px-4 rounded-xl bg-[#003FA9] text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
                 Filter
             </button>
-            @if(request('status') || request('sumber') || request('tanggal'))
-                <a href="{{ route('inventory.borrowings') }}" class="text-xs text-slate-400 hover:text-slate-600">Reset</a>
+            @if(request('status') || request('sumber') || request('tanggal') || request('peminjam') || request('barang'))
+                <a href="{{ route('inventory.borrowings') }}" class="text-xs text-slate-400 hover:text-slate-600 ml-1">Reset</a>
             @endif
         </form>
 
         <div class="flex items-center gap-3">
             @if(in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog', 'guru']))
             <button type="button" onclick="openManualTx()"
-                class="inline-flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#0052CC] text-white text-xs font-bold hover:bg-[#003FA9] transition-colors shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                class="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-[#003FA9] text-white text-xs font-semibold hover:bg-blue-700 transition shadow-sm">
+                <i class='bx bx-plus text-base'></i>
                 Tambah Transaksi Manual
             </button>
             @endif
-            <a href="{{ route('inventory.index') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-[#0052CC] hover:underline">
-                <i class='bx bx-arrow-back'></i> Kembali ke Katalog Inventaris
+            <a href="{{ route('inventory.index') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-[#003FA9] hover:underline">
+                <i class='bx bx-arrow-back'></i> Katalog
             </a>
         </div>
     </div>
 
     {{-- Borrowings Table --}}
-    <div class="bg-white rounded-3xl shadow-sm border border-blue-50 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 overflow-hidden">
+        <div class="pb-4 mb-4 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-sm font-bold text-slate-800">Daftar Transaksi Peminjaman Alat</h3>
             <span class="text-xs text-slate-400">Total {{ $borrowings->total() }} Transaksi</span>
         </div>
 
         @if($borrowings->isEmpty())
-            <div class="py-14 px-6 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-[#0052CC] flex items-center justify-center mx-auto mb-3 text-2xl">
-                    <i class='bx bx-check-circle'></i>
+            <div class="py-12 text-center text-slate-400">
+                <div class="flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                        <i class='bx bx-check-circle text-2xl text-slate-400'></i>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600">Tidak Ada Transaksi Peminjaman</p>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                        Data permohonan pinjam alat praktikum siswa atau guru akan tampil di sini.
+                    </p>
                 </div>
-                <h4 class="text-sm font-bold text-slate-800">Tidak Ada Transaksi Peminjaman</h4>
-                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                    Data permohonan pinjam alat praktikum siswa atau guru akan tampil di sini.
-                </p>
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                            <th class="py-3 px-4">Peminjam</th>
-                            <th class="py-3 px-4">Peralatan</th>
-                            <th class="py-3 px-4 text-center">Jumlah</th>
-                            <th class="py-3 px-4">Jadwal Pinjam & Rencana Kembali</th>
-                            <th class="py-3 px-4">Keperluan</th>
-                            <th class="py-3 px-4">Sumber / Petugas</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4 text-right">Aksi Petugas</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Peminjam</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Peralatan</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jumlah</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Jadwal Pinjam & Rencana Kembali</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Keperluan</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sumber / Petugas</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Aksi Petugas</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @foreach($borrowings as $b)
-                            @php
-                                $badge = match($b->status) {
-                                    'returned' => ['bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'label' => 'Dikembalikan'],
-                                    'borrowed' => ['bg' => 'bg-blue-50 text-[#0052CC] border-blue-200', 'label' => 'Sedang Dipinjam'],
-                                    'pending'  => ['bg' => 'bg-amber-50 text-amber-700 border-amber-200', 'label' => 'Menunggu Approve'],
-                                    default    => ['bg' => 'bg-slate-100 text-slate-700 border-slate-200', 'label' => $b->status],
-                                };
-                            @endphp
-                            <tr class="hover:bg-blue-50/20 transition-colors">
-                                <td class="py-3 px-4">
-                                    <div class="font-bold text-slate-900">{{ $b->user->name ?? '-' }}</div>
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4">
+                                    <div class="font-semibold text-slate-800">{{ $b->user->name ?? '-' }}</div>
                                     @if($b->siswa)
-                                        <div class="text-[10px] text-slate-400">{{ $b->siswa->kelas->nama_kelas ?? 'Kelas' }} (NIS: {{ $b->siswa->nis }})</div>
+                                        <div class="text-xs text-slate-400 mt-0.5">{{ $b->siswa->kelas->nama_kelas ?? 'Kelas' }} (NIS: {{ $b->siswa->nis }})</div>
                                     @elseif($b->peminjamGuru)
-                                        <div class="text-[10px] text-slate-400 font-mono">Guru (NIP: {{ $b->peminjamGuru->nip ?? '-' }})</div>
+                                        <div class="text-xs text-slate-400 font-mono mt-0.5">Guru (NIP: {{ $b->peminjamGuru->nip ?? '-' }})</div>
                                     @else
-                                        <div class="text-[10px] text-slate-400 font-mono">Role: {{ ucfirst($b->user->role ?? '-') }}</div>
+                                        <div class="text-xs text-slate-400 font-mono mt-0.5">Role: {{ ucfirst($b->user->role ?? '-') }}</div>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4">
-                                    <div class="font-bold text-slate-800">{{ $b->item->nama_barang }}</div>
-                                    <div class="text-[10px] font-mono text-[#0052CC]">{{ $b->item->kode_barang }} | {{ $b->item->lokasi_penyimpanan }}</div>
+                                <td class="py-4 px-4">
+                                    <div class="font-semibold text-slate-800">{{ $b->item->nama_barang }}</div>
+                                    <div class="text-xs font-mono text-[#003FA9] mt-0.5">{{ $b->item->kode_barang }} | {{ $b->item->lokasi_penyimpanan }}</div>
                                 </td>
-                                <td class="py-3 px-4 text-center font-bold font-mono text-slate-800">
+                                <td class="py-4 px-4 text-center font-bold font-mono text-slate-800">
                                     {{ $b->jumlah }} Unit
                                 </td>
-                                <td class="py-3 px-4 font-mono text-slate-600 whitespace-nowrap">
+                                <td class="py-4 px-4 font-mono text-slate-600 whitespace-nowrap text-xs">
                                     <div>Pinjam: {{ $b->tanggal_pinjam->translatedFormat('d M Y') }}</div>
-                                    <div class="text-[11px] {{ now()->gt($b->rencana_kembali) && $b->status === 'borrowed' ? 'text-rose-600 font-bold' : 'text-slate-400' }}">
+                                    <div class="mt-0.5 {{ now()->gt($b->rencana_kembali) && $b->status === 'borrowed' ? 'text-rose-600 font-bold' : 'text-slate-400' }}">
                                         Kembali: {{ $b->rencana_kembali->translatedFormat('d M Y') }}
                                         @if(now()->gt($b->rencana_kembali) && $b->status === 'borrowed')
                                             (Terlambat)
                                         @endif
                                     </div>
                                 </td>
-                                <td class="py-3 px-4 text-slate-600 max-w-xs truncate" title="{{ $b->keperluan }}">
+                                <td class="py-4 px-4 text-slate-600 max-w-xs truncate text-xs" title="{{ $b->keperluan }}">
                                     {{ $b->keperluan }}
                                 </td>
-                                <td class="py-3 px-4">
+                                <td class="py-4 px-4">
                                     @if($b->sumber_transaksi === 'manual_petugas')
-                                        <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-violet-50 text-violet-700 border border-violet-200">MANUAL PETUGAS</span>
-                                        <div class="text-[10px] text-slate-400 mt-0.5">Oleh: {{ $b->pencatat->name ?? '-' }}</div>
+                                        <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700 uppercase">MANUAL PETUGAS</span>
+                                        <div class="text-xs text-slate-400 mt-0.5">Oleh: {{ $b->pencatat->name ?? '-' }}</div>
                                     @else
-                                        <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-50 text-slate-500 border border-slate-200">MANDIRI</span>
+                                        <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-500 uppercase">MANDIRI</span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border {{ $badge['bg'] }}">
-                                        {{ $badge['label'] }}
-                                    </span>
+                                <td class="py-4 px-4">
+                                    @if($b->status === 'returned')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">Dikembalikan</span>
+                                    @elseif($b->status === 'borrowed')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#003FA9] text-white">Sedang Dipinjam</span>
+                                    @elseif($b->status === 'pending')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">Menunggu Approve</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">{{ $b->status }}</span>
+                                    @endif
                                 </td>
-                                <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <td class="py-4 px-4 text-right whitespace-nowrap">
                                     @if($b->status === 'pending' && in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog', 'guru']))
                                         <form action="{{ route('inventory.borrow.approve', $b->id) }}" method="POST" class="inline" onsubmit="return confirm('Setujui peminjaman dan serahkan alat?')">
                                             @csrf
                                             <button type="submit"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition-colors shadow-xs">
-                                                <i class='bx bx-check'></i> Setujui
+                                                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition inline-flex items-center gap-1">
+                                                <i class='bx bx-check text-base'></i> Setujui
                                             </button>
                                         </form>
                                     @elseif($b->status === 'borrowed' && in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog', 'guru']))
                                         {{-- Return Dropdown Form --}}
                                         <div x-data="{ open: false }" class="inline-block relative">
                                             <button @click="open = !open" type="button"
-                                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-50 text-[#0052CC] hover:bg-blue-100 text-xs font-semibold transition-colors shadow-xs">
-                                                <i class='bx bx-check-circle'></i> {{ $b->sumber_transaksi === 'manual_petugas' ? 'Catat Pengembalian Manual' : 'Terima Kembali' }}
+                                                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#003FA9] bg-blue-50 hover:bg-blue-100 transition inline-flex items-center gap-1">
+                                                <i class='bx bx-check-circle text-base'></i> {{ $b->sumber_transaksi === 'manual_petugas' ? 'Catat Pengembalian' : 'Terima Kembali' }}
                                             </button>
 
                                             <div x-show="open" @click.outside="open = false" x-cloak
@@ -160,12 +160,12 @@
                                                         <div>
                                                             <label class="block text-[10px] font-bold text-slate-500 uppercase">Tanggal Kembali Aktual</label>
                                                             <input type="date" name="tanggal_kembali" value="{{ now()->toDateString() }}" required
-                                                                class="w-full text-xs rounded-xl border-slate-200 bg-slate-50/50 py-1.5 px-2">
+                                                                class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 px-2">
                                                         </div>
                                                         @endif
                                                         <div>
                                                             <label class="block text-[10px] font-bold text-slate-500 uppercase">Kondisi Fisik Saat Dikembalikan</label>
-                                                            <select name="kondisi_sesudah" required class="w-full text-xs rounded-xl border-slate-200 bg-slate-50/50 py-1.5 px-2">
+                                                            <select name="kondisi_sesudah" required class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 px-2">
                                                                 <option value="baik">Kondisi Baik Lengkap</option>
                                                                 <option value="rusak_ringan">Rusak Ringan (Bisa Diperbaiki)</option>
                                                                 <option value="rusak_berat">Rusak Berat / Hilang</option>
@@ -174,12 +174,12 @@
                                                         <div>
                                                             <label class="block text-[10px] font-bold text-slate-500 uppercase">Catatan Pengembalian</label>
                                                             <input type="text" name="catatan_pengembalian" placeholder="Kelengkapan, lensa bersih, dll."
-                                                                class="w-full text-xs rounded-xl border-slate-200 bg-slate-50/50 py-1.5 px-2">
+                                                                class="w-full text-xs rounded-xl border border-slate-200 bg-slate-50/50 py-1.5 px-2">
                                                         </div>
                                                     </div>
                                                     <div class="mt-3 flex items-center justify-end gap-1.5">
                                                         <button @click="open = false" type="button" class="px-2.5 py-1 text-xs text-slate-500 hover:text-slate-700">Batal</button>
-                                                        <button type="submit" class="px-3 py-1 bg-[#0052CC] text-white text-xs font-semibold rounded-xl hover:bg-[#003FA9]">Konfirmasi</button>
+                                                        <button type="submit" class="px-3 py-1 bg-[#003FA9] text-white text-xs font-semibold rounded-xl hover:bg-blue-700">Konfirmasi</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -195,7 +195,7 @@
             </div>
 
             @if($borrowings->hasPages())
-                <div class="p-4 bg-slate-50/50 border-t border-slate-100">
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                     {{ $borrowings->links() }}
                 </div>
             @endif

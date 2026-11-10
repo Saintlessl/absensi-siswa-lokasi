@@ -177,77 +177,77 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-200 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            <th class="py-3.5 px-4 text-center w-12">NO</th>
-                            <th class="py-3.5 px-4">TANGGAL</th>
-                            <th class="py-3.5 px-4">NIS/NAMA</th>
-                            <th class="py-3.5 px-4 text-center">KELAS</th>
-                            <th class="py-3.5 px-4 text-center">STATUS</th>
-                            <th class="py-3.5 px-4">KETERANGAN</th>
-                            <th class="py-3.5 px-4 text-center w-28">AKSI</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-12">NO</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS/NAMA</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">KELAS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KETERANGAN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-28">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($absensi as $a)
-                            <tr class="hover:bg-blue-50/30 transition-colors">
-                                <td class="py-3.5 px-4 text-center text-slate-500 text-xs font-semibold">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 text-center text-slate-400 text-xs font-semibold">
                                     {{ $absensi->firstItem() + $loop->index }}
                                 </td>
-                                <td class="py-3.5 px-4 text-slate-800 font-medium whitespace-nowrap text-xs">
+                                <td class="py-4 px-4 text-slate-800 font-semibold whitespace-nowrap text-xs">
                                     {{ \Carbon\Carbon::parse($a->tanggal)->isoFormat('D MMM Y') }}
                                 </td>
-                                <td class="py-3.5 px-4">
+                                <td class="py-4 px-4">
                                     <div class="flex items-center gap-2.5">
-                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-[#0052CC] font-bold text-xs flex items-center justify-center flex-shrink-0 uppercase">
+                                        <div class="w-8 h-8 rounded-full bg-blue-50 text-[#003FA9] font-bold text-xs flex items-center justify-center flex-shrink-0 uppercase">
                                             {{ substr($a->siswa->nama ?? '?', 0, 1) }}
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="font-bold text-slate-900 text-xs truncate">{{ $a->siswa->nama ?? '-' }}</p>
+                                            <p class="font-semibold text-slate-800 text-xs truncate">{{ $a->siswa->nama ?? '-' }}</p>
                                             <p class="text-[11px] text-slate-400 font-mono">{{ $a->siswa->nis ?? '-' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                                    <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-[#0052CC] border border-blue-200">
+                                <td class="py-4 px-4 text-center whitespace-nowrap">
+                                    <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-700">
                                         {{ $a->siswa->kelas->nama_kelas ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                <td class="py-4 px-4 text-center whitespace-nowrap">
                                     @php $st = strtolower($a->status); @endphp
                                     @if ($st == 'hadir')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <i class='bx bx-check-shield'></i> Hadir
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
+                                            Hadir
                                         </span>
                                     @elseif($st == 'izin')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                            <i class='bx bx-envelope'></i> Izin
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#003FA9] text-white">
+                                            Izin
                                         </span>
                                     @elseif($st == 'sakit')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <i class='bx bx-plus-medical'></i> Sakit
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">
+                                            Sakit
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <i class='bx bx-x-circle'></i> Alfa
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-600 text-white">
+                                            Alfa
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-3.5 px-4 text-xs text-slate-600 max-w-[160px] truncate" title="{{ $a->keterangan }}">
+                                <td class="py-4 px-4 text-xs text-slate-600 max-w-[160px] truncate" title="{{ $a->keterangan }}">
                                     {{ $a->keterangan ?? '-' }}
                                 </td>
-                                <td class="py-3.5 px-4 text-center">
-                                    <div class="flex items-center justify-center gap-1.5">
+                                <td class="py-4 px-4 text-center">
+                                    <div class="flex items-center justify-center gap-1">
                                         <button type="button"
                                                 onclick='openEditAbsensi({{ $a->id }}, @js($a->status), @js($a->keterangan))'
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-[#0052CC] bg-blue-50 hover:bg-blue-100 transition"
+                                                class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
                                                 title="Edit">
-                                            <i class='bx bx-edit-alt text-base'></i>
+                                            <i class='bx bx-edit text-base'></i>
                                         </button>
                                         @if (Auth::user()->role === 'superadmin')
                                             <form action="{{ route('dashboard.absensi.delete', $a->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 <button type="button"
-                                                        class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition"
+                                                        class="delete-confirm p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                                         title="Hapus">
                                                     <i class='bx bx-trash text-base'></i>
                                                 </button>
@@ -259,9 +259,13 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="py-12 text-center text-slate-400">
-                                    <i class='bx bx-folder-open text-4xl mb-2 text-slate-300'></i>
-                                    <p class="text-sm font-semibold text-slate-700">Tidak ada data</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Belum ada catatan absensi pada periode ini.</p>
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                            <i class='bx bx-folder-open text-2xl text-slate-400'></i>
+                                        </div>
+                                        <p class="text-sm font-medium text-slate-600">Tidak ada data</p>
+                                        <p class="text-xs text-slate-400 mt-1">Belum ada catatan absensi pada periode ini.</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -445,73 +449,71 @@
         </div>
 
         {{-- Pantauan Kehadiran Harian --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
-            <div class="px-6 py-5 border-b border-dark-100 bg-dark-50/30">
-                <h3 class="text-lg font-bold text-dark-800">Pantau Kehadiran Harian</h3>
-                <p class="text-sm text-dark-500 mt-1">10 catatan terbaru di bulan
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-6">
+            <div class="pb-4 mb-4 border-b border-slate-100">
+                <h3 class="text-sm font-bold text-slate-800">Pantau Kehadiran Harian</h3>
+                <p class="text-xs text-slate-400 mt-0.5">10 catatan terbaru di bulan
                     {{ \Carbon\Carbon::createFromDate(null, $bulan, 1)->isoFormat('MMMM') }}</p>
             </div>
-            <div class="overflow-x-auto custom-scrollbar">
+            <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Tanggal
-                            </th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">
-                                Status</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">
-                                Jam Masuk</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Keterangan
-                            </th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tanggal</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jam Masuk</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Keterangan</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-dark-200/50">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($riwayatHarian as $rw)
-                            <tr class="hover:bg-dark-50/50 transition-colors">
-                                <td class="px-6 py-3.5 text-sm text-dark-800 font-medium">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 text-slate-800 font-semibold text-xs whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($rw->tanggal)->isoFormat('dddd, D MMM') }}
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
+                                <td class="py-4 px-4 text-center">
                                     @php $rwSt = strtolower($rw->status); @endphp
                                     @if ($rwSt == 'hadir')
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <i class='bx bx-check-shield'></i> Hadir
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
+                                            Hadir
                                         </span>
                                     @elseif($rwSt == 'izin')
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                            <i class='bx bx-envelope'></i> Izin
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#003FA9] text-white">
+                                            Izin
                                         </span>
                                     @elseif($rwSt == 'sakit')
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <i class='bx bx-plus-medical'></i> Sakit
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">
+                                            Sakit
                                         </span>
                                     @else
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <i class='bx bx-x-circle'></i> Alfa
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-600 text-white">
+                                            Alfa
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
+                                <td class="py-4 px-4 text-center">
                                     @if ($rw->jam_masuk)
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2 py-1 rounded bg-dark-50 text-xs font-mono text-dark-600 border border-dark-100">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 text-xs font-mono font-semibold text-slate-700">
                                             <i class='bx bx-time-five'></i>
                                             {{ date('H:i', strtotime($rw->jam_masuk)) }}
                                         </span>
                                     @else
-                                        <span class="text-xs text-dark-400 italic">-</span>
+                                        <span class="text-xs text-slate-400 italic">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-3.5 text-sm text-dark-600">{{ $rw->keterangan ?? '-' }}</td>
+                                <td class="py-4 px-4 text-slate-600 text-xs">{{ $rw->keterangan ?? '-' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-dark-500">Belum ada riwayat
-                                    kehadiran di bulan ini.</td>
+                                <td colspan="4" class="py-12 text-center text-slate-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                            <i class='bx bx-history text-2xl text-slate-400'></i>
+                                        </div>
+                                        <p class="text-sm font-medium text-slate-600">Belum ada riwayat kehadiran</p>
+                                        <p class="text-xs text-slate-400 mt-1">Belum ada riwayat kehadiran di bulan ini.</p>
+                                    </div>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -670,14 +672,14 @@
             </div>
         </div>
 
-        {{-- Tabel Riwayat Kehadiran Terbaru Siswa (Sama persis gaya tabel Admin) --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden mb-8">
-            <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30 flex items-center justify-between">
+        {{-- Tabel Riwayat Kehadiran Terbaru Siswa --}}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8 p-6">
+            <div class="pb-4 mb-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                    <h3 class="text-base font-bold text-dark-800">Riwayat Presensi Terbaru Anda</h3>
-                    <p class="text-xs text-dark-500 mt-0.5">Catatan presensi terakhir yang tercatat di database sekolah.</p>
+                    <h3 class="text-sm font-bold text-slate-800">Riwayat Presensi Terbaru Anda</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Catatan presensi terakhir yang tercatat di database sekolah.</p>
                 </div>
-                <a href="{{ route('riwayatkehadiran') }}" class="px-3.5 py-1.5 rounded-xl border border-dark-200 text-dark-600 hover:bg-dark-50 text-xs font-semibold transition-colors flex items-center gap-1">
+                <a href="{{ route('riwayatkehadiran') }}" class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition flex items-center gap-1">
                     <span>Lihat Semua Riwayat</span>
                     <i class='bx bx-chevron-right text-base'></i>
                 </a>
@@ -686,70 +688,76 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-dark-50/50 border-b border-dark-200/50 text-xs font-semibold text-dark-500 uppercase tracking-wider">
-                            <th class="px-6 py-3.5 w-12 text-center">No</th>
-                            <th class="px-6 py-3.5">Tanggal</th>
-                            <th class="px-6 py-3.5 text-center">Jam Masuk</th>
-                            <th class="px-6 py-3.5 text-center">Jam Pulang</th>
-                            <th class="px-6 py-3.5 text-center">Status</th>
-                            <th class="px-6 py-3.5">Keterangan</th>
-                            <th class="px-6 py-3.5 text-center">Foto Selfie</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">No</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tanggal</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jam Masuk</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jam Pulang</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Keterangan</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Foto Selfie</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-dark-200/50 text-sm">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse ($riwayatSiswa ?? [] as $index => $r)
-                            <tr class="hover:bg-dark-50/50 transition-colors">
-                                <td class="px-6 py-3.5 text-center text-dark-400 text-xs font-medium">{{ $index + 1 }}</td>
-                                <td class="px-6 py-3.5 text-dark-800 font-medium text-xs">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 text-center text-slate-400 text-xs font-medium">{{ $index + 1 }}</td>
+                                <td class="py-4 px-4 text-slate-800 font-semibold text-xs whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('l, d M Y') }}
                                 </td>
-                                <td class="px-6 py-3.5 text-center text-xs font-mono">
+                                <td class="py-4 px-4 text-center text-xs font-mono text-slate-600">
                                     {{ $r->jam_masuk ? date('H:i', strtotime($r->jam_masuk)) . ' WIB' : '-' }}
                                 </td>
-                                <td class="px-6 py-3.5 text-center text-xs font-mono">
+                                <td class="py-4 px-4 text-center text-xs font-mono text-slate-600">
                                     {{ $r->jam_pulang ? date('H:i', strtotime($r->jam_pulang)) . ' WIB' : '-' }}
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
+                                <td class="py-4 px-4 text-center whitespace-nowrap">
                                     @php $st = strtolower($r->status); @endphp
                                     @if ($st == 'hadir')
                                         @if ($r->menit_terlambat > 0)
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                                <i class='bx bx-time text-xs'></i> Terlambat
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">
+                                                Terlambat
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                <i class='bx bx-check text-xs'></i> Tepat Waktu
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
+                                                Tepat Waktu
                                             </span>
                                         @endif
                                     @elseif ($st == 'izin')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                            <i class='bx bx-envelope text-xs'></i> Izin
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#003FA9] text-white">
+                                            Izin
                                         </span>
                                     @elseif ($st == 'sakit')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <i class='bx bx-plus-medical text-xs'></i> Sakit
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">
+                                            Sakit
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <i class='bx bx-x text-xs'></i> Alfa
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-600 text-white">
+                                            Alfa
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-3.5 text-xs text-dark-500">
+                                <td class="py-4 px-4 text-xs text-slate-600">
                                     {{ $r->keterangan ?? ($r->keterangan_terlambat ?? '-') }}
                                 </td>
-                                <td class="px-6 py-3.5 text-center">
+                                <td class="py-4 px-4 text-center">
                                     @if ($u = image_url($r->foto_masuk))
-                                        <img src="{{ $u }}" class="w-9 h-9 rounded-lg object-cover border border-dark-200 mx-auto shadow-sm" loading="lazy">
+                                        <img src="{{ $u }}" class="w-9 h-9 rounded-lg object-cover border border-slate-200 mx-auto shadow-sm" loading="lazy">
                                     @else
-                                        <span class="text-dark-300 text-xs">-</span>
+                                        <span class="text-slate-300 text-xs">-</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-dark-400 text-xs">
-                                    Belum ada catatan riwayat kehadiran bulan ini.
+                                <td colspan="7" class="py-12 text-center text-slate-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                            <i class='bx bx-history text-2xl text-slate-400'></i>
+                                        </div>
+                                        <p class="text-sm font-medium text-slate-600">Belum ada riwayat presensi</p>
+                                        <p class="text-xs text-slate-400 mt-1">Belum ada catatan riwayat kehadiran bulan ini.</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -862,51 +870,57 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-dark-50/60 border-b border-dark-100 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                                <th class="px-5 py-3.5">Waktu</th>
-                                <th class="px-5 py-3.5">Rombel</th>
-                                <th class="px-5 py-3.5">Mata Pelajaran</th>
-                                <th class="px-5 py-3.5">Ruangan Fisik</th>
-                                <th class="px-5 py-3.5 text-right">Aksi</th>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Waktu</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rombel</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mata Pelajaran</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ruangan Fisik</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-dark-100/60">
+                        <tbody class="divide-y divide-slate-100 text-sm">
                             @forelse($jadwalHariIni as $j)
-                                <tr class="hover:bg-dark-50/30 transition">
-                                    <td class="px-5 py-4 font-mono font-bold text-dark-800">
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-4 px-4 font-mono font-bold text-slate-800 text-xs">
                                         {{ \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($j->jam_selesai)->format('H:i') }}
                                     </td>
-                                    <td class="px-5 py-4">
-                                        <span class="font-bold text-primary-700">{{ $j->kelas->nama_kelas ?? '-' }}</span>
-                                        <p class="text-[10px] text-dark-400">{{ $j->kelas->jurusan->nama_jurusan ?? '' }}</p>
+                                    <td class="py-4 px-4">
+                                        <span class="font-bold text-[#003FA9]">{{ $j->kelas->nama_kelas ?? '-' }}</span>
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ $j->kelas->jurusan->nama_jurusan ?? '' }}</p>
                                     </td>
-                                    <td class="px-5 py-4 font-semibold text-dark-800">
+                                    <td class="py-4 px-4 font-semibold text-slate-800">
                                         {{ $j->mataPelajaran->nama_mapel ?? $j->mata_pelajaran }}
                                     </td>
-                                    <td class="px-5 py-4">
+                                    <td class="py-4 px-4">
                                         @if($j->live_room)
-                                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 w-max">
-                                                <i class='bx bx-building-house'></i>
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">
+                                                <i class='bx bx-building-house text-[#003FA9]'></i>
                                                 {{ $j->live_room->name }}
                                             </span>
                                         @else
-                                            <span class="text-dark-400 italic text-[11px]">Belum Dialokasikan</span>
+                                            <span class="text-slate-400 italic text-xs">Belum Dialokasikan</span>
                                         @endif
                                     </td>
-                                    <td class="px-5 py-4 text-right">
+                                    <td class="py-4 px-4 text-right">
                                         <a href="{{ route('teacher.class.students', $j->kelas_id) }}"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-xs transition">
-                                            <i class='bx bx-group'></i> Siswa
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition inline-flex items-center gap-1 text-xs font-semibold"
+                                            title="Daftar Siswa">
+                                            <i class='bx bx-group text-base'></i> Siswa
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-5 py-10 text-center text-dark-400">
-                                        <i class='bx bx-calendar-x text-3xl mb-1 text-dark-300'></i>
-                                        <p class="font-medium">Tidak ada jadwal mengajar untuk hari ini.</p>
+                                    <td colspan="5" class="py-12 text-center text-slate-400">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                                <i class='bx bx-calendar-x text-2xl text-slate-400'></i>
+                                            </div>
+                                            <p class="text-sm font-medium text-slate-600">Tidak ada jadwal mengajar</p>
+                                            <p class="text-xs text-slate-400 mt-1">Tidak ada jadwal mengajar untuk hari ini.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse

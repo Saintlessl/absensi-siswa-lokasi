@@ -121,63 +121,66 @@
         </div>
 
         {{-- Table --}}
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto p-6">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-dark-100 bg-dark-50/50 text-[11px] font-bold text-dark-400 uppercase tracking-wider">
-                        <th class="px-6 py-3.5">Siswa</th>
-                        <th class="px-6 py-3.5">NIS / NISN</th>
-                        <th class="px-6 py-3.5">Kelas & Jurusan Terakhir</th>
-                        <th class="px-6 py-3.5">Tahun Masuk / Lulus</th>
-                        <th class="px-6 py-3.5 text-center">Status Siswa</th>
-                        <th class="px-6 py-3.5 text-right">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS / NISN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KELAS & JURUSAN TERAKHIR</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TAHUN MASUK / LULUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-32">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-100 text-sm">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($siswas as $siswa)
-                        <tr class="hover:bg-dark-50/30 transition-colors">
-                            <td class="px-6 py-4">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-xs">
+                                    <div class="w-9 h-9 rounded-xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center font-bold text-xs shrink-0">
                                         {{ strtoupper(substr($siswa->nama, 0, 2)) }}
                                     </div>
                                     <div>
-                                        <p class="font-bold text-dark-800">{{ $siswa->nama }}</p>
-                                        <p class="text-xs text-dark-400">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+                                        <p class="font-bold text-slate-900 text-xs sm:text-sm">{{ $siswa->nama }}</p>
+                                        <p class="text-[11px] text-slate-400">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="font-mono text-dark-800 font-semibold">{{ $siswa->nis }}</p>
-                                <p class="font-mono text-xs text-dark-400">{{ $siswa->nisn ?? '-' }}</p>
+                            <td class="py-4 px-4">
+                                <p class="font-mono text-slate-900 font-bold text-xs sm:text-sm">{{ $siswa->nis }}</p>
+                                <p class="font-mono text-[11px] text-slate-400">NISN: {{ $siswa->nisn ?? '-' }}</p>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="font-medium text-dark-800">{{ $siswa->kelas->nama_kelas ?? 'Belum Ditentukan' }}</p>
-                                <p class="text-xs text-dark-400">{{ $siswa->kelas->jurusan->nama_jurusan ?? '-' }}</p>
+                            <td class="py-4 px-4">
+                                <p class="font-semibold text-slate-800 text-xs sm:text-sm">{{ $siswa->kelas->nama_kelas ?? 'Belum Ditentukan' }}</p>
+                                <p class="text-[11px] text-slate-400">{{ $siswa->kelas->jurusan->nama_jurusan ?? '-' }}</p>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="text-dark-800">Masuk: <span class="font-semibold">{{ $siswa->tahun_masuk ?? $angkatan->tahun_masuk }}</span></p>
+                            <td class="py-4 px-4">
+                                <p class="text-xs text-slate-800">Masuk: <span class="font-bold font-mono">{{ $siswa->tahun_masuk ?? $angkatan->tahun_masuk }}</span></p>
                                 @if ($siswa->tahun_lulus)
-                                    <p class="text-xs text-emerald-700">Lulus: <span class="font-semibold">{{ $siswa->tahun_lulus }}</span> (T.A. {{ $siswa->tahun_ajaran_lulus }})</p>
+                                    <p class="text-[11px] text-emerald-700">Lulus: <span class="font-bold font-mono">{{ $siswa->tahun_lulus }}</span> (T.A. {{ $siswa->tahun_ajaran_lulus }})</p>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $siswa->status_badge }} border">
+                            <td class="py-4 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $siswa->status === 'aktif' ? 'bg-emerald-600 text-white' : ($siswa->status === 'lulus' ? 'bg-[#003FA9] text-white' : 'bg-slate-200 text-slate-700') }}">
                                     {{ $siswa->status_label }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="py-4 px-4 text-right">
                                 <a href="{{ route('siswa') }}?search={{ urlencode($siswa->nis) }}"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-dark-200 text-xs font-medium text-dark-700 hover:bg-dark-50 transition-colors">
-                                    <i class='bx bx-user'></i> Buka di Data Siswa
+                                    class="p-1.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-[#003FA9] text-xs font-bold inline-flex items-center gap-1 transition"
+                                    title="Lihat Profil di Data Siswa">
+                                    <i class='bx bx-user text-sm'></i>
+                                    <span>Buka Siswa</span>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-dark-400">
-                                <i class='bx bx-user-x text-4xl mb-2 text-dark-300'></i>
-                                <p class="text-sm font-medium">Tidak ada siswa yang sesuai kriteria pencarian di angkatan ini.</p>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-user-x text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Tidak ada siswa yang sesuai kriteria pencarian di angkatan ini.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Silakan sesuaikan kata kunci pencarian atau filter status.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -186,7 +189,7 @@
         </div>
 
         @if ($siswas->hasPages())
-            <div class="px-6 py-4 border-t border-dark-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $siswas->links() }}
             </div>
         @endif

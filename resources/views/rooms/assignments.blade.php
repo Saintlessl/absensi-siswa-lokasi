@@ -99,76 +99,76 @@
     </div>
 
     {{-- Assignments Table --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-dark-200 bg-dark-50/70 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                        <th class="px-6 py-3.5">Rombel Belajar</th>
-                        <th class="px-6 py-3.5">Ruangan Fisik</th>
-                        <th class="px-6 py-3.5">Periode Berlaku</th>
-                        <th class="px-6 py-3.5">Jadwal Hari & Jam</th>
-                        <th class="px-6 py-3.5 text-center">Tahun Ajaran</th>
-                        <th class="px-6 py-3.5 text-center">Status</th>
-                        <th class="px-6 py-3.5 text-center">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rombel Belajar</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ruangan Fisik</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Periode Berlaku</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Jadwal Hari & Jam</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Tahun Ajaran</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/60 text-sm">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($assignments as $a)
                         @php
                             $today = \Carbon\Carbon::today();
                             $isActiveNow = (!$a->starts_on || $a->starts_on->lte($today)) && (!$a->ends_on || $a->ends_on->gte($today));
                         @endphp
-                        <tr class="hover:bg-dark-50/50 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="font-bold text-dark-900">{{ $a->kelas->nama_kelas }}</div>
-                                <div class="text-xs text-dark-500 mt-0.5">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4">
+                                <div class="font-semibold text-slate-800">{{ $a->kelas->nama_kelas }}</div>
+                                <div class="text-xs text-slate-400 mt-0.5">
                                     {{ $a->kelas->jurusan->nama_jurusan ?? '-' }} &bull; Wali: {{ $a->kelas->wali_kelas ?? '-' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="font-bold text-dark-900 flex items-center gap-1.5">
-                                    <i class='bx bx-building text-primary-600'></i>
+                            <td class="py-4 px-4">
+                                <div class="font-semibold text-slate-800 flex items-center gap-1.5">
+                                    <i class='bx bx-building text-[#003FA9]'></i>
                                     <span>{{ $a->room->name }}</span>
-                                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-dark-100 text-dark-600">{{ $a->room->code }}</span>
+                                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">{{ $a->room->code }}</span>
                                 </div>
-                                <div class="text-xs text-dark-500 mt-0.5">{{ $a->room->building ?? 'Gedung Utama' }} (Kapasitas {{ $a->room->capacity ?? 36 }})</div>
+                                <div class="text-xs text-slate-400 mt-0.5">{{ $a->room->building ?? 'Gedung Utama' }} (Kapasitas {{ $a->room->capacity ?? 36 }})</div>
                             </td>
-                            <td class="px-6 py-4 text-xs text-dark-700">
+                            <td class="py-4 px-4 text-xs text-slate-700">
                                 <div class="font-semibold">{{ $a->starts_on->format('d M Y') }}</div>
-                                <div class="text-dark-400 mt-0.5">
+                                <div class="text-slate-400 mt-0.5">
                                     s/d {{ $a->ends_on ? $a->ends_on->format('d M Y') : 'Berjalan (Permanen)' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-xs text-dark-700">
+                            <td class="py-4 px-4 text-xs text-slate-700">
                                 <div class="font-semibold">{{ $a->day_of_week ?? 'Setiap Hari Kerja' }}</div>
-                                <div class="text-dark-400 mt-0.5 font-mono">
+                                <div class="text-slate-400 mt-0.5 font-mono">
                                     {{ $a->start_time && $a->end_time ? $a->start_time . ' - ' . $a->end_time : 'Sepanjang Hari' }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-center font-mono text-xs font-bold text-dark-700">
+                            <td class="py-4 px-4 text-center font-mono text-xs font-bold text-slate-700">
                                 {{ $a->tahun_ajaran }}
                             </td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="py-4 px-4 text-center">
                                 @if($isActiveNow)
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
                                         Aktif Sekarang
                                     </span>
                                 @elseif($a->ends_on && $a->ends_on->lt($today))
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-dark-100 text-dark-500">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">
                                         Selesai
                                     </span>
                                 @else
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">
                                         Akan Datang
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="py-4 px-4 text-center">
                                 <form action="{{ route('rooms.assignments.destroy', $a) }}" method="POST" onsubmit="return confirm('Hapus alokasi rombel {{ $a->kelas->nama_kelas }} di {{ $a->room->name }}?')">
                                     @csrf
                                     <button type="submit"
-                                        class="w-8 h-8 rounded-lg border border-dark-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 inline-flex items-center justify-center text-dark-600 transition"
+                                        class="delete-confirm p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                         title="Hapus Alokasi">
                                         <i class='bx bx-trash text-base'></i>
                                     </button>
@@ -177,10 +177,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-dark-400">
-                                <i class='bx bx-transfer text-4xl mb-2'></i>
-                                <p class="text-sm font-semibold text-dark-600">Belum ada alokasi ruangan aktif</p>
-                                <p class="text-xs text-dark-400 mt-1">Gunakan tombol "Tambah Alokasi Ruangan" untuk menjadwalkan kelas ke ruangan fisik.</p>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-transfer text-2xl text-slate-400'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600">Belum ada alokasi ruangan aktif</p>
+                                    <p class="text-xs text-slate-400 mt-1">Gunakan tombol "Tambah Alokasi Ruangan" untuk menjadwalkan kelas ke ruangan fisik.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -188,7 +192,7 @@
             </table>
         </div>
         @if($assignments->hasPages())
-            <div class="px-6 py-4 border-t border-dark-200">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $assignments->links() }}
             </div>
         @endif

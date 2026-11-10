@@ -21,65 +21,71 @@
     @endif
 
     <!-- Table -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden p-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Siswa</th>
-                        <th class="py-3 px-4">Perusahaan Mitra</th>
-                        <th class="py-3 px-4">Aktivitas & Kompetensi</th>
-                        <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4 text-right">Aksi Verifikasi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PERUSAHAAN MITRA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKTIVITAS & KOMPETENSI</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">AKSI VERIFIKASI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($logbooks as $log)
-                        <tr class="hover:bg-blue-50/30 transition">
-                            <td class="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 font-mono font-bold text-slate-800 text-xs sm:text-sm whitespace-nowrap">
                                 {{ $log->tanggal ? $log->tanggal->format('d/m/Y') : '-' }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $log->placement->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $log->placement->siswa->kelas->nama_kelas ?? '' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 text-xs sm:text-sm block">{{ $log->placement->siswa->nama ?? 'Siswa' }}</span>
+                                <span class="text-[11px] text-slate-400 font-normal">{{ $log->placement->siswa->kelas->nama_kelas ?? '' }}</span>
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="text-blue-700 font-semibold block">{{ $log->placement->partner->nama_dudi ?? '-' }}</span>
+                            <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
+                                {{ $log->placement->partner->nama_dudi ?? '-' }}
                             </td>
-                            <td class="py-3 px-4 max-w-xs">
-                                <p class="text-slate-700 line-clamp-2">{{ $log->aktivitas }}</p>
+                            <td class="py-4 px-4 max-w-xs">
+                                <p class="text-slate-800 text-xs sm:text-sm line-clamp-2">{{ $log->aktivitas }}</p>
                                 @if($log->kompetensi_dipelajari)
-                                    <span class="text-[10px] text-blue-600 font-medium">🎯 {{ $log->kompetensi_dipelajari }}</span>
+                                    <span class="text-[11px] text-[#003FA9] font-medium block mt-0.5">{{ $log->kompetensi_dipelajari }}</span>
                                 @endif
                                 @if($u = image_url($log->foto_dokumentasi_path))
                                     <a href="{{ $u }}" target="_blank" rel="noopener" class="inline-block mt-1.5">
-                                        <img src="{{ $u }}" alt="Foto dokumentasi PKL" class="h-16 w-16 rounded-lg object-cover border border-slate-200 hover:opacity-80" loading="lazy">
+                                        <img src="{{ $u }}" alt="Foto dokumentasi PKL" class="h-14 w-14 rounded-xl object-cover border border-slate-200 hover:opacity-80 transition" loading="lazy">
                                     </a>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 whitespace-nowrap">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold 
-                                    {{ $log->status === 'approved' ? 'bg-emerald-50 text-emerald-700' : ($log->status === 'revision_requested' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700') }}">
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold text-white
+                                    {{ $log->status === 'approved' ? 'bg-emerald-600' : ($log->status === 'revision_requested' ? 'bg-rose-600' : 'bg-amber-500') }}">
                                     {{ strtoupper(str_replace('_', ' ', $log->status)) }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <button type="button" onclick="openReviewModal({{ $log->id }}, '{{ addslashes($log->aktivitas) }}', '{{ $log->status }}', '{{ addslashes($log->catatan_guru ?? '') }}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition shadow-xs">
-                                    Review
+                            <td class="py-4 px-4 text-right whitespace-nowrap">
+                                <button type="button" onclick="openReviewModal({{ $log->id }}, '{{ addslashes($log->aktivitas) }}', '{{ $log->status }}', '{{ addslashes($log->catatan_guru ?? '') }}')"
+                                    class="px-3.5 py-1.5 bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold rounded-xl transition shadow-sm inline-flex items-center gap-1.5">
+                                    <i class='bx bx-check-shield text-sm'></i>
+                                    <span>Review</span>
                                 </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 text-xs">Belum ada jurnal logbook yang perlu diverifikasi.</td>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-book-open text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Belum ada jurnal logbook yang perlu diverifikasi</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Jurnal logbook harian siswa PKL akan muncul di sini untuk ditinjau guru pembimbing.</p>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($logbooks->hasPages())
-            <div class="p-4 border-t border-slate-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $logbooks->links() }}
             </div>
         @endif

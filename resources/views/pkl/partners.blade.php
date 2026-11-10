@@ -51,7 +51,7 @@
             <div class="bg-white rounded-2xl p-5 border border-slate-100 hover:border-blue-200 shadow-sm transition space-y-3">
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 mb-1.5">
+                        <span class="text-xs font-bold text-[#003FA9] block mb-1">
                             {{ $p->bidang_industri }}
                         </span>
                         <h3 class="text-sm font-bold text-slate-800 line-clamp-1">{{ $p->nama_dudi }}</h3>
@@ -60,7 +60,7 @@
                             {{ $p->kota }}
                         </p>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $p->status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+                    <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold text-white {{ $p->status === 'aktif' ? 'bg-emerald-600' : 'bg-rose-600' }}">
                         {{ strtoupper($p->status) }}
                     </span>
                 </div>
@@ -86,32 +86,32 @@
                 @if(in_array(auth()->user()->role, ['admin', 'superadmin', 'kaprog']))
                 <div class="flex items-center gap-2">
                     <button type="button"
-                        data-partner='@js([
-                            "id" => $p->id,
-                            "nama_dudi" => $p->nama_dudi,
-                            "bidang_industri" => $p->bidang_industri,
-                            "alamat" => $p->alamat,
-                            "kota" => $p->kota,
-                            "kontak_person" => $p->kontak_person,
-                            "email" => $p->email,
-                            "telepon" => $p->telepon,
-                            "pembimbing_dudi" => $p->pembimbing_dudi,
-                            "latitude" => $p->latitude,
-                            "longitude" => $p->longitude,
-                            "radius_meter" => $p->radius_meter,
-                            "kuota_siswa" => $p->kuota_siswa,
-                            "jurusan_id" => $p->jurusan_id,
-                            "status" => $p->status,
-                        ])'
+                        data-partner="{{ json_encode([
+                            'id' => $p->id,
+                            'nama_dudi' => $p->nama_dudi,
+                            'bidang_industri' => $p->bidang_industri,
+                            'alamat' => $p->alamat,
+                            'kota' => $p->kota,
+                            'kontak_person' => $p->kontak_person,
+                            'email' => $p->email,
+                            'telepon' => $p->telepon,
+                            'pembimbing_dudi' => $p->pembimbing_dudi,
+                            'latitude' => $p->latitude,
+                            'longitude' => $p->longitude,
+                            'radius_meter' => $p->radius_meter,
+                            'kuota_siswa' => $p->kuota_siswa,
+                            'jurusan_id' => $p->jurusan_id,
+                            'status' => $p->status,
+                        ]) }}"
                         onclick="openEditDudi(this.dataset.partner)"
-                        class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-[11px] font-bold hover:bg-blue-100 transition">
+                        class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#003FA9] text-white text-[11px] font-bold hover:bg-[#002D7A] shadow-xs transition">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9l-2.732-2.732a2 2 0 01-.414-.828l-.828-2.414 2.414-.828a2 2 0 01.828-.414l6.328-6.328z"/></svg>
                         Edit
                     </button>
                     <form method="POST" action="{{ route('pkl.partners.destroy', $p->id) }}" class="flex-1"
                           onsubmit="return confirm('Hapus mitra \'{{ $p->nama_dudi }}\'?\n\nTindakan ini tidak dapat dibatalkan. Mitra yang masih dipakai penempatan PKL akan ditolak sistem secara otomatis.');">
                         @csrf @method('DELETE')
-                        <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-[11px] font-bold hover:bg-rose-100 transition">
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-rose-600 text-[11px] font-bold hover:bg-rose-50 transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             Hapus
                         </button>
@@ -355,10 +355,12 @@
         </div>
     </div>
 </div>
+@endpush
 
+@push('scripts')
 <script>
 function openEditDudi(raw) {
-    const p = JSON.parse(raw);
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
     document.getElementById('formEditDudi').action = '/pkl/mitra-industri/' + p.id;
     const set = (id, v) => { document.getElementById(id).value = (v === null || v === undefined) ? '' : v; };
     set('edit_nama_dudi', p.nama_dudi);

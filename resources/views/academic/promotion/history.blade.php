@@ -33,93 +33,91 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden p-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-700">
-                <thead class="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
-                    <tr>
-                        <th class="p-4 w-12 text-center">No</th>
-                        <th class="p-4">Kode Batch</th>
-                        <th class="p-4">Periode Akademik</th>
-                        <th class="p-4">Statistik Siswa</th>
-                        <th class="p-4">Admin Pelaksana</th>
-                        <th class="p-4">Tanggal Eksekusi</th>
-                        <th class="p-4 text-center">Status</th>
-                        <th class="p-4 text-right">Aksi</th>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KODE BATCH</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PERIODE AKADEMIK</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATISTIK SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ADMIN PELAKSANA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL EKSEKUSI</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-20">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($batches as $index => $b)
-                        <tr class="hover:bg-slate-50/60 transition-colors">
-                            <td class="p-4 text-center text-slate-400 font-semibold">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-center text-slate-400 text-xs font-medium">
                                 {{ $batches->firstItem() + $index }}
                             </td>
-                            <td class="p-4">
-                                <a href="{{ route('academic.promotion.show', $b->id) }}" class="font-bold text-[#003EA7] hover:underline font-mono">
+                            <td class="py-4 px-4">
+                                <a href="{{ route('academic.promotion.show', $b->id) }}" class="font-bold text-[#003FA9] hover:underline font-mono text-xs sm:text-sm block">
                                     {{ $b->batch_code }}
                                 </a>
                                 @if($b->catatan)
-                                    <p class="text-[11px] text-slate-500 truncate max-w-xs mt-0.5">{{ $b->catatan }}</p>
+                                    <p class="text-[11px] text-slate-400 truncate max-w-xs mt-0.5">{{ $b->catatan }}</p>
                                 @endif
                             </td>
-                            <td class="p-4">
-                                <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-1.5 font-bold text-slate-900 text-xs sm:text-sm">
                                     <span>{{ $b->tahunAjaranAsal?->nama ?? '-' }}</span>
                                     <i class='bx bx-right-arrow-alt text-slate-400'></i>
-                                    <span class="text-[#003EA7]">{{ $b->tahunAjaranTujuan?->nama ?? '-' }}</span>
+                                    <span class="text-[#003FA9]">{{ $b->tahunAjaranTujuan?->nama ?? '-' }}</span>
                                 </div>
                             </td>
-                            <td class="p-4">
+                            <td class="py-4 px-4">
                                 <div class="flex flex-wrap items-center gap-1.5">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-800">
                                         Total: {{ $b->total_siswa }}
                                     </span>
                                     @if($b->total_naik > 0)
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700">
+                                        <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-[#EFF5FF] text-[#003FA9]">
                                             Naik: {{ $b->total_naik }}
                                         </span>
                                     @endif
                                     @if($b->total_tinggal > 0)
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800">
+                                        <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-100 text-amber-800">
                                             Tinggal: {{ $b->total_tinggal }}
                                         </span>
                                     @endif
                                     @if($b->total_lulus > 0)
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800">
+                                        <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800">
                                             Lulus: {{ $b->total_lulus }}
                                         </span>
                                     @endif
                                 </div>
                             </td>
-                            <td class="p-4">
-                                <div class="font-semibold text-slate-800">{{ $b->creator?->name ?? 'Administrator' }}</div>
-                                <div class="text-[10px] text-slate-400">{{ $b->creator?->email ?? '-' }}</div>
+                            <td class="py-4 px-4">
+                                <div class="font-bold text-slate-900 text-xs sm:text-sm">{{ $b->creator?->name ?? 'Administrator' }}</div>
+                                <div class="text-[11px] text-slate-400 font-mono">{{ $b->creator?->email ?? '-' }}</div>
                             </td>
-                            <td class="p-4 font-mono text-[11px] text-slate-600">
+                            <td class="py-4 px-4 font-mono text-xs text-slate-600">
                                 {{ $b->created_at->translatedFormat('d M Y, H:i') }}
                             </td>
-                            <td class="p-4 text-center">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
-                                    {{ $b->status === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
-                                    {{ $b->status }}
+                            <td class="py-4 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold
+                                    {{ $b->status === 'completed' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
+                                    {{ strtoupper($b->status) }}
                                 </span>
                             </td>
-                            <td class="p-4 text-right">
+                            <td class="py-4 px-4 text-right">
                                 <a href="{{ route('academic.promotion.show', $b->id) }}"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-[#003EA7] hover:text-white text-slate-700 rounded-lg text-xs font-bold transition-all">
-                                    <span>Detail</span>
-                                    <i class='bx bx-chevron-right'></i>
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition inline-flex items-center gap-1"
+                                    title="Lihat Detail Batch">
+                                    <i class='bx bx-info-circle text-lg'></i>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="p-12 text-center text-slate-400">
-                                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-3xl">
-                                    <i class='bx bx-folder-open'></i>
-                                </div>
-                                <p class="text-sm font-bold text-slate-700">Belum Ada Riwayat Kenaikan Kelas</p>
-                                <p class="text-xs text-slate-400 mt-1">Eksekusi kenaikan kelas atau kelulusan pertama Anda melalui wizard.</p>
+                            <td colspan="8" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-history text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Belum Ada Riwayat Kenaikan Kelas</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Eksekusi kenaikan kelas atau kelulusan pertama Anda melalui wizard.</p>
                             </td>
                         </tr>
                     @endforelse

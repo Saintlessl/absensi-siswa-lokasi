@@ -136,19 +136,19 @@
         @endif
 
         {{-- Angkatan Table --}}
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto p-6">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-dark-100 bg-dark-50/50 text-[11px] font-bold text-dark-400 uppercase tracking-wider">
-                        <th class="px-6 py-3.5">Angkatan & Kode</th>
-                        <th class="px-6 py-3.5">Tahun Masuk</th>
-                        <th class="px-6 py-3.5">Target / Realisasi Kelulusan</th>
-                        <th class="px-6 py-3.5 text-center">Status</th>
-                        <th class="px-6 py-3.5 text-center">Statistik Siswa</th>
-                        <th class="px-6 py-3.5 text-right">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ANGKATAN & KODE</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TAHUN MASUK</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TARGET / REALISASI KELULUSAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATISTIK SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-28">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-100 text-sm">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($angkatans as $angkatan)
                         @php
                             $st = $angkatan->computed_stats ?? [
@@ -161,27 +161,27 @@
                                 'siswa_keluar' => 0,
                             ];
                         @endphp
-                        <tr class="hover:bg-dark-50/30 transition-colors">
-                            <td class="px-6 py-4">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-[#003EA7] flex items-center justify-center font-bold text-base flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center font-bold text-base shrink-0">
                                         {{ $angkatan->nomor_angkatan }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('angkatan.show', $angkatan->id) }}" class="font-bold text-dark-800 hover:text-primary-600 transition-colors">
+                                        <a href="{{ route('angkatan.show', $angkatan->id) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition block text-xs sm:text-sm">
                                             {{ $angkatan->nama_angkatan }}
                                         </a>
                                         <div class="flex items-center gap-2 mt-0.5">
                                             @if ($angkatan->jurusan)
-                                                <span class="inline-block px-1.5 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-[#003FA9]">
+                                                <span class="inline-block text-[11px] font-bold text-[#003FA9] font-mono">
                                                     {{ $angkatan->jurusan->kode_jurusan }}
                                                 </span>
                                             @endif
-                                            <span class="inline-block px-1.5 py-0.5 rounded text-[11px] font-mono bg-dark-100 text-dark-600 font-medium">
+                                            <span class="inline-block text-[11px] font-mono text-slate-500 font-medium">
                                                 {{ $angkatan->kode_angkatan }}
                                             </span>
                                             @if ($angkatan->keterangan)
-                                                <span class="text-xs text-dark-400 truncate max-w-[180px]" title="{{ $angkatan->keterangan }}">
+                                                <span class="text-[11px] text-slate-400 truncate max-w-[180px]" title="{{ $angkatan->keterangan }}">
                                                     • {{ $angkatan->keterangan }}
                                                 </span>
                                             @endif
@@ -189,78 +189,75 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="font-semibold text-dark-800">{{ $angkatan->tahun_masuk }}</p>
-                                <p class="text-xs text-dark-400">T.A. {{ $angkatan->tahun_ajaran_masuk }}</p>
+                            <td class="py-4 px-4">
+                                <p class="font-bold text-slate-900 text-xs sm:text-sm">{{ $angkatan->tahun_masuk }}</p>
+                                <p class="text-[11px] text-slate-400">T.A. {{ $angkatan->tahun_ajaran_masuk }}</p>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="font-semibold text-dark-800">{{ $angkatan->tahun_lulus_rencana }}</p>
-                                <p class="text-xs text-dark-400">T.A. {{ $angkatan->tahun_ajaran_kelulusan }}</p>
+                            <td class="py-4 px-4">
+                                <p class="font-bold text-slate-900 text-xs sm:text-sm">{{ $angkatan->tahun_lulus_rencana }}</p>
+                                <p class="text-[11px] text-slate-400">T.A. {{ $angkatan->tahun_ajaran_kelulusan }}</p>
                                 @if ($angkatan->tanggal_kelulusan)
-                                    <span class="inline-block text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-1">
+                                    <span class="inline-block text-[11px] text-emerald-700 font-semibold mt-0.5">
                                         Lulus: {{ $angkatan->tanggal_kelulusan->translatedFormat('d M Y') }}
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="py-4 px-4 text-center">
                                 @if ($angkatan->status === 'aktif')
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#003FA9] text-white">
                                         Aktif
                                     </span>
                                 @elseif ($angkatan->status === 'proses_kelulusan')
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
                                         Proses Kelulusan
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        <i class='bx bx-check text-sm'></i>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
                                         Alumni / Selesai
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="py-4 px-4">
                                 <div class="flex items-center justify-center gap-2">
-                                    <div class="text-center px-2 py-1 rounded-lg bg-dark-50 min-w-[50px]">
-                                        <span class="text-xs font-bold text-dark-800">{{ $st['total_siswa'] }}</span>
-                                        <p class="text-[10px] text-dark-400 uppercase">Total</p>
+                                    <div class="text-center px-2.5 py-1 rounded-xl bg-slate-100 min-w-[50px]">
+                                        <span class="text-xs font-bold text-slate-800">{{ $st['total_siswa'] }}</span>
+                                        <p class="text-[10px] text-slate-400 uppercase">Total</p>
                                     </div>
                                     @if ($angkatan->status === 'selesai')
-                                        <div class="text-center px-2 py-1 rounded-lg bg-emerald-50 min-w-[50px]">
-                                            <span class="text-xs font-bold text-emerald-700">{{ $st['siswa_lulus'] }}</span>
-                                            <p class="text-[10px] text-emerald-600 uppercase">Lulus</p>
+                                        <div class="text-center px-2.5 py-1 rounded-xl bg-emerald-100 min-w-[50px]">
+                                            <span class="text-xs font-bold text-emerald-800">{{ $st['siswa_lulus'] }}</span>
+                                            <p class="text-[10px] text-emerald-700 uppercase">Lulus</p>
                                         </div>
                                     @else
-                                        <div class="text-center px-2 py-1 rounded-lg bg-blue-50 min-w-[50px]">
-                                            <span class="text-xs font-bold text-blue-700">{{ $st['siswa_aktif'] }}</span>
-                                            <p class="text-[10px] text-blue-600 uppercase">Aktif</p>
+                                        <div class="text-center px-2.5 py-1 rounded-xl bg-[#EFF5FF] min-w-[50px]">
+                                            <span class="text-xs font-bold text-[#003FA9]">{{ $st['siswa_aktif'] }}</span>
+                                            <p class="text-[10px] text-[#003FA9]/70 uppercase">Aktif</p>
                                         </div>
                                     @endif
                                     @if ($st['siswa_pindah'] > 0 || $st['siswa_keluar'] > 0)
-                                        <div class="text-center px-2 py-1 rounded-lg bg-purple-50 min-w-[50px]">
-                                            <span class="text-xs font-bold text-purple-700">{{ $st['siswa_pindah'] + $st['siswa_keluar'] }}</span>
-                                            <p class="text-[10px] text-purple-600 uppercase">Mutasi</p>
+                                        <div class="text-center px-2.5 py-1 rounded-xl bg-purple-100 min-w-[50px]">
+                                            <span class="text-xs font-bold text-purple-800">{{ $st['siswa_pindah'] + $st['siswa_keluar'] }}</span>
+                                            <p class="text-[10px] text-purple-700 uppercase">Mutasi</p>
                                         </div>
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="py-4 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <a href="{{ route('angkatan.show', $angkatan->id) }}"
-                                        class="p-2 text-dark-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
                                         title="Detail Angkatan">
-                                        <i class='bx bx-show text-lg'></i>
+                                        <i class='bx bx-info-circle text-lg'></i>
                                     </a>
-                                    <button onclick="editAngkatan({{ $angkatan->id }})"
-                                        class="p-2 text-dark-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                    <button type="button" onclick="editAngkatan({{ $angkatan->id }})"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
                                         title="Edit Angkatan">
                                         <i class='bx bx-edit text-lg'></i>
                                     </button>
                                     <form action="{{ route('angkatan.destroy', $angkatan->id) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="button"
-                                            class="delete-confirm p-2 text-dark-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                            class="delete-confirm p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                             title="Hapus Angkatan"
                                             data-name="{{ $angkatan->nama_angkatan }}"
                                             data-students="{{ $st['total_siswa'] }}">
@@ -272,15 +269,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-blue-50 text-[#003EA7] flex items-center justify-center text-3xl">
-                                    <i class='bx bxs-graduation'></i>
-                                </div>
-                                <h3 class="text-base font-bold text-dark-800">Belum Ada Data Angkatan</h3>
-                                <p class="text-sm text-dark-400 mt-1">Data angkatan belum dibuat atau tidak ditemukan berdasarkan kriteria pencarian.</p>
-                                <button onclick="openModal('modal-inputangkatan')" class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl">
-                                    Tambah Angkatan Pertama
-                                </button>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <i class='bx bxs-graduation text-4xl mb-2 text-slate-300'></i>
+                                <h3 class="text-sm font-semibold text-slate-600">Belum Ada Data Angkatan</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Data angkatan belum dibuat atau tidak ditemukan berdasarkan kriteria pencarian.</p>
                             </td>
                         </tr>
                     @endforelse

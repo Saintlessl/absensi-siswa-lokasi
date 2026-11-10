@@ -120,57 +120,58 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                            <th class="py-3 px-4">Tanggal</th>
-                            <th class="py-3 px-4">Kelas</th>
-                            <th class="py-3 px-4">Mata Pelajaran</th>
-                            <th class="py-3 px-4">Materi Pembelajaran</th>
-                            <th class="py-3 px-4">Presensi Sesi</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4 text-right">Aksi</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KELAS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MATA PELAJARAN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MATERI PEMBELAJARAN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PRESENSI SESI</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-20">AKSI</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @foreach($journals as $jurnal)
                             @php
                                 $hadirCount = $jurnal->attendances->where('status', 'hadir')->count();
                                 $totalSiswa = $jurnal->attendances->count();
                             @endphp
-                            <tr class="hover:bg-blue-50/20 transition-colors">
-                                <td class="py-3 px-4 whitespace-nowrap text-slate-600 font-semibold">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 whitespace-nowrap text-slate-900 font-bold text-xs sm:text-sm">
                                     {{ $jurnal->tanggal->translatedFormat('d M Y') }}
-                                    <div class="text-[10px] text-slate-400 font-mono">{{ $jurnal->jam_ke ?? '-' }}</div>
+                                    <div class="text-[11px] text-slate-400 font-mono font-normal">{{ $jurnal->jam_ke ?? '-' }}</div>
                                 </td>
-                                <td class="py-3 px-4 font-bold text-slate-800">
+                                <td class="py-4 px-4 font-bold text-slate-900 font-mono text-xs sm:text-sm">
                                     {{ $jurnal->kelas->nama_kelas ?? '-' }}
                                 </td>
-                                <td class="py-3 px-4 text-slate-700">
+                                <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
                                     {{ $jurnal->nama_mapel }}
                                 </td>
-                                <td class="py-3 px-4 text-slate-700 max-w-xs truncate" title="{{ $jurnal->materi_pokok }}">
-                                    <div class="font-semibold text-slate-800 truncate">{{ $jurnal->materi_pokok }}</div>
+                                <td class="py-4 px-4 text-slate-700 max-w-xs truncate" title="{{ $jurnal->materi_pokok }}">
+                                    <div class="font-bold text-slate-900 text-xs sm:text-sm truncate">{{ $jurnal->materi_pokok }}</div>
                                     <div class="text-[11px] text-slate-400 truncate">{{ $jurnal->aktivitas }}</div>
                                 </td>
-                                <td class="py-3 px-4">
+                                <td class="py-4 px-4">
                                     @if($totalSiswa > 0)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <i class='bx bx-user-check'></i> {{ $hadirCount }}/{{ $totalSiswa }} Hadir
+                                        <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                                            <i class='bx bx-user-check text-base'></i> {{ $hadirCount }}/{{ $totalSiswa }} Hadir
                                         </span>
                                     @else
-                                        <span class="text-slate-400 text-[11px]">-</span>
+                                        <span class="text-slate-400 text-xs">-</span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase {{ $jurnal->status === 'submitted' ? 'bg-blue-50 text-[#0052CC]' : 'bg-slate-100 text-slate-600' }}">
-                                        {{ $jurnal->status }}
+                                <td class="py-4 px-4 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $jurnal->status === 'submitted' ? 'bg-[#003FA9] text-white' : 'bg-slate-200 text-slate-700' }}">
+                                        {{ strtoupper($jurnal->status) }}
                                     </span>
                                 </td>
-                                <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <td class="py-4 px-4 text-right whitespace-nowrap">
                                     <a href="{{ route('jurnal.show', $jurnal->id) }}"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-[#0052CC] hover:bg-blue-100 transition-colors">
-                                        <i class='bx bx-show'></i> Detail
+                                       class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition inline-flex items-center gap-1"
+                                       title="Lihat Detail Jurnal">
+                                        <i class='bx bx-info-circle text-lg'></i>
                                     </a>
                                 </td>
                             </tr>

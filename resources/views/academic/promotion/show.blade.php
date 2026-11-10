@@ -119,74 +119,74 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-700">
-                <thead class="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
-                    <tr>
-                        <th class="p-3.5 w-12 text-center">No</th>
-                        <th class="p-3.5">Identitas Siswa</th>
-                        <th class="p-3.5">Kohort Permanen</th>
-                        <th class="p-3.5">Keputusan Status</th>
-                        <th class="p-3.5">Rombel Asal</th>
-                        <th class="p-3.5">Rombel Tujuan</th>
-                        <th class="p-3.5">Perubahan Tingkat</th>
-                        <th class="p-3.5 text-center">Hasil</th>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">IDENTITAS SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KOHORT PERMANEN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KEPUTUSAN STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL ASAL</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL TUJUAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PERUBAHAN TINGKAT</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">HASIL</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($batch->items as $idx => $item)
                         <tr x-show="(!search || '{{ strtolower(addslashes($item->siswa?->nama ?? '')) }} {{ $item->siswa?->nis ?? '' }} {{ strtolower(addslashes($item->kelasAsal?->nama_kelas ?? '')) }} {{ strtolower(addslashes($item->kelasTujuan?->nama_kelas ?? '')) }}'.includes(search.toLowerCase())) && (!filterStatus || '{{ $item->action }}' === filterStatus)"
-                            class="hover:bg-slate-50/60 transition-colors">
-                            <td class="p-3.5 text-center text-slate-400 font-semibold">{{ $idx + 1 }}</td>
-                            <td class="p-3.5">
-                                <a href="{{ route('siswa.show', $item->siswa_id) }}" class="font-bold text-slate-800 hover:text-[#003EA7] hover:underline">
+                            class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-center text-slate-400 text-xs font-medium">{{ $idx + 1 }}</td>
+                            <td class="py-4 px-4">
+                                <a href="{{ route('siswa.show', $item->siswa_id) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition block text-xs sm:text-sm">
                                     {{ $item->siswa?->nama ?? '-' }}
                                 </a>
-                                <div class="text-[11px] text-slate-500 font-mono">
+                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">
                                     NIS: {{ $item->siswa?->nis ?? '-' }} | NISN: {{ $item->siswa?->nisn ?? '-' }}
                                 </div>
                             </td>
-                            <td class="p-3.5">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                            <td class="py-4 px-4">
+                                <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700">
                                     {{ $item->siswa?->angkatan?->nama_angkatan ?? ($item->siswa?->tahun_masuk ? 'Angkatan ' . $item->siswa?->tahun_masuk : '-') }}
                                 </span>
-                                <div class="text-[10px] text-slate-400 mt-0.5">
+                                <div class="text-[11px] text-slate-400 mt-1">
                                     Masuk: {{ $item->siswa?->tahun_ajaran_masuk ?? $item->siswa?->tahun_masuk ?? '-' }}
                                 </div>
                             </td>
-                            <td class="p-3.5">
+                            <td class="py-4 px-4">
                                 @if($item->action === 'naik_kelas')
-                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#003FA9] text-white">
                                         Naik Kelas
                                     </span>
                                 @elseif($item->action === 'tinggal_kelas')
-                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
                                         Tinggal Kelas
                                     </span>
                                 @elseif($item->action === 'lulus')
-                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
                                         Lulus (Alumni)
                                     </span>
                                 @elseif($item->action === 'pindah')
-                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-600 text-white">
                                         Mutasi Pindah
                                     </span>
                                 @else
-                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white">
                                         Keluar / DO
                                     </span>
                                 @endif
                             </td>
-                            <td class="p-3.5">
-                                <span class="font-semibold text-slate-800">{{ $item->kelasAsal?->nama_kelas ?? '-' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold text-slate-800 text-xs sm:text-sm">{{ $item->kelasAsal?->nama_kelas ?? '-' }}</span>
                             </td>
-                            <td class="p-3.5">
+                            <td class="py-4 px-4">
                                 @if($item->kelasTujuan)
-                                    <span class="font-semibold text-[#003EA7]">{{ $item->kelasTujuan->nama_kelas }}</span>
+                                    <span class="font-bold text-[#003FA9] text-xs sm:text-sm font-mono">{{ $item->kelasTujuan->nama_kelas }}</span>
                                 @else
-                                    <span class="text-slate-400 italic">- (Tidak dialokasikan)</span>
+                                    <span class="text-slate-400 text-xs italic">- (Tidak dialokasikan)</span>
                                 @endif
                             </td>
-                            <td class="p-3.5 font-mono text-[11px]">
+                            <td class="py-4 px-4 font-mono text-xs">
                                 @if($item->tingkat_tujuan)
                                     <span class="text-slate-600">Tingkat {{ $item->tingkat_asal }}</span>
                                     <i class='bx bx-right-arrow-alt text-slate-400 align-middle'></i>
@@ -195,17 +195,19 @@
                                     <span class="text-slate-500">Tingkat {{ $item->tingkat_asal }}</span>
                                 @endif
                             </td>
-                            <td class="p-3.5 text-center">
-                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
-                                    <i class='bx bx-check-circle text-base text-emerald-600'></i>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                                    <i class='bx bx-check-circle text-base'></i>
                                     <span>Berhasil</span>
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="p-8 text-center text-slate-400">
-                                Tidak ada item siswa tercatat dalam batch ini.
+                            <td colspan="8" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-folder-open text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Tidak Ada Item Siswa</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Tidak ada item siswa tercatat dalam batch ini.</p>
                             </td>
                         </tr>
                     @endforelse

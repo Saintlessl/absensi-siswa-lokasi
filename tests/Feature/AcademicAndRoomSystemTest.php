@@ -74,6 +74,16 @@ class AcademicAndRoomSystemTest extends TestCase
         $response->assertSee('QR Code Presensi Fisik Ruangan');
     }
 
+    public function test_superadmin_can_access_rekap_absensi()
+    {
+        $response = $this->actingAs($this->superadmin)->get(route('rekapabsensi'));
+        $response->assertStatus(200);
+        $response->assertSee('Rekap Absensi');
+
+        $responseRekapKelas = $this->actingAs($this->superadmin)->get(route('rekapkelas'));
+        $responseRekapKelas->assertStatus(200);
+    }
+
     public function test_superadmin_can_access_data_siswa()
     {
         $response = $this->actingAs($this->superadmin)->get(route('siswa'));

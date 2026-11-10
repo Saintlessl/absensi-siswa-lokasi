@@ -24,25 +24,25 @@
 @endsection
 
 @section('content')
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         {{-- Filter Bar --}}
-        <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30">
+        <div class="pb-6 mb-6 border-b border-slate-100">
             <form action="{{ route('user') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">
                 <div class="flex-1 w-full">
-                    <label class="block text-xs font-medium text-dark-600 mb-1">Cari Pengguna</label>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Cari Pengguna</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class='bx bx-search text-dark-400'></i>
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i class='bx bx-search text-slate-400'></i>
                         </div>
                         <input type="text" name="search" value="{{ $search }}"
-                            class="block w-full pl-9 pr-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+                            class="block w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9] transition"
                             placeholder="Nama pengguna...">
                     </div>
                 </div>
-                <div class="w-full sm:w-44">
-                    <label class="block text-xs font-medium text-dark-600 mb-1">Role</label>
+                <div class="w-full sm:w-48">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Role</label>
                     <select name="role"
-                        class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
+                        class="block w-full px-3.5 py-2 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9] transition">
                         <option value="">Semua Role</option>
                         <option value="superadmin" {{ $filter_role == 'superadmin' ? 'selected' : '' }}>Superadmin</option>
                         <option value="admin" {{ $filter_role == 'admin' ? 'selected' : '' }}>Admin</option>
@@ -53,12 +53,12 @@
                     </select>
                 </div>
                 <button type="submit"
-                    class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                    class="px-4 py-2 bg-[#003FA9] hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition flex items-center gap-1.5 whitespace-nowrap shadow-sm h-[38px]">
                     <i class='bx bx-filter-alt'></i> Filter
                 </button>
                 @if ($search || $filter_role)
                     <a href="{{ route('user') }}"
-                        class="px-4 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
+                        class="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition whitespace-nowrap h-[38px] flex items-center">
                         Reset
                     </a>
                 @endif
@@ -66,82 +66,82 @@
         </div>
 
         {{-- Table Container --}}
-        <div class="overflow-x-auto custom-scrollbar">
+        <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-16 text-center">No</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Nama Akun</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Jenis Kelamin</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Role Akses</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center w-28">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-16 text-center">No</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Nama Akun</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Email</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jenis Kelamin</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Role Akses</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-28">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/50">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($user as $u)
-                        <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                            <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $user->firstItem() + $loop->index }}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-dark-800">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-slate-400 text-center text-xs">{{ $user->firstItem() + $loop->index }}</td>
+                            <td class="py-4 px-4 font-semibold text-slate-800">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs shadow-sm shadow-primary-500/20">
+                                    <div class="w-8 h-8 rounded-full bg-blue-50 text-[#003FA9] flex items-center justify-center font-bold text-xs">
                                         {{ strtoupper(substr($u->name, 0, 1)) }}
                                     </div>
-                                    {{ $u->name }}
+                                    <span>{{ $u->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-dark-600">{{ $u->email }}</td>
-                            <td class="px-6 py-4 text-sm text-center">
+                            <td class="py-4 px-4 text-slate-600">{{ $u->email }}</td>
+                            <td class="py-4 px-4 text-center">
                                 @if ($u->effective_gender === 'L')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-[#003FA9]">
                                         Laki-laki
                                     </span>
                                 @elseif ($u->effective_gender === 'P')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-200">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-50 text-pink-700">
                                         Perempuan
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200" title="Informasi jenis kelamin belum diatur">
-                                        <i class='bx bx-info-circle text-xs'></i> Belum diatur
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500" title="Informasi jenis kelamin belum diatur">
+                                        Belum diatur
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-sm text-center">
+                            <td class="py-4 px-4 text-center">
                                 @php
                                     $roleColors = [
-                                        'superadmin' => 'bg-purple-50 text-purple-700 border border-purple-200',
-                                        'admin' => 'bg-indigo-50 text-indigo-700 border border-indigo-200',
-                                        'kaprog' => 'bg-violet-50 text-violet-700 border border-violet-200',
-                                        'guru' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                                        'siswa' => 'bg-amber-50 text-amber-700 border border-amber-200',
-                                        'orangtua' => 'bg-rose-50 text-rose-700 border border-rose-200',
+                                        'superadmin' => 'bg-purple-600 text-white',
+                                        'admin' => 'bg-[#003FA9] text-white',
+                                        'kaprog' => 'bg-indigo-600 text-white',
+                                        'guru' => 'bg-emerald-600 text-white',
+                                        'siswa' => 'bg-amber-500 text-white',
+                                        'orangtua' => 'bg-rose-600 text-white',
                                     ];
-                                    $colorClass = $roleColors[$u->role] ?? 'bg-dark-50 text-dark-700 border border-dark-200';
+                                    $colorClass = $roleColors[$u->role] ?? 'bg-slate-200 text-slate-700';
                                 @endphp
-                                <span class="px-3 py-1 rounded-lg text-xs font-semibold {{ $colorClass }} uppercase tracking-wider">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $colorClass }} uppercase tracking-wider">
                                     {{ $u->role }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-center">
-                                <div class="flex items-center justify-center gap-2">
+                            <td class="py-4 px-4 text-center">
+                                <div class="flex items-center justify-center gap-1">
                                     <button onclick="editUser('{{ $u->id }}')"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
                                         title="Edit Data">
-                                        <i class='bx bx-edit-alt text-lg'></i>
+                                        <i class='bx bx-edit text-base'></i>
                                     </button>
                                     @if ($u->id !== Auth::id())
                                         <form action="{{ route('user.delete', ['id' => $u->id]) }}" method="POST"
                                             class="inline">
                                             @csrf
                                             <button type="button"
-                                                class="delete-confirm inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 hover:text-rose-700 transition-colors duration-200"
+                                                class="delete-confirm p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                                 title="Hapus Data">
-                                                <i class='bx bx-trash text-lg'></i>
+                                                <i class='bx bx-trash text-base'></i>
                                             </button>
                                         </form>
                                     @else
-                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-dark-300 bg-dark-100 cursor-not-allowed" title="Akun Anda Sendiri">
-                                            <i class='bx bx-lock-alt text-lg'></i>
+                                        <span class="p-1.5 rounded-lg text-slate-300 cursor-not-allowed" title="Akun Anda Sendiri">
+                                            <i class='bx bx-lock-alt text-base'></i>
                                         </span>
                                     @endif
                                 </div>
@@ -149,13 +149,13 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
-                                    <div class="w-16 h-16 mb-4 rounded-full bg-dark-100 flex items-center justify-center">
-                                        <i class='bx bx-group text-3xl text-dark-400'></i>
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-group text-2xl text-slate-400'></i>
                                     </div>
-                                    <h3 class="text-sm font-medium text-dark-900">Belum ada data user</h3>
-                                    <p class="mt-1 text-sm text-dark-500">Silakan tambah data pengguna baru.</p>
+                                    <p class="text-sm font-medium text-slate-600">Belum ada data user</p>
+                                    <p class="text-xs text-slate-400 mt-1">Silakan tambah data pengguna baru.</p>
                                 </div>
                             </td>
                         </tr>
@@ -166,7 +166,7 @@
 
         {{-- Pagination --}}
         @if ($user->hasPages())
-            <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $user->links() }}
             </div>
         @endif

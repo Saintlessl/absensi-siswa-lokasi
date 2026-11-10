@@ -121,101 +121,96 @@
     </div>
 
     {{-- Main Table Matrix --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+    <div class="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden p-6">
+        <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <i class='bx bx-list-ul text-lg text-[#003EA7]'></i>
-                <h3 class="font-bold text-slate-800 text-sm">Daftar Rombongan Belajar & Wali Kelas (T.A. {{ $selectedTa?->nama }})</h3>
+                <i class='bx bx-list-ul text-lg text-[#003FA9]'></i>
+                <h3 class="font-bold text-slate-900 text-base tracking-tight">Daftar Rombongan Belajar & Wali Kelas (T.A. {{ $selectedTa?->nama }})</h3>
             </div>
             <span class="text-xs text-slate-400">Total: {{ $kelasList->count() }} rombel ditampilkan</span>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
-                    <tr>
-                        <th class="px-4 py-3">No</th>
-                        <th class="px-4 py-3">Rombel & Tingkat</th>
-                        <th class="px-4 py-3">Program Keahlian</th>
-                        <th class="px-4 py-3">Wali Kelas Aktif</th>
-                        <th class="px-4 py-3">Mulai Bertugas</th>
-                        <th class="px-4 py-3">Status Indikator</th>
-                        <th class="px-4 py-3 text-right">Aksi Manajemen</th>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">ROMBEL & TINGKAT</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PROGRAM KEAHLIAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">WALI KELAS AKTIF</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MULAI BERTUGAS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS INDIKATOR</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-36">AKSI MANAJEMEN</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($kelasList as $idx => $k)
                         @php
                             $current = $k->current_homeroom_assignment;
                         @endphp
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="px-4 py-3 text-slate-400 font-mono">{{ $idx + 1 }}</td>
-                            <td class="px-4 py-3">
-                                <span class="font-bold text-slate-800 text-sm block">{{ $k->nama_kelas }}</span>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 text-slate-400 text-xs font-medium text-center">{{ $idx + 1 }}</td>
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 text-xs sm:text-sm block">{{ $k->nama_kelas }}</span>
                                 <span class="text-slate-400 text-[11px]">Tingkat {{ $k->tingkat }} • Rombel {{ $k->nomor_rombel }}</span>
                             </td>
-                            <td class="px-4 py-3">
-                                <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-[#003EA7] font-bold text-[11px]">
-                                    {{ $k->jurusan?->kode_jurusan ?? '-' }}
-                                </span>
+                            <td class="py-4 px-4 font-bold text-slate-900 font-mono text-xs sm:text-sm">
+                                {{ $k->jurusan?->kode_jurusan ?? '-' }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="py-4 px-4">
                                 @if($current && $current->guru)
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-7 h-7 rounded-full bg-blue-100 text-[#003EA7] flex items-center justify-center font-bold text-xs shrink-0">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center font-bold text-xs shrink-0">
                                             {{ substr($current->guru->nama, 0, 1) }}
                                         </div>
                                         <div>
-                                            <span class="font-bold text-slate-800 block">{{ $current->guru->nama }}</span>
-                                            <span class="text-[10px] text-slate-400 font-mono">NIP: {{ $current->guru->nip ?: '-' }}</span>
+                                            <span class="font-bold text-slate-900 text-xs sm:text-sm block">{{ $current->guru->nama }}</span>
+                                            <span class="text-[11px] text-slate-400 font-mono">NIP: {{ $current->guru->nip ?: '-' }}</span>
                                         </div>
                                     </div>
                                 @else
-                                    <span class="text-slate-400 italic">Belum ada wali kelas aktif</span>
+                                    <span class="text-slate-400 text-xs italic">Belum ada wali kelas aktif</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 font-mono text-slate-600">
+                            <td class="py-4 px-4 font-mono text-xs text-slate-600">
                                 {{ $current && $current->starts_on ? $current->starts_on->format('d/m/Y') : '-' }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="py-4 px-4 text-center">
                                 @if($k->has_homeroom)
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
                                         SUDAH DITUGASKAN
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[10px]">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
                                         BELUM DITETAPKAN
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="inline-flex items-center gap-1.5">
+                            <td class="py-4 px-4 text-right">
+                                <div class="inline-flex items-center justify-end gap-1.5">
                                     {{-- Riwayat Wali Kelas Rombel --}}
                                     <button type="button" @click="openClassHistory({{ $k->id }})" title="Lihat Riwayat Wali Kelas Rombel Ini"
-                                        class="p-1.5 rounded-lg text-slate-500 hover:text-[#003EA7] hover:bg-blue-50 transition-all">
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition">
                                         <i class='bx bx-history text-lg'></i>
                                     </button>
 
                                     @if($k->has_homeroom)
                                         {{-- Ganti Wali Kelas --}}
                                         <button type="button" @click="openReplaceModal({{ $k->id }}, '{{ addslashes($k->nama_kelas) }}', '{{ addslashes($current->guru->nama) }}', {{ $current->guru_id }})"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#003EA7] font-semibold text-xs transition-all">
-                                            <i class='bx bx-transfer-alt'></i>
-                                            <span>Ganti</span>
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition" title="Ganti Wali Kelas">
+                                            <i class='bx bx-transfer-alt text-lg'></i>
                                         </button>
 
                                         {{-- Nonaktifkan / Berhentikan --}}
                                         <button type="button" @click="openTerminateModal({{ $current->id }}, '{{ addslashes($k->nama_kelas) }}', '{{ addslashes($current->guru->nama) }}')"
-                                            class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-all" title="Akhiri Penugasan">
+                                            class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Akhiri Penugasan">
                                             <i class='bx bx-x-circle text-lg'></i>
                                         </button>
                                     @else
                                         {{-- Tetapkan Wali Kelas Baru --}}
                                         <button type="button" @click="openAssignModal({{ $k->id }}, '{{ addslashes($k->nama_kelas) }}')"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#003EA7] hover:bg-[#002D7A] text-white font-semibold text-xs shadow transition-all">
-                                            <i class='bx bx-user-plus'></i>
+                                            class="px-3 py-1.5 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white font-bold text-xs inline-flex items-center gap-1 shadow-sm transition">
+                                            <i class='bx bx-user-plus text-sm'></i>
                                             <span>Tetapkan</span>
                                         </button>
                                     @endif
@@ -224,7 +219,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-8 text-slate-400">Tidak ada rombel yang sesuai dengan filter yang dipilih.</td>
+                            <td colspan="7" class="text-center py-12 text-slate-400">
+                                <i class='bx bx-group text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Tidak ada rombel yang sesuai</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Silakan sesuaikan filter pencarian atau tingkat kelas.</p>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

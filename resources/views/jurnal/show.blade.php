@@ -138,37 +138,37 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 text-slate-400 uppercase text-[10px] font-semibold tracking-wider border-b border-slate-100">
-                            <th class="py-2.5 px-4">No</th>
-                            <th class="py-2.5 px-4">NIS</th>
-                            <th class="py-2.5 px-4">Nama Siswa</th>
-                            <th class="py-2.5 px-4">Status Kehadiran</th>
-                            <th class="py-2.5 px-4">Catatan</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NAMA SISWA</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS KEHADIRAN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">CATATAN</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @foreach($journal->attendances as $idx => $att)
                             @php
                                 $badge = match($att->status) {
-                                    'hadir'     => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'label' => 'Hadir'],
-                                    'terlambat' => ['bg' => 'bg-blue-50', 'text' => 'text-[#0052CC]', 'label' => 'Terlambat'],
-                                    'izin'      => ['bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'label' => 'Izin'],
-                                    'sakit'     => ['bg' => 'bg-purple-50', 'text' => 'text-purple-700', 'label' => 'Sakit'],
-                                    default     => ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'label' => 'Alpa'],
+                                    'hadir'     => ['bg' => 'bg-emerald-600 text-white', 'label' => 'Hadir'],
+                                    'terlambat' => ['bg' => 'bg-[#003FA9] text-white', 'label' => 'Terlambat'],
+                                    'izin'      => ['bg' => 'bg-amber-500 text-white', 'label' => 'Izin'],
+                                    'sakit'     => ['bg' => 'bg-purple-600 text-white', 'label' => 'Sakit'],
+                                    default     => ['bg' => 'bg-rose-600 text-white', 'label' => 'Alpa'],
                                 };
                             @endphp
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="py-2.5 px-4 text-slate-400 font-mono">{{ $idx + 1 }}</td>
-                                <td class="py-2.5 px-4 text-slate-500 font-mono">{{ $att->siswa->nis ?? '-' }}</td>
-                                <td class="py-2.5 px-4 font-semibold text-slate-800">{{ $att->siswa->nama ?? 'Siswa Terhapus' }}</td>
-                                <td class="py-2.5 px-4">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase {{ $badge['bg'] }} {{ $badge['text'] }}">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 text-slate-400 font-medium text-xs text-center">{{ $idx + 1 }}</td>
+                                <td class="py-4 px-4 font-mono font-bold text-slate-900 text-xs sm:text-sm">{{ $att->siswa->nis ?? '-' }}</td>
+                                <td class="py-4 px-4 font-bold text-slate-900 text-xs sm:text-sm">{{ $att->siswa->nama ?? 'Siswa Terhapus' }}</td>
+                                <td class="py-4 px-4 text-center">
+                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase {{ $badge['bg'] }}">
                                         {{ $badge['label'] }}
                                     </span>
                                 </td>
-                                <td class="py-2.5 px-4 text-slate-500">
+                                <td class="py-4 px-4 text-xs text-slate-500">
                                     {{ $att->catatan ?: '-' }}
                                 </td>
                             </tr>

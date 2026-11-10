@@ -2,219 +2,157 @@
 
 @section('title', 'Data Guru')
 @section('page-title', 'Data Guru')
-@section('page-subtitle', 'Manajemen profil, akun autentikasi, dan penugasan guru')
+@section('page-subtitle', 'Manajemen Data Guru')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><span class="text-dark-500">Manajemen Sekolah</span></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Data Guru</li>
-@endsection
-
-@section('page-header')
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="text-xl font-medium text-dark-800">Manajemen Data Guru</h2>
-            <p class="text-sm text-dark-400 mt-1">Satu akun guru terintegrasi untuk Guru Mata Pelajaran, Wali Kelas, dan KAPROG.</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('guru.workload') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 border border-dark-200 bg-white hover:bg-dark-50 text-dark-700 text-sm font-medium rounded-xl shadow-sm transition-all duration-200">
-                <i class='bx bx-pie-chart-alt-2 text-lg text-primary-600'></i>
-                <span>Beban Kerja Guru</span>
-            </a>
-            <button onclick="openModal('modal-inputguru')"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200">
-                <i class='bx bx-plus text-lg'></i>
-                <span>Tambah Guru Baru</span>
-            </button>
-        </div>
-    </div>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li class="text-[#003FA9] font-semibold">Data Guru</li>
 @endsection
 
 @section('content')
     {{-- Flash Notifications --}}
-        @if(session('error'))
-        <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-800 text-sm font-semibold">
-            <div class="flex items-center gap-2">
-                <i class='bx bx-error-circle text-lg text-rose-600'></i>
-                <span>{{ session('error') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-800"><i class='bx bx-x text-lg'></i></button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm">
-            <div class="flex items-center justify-between font-bold mb-1">
-                <span class="flex items-center gap-2">
-                    <i class='bx bx-error-circle text-lg text-rose-600'></i> Terdapat kesalahan pada input:
-                </span>
-                <button onclick="this.parentElement.parentElement.remove()" class="text-rose-600 hover:text-rose-800"><i class='bx bx-x text-lg'></i></button>
-            </div>
-            <ul class="list-disc list-inside text-xs text-rose-700 mt-1 space-y-0.5">
-                @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @if(session('success'))
-        <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-sm font-semibold">
-            <div class="flex items-center gap-2">
-                <i class='bx bx-check-circle text-lg text-emerald-600'></i>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800"><i class='bx bx-x text-lg'></i></button>
-        </div>
-    @endif
-
     @if(session('activation_url'))
-        <div class="mb-6 p-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-sm">
-            <div class="flex items-center justify-between font-bold mb-1">
+        <div class="mb-5 rounded-2xl bg-blue-50 p-4 border border-blue-200 text-sm text-[#003FA9] shadow-sm">
+            <div class="flex items-center justify-between font-bold">
                 <span class="flex items-center gap-2">
-                    <i class='bx bx-link-external text-lg text-indigo-600'></i> Tautan Aktivasi Akun Guru Siap Dibagikan
+                    <i class='bx bx-link-external text-base'></i> Tautan Aktivasi Akun Guru Siap Dibagikan
                 </span>
-                <button onclick="this.parentElement.parentElement.remove()" class="text-indigo-500 hover:text-indigo-700"><i class='bx bx-x text-lg'></i></button>
+                <button type="button" onclick="this.closest('.mb-5').remove()" class="text-blue-400 hover:text-[#003FA9]">
+                    <i class='bx bx-x text-lg'></i>
+                </button>
             </div>
-            <p class="text-xs text-indigo-700 mb-2">Salin tautan ini dan kirimkan kepada guru untuk membuat password akunnya sendiri secara mandiri:</p>
-            <div class="flex items-center gap-2">
-                <input type="text" readonly value="{{ session('activation_url') }}" id="activation_url_copy"
-                    class="w-full text-xs font-mono bg-white border border-indigo-200 rounded-lg px-3 py-2 text-dark-800 select-all">
+            <p class="mt-1 text-xs text-blue-700">Salin tautan ini dan kirimkan kepada guru untuk mengatur password akunnya sendiri secara mandiri:</p>
+            <div class="mt-2 flex items-center gap-2">
+                <input class="w-full rounded-xl border border-blue-200 bg-white px-3 py-2 font-mono text-xs text-slate-800 select-all" readonly value="{{ session('activation_url') }}" id="activation_url_copy" onclick="this.select()">
                 <button type="button" onclick="copyActivationUrl()"
-                    class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1 transition">
-                    <i class='bx bx-copy'></i> Salin
+                    class="h-9 px-4 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold whitespace-nowrap inline-flex items-center gap-1.5 transition">
+                    <i class='bx bx-copy'></i>
+                    <span>Salin</span>
                 </button>
             </div>
         </div>
     @endif
 
-    {{-- Stats Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-2xl flex-shrink-0">
-                <i class='bx bx-user'></i>
-            </div>
+    {{-- Main Container Card (Matching Data Siswa Reference 1) --}}
+    <div class="bg-white rounded-[28px] p-6 sm:p-8 shadow-sm border border-slate-100">
+        {{-- Card Header --}}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>
-                <p class="text-[11px] font-semibold uppercase tracking-wider text-dark-400">Total Guru</p>
-                <h3 class="text-2xl font-extrabold text-dark-900 mt-0.5">{{ $totalGurus }}</h3>
+                <h2 class="text-xl font-bold text-slate-900 tracking-tight">Daftar Guru</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Kelola data pengajar, wali kelas, dan pimpinan program keahlian.</p>
+            </div>
+            <div class="flex items-center gap-2.5 self-end sm:self-auto">
+                <a href="{{ route('guru.workload') }}"
+                    class="h-11 px-4 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-xs inline-flex items-center gap-2 transition"
+                    title="Beban Kerja Mengajar Guru">
+                    <i class='bx bx-pie-chart-alt-2 text-base text-[#003FA9]'></i>
+                    <span class="hidden sm:inline">Beban Kerja</span>
+                </a>
+                <button type="button" onclick="openModal('modal-inputguru')"
+                    class="h-11 inline-flex items-center gap-2 px-4 py-2.5 bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-900/10 transition-all">
+                    <i class='bx bx-plus text-base'></i>
+                    <span>Tambah Data</span>
+                </button>
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl flex-shrink-0">
-                <i class='bx bx-check-circle'></i>
-            </div>
-            <div>
-                <p class="text-[11px] font-semibold uppercase tracking-wider text-dark-400">Guru Aktif</p>
-                <h3 class="text-2xl font-extrabold text-dark-900 mt-0.5">{{ $activeGurus }}</h3>
-            </div>
-        </div>
-
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl flex-shrink-0">
-                <i class='bx bx-id-card'></i>
-            </div>
-            <div>
-                <p class="text-[11px] font-semibold uppercase tracking-wider text-dark-400">Wali Kelas Aktif</p>
-                <h3 class="text-2xl font-extrabold text-dark-900 mt-0.5">{{ $homeroomGurus }}</h3>
-            </div>
-        </div>
-
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl flex-shrink-0">
-                <i class='bx bx-briefcase'></i>
-            </div>
-            <div>
-                <p class="text-[11px] font-semibold uppercase tracking-wider text-dark-400">KAPROG</p>
-                <h3 class="text-2xl font-extrabold text-dark-900 mt-0.5">{{ $kaprogGurus }}</h3>
-            </div>
-        </div>
-    </div>
-
-    {{-- Filter Bar --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-4 mb-6 bg-white shadow-sm">
-        <form action="{{ route('guru') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-            <div class="sm:col-span-4">
-                <label class="block text-xs font-medium text-dark-600 mb-1">Cari Guru</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class='bx bx-search text-dark-400'></i>
+        {{-- Search & Filter Bar (Matching Data Siswa layout) --}}
+        <form action="{{ route('guru') }}" method="GET" class="mb-6">
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3">
+                {{-- Cari Guru Input --}}
+                <div class="flex-1">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Cari Guru</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class='bx bx-search text-base'></i>
+                        </div>
+                        <input type="text" name="search" value="{{ $search }}"
+                            class="w-full h-11 pl-10 pr-4 rounded-xl bg-[#EFF5FF] border-0 text-slate-800 text-xs font-medium placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9] outline-none transition"
+                            placeholder="Nama / NIP / NUPTK / Email...">
                     </div>
-                    <input type="text" name="search" value="{{ $search }}"
-                        class="block w-full pl-9 pr-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                        placeholder="Nama, NIP, NUPTK, email...">
+                </div>
+
+                {{-- Status Kepegawaian Filter --}}
+                <div class="w-full sm:w-44">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Kepegawaian</label>
+                    <div class="relative">
+                        <select name="status_kepegawaian"
+                            class="w-full h-11 px-3.5 pr-8 rounded-xl bg-[#EFF5FF] border-0 text-slate-800 text-xs font-semibold focus:ring-2 focus:ring-[#003FA9] outline-none transition appearance-none">
+                            <option value="">Semua Status</option>
+                            <option value="PNS" {{ ($status_kepegawaian ?? '') == 'PNS' ? 'selected' : '' }}>PNS</option>
+                            <option value="PPPK" {{ ($status_kepegawaian ?? '') == 'PPPK' ? 'selected' : '' }}>PPPK</option>
+                            <option value="GTT/Honorer" {{ ($status_kepegawaian ?? '') == 'GTT/Honorer' ? 'selected' : '' }}>GTT / Honorer</option>
+                            <option value="Tetap Yayasan" {{ ($status_kepegawaian ?? '') == 'Tetap Yayasan' ? 'selected' : '' }}>Tetap Yayasan</option>
+                        </select>
+                        <i class='bx bx-chevron-down absolute right-3 top-3.5 text-slate-400 pointer-events-none text-sm'></i>
+                    </div>
+                </div>
+
+                {{-- Status Akun Filter --}}
+                <div class="w-full sm:w-36">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Status Akun</label>
+                    <div class="relative">
+                        <select name="status_akun"
+                            class="w-full h-11 px-3.5 pr-8 rounded-xl bg-[#EFF5FF] border-0 text-slate-800 text-xs font-semibold focus:ring-2 focus:ring-[#003FA9] outline-none transition appearance-none">
+                            <option value="">Semua Akun</option>
+                            <option value="active" {{ ($status_akun ?? '') == 'active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="pending" {{ ($status_akun ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="suspended" {{ ($status_akun ?? '') == 'suspended' ? 'selected' : '' }}>Ditangguhkan</option>
+                            <option value="deactivated" {{ ($status_akun ?? '') == 'deactivated' ? 'selected' : '' }}>Nonaktif</option>
+                        </select>
+                        <i class='bx bx-chevron-down absolute right-3 top-3.5 text-slate-400 pointer-events-none text-sm'></i>
+                    </div>
+                </div>
+
+                {{-- Tanggung Jawab Tambahan Filter --}}
+                <div class="w-full sm:w-48">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1.5">Penugasan</label>
+                    <div class="relative">
+                        <select name="additional_duty"
+                            class="w-full h-11 px-3.5 pr-8 rounded-xl bg-[#EFF5FF] border-0 text-slate-800 text-xs font-semibold focus:ring-2 focus:ring-[#003FA9] outline-none transition appearance-none">
+                            <option value="">Semua Penugasan</option>
+                            <option value="homeroom" {{ ($additional_duty ?? '') == 'homeroom' ? 'selected' : '' }}>Wali Kelas</option>
+                            <option value="kaprog" {{ ($additional_duty ?? '') == 'kaprog' ? 'selected' : '' }}>KAPROG</option>
+                            <option value="both" {{ ($additional_duty ?? '') == 'both' ? 'selected' : '' }}>Wali Kelas & KAPROG</option>
+                            <option value="pure" {{ ($additional_duty ?? '') == 'pure' ? 'selected' : '' }}>Guru Mapel Murni</option>
+                        </select>
+                        <i class='bx bx-chevron-down absolute right-3 top-3.5 text-slate-400 pointer-events-none text-sm'></i>
+                    </div>
+                </div>
+
+                {{-- Actions: Filter & Reset --}}
+                <div class="flex items-center gap-2">
+                    <button type="submit"
+                        class="h-11 px-5 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition">
+                        <i class='bx bx-filter-alt text-sm'></i>
+                        <span>Filter</span>
+                    </button>
+                    @if ($search || $status_kepegawaian || $status_akun || ($additional_duty ?? ''))
+                        <a href="{{ route('guru') }}"
+                            class="h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold inline-flex items-center transition">
+                            Reset
+                        </a>
+                    @endif
                 </div>
             </div>
-
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-medium text-dark-600 mb-1">Status Kepegawaian</label>
-                <select name="status_kepegawaian"
-                    class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                    <option value="">Semua Status</option>
-                    <option value="PNS" {{ $status_kepegawaian == 'PNS' ? 'selected' : '' }}>PNS</option>
-                    <option value="PPPK" {{ $status_kepegawaian == 'PPPK' ? 'selected' : '' }}>PPPK</option>
-                    <option value="GTT/Honorer" {{ $status_kepegawaian == 'GTT/Honorer' ? 'selected' : '' }}>GTT / Honorer</option>
-                    <option value="Tetap Yayasan" {{ $status_kepegawaian == 'Tetap Yayasan' ? 'selected' : '' }}>Tetap Yayasan</option>
-                </select>
-            </div>
-
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-medium text-dark-600 mb-1">Status Akun</label>
-                <select name="status_akun"
-                    class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                    <option value="">Semua Akun</option>
-                    <option value="active" {{ $status_akun == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="pending" {{ $status_akun == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="suspended" {{ $status_akun == 'suspended' ? 'selected' : '' }}>Suspended</option>
-                    <option value="deactivated" {{ $status_akun == 'deactivated' ? 'selected' : '' }}>Deactivated</option>
-                </select>
-            </div>
-
-            <div class="sm:col-span-3">
-                <label class="block text-xs font-medium text-dark-600 mb-1">Tanggung Jawab Tambahan</label>
-                <select name="additional_duty"
-                    class="block w-full px-3 py-2 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all">
-                    <option value="">Semua Guru</option>
-                    <option value="homeroom" {{ ($additional_duty ?? '') == 'homeroom' ? 'selected' : '' }}>Dengan Tugas Wali Kelas</option>
-                    <option value="kaprog" {{ ($additional_duty ?? '') == 'kaprog' ? 'selected' : '' }}>Dengan Tugas KAPROG</option>
-                    <option value="both" {{ ($additional_duty ?? '') == 'both' ? 'selected' : '' }}>Wali Kelas & KAPROG Sekaligus</option>
-                    <option value="pure" {{ ($additional_duty ?? '') == 'pure' ? 'selected' : '' }}>Hanya Mengajar Mapel (Tanpa Tugas Tambahan)</option>
-                </select>
-            </div>
-
-            <div class="sm:col-span-2 flex items-center gap-2">
-                <button type="submit"
-                    class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-1.5">
-                    <i class='bx bx-filter-alt'></i> Filter
-                </button>
-                @if ($search || $status_kepegawaian || $status_akun || ($additional_duty ?? ''))
-                    <a href="{{ route('guru') }}"
-                        class="px-3 py-2 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition">
-                        Reset
-                    </a>
-                @endif
-            </div>
         </form>
-    </div>
 
-    {{-- Teacher Table --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+        {{-- Table Data Guru (Matching Data Siswa: Clean typography, no chips, no translucent borders) --}}
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/70 border-b border-dark-200 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                        <th class="px-6 py-3.5 w-14 text-center">No</th>
-                        <th class="px-6 py-3.5">Profil Guru</th>
-                        <th class="px-6 py-3.5">NIP & NUPTK</th>
-                        <th class="px-6 py-3.5">Kepegawaian</th>
-                        <th class="px-6 py-3.5">Penugasan & Tanggung Jawab</th>
-                        <th class="px-6 py-3.5 text-center">Status Akun</th>
-                        <th class="px-6 py-3.5 text-center w-36">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">IDENTITAS (NIP / NUPTK)</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NAMA LENGKAP</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JENIS KELAMIN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MATA PELAJARAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">PENUGASAN & STATUS</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KONTAK</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-28">AKSI</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/60 text-sm">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($guru as $g)
                         @php
                             $user = $g->user;
@@ -223,116 +161,101 @@
                             $isKaprog = $g->is_kaprog;
                             $kaprogJurusan = $g->kaprog_jurusan;
 
+                            // Resolve clean subject list
+                            $activeMapels = $g->activeSubjectAssignments->map(fn($sa) => $sa->mataPelajaran?->nama_mapel ?: $sa->mataPelajaran?->kode_mapel)->filter()->unique();
+                            $mapelText = $activeMapels->isNotEmpty() ? $activeMapels->take(2)->implode(', ') . ($activeMapels->count() > 2 ? ' +' . ($activeMapels->count() - 2) : '') : ($g->mapel ?: '-');
+
+                            // Resolve duty list
+                            $dutyList = [];
+                            if ($activeHomeroom) {
+                                $dutyList[] = 'Wali ' . $activeHomeroom->kelas->nama_kelas;
+                            }
+                            if ($isKaprog && $kaprogJurusan) {
+                                $dutyList[] = 'KAPROG ' . $kaprogJurusan->kode_jurusan;
+                            }
+                            if ($activeSubjectsCount > 0) {
+                                $dutyList[] = $activeSubjectsCount . ' Rombel Mapel';
+                            }
+                            if (empty($dutyList)) {
+                                $dutyList[] = 'Guru Mapel';
+                            }
+
                             $accountStatus = $user->status ?? 'active';
-                            $statusBadge = match($accountStatus) {
-                                'active' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                'suspended' => 'bg-rose-50 text-rose-700 border-rose-200',
-                                'deactivated' => 'bg-dark-100 text-dark-600 border-dark-200',
-                                default => 'bg-dark-100 text-dark-600'
-                            };
                         @endphp
-                        <tr class="hover:bg-dark-50/50 transition-colors">
-                            <td class="px-6 py-4 text-center text-xs text-dark-500">{{ $guru->firstItem() + $loop->index }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden shadow-sm">
-                                        @if($g->photo_url)
-                                            <img src="{{ $g->photo_url }}" alt="{{ $g->nama }}" class="w-full h-full object-cover">
-                                        @else
-                                            {{ strtoupper(substr($g->nama, 0, 1)) }}
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center gap-1.5">
-                                            <a href="{{ route('guru.show', $g->id) }}" class="font-bold text-dark-900 hover:text-primary-600 transition">
-                                                {{ $g->nama }}
-                                            </a>
-                                            @if ($g->jenis_kelamin === 'L')
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200" title="Laki-laki">
-                                                    L
-                                                </span>
-                                            @elseif ($g->jenis_kelamin === 'P')
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-pink-50 text-pink-700 border border-pink-200" title="Perempuan">
-                                                    P
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200" title="Jenis kelamin belum diatur">
-                                                    <i class='bx bx-info-circle text-[11px]'></i> Belum diatur
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <div class="text-[11px] text-dark-400 flex items-center gap-1.5 mt-0.5">
-                                            <span><i class='bx bx-envelope text-xs'></i> {{ $user->email ?? '-' }}</span>
-                                            @if($g->telepon)
-                                                <span>&bull;</span>
-                                                <span><i class='bx bxl-whatsapp text-emerald-600'></i> {{ $g->telepon }}</span>
-                                            @endif
-                                        </div>
-                                    </div>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            {{-- 1. No --}}
+                            <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">
+                                {{ $guru->firstItem() + $loop->index }}
+                            </td>
+
+                            {{-- 2. Identitas (NIP / NUPTK) --}}
+                            <td class="py-4 px-4">
+                                <div class="font-bold text-slate-900 font-mono text-xs sm:text-sm">{{ $g->nip ?: '-' }}</div>
+                                <div class="text-[11px] text-slate-400 font-normal">NUPTK: {{ $g->nuptk ?: '-' }}</div>
+                            </td>
+
+                            {{-- 3. Nama Lengkap & Email --}}
+                            <td class="py-4 px-4">
+                                <a href="{{ route('guru.show', $g->id) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition block">
+                                    {{ $g->nama }}
+                                </a>
+                                @if($user?->email)
+                                    <div class="text-[11px] text-slate-400 font-mono">{{ $user->email }}</div>
+                                @endif
+                            </td>
+
+                            {{-- 4. Jenis Kelamin (Clean text, no chip) --}}
+                            <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
+                                {{ $g->jenis_kelamin === 'L' ? 'Laki-laki' : ($g->jenis_kelamin === 'P' ? 'Perempuan' : '-') }}
+                            </td>
+
+                            {{-- 5. Mata Pelajaran (Clean text, no chip) --}}
+                            <td class="py-4 px-4">
+                                <div class="font-semibold text-slate-900 text-xs sm:text-sm">{{ $mapelText }}</div>
+                                <div class="text-[11px] text-slate-400">{{ $g->status_kepegawaian ?: 'GTT / Honorer' }}</div>
+                            </td>
+
+                            {{-- 6. Penugasan & Status Akun --}}
+                            <td class="py-4 px-4">
+                                <div class="font-semibold text-slate-800 text-xs sm:text-sm">{{ implode(' • ', $dutyList) }}</div>
+                                <div class="text-[11px] font-bold mt-0.5 inline-flex items-center gap-1.5 {{ $accountStatus === 'active' ? 'text-emerald-600' : ($accountStatus === 'pending' ? 'text-amber-600' : 'text-slate-500') }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $accountStatus === 'active' ? 'bg-emerald-500' : ($accountStatus === 'pending' ? 'bg-amber-500' : 'bg-slate-400') }}"></span>
+                                    <span>{{ ucfirst($accountStatus) }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-xs font-mono">
-                                <div><span class="text-dark-400">NIP:</span> <span class="font-bold text-dark-800">{{ $g->nip ?? '-' }}</span></div>
-                                <div class="mt-0.5"><span class="text-dark-400">NUPTK:</span> <span class="text-dark-700">{{ $g->nuptk ?? '-' }}</span></div>
-                            </td>
-                            <td class="px-6 py-4 text-xs">
-                                <span class="inline-block px-2.5 py-1 rounded-md bg-dark-100 font-semibold text-dark-700 border border-dark-200">
-                                    {{ $g->status_kepegawaian ?? 'GTT/Honorer' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex flex-wrap gap-1.5 items-center">
-                                    {{-- Wali Kelas Badge --}}
-                                    @if($activeHomeroom)
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
-                                            <i class='bx bx-id-card'></i> Wali {{ $activeHomeroom->kelas->nama_kelas }}
-                                        </span>
-                                    @endif
 
-                                    {{-- KAPROG Badge --}}
-                                    @if($isKaprog && $kaprogJurusan)
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 text-purple-800 border border-purple-200 flex items-center gap-1">
-                                            <i class='bx bx-briefcase'></i> KAPROG {{ $kaprogJurusan->kode_jurusan }}
-                                        </span>
-                                    @endif
-
-                                    {{-- Subject Teacher Count --}}
-                                    @if($activeSubjectsCount > 0)
-                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-200 flex items-center gap-1">
-                                            <i class='bx bx-book-open'></i> {{ $activeSubjectsCount }} Penugasan Mapel
-                                        </span>
-                                    @else
-                                        <span class="text-[11px] text-dark-400 italic">Belum ada penugasan mapel</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold border uppercase tracking-wider {{ $statusBadge }}">
-                                    {{ $accountStatus }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <button type="button" onclick="editGuru('{{ $g->id }}')"
-                                        class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#003FA9] border border-blue-200 hover:bg-blue-100 text-xs font-semibold flex items-center gap-1 transition"
-                                        title="Edit Cepat Data Guru">
-                                        <i class='bx bx-edit text-sm'></i>
-                                        <span>Edit</span>
-                                    </button>
-                                    <a href="{{ route('guru.show', $g->id) }}"
-                                        class="px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-700 border border-primary-200 hover:bg-primary-100 text-xs font-semibold flex items-center gap-1 transition"
-                                        title="Detail Profil & Kelola Penugasan">
-                                        <i class='bx bx-slider text-sm'></i>
-                                        <span>Kelola</span>
+                            {{-- 7. Kontak --}}
+                            <td class="py-4 px-4">
+                                @if($g->telepon)
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $g->telepon) }}" target="_blank"
+                                       class="text-[#003FA9] hover:underline font-bold text-xs inline-flex items-center gap-1 font-mono">
+                                        {{ $g->telepon }}
                                     </a>
+                                @else
+                                    <span class="text-xs text-slate-400">-</span>
+                                @endif
+                            </td>
 
-                                    <form action="{{ route('guru.delete', ['id' => $g->id]) }}" method="POST" onsubmit="return confirm('Hapus data guru {{ $g->nama }} beserta seluruh penugasannya?')">
+                            {{-- 8. Aksi (Minimalist icons matching Data Siswa) --}}
+                            <td class="py-4 px-4 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <a href="{{ route('guru.show', $g->id) }}"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
+                                        title="Detail & Kelola Penugasan">
+                                        <i class='bx bx-info-circle text-lg'></i>
+                                    </a>
+                                    <button type="button" onclick="editGuru('{{ $g->id }}')"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
+                                        title="Edit Data Guru">
+                                        <i class='bx bx-edit text-lg'></i>
+                                    </button>
+                                    <form action="{{ route('guru.delete', $g->id) }}" method="POST" class="inline"
+                                          onsubmit="return confirm('Hapus data guru {{ $g->nama }} beserta akun autentikasinya?')">
                                         @csrf
                                         <button type="submit"
-                                            class="w-8 h-8 rounded-lg border border-dark-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 inline-flex items-center justify-center text-dark-500 transition"
+                                            class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                             title="Hapus Guru">
-                                            <i class='bx bx-trash text-base'></i>
+                                            <i class='bx bx-trash text-lg'></i>
                                         </button>
                                     </form>
                                 </div>
@@ -340,18 +263,20 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-dark-400">
-                                <i class='bx bx-user-x text-4xl mb-2 text-dark-300'></i>
-                                <p class="text-sm font-semibold text-dark-700">Tidak ada data guru yang cocok</p>
-                                <p class="text-xs text-dark-400 mt-1">Gunakan tombol "Tambah Guru Baru" di atas untuk mendaftarkan akun pengajar.</p>
+                            <td colspan="8" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-user text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Belum ada data guru</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Tidak ditemukan data guru yang sesuai filter pencarian.</p>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        {{-- Pagination --}}
         @if ($guru->hasPages())
-            <div class="px-6 py-4 border-t border-dark-200">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $guru->links() }}
             </div>
         @endif
@@ -362,7 +287,7 @@
     {{-- Multi-Step Wizard Modal for Guru (Exact Design System) --}}
     @include('guru.modal-wizard')
 
-    {{-- Modal Edit Guru (Exact Design System) --}}
+    {{-- Modal Edit Guru (Design System) --}}
     <div id="modal-editguru" class="fixed inset-0 z-[60] hidden overflow-y-auto">
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onclick="closeModal('modal-editguru')"></div>
@@ -394,203 +319,70 @@
 @endpush
 
 @push('scripts')
-    <script>
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-                setTimeout(() => {
-                    const scrollBody = document.getElementById('modal_guru_scroll_body');
-                    if (scrollBody) {
-                        scrollBody.scrollTop = 0;
-                    }
-                    const outerScroll = modal.querySelector('.overflow-y-auto');
-                    if (outerScroll) {
-                        outerScroll.scrollTop = 0;
-                    }
-                }, 20);
-            }
+<script>
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
+    }
 
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
         }
+    }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal('modal-inputguru');
-                closeModal('modal-editguru');
-            }
+    function editGuru(id) {
+        openModal('modal-editguru');
+        document.getElementById('loadeditform').innerHTML = `
+            <div class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#003FA9] border-t-transparent"></div>
+                <p class="text-xs text-slate-500 mt-2">Memuat formulir...</p>
+            </div>
+        `;
+
+        fetch('{{ route("guru.edit") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('loadeditform').innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('loadeditform').innerHTML = `
+                <div class="text-center py-6 text-rose-600 text-xs">
+                    Gagal memuat formulir edit guru. Silakan coba lagi.
+                </div>
+            `;
         });
+    }
 
-        function togglePasswordMode(mode) {
-            const wrapper = document.getElementById('wrapper_direct_password');
-            const input = document.getElementById('field_direct_password');
-            if (mode === 'direct') {
-                wrapper.classList.remove('hidden');
-                input.required = true;
-            } else {
-                wrapper.classList.add('hidden');
-                input.required = false;
-                input.value = '';
-            }
-        }
-
-        function previewPhoto(input) {
-            const container = document.getElementById('preview_guru_photo');
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                };
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                container.innerHTML = `<i class='bx bx-user text-3xl text-dark-300'></i>`;
-            }
-        }
-
-        function selectAllClasses(checked) {
-            document.querySelectorAll('.class-checkbox').forEach(cb => cb.checked = checked);
-        }
-
-        function toggleHomeroomSelect(checked) {
-            const wrap = document.getElementById('wrapper_homeroom_select');
-            const field = document.getElementById('field_homeroom_kelas_id');
-            if (checked) {
-                wrap.classList.remove('hidden');
-                field.required = true;
-            } else {
-                wrap.classList.add('hidden');
-                field.required = false;
-                field.value = '';
-            }
-        }
-
-        function toggleKaprogSelect(checked) {
-            const wrap = document.getElementById('wrapper_kaprog_select');
-            const field = document.getElementById('field_kaprog_jurusan_id');
-            if (checked) {
-                wrap.classList.remove('hidden');
-                field.required = true;
-            } else {
-                wrap.classList.add('hidden');
-                field.required = false;
-                field.value = '';
-            }
-        }
-
-        function copyActivationUrl() {
-            const input = document.getElementById('activation_url_copy');
-            if (!input) return;
-            input.select();
-            input.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(input.value).then(() => {
-                alert('Tautan aktivasi berhasil disalin ke clipboard!');
+    function copyActivationUrl() {
+        const copyInput = document.getElementById('activation_url_copy');
+        if (copyInput) {
+            copyInput.select();
+            navigator.clipboard.writeText(copyInput.value);
+            Swal.fire({
+                title: 'Berhasil Disalin!',
+                text: 'Tautan aktivasi akun guru siap dibagikan.',
+                icon: 'success',
+                confirmButtonColor: '#003FA9',
+                customClass: {
+                    popup: 'font-inter rounded-2xl',
+                    confirmButton: 'rounded-xl text-xs px-5 py-2'
+                }
             });
         }
-
-        function editGuru(id) {
-            const container = document.getElementById('loadeditform');
-            if (!container) return;
-
-            // 1. Tampilkan state loading
-            container.innerHTML = `
-                <div class="text-center py-10">
-                    <div class="inline-block animate-spin rounded-full h-9 w-9 border-4 border-[#003EA7] border-t-transparent"></div>
-                    <p class="text-xs font-semibold text-slate-500 mt-3">Memuat data guru...</p>
-                </div>`;
-            openModal('modal-editguru');
-
-            const tokenEl = document.querySelector('meta[name="csrf-token"]');
-            const csrfToken = tokenEl ? tokenEl.getAttribute('content') : '';
-
-            // 2. Request form edit ke backend
-            fetch('{{ route("guru.edit") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'text/html, text/plain, */*',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ id: id })
-            })
-            .then(res => {
-                if (!res.ok) {
-                    if (res.status === 419) {
-                        throw new Error('Sesi Anda telah berakhir. Silakan muat ulang halaman atau login kembali.');
-                    }
-                    if (res.status === 404) {
-                        throw new Error('Data guru tidak ditemukan di sistem.');
-                    }
-                    if (res.status === 403) {
-                        throw new Error('Anda tidak memiliki izin untuk mengedit data ini.');
-                    }
-                    throw new Error('Terjadi kesalahan pada server (Status ' + res.status + '). Silakan coba lagi.');
-                }
-                return res.text();
-            })
-            .then(html => {
-                // 3. Tampilkan form yang berhasil dimuat
-                container.innerHTML = html;
-            })
-            .catch(err => {
-                console.error('Error loading edit form:', err);
-
-                let friendlyMsg = 'Terjadi kesalahan saat memuat formulir edit.';
-                if (!navigator.onLine) {
-                    friendlyMsg = 'Koneksi ke server gagal. Silakan periksa koneksi internet Anda.';
-                } else if (err && err.message) {
-                    friendlyMsg = err.message;
-                }
-
-                // 4. Render error state secara aman via DOM (tanpa innerHTML injection yang rentan)
-                container.innerHTML = '';
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'text-center py-8 px-4';
-
-                const icon = document.createElement('i');
-                icon.className = 'bx bx-error-circle text-4xl text-rose-500 mb-2 block';
-
-                const title = document.createElement('h4');
-                title.className = 'text-sm font-bold text-slate-800 mb-1';
-                title.textContent = 'Gagal Memuat Formulir';
-
-                const desc = document.createElement('p');
-                desc.className = 'text-xs text-rose-600 max-w-sm mx-auto mb-4';
-                desc.textContent = friendlyMsg;
-
-                const btnGroup = document.createElement('div');
-                btnGroup.className = 'flex items-center justify-center gap-2';
-
-                const retryBtn = document.createElement('button');
-                retryBtn.type = 'button';
-                retryBtn.className = 'px-4 py-2 rounded-xl bg-[#003EA7] hover:bg-[#00338d] text-white text-xs font-bold transition shadow-sm';
-                retryBtn.textContent = 'Coba Lagi';
-                retryBtn.onclick = function() { editGuru(id); };
-
-                const cancelBtn = document.createElement('button');
-                cancelBtn.type = 'button';
-                cancelBtn.className = 'px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition';
-                cancelBtn.textContent = 'Tutup';
-                cancelBtn.onclick = function() { closeModal('modal-editguru'); };
-
-                btnGroup.appendChild(retryBtn);
-                btnGroup.appendChild(cancelBtn);
-
-                wrapper.appendChild(icon);
-                wrapper.appendChild(title);
-                wrapper.appendChild(desc);
-                wrapper.appendChild(btnGroup);
-
-                container.appendChild(wrapper);
-            });
-        }
-    </script>
+    }
+</script>
 @endpush

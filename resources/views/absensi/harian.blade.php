@@ -86,104 +86,93 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto custom-scrollbar">
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-dark-50/50 border-b border-dark-200/50">
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider w-12 text-center">
-                                    No</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">NIS /
-                                    Nama Siswa</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Gender
-                                </th>
-                                <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Kelas
-                                </th>
-                                <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Status
-                                    Absensi (Hari Ini)</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider">Jam /
-                                    Info</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-dark-500 uppercase tracking-wider text-center">Aksi</th>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS / NAMA SISWA</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">GENDER</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KELAS</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS ABSENSI (HARI INI)</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">JAM / INFO</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center w-20">AKSI</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-dark-200/50">
+                        <tbody class="divide-y divide-slate-100 text-sm">
                             @forelse ($siswas as $s)
                                 @php
                                     $absen = $s->absensi->first();
                                 @endphp
-                                <tr class="hover:bg-dark-50/50 transition-colors duration-200">
-                                    <td class="px-6 py-4 text-sm text-dark-600 text-center">{{ $siswas->firstItem() + $loop->index }}</td>
-                                    <td class="px-6 py-4">
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">{{ $siswas->firstItem() + $loop->index }}</td>
+                                    <td class="py-4 px-4">
                                         <div class="flex items-center gap-3">
-                                            <div
-                                                class="flex-shrink-0 w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xs uppercase">
+                                            <div class="flex-shrink-0 w-8 h-8 rounded-xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center font-bold text-xs uppercase">
                                                 {{ substr($s->nama, 0, 1) }}
                                             </div>
                                             <div>
-                                                <p class="text-sm font-bold text-dark-800">{{ $s->nama }}</p>
-                                                <p class="text-xs text-dark-500 font-mono">{{ $s->nis }}</p>
+                                                <p class="text-xs sm:text-sm font-bold text-slate-900">{{ $s->nama }}</p>
+                                                <p class="text-[11px] text-slate-400 font-mono">NIS: {{ $s->nis }}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-dark-600">
+                                    <td class="py-4 px-4 text-xs font-semibold text-slate-800 text-center">
                                         {{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-bold text-dark-700">
+                                    <td class="py-4 px-4 text-xs sm:text-sm font-bold text-slate-900 font-mono">
                                         {{ $s->kelas->nama_kelas }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="py-4 px-4 text-center">
                                         @if ($absen)
                                             @php $status = strtolower($absen->status); @endphp
                                             @if ($status == 'hadir')
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                    <i class='bx bx-check-shield text-sm'></i> Hadir
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
+                                                    Hadir
                                                 </span>
                                             @elseif($status == 'izin')
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200">
-                                                    <i class='bx bx-envelope text-sm'></i> Izin
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#003FA9] text-white">
+                                                    Izin
                                                 </span>
                                             @elseif($status == 'sakit')
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                                    <i class='bx bx-plus-medical text-sm'></i> Sakit
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-white">
+                                                    Sakit
                                                 </span>
                                             @else
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                                    <i class='bx bx-x-circle text-sm'></i> Alfa
+                                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white">
+                                                    Alfa
                                                 </span>
                                             @endif
                                         @else
-                                            <span
-                                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-dark-100 text-dark-600 border border-dark-200">
-                                                <i class='bx bx-time text-sm'></i> Belum Absen
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
+                                                Belum Absen
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="py-4 px-4 text-center">
                                         @if ($absen && $absen->jam_masuk)
-                                            <span
-                                                class="inline-flex items-center gap-1 px-2 py-1 rounded bg-dark-50 text-xs font-mono text-dark-600 border border-dark-100">
-                                                <i class='bx bx-time-five'></i>
+                                            <span class="font-mono text-xs font-bold text-slate-800">
                                                 {{ date('H:i', strtotime($absen->jam_masuk)) }}
                                             </span>
                                         @else
-                                            <span class="text-xs text-dark-400 italic">-</span>
+                                            <span class="text-xs text-slate-400">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="py-4 px-4 text-center">
                                         <button type="button"
                                             onclick="openEditAbsensi({{ $s->id }}, '{{ $absen ? $absen->status : '' }}', '{{ $absen ? addslashes($absen->keterangan) : '' }}', '{{ addslashes($s->nama) }}')"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors" title="Edit Kehadiran">
-                                            <i class='bx bx-edit-alt text-lg'></i>
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition" title="Edit Kehadiran">
+                                            <i class='bx bx-edit text-lg'></i>
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-12 text-center text-dark-500">Tidak ada siswa.</td>
+                                    <td colspan="7" class="py-12 text-center text-slate-400">
+                                        <i class='bx bx-user-x text-4xl mb-2 text-slate-300'></i>
+                                        <p class="font-semibold text-sm text-slate-600">Tidak ada data siswa</p>
+                                        <p class="text-xs text-slate-400 mt-0.5">Tidak ditemukan siswa pada filter ini.</p>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -192,7 +181,7 @@
 
                 {{-- Pagination --}}
                 @if ($siswas->hasPages())
-                    <div class="px-6 py-4 border-t border-dark-100 bg-dark-50/30">
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                         {{ $siswas->links() }}
                     </div>
                 @endif

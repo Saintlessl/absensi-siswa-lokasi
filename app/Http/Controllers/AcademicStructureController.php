@@ -168,7 +168,18 @@ class AcademicStructureController extends Controller
         $this->authorizeMajor($jurusan);
         abort_unless(in_array($tingkat, [10, 11, 12]), 404);
 
-        $query = $jurusan->kelas()->with('jurusan')->withCount('siswa')->where('tingkat', $tingkat)->where('is_active', true);
+        $activeTahunAjaran = TahunAjaran::getActiveName();
+        $baseYear = (int) explode('/', $activeTahunAjaran)[0];
+        $expectedEntryYear = $baseYear - ($tingkat - 10);
+        $matchedCohort = Angkatan::where('jurusan_id', $jurusan->id)
+            ->where('tahun_masuk', $expectedEntryYear)
+            ->first() ?? Angkatan::where('tahun_masuk', $expectedEntryYear)->first();
+
+        $query = $jurusan->kelas()
+            ->with(['jurusan', 'activeHomeroom.guru'])
+            ->withCount('siswa')
+            ->where('tingkat', $tingkat)
+            ->where('is_active', true);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -180,7 +191,7 @@ class AcademicStructureController extends Controller
 
         $kelas = $query->orderBy('nomor_rombel')->get();
 
-        return view('academic.level', compact('jurusan', 'tingkat', 'kelas') + ['search' => $request->search ?? '']);
+        return view('academic.level', compact('jurusan', 'tingkat', 'kelas', 'matchedCohort', 'activeTahunAjaran') + ['search' => $request->search ?? '']);
     }
 
     /**

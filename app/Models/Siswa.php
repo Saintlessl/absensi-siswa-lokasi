@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Siswa extends Model
 {
@@ -117,6 +118,23 @@ class Siswa extends Model
     public function kelas()
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    public function jurusan(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Jurusan::class,
+            Kelas::class,
+            'id',          // Foreign key on Kelas table (matches siswas.kelas_id)
+            'id',          // Foreign key on Jurusan table (matches kelas.jurusan_id)
+            'kelas_id',    // Local key on Siswa table
+            'jurusan_id'   // Local key on Kelas table
+        );
+    }
+
+    public function getJurusanIdAttribute(): ?int
+    {
+        return $this->kelas?->jurusan_id ?? $this->angkatan?->jurusan_id;
     }
 
     public function angkatan(): BelongsTo

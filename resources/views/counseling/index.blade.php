@@ -41,72 +41,79 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Siswa</th>
-                        <th class="py-3 px-4">Konselor BK</th>
-                        <th class="py-3 px-4">Topik Umum</th>
-                        <th class="py-3 px-4">Detail Permasalahan</th>
-                        <th class="py-3 px-4">Tindak Lanjut Umum</th>
-                        <th class="py-3 px-4">Status</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tanggal</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Siswa</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Konselor BK</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Topik Umum</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Detail Permasalahan</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tindak Lanjut Umum</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($sessions as $sess)
                         @php
                             $canViewSecret = $sess->canViewConfidentialNotes(auth()->user());
                         @endphp
-                        <tr class="hover:bg-purple-50/20 transition">
-                            <td class="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 font-semibold text-slate-700 whitespace-nowrap text-xs">
                                 {{ $sess->tanggal->format('d/m/Y') }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $sess->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $sess->siswa->kelas->nama_kelas ?? '' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold text-slate-800 block">{{ $sess->siswa->nama ?? 'Siswa' }}</span>
+                                <span class="text-xs text-slate-400 mt-0.5 block">{{ $sess->siswa->kelas->nama_kelas ?? '' }}</span>
                             </td>
-                            <td class="py-3 px-4 font-medium text-slate-700">
+                            <td class="py-4 px-4 font-medium text-slate-700">
                                 {{ $sess->guruBk->name ?? 'Konselor' }}
                             </td>
-                            <td class="py-3 px-4 font-semibold text-slate-800">
+                            <td class="py-4 px-4 font-semibold text-slate-800">
                                 {{ $sess->topik_umum }}
                             </td>
-                            <td class="py-3 px-4 max-w-xs">
+                            <td class="py-4 px-4 max-w-xs">
                                 @if($canViewSecret)
                                     <p class="text-slate-700 line-clamp-2">{{ $sess->permasalahan_rahasia }}</p>
                                     @if($sess->catatan_rahasia)
-                                        <span class="text-[10px] text-purple-700 font-bold block mt-0.5">🔒 {{ $sess->catatan_rahasia }}</span>
+                                        <span class="text-xs text-purple-700 font-semibold block mt-0.5">🔒 {{ $sess->catatan_rahasia }}</span>
                                     @endif
                                 @else
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                        Rahasia Konselor
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                                        <i class='bx bx-lock-alt text-xs'></i> Rahasia Konselor
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-slate-600">
+                            <td class="py-4 px-4 text-slate-600">
                                 {{ $sess->tindak_lanjut_umum ?? 'Dalam proses' }}
                             </td>
-                            <td class="py-3 px-4 whitespace-nowrap">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold 
-                                    {{ $sess->status === 'completed' ? 'bg-emerald-50 text-emerald-700' : ($sess->status === 'in_progress' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700') }}">
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
+                                    {{ $sess->status === 'completed' ? 'bg-emerald-600 text-white' : ($sess->status === 'in_progress' ? 'bg-amber-500 text-white' : 'bg-[#003FA9] text-white') }}">
                                     {{ strtoupper(str_replace('_', ' ', $sess->status)) }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-slate-400 text-xs">Belum ada sesi konseling BK yang tercatat.</td>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-heart-circle text-2xl text-slate-400'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600">Belum ada sesi konseling</p>
+                                    <p class="text-xs text-slate-400 mt-1">Belum ada sesi bimbingan konseling BK yang tercatat.</p>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($sessions->hasPages())
-            <div class="p-4 border-t border-slate-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $sessions->links() }}
             </div>
         @endif

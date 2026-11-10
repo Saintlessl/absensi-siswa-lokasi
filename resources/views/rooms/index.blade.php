@@ -131,79 +131,79 @@
     </div>
 
     {{-- Room Table --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-dark-200 bg-dark-50/70 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                        <th class="px-6 py-3.5">Nama & Jenis Ruangan</th>
-                        <th class="px-6 py-3.5">Kode Ruangan</th>
-                        <th class="px-6 py-3.5">Gedung / Lokasi</th>
-                        <th class="px-6 py-3.5 text-center">Kapasitas</th>
-                        <th class="px-6 py-3.5">Alokasi Rombel Aktif</th>
-                        <th class="px-6 py-3.5 text-center">Status</th>
-                        <th class="px-6 py-3.5 text-center">QR Code</th>
-                        <th class="px-6 py-3.5 text-center">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Nama & Jenis Ruangan</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kode Ruangan</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Gedung / Lokasi</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Kapasitas</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Alokasi Rombel Aktif</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">QR Code</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-200/60 text-sm">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse ($rooms as $room)
                         @php
                             $activeAssignment = $room->assignments->first();
                             $activeKelas = $activeAssignment?->kelas;
                         @endphp
-                        <tr class="hover:bg-dark-50/50 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="font-bold text-dark-900">{{ $room->name }}</div>
-                                <div class="text-xs text-dark-500 flex items-center gap-2 mt-0.5">
-                                    <span class="px-2 py-0.5 rounded bg-dark-100 text-dark-600 text-[10px] font-medium">{{ $room->type ?? 'Ruang Teori' }}</span>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4">
+                                <div class="font-semibold text-slate-800">{{ $room->name }}</div>
+                                <div class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium">{{ $room->type ?? 'Ruang Teori' }}</span>
                                     @if($room->description)
                                         <span class="truncate max-w-[200px]" title="{{ $room->description }}">{{ $room->description }}</span>
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-6 py-4 font-mono font-bold text-dark-800 text-xs">
-                                <span class="px-2 py-1 bg-dark-100 rounded-md border border-dark-200">{{ $room->code }}</span>
+                            <td class="py-4 px-4 font-mono font-bold text-slate-700 text-xs">
+                                <span class="px-2 py-1 bg-slate-100 rounded-md text-slate-700">{{ $room->code }}</span>
                             </td>
-                            <td class="px-6 py-4 text-dark-600 text-xs">
-                                <i class='bx bx-building mr-1 text-dark-400'></i>{{ $room->building ?? '-' }}
+                            <td class="py-4 px-4 text-slate-600 text-xs">
+                                <i class='bx bx-building mr-1 text-slate-400'></i>{{ $room->building ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 text-center font-bold text-dark-800 text-xs">
-                                {{ $room->capacity ?? '-' }} <span class="text-dark-400 font-normal">siswa</span>
+                            <td class="py-4 px-4 text-center font-bold text-slate-700 text-xs">
+                                {{ $room->capacity ?? '-' }} <span class="text-slate-400 font-normal">siswa</span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="py-4 px-4">
                                 @if($activeKelas)
-                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary-50 text-primary-800 border border-primary-200 text-xs font-semibold">
-                                        <i class='bx bx-door-open text-primary-600'></i>
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-[#003FA9] text-xs font-semibold">
+                                        <i class='bx bx-door-open text-base'></i>
                                         <span>{{ $activeKelas->nama_kelas }}</span>
                                     </div>
-                                    <p class="text-[10px] text-dark-400 mt-0.5">s/d {{ $activeAssignment->ends_on ? $activeAssignment->ends_on->format('d/m/Y') : 'Berjalan' }}</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">s/d {{ $activeAssignment->ends_on ? $activeAssignment->ends_on->format('d/m/Y') : 'Berjalan' }}</p>
                                 @else
-                                    <span class="text-xs text-dark-400 italic">Belum dialokasikan</span>
+                                    <span class="text-xs text-slate-400 italic">Belum dialokasikan</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="py-4 px-4 text-center">
                                 @if($room->is_active)
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
                                         Aktif
                                     </span>
                                 @else
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-dark-100 text-dark-500">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">
                                         Nonaktif
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="py-4 px-4 text-center">
                                 <button type="button" onclick="showQrModal('{{ $room->id }}', '{{ $room->name }}', '{{ $room->code }}', '{{ $room->qr_token }}')"
-                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-dark-50 hover:bg-dark-100 text-dark-700 border border-dark-200 text-xs font-semibold transition">
-                                    <i class='bx bx-qr-scan text-sm text-primary-600'></i>
-                                    <span>Lihat QR</span>
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition inline-flex items-center gap-1 text-xs font-semibold"
+                                    title="Lihat QR Code">
+                                    <i class='bx bx-qr-scan text-base'></i> QR
                                 </button>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="inline-flex items-center gap-1.5">
+                            <td class="py-4 px-4 text-center">
+                                <div class="inline-flex items-center justify-center gap-1">
                                     <button type="button" onclick="openEditRoomModal({{ json_encode($room) }})"
-                                        class="w-8 h-8 rounded-lg border border-dark-200 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-200 flex items-center justify-center text-dark-600 transition"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
                                         title="Edit Ruangan">
                                         <i class='bx bx-edit text-base'></i>
                                     </button>
@@ -211,7 +211,7 @@
                                     <form action="{{ route('rooms.regenerate', $room) }}" method="POST" onsubmit="return confirm('Regenerate QR Code untuk {{ $room->name }}? QR Code sebelumnya tidak akan bisa digunakan lagi!')">
                                         @csrf
                                         <button type="submit"
-                                            class="w-8 h-8 rounded-lg border border-dark-200 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 flex items-center justify-center text-dark-600 transition"
+                                            class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition"
                                             title="Regenerate QR Token">
                                             <i class='bx bx-refresh text-base'></i>
                                         </button>
@@ -220,7 +220,7 @@
                                     <form action="{{ route('rooms.destroy', $room) }}" method="POST" onsubmit="return confirm('Hapus data ruangan {{ $room->name }}?')">
                                         @csrf
                                         <button type="submit"
-                                            class="w-8 h-8 rounded-lg border border-dark-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 flex items-center justify-center text-dark-600 transition"
+                                            class="delete-confirm p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                                             title="Hapus Ruangan">
                                             <i class='bx bx-trash text-base'></i>
                                         </button>
@@ -230,10 +230,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-dark-400">
-                                <i class='bx bx-building-house text-4xl mb-2'></i>
-                                <p class="text-sm font-semibold text-dark-600">Belum ada data ruangan fisik</p>
-                                <p class="text-xs text-dark-400 mt-1">Gunakan tombol "Tambah Ruangan" di atas untuk menambahkan ruangan baru.</p>
+                            <td colspan="8" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-building-house text-2xl text-slate-400'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600">Belum ada data ruangan fisik</p>
+                                    <p class="text-xs text-slate-400 mt-1">Gunakan tombol "Tambah Ruangan" di atas untuk menambahkan ruangan baru.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -241,7 +245,7 @@
             </table>
         </div>
         @if($rooms->hasPages())
-            <div class="px-6 py-4 border-t border-dark-200">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $rooms->links() }}
             </div>
         @endif

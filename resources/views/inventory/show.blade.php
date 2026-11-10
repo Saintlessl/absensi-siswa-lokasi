@@ -139,48 +139,61 @@
     </div>
 
     {{-- Borrowing History Table --}}
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-blue-50 space-y-4">
-        <h3 class="text-sm font-bold text-slate-800">Riwayat Peminjaman Alat</h3>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 overflow-hidden">
+        <div class="pb-4 mb-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-800">Riwayat Peminjaman Alat</h3>
+            <span class="text-xs text-slate-400">Total {{ $item->borrowings->count() }} Riwayat</span>
+        </div>
 
         @if($item->borrowings->isEmpty())
-            <div class="py-8 text-center text-xs text-slate-400">
-                Belum ada riwayat transaksi peminjaman untuk peralatan ini.
+            <div class="py-12 text-center text-slate-400">
+                <div class="flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                        <i class='bx bx-history text-2xl text-slate-400'></i>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600">Belum Ada Riwayat Peminjaman</p>
+                    <p class="text-xs text-slate-400 mt-1">Belum ada riwayat transaksi peminjaman untuk peralatan ini.</p>
+                </div>
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 text-slate-400 uppercase text-[10px] font-semibold tracking-wider">
-                            <th class="py-2.5 px-3">Peminjam</th>
-                            <th class="py-2.5 px-3">Tgl Pinjam</th>
-                            <th class="py-2.5 px-3">Rencana Kembali</th>
-                            <th class="py-2.5 px-3">Tgl Kembali</th>
-                            <th class="py-2.5 px-3">Status</th>
-                            <th class="py-2.5 px-3">Kondisi Fisik</th>
-                            <th class="py-2.5 px-3">Keperluan</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Peminjam</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tgl Pinjam</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rencana Kembali</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tgl Kembali</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kondisi Fisik</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Keperluan</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @foreach($item->borrowings as $b)
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="py-2 px-3 font-semibold text-slate-800">
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 font-semibold text-slate-800">
                                     {{ $b->user->name ?? '-' }}
                                     @if($b->siswa)
-                                        <div class="text-[10px] text-slate-400 font-mono">Siswa (NIS: {{ $b->siswa->nis }})</div>
+                                        <div class="text-xs text-slate-400 font-mono mt-0.5">Siswa (NIS: {{ $b->siswa->nis }})</div>
                                     @endif
                                 </td>
-                                <td class="py-2 px-3 text-slate-600 font-mono">{{ $b->tanggal_pinjam->translatedFormat('d M Y') }}</td>
-                                <td class="py-2 px-3 text-slate-600 font-mono">{{ $b->rencana_kembali->translatedFormat('d M Y') }}</td>
-                                <td class="py-2 px-3 text-slate-600 font-mono">{{ $b->tanggal_kembali ? $b->tanggal_kembali->translatedFormat('d M Y') : '-' }}</td>
-                                <td class="py-2 px-3">
-                                    <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {{ $b->status === 'returned' ? 'bg-emerald-50 text-emerald-700' : ($b->status === 'borrowed' ? 'bg-blue-50 text-[#0052CC]' : 'bg-amber-50 text-amber-700') }}">
-                                        {{ $b->status }}
-                                    </span>
+                                <td class="py-4 px-4 text-slate-600 font-mono text-xs">{{ $b->tanggal_pinjam->translatedFormat('d M Y') }}</td>
+                                <td class="py-4 px-4 text-slate-600 font-mono text-xs">{{ $b->rencana_kembali->translatedFormat('d M Y') }}</td>
+                                <td class="py-4 px-4 text-slate-600 font-mono text-xs">{{ $b->tanggal_kembali ? $b->tanggal_kembali->translatedFormat('d M Y') : '-' }}</td>
+                                <td class="py-4 px-4">
+                                    @if($b->status === 'returned')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">DIKEMBALIKAN</span>
+                                    @elseif($b->status === 'borrowed')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#003FA9] text-white">DIPINJAM</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500 text-white">PENDING</span>
+                                    @endif
                                 </td>
-                                <td class="py-2 px-3 uppercase text-[10px] font-semibold text-slate-600">
+                                <td class="py-4 px-4 uppercase text-xs font-medium text-slate-600">
                                     {{ $b->kondisi_sesudah ?: $b->kondisi_sebelum }}
                                 </td>
-                                <td class="py-2 px-3 text-slate-500 max-w-xs truncate" title="{{ $b->keperluan }}">
+                                <td class="py-4 px-4 text-slate-500 max-w-xs truncate text-xs" title="{{ $b->keperluan }}">
                                     {{ $b->keperluan }}
                                 </td>
                             </tr>

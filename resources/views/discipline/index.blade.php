@@ -77,20 +77,21 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
         <form method="GET" action="{{ route('discipline.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul atau nama siswa..." class="w-full text-xs rounded-xl border-slate-200">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul atau nama siswa..."
+                    class="w-full text-sm rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9] px-3.5 py-2 transition">
             </div>
             <div>
-                <select name="tipe" class="w-full text-xs rounded-xl border-slate-200">
+                <select name="tipe" class="w-full text-sm rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9] px-3.5 py-2 transition">
                     <option value="">Semua Tipe Catatan</option>
                     <option value="pelanggaran" {{ request('tipe') == 'pelanggaran' ? 'selected' : '' }}>Pelanggaran Tata Tertib</option>
                     <option value="prestasi" {{ request('tipe') == 'prestasi' ? 'selected' : '' }}>Prestasi & Penghargaan</option>
                 </select>
             </div>
             <div>
-                <select name="kelas_id" class="w-full text-xs rounded-xl border-slate-200">
+                <select name="kelas_id" class="w-full text-sm rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003FA9]/20 focus:border-[#003FA9] px-3.5 py-2 transition">
                     <option value="">Semua Kelas</option>
                     @foreach($classes as $c)
                         <option value="{{ $c->id }}" {{ request('kelas_id') == $c->id ? 'selected' : '' }}>{{ $c->nama_kelas }}</option>
@@ -98,78 +99,87 @@
                 </select>
             </div>
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition">Filter</button>
-                <a href="{{ route('discipline.index') }}" class="px-3 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-200 transition">Reset</a>
+                <button type="submit" class="flex-1 px-4 py-2 bg-[#003FA9] hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm">Filter</button>
+                <a href="{{ route('discipline.index') }}" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold rounded-xl transition flex items-center justify-center">Reset</a>
             </div>
         </form>
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4">Tanggal</th>
-                        <th class="py-3 px-4">Siswa</th>
-                        <th class="py-3 px-4">Kategori & Judul</th>
-                        <th class="py-3 px-4">Poin</th>
-                        <th class="py-3 px-4">Dicatat Oleh</th>
-                        <th class="py-3 px-4">Status & Tindak Lanjut</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tanggal</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Siswa</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kategori & Judul</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Poin</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Dicatat Oleh</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status & Tindak Lanjut</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($records as $rec)
-                        <tr class="hover:bg-blue-50/30 transition">
-                            <td class="py-3 px-4 font-bold text-slate-700 whitespace-nowrap">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 font-semibold text-slate-700 whitespace-nowrap text-xs">
                                 {{ $rec->tanggal->format('d/m/Y') }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $rec->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $rec->siswa->kelas->nama_kelas ?? '' }}</span>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold text-slate-800 block">{{ $rec->siswa->nama ?? 'Siswa' }}</span>
+                                <span class="text-xs text-slate-400 mt-0.5 block">{{ $rec->siswa->kelas->nama_kelas ?? '' }}</span>
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase mb-1
-                                    {{ $rec->category->tipe === 'prestasi' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+                            <td class="py-4 px-4">
+                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase mb-1
+                                    {{ $rec->category->tipe === 'prestasi' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white' }}">
                                     {{ $rec->category->nama ?? $rec->category->tipe }}
                                 </span>
-                                <div class="font-semibold text-slate-800">{{ $rec->judul }}</div>
-                                <div class="text-[11px] text-slate-500 line-clamp-1">{{ $rec->deskripsi }}</div>
+                                <div class="font-semibold text-slate-800 text-sm">{{ $rec->judul }}</div>
+                                <div class="text-xs text-slate-500 line-clamp-1 mt-0.5">{{ $rec->deskripsi }}</div>
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="font-black {{ $rec->category->tipe === 'prestasi' ? 'text-emerald-600' : 'text-rose-600' }}">
+                            <td class="py-4 px-4 font-bold text-sm">
+                                <span class="{{ $rec->category->tipe === 'prestasi' ? 'text-emerald-600' : 'text-rose-600' }}">
                                     {{ $rec->category->tipe === 'prestasi' ? '+' : '-' }}{{ $rec->poin }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-[11px] text-slate-500">
+                            <td class="py-4 px-4 text-xs text-slate-500">
                                 {{ $rec->recordedBy->name ?? 'Sistem' }}
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold 
-                                    {{ $rec->status === 'resolved' ? 'bg-emerald-50 text-emerald-700' : ($rec->status === 'verified' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700') }}">
+                            <td class="py-4 px-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
+                                    {{ $rec->status === 'resolved' ? 'bg-emerald-600 text-white' : ($rec->status === 'verified' ? 'bg-[#003FA9] text-white' : 'bg-amber-500 text-white') }}">
                                     {{ strtoupper($rec->status) }}
                                 </span>
                                 @if($rec->tindak_lanjut)
-                                    <div class="text-[10px] text-slate-500 mt-0.5">Tindak: {{ $rec->tindak_lanjut }}</div>
+                                    <div class="text-xs text-slate-500 mt-1">Tindak: {{ $rec->tindak_lanjut }}</div>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <button type="button" onclick="openStatusModal({{ $rec->id }}, '{{ $rec->status }}', '{{ addslashes($rec->tindak_lanjut ?? '') }}')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-lg transition">
-                                    Update
+                            <td class="py-4 px-4 text-right whitespace-nowrap">
+                                <button type="button" onclick="openStatusModal({{ $rec->id }}, '{{ $rec->status }}', '{{ addslashes($rec->tindak_lanjut ?? '') }}')"
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition" title="Update Status">
+                                    <i class='bx bx-edit text-lg'></i>
                                 </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-slate-400 text-xs">Belum ada catatan kedisiplinan atau prestasi.</td>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                                        <i class='bx bx-shield-quarter text-2xl text-slate-400'></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600">Belum ada catatan</p>
+                                    <p class="text-xs text-slate-400 mt-1">Belum ada catatan kedisiplinan atau prestasi.</p>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         @if($records->hasPages())
-            <div class="p-4 border-t border-slate-100">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $records->links() }}
             </div>
         @endif

@@ -5,119 +5,137 @@
 @section('page-subtitle', 'Pilih rombongan belajar untuk melihat data siswa terdaftar')
 
 @section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.index') }}" class="hover:text-primary-600 transition-colors">Struktur Akademik</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><a href="{{ route('academic.major', $jurusan) }}" class="hover:text-primary-600 transition-colors font-mono font-bold">{{ $jurusan->kode_jurusan }}</a></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium font-bold">Kelas {{ $tingkat }}</li>
-@endsection
-
-@section('page-header')
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded-md text-xs font-bold border border-primary-200 bg-primary-50 text-primary-700 font-mono">
-                    {{ $jurusan->kode_jurusan }}
-                </span>
-                <span class="text-xs text-dark-400">&bull; Tingkat {{ $tingkat }}</span>
-            </div>
-            <h2 class="text-xl font-medium text-dark-800">Daftar Rombongan Belajar (Rombel)</h2>
-            <p class="text-sm text-dark-400">Pilih salah satu rombel untuk membuka direktori siswa, histori penempatan, dan profil.</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('academic.major', $jurusan) }}"
-                class="px-3.5 py-2 border border-dark-200 rounded-xl text-dark-600 hover:bg-dark-50 text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
-                <i class='bx bx-arrow-back'></i> Kembali ke Tingkat
-            </a>
-            @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
-                <a href="{{ route('kelas') }}"
-                    class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
-                    <i class='bx bx-plus-circle'></i> Tambah Rombel
-                </a>
-            @endif
-        </div>
-    </div>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li><a href="{{ route('academic.index') }}" class="text-slate-500 hover:text-[#003FA9] transition">Struktur Akademik</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li><a href="{{ route('academic.major', $jurusan) }}" class="text-slate-500 hover:text-[#003FA9] transition font-bold">{{ $jurusan->nama_jurusan }}</a></li>
+    <li><i class='bx bx-chevron-right text-slate-400'></i></li>
+    <li class="text-[#003FA9] font-semibold">Kelas {{ $tingkat }}</li>
 @endsection
 
 @section('content')
-    {{-- Search Bar --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-4 mb-6">
-        <form action="{{ route('academic.level', ['jurusan' => $jurusan->id, 'tingkat' => $tingkat]) }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3">
-            <div class="flex-1 w-full relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class='bx bx-search text-dark-400 text-lg'></i>
-                </div>
-                <input type="text" name="search" value="{{ $search }}"
-                    class="block w-full pl-10 pr-3 py-2.5 border border-dark-200 rounded-xl bg-white text-sm text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
-                    placeholder="Cari nama rombel atau nama wali kelas...">
-            </div>
-            <button type="submit"
-                class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-1.5 whitespace-nowrap">
-                <i class='bx bx-filter-alt'></i> Cari
-            </button>
-            @if ($search)
-                <a href="{{ route('academic.level', ['jurusan' => $jurusan->id, 'tingkat' => $tingkat]) }}"
-                    class="px-4 py-2.5 border border-dark-200 rounded-xl text-sm text-dark-600 hover:bg-dark-50 transition-colors whitespace-nowrap">
-                    Reset
-                </a>
-            @endif
-        </form>
-    </div>
+    {{-- Main Container Card --}}
+    <div class="bg-white rounded-[28px] p-6 sm:p-8 shadow-sm border border-slate-100 space-y-6">
 
-    {{-- Cards Grid (Level 3: Rombel) --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @forelse ($kelas as $k)
-            <div class="glass-card rounded-2xl border border-dark-200/50 bg-white shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col overflow-hidden group hover:-translate-y-1">
-                {{-- Header --}}
-                <div class="p-6 border-b border-dark-100 bg-dark-50/20">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="w-10 h-10 rounded-xl bg-primary-600 text-white font-black flex items-center justify-center font-mono text-base shadow-sm">
-                            {{ $k->nomor_rombel ?: substr($k->nama_kelas, -1) }}
+        {{-- Header Section: Detail Tingkat Kelas --}}
+        <div class="border border-slate-100 rounded-[24px] p-6 sm:p-7 bg-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-3 py-1 rounded-xl bg-[#EFF5FF] text-[#003FA9] text-xs font-bold">
+                        Kelas {{ $tingkat }}
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold font-mono">
+                        {{ $jurusan->kode_jurusan }}
+                    </span>
+                    @if (isset($matchedCohort) && $matchedCohort)
+                        <span class="text-xs text-slate-400 font-medium">
+                            &bull; {{ $matchedCohort->nama_angkatan }} (Masuk {{ $matchedCohort->tahun_masuk }})
                         </span>
-                        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-dark-100 text-dark-700 border border-dark-200">
-                            TA {{ $k->tahun_ajaran ?: '2026/2027' }}
-                        </span>
-                    </div>
-
-                    <h3 class="text-xl font-black text-dark-900 font-mono tracking-tight group-hover:text-primary-600 transition-colors">
-                        {{ $k->nama_kelas }}
-                    </h3>
-                    <div class="flex items-center gap-1.5 text-xs text-dark-500 mt-1">
-                        <i class='bx bx-user-voice text-primary-600 text-sm'></i>
-                        <span class="truncate">Wali: <strong class="text-dark-700 font-semibold">{{ $k->wali_kelas }}</strong></span>
-                    </div>
+                    @endif
                 </div>
-
-                {{-- Statistics / Detail --}}
-                <div class="px-6 py-4 border-b border-dark-100 bg-white flex items-center justify-between text-xs">
-                    <div>
-                        <span class="text-dark-400 block text-[11px] uppercase font-semibold">Siswa Terdaftar</span>
-                        <span class="text-base font-extrabold text-dark-800">{{ $k->siswa_count }} Siswa</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-dark-400 block text-[11px] uppercase font-semibold">Kapasitas Maks</span>
-                        <span class="text-sm font-semibold text-dark-600">{{ $k->jumlah_siswa }} Kursi</span>
-                    </div>
-                </div>
-
-                {{-- Action Footer --}}
-                <div class="p-4 bg-white mt-auto">
-                    <a href="{{ route('academic.class', $k) }}"
-                        class="w-full py-2.5 px-4 rounded-xl border border-dark-200 hover:border-primary-500 hover:bg-primary-50 text-dark-700 hover:text-primary-700 font-semibold text-xs transition-all flex items-center justify-center gap-2 group-hover:bg-primary-600 group-hover:text-white group-hover:border-primary-600 shadow-sm">
-                        <span>Buka Direktori Siswa</span>
-                        <i class='bx bx-right-arrow-alt text-base transition-transform group-hover:translate-x-1'></i>
-                    </a>
-                </div>
-            </div>
-        @empty
-            <div class="col-span-full py-16 text-center glass-card rounded-2xl border border-dark-200/50 bg-white">
-                <i class='bx bx-home-alt text-5xl text-dark-300 mb-3'></i>
-                <h4 class="text-base font-bold text-dark-800">Belum Ada Rombel untuk Kelas {{ $tingkat }} {{ $jurusan->kode_jurusan }}</h4>
-                <p class="text-xs text-dark-400 mt-1 max-w-sm mx-auto">
-                    Silakan tambahkan data rombongan belajar baru melalui menu Data Rombel.
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    Rombongan Belajar Kelas {{ $tingkat }}
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+                    {{ $jurusan->nama_jurusan }} &bull; Tahun Ajaran Operasional {{ $activeTahunAjaran ?? '2026/2027' }}
                 </p>
             </div>
-        @endforelse
+            <div class="flex items-center gap-2.5 self-start sm:self-center">
+                <a href="{{ route('academic.major', $jurusan) }}"
+                    class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs inline-flex items-center gap-2 transition">
+                    <i class='bx bx-arrow-back text-sm'></i>
+                    <span>Kembali ke Detail Jurusan</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- Search Bar --}}
+        <form action="{{ route('academic.level', ['jurusan' => $jurusan->id, 'tingkat' => $tingkat]) }}" method="GET">
+            <div class="flex items-center gap-3">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class='bx bx-search text-base'></i>
+                    </div>
+                    <input type="text" name="search" value="{{ $search }}"
+                        class="w-full h-11 pl-10 pr-4 rounded-xl bg-[#EFF5FF] border-0 text-slate-800 text-xs font-medium placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9] outline-none transition"
+                        placeholder="Cari nama rombel atau nama wali kelas...">
+                </div>
+                <button type="submit"
+                    class="h-11 px-6 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition">
+                    <span>Cari</span>
+                </button>
+                @if ($search)
+                    <a href="{{ route('academic.level', ['jurusan' => $jurusan->id, 'tingkat' => $tingkat]) }}"
+                        class="h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold inline-flex items-center transition">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
+
+        {{-- Grid Cards Rombel (Consistent with Card Tingkat Kelas) --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+            @forelse ($kelas as $k)
+                @php
+                    $waliName = $k->activeHomeroom?->guru?->nama ?? $k->wali_kelas;
+                @endphp
+                <div class="border border-slate-100 rounded-[24px] p-6 bg-white shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                    <div>
+                        {{-- Top Badges --}}
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-3 py-1 rounded-xl bg-[#EFF5FF] text-[#003FA9] text-xs font-bold">
+                                Kelas {{ $k->tingkat }}
+                            </span>
+                            <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold font-mono">
+                                {{ $jurusan->kode_jurusan }}
+                            </span>
+                        </div>
+
+                        {{-- Nama Rombel --}}
+                        <h3 class="text-2xl font-black text-slate-900 mt-4 tracking-tight group-hover:text-[#003FA9] transition-colors">
+                            {{ $k->nama_kelas }}
+                        </h3>
+
+                        {{-- Wali Kelas --}}
+                        <div class="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                            <i class='bx bx-user-voice text-base text-[#003FA9] shrink-0'></i>
+                            <span class="truncate">Wali: <strong class="text-slate-800 font-semibold">{{ $waliName ?: 'Belum ditentukan' }}</strong></span>
+                        </div>
+
+                        {{-- 2 Stat Boxes --}}
+                        <div class="grid grid-cols-2 gap-3 my-5 text-center">
+                            <div class="bg-[#EFF5FF] rounded-xl p-3.5">
+                                <span class="block text-xl font-black text-slate-900">{{ $k->siswa_count }}</span>
+                                <span class="block text-[11px] text-slate-500 font-medium mt-0.5">Siswa Terdaftar</span>
+                            </div>
+                            <div class="bg-[#EFF5FF] rounded-xl p-3.5">
+                                <span class="block text-xl font-black text-slate-900">{{ $k->jumlah_siswa ?: 36 }}</span>
+                                <span class="block text-[11px] text-slate-500 font-medium mt-0.5">Kapasitas Maks</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Action Button --}}
+                    <div>
+                        <a href="{{ route('academic.class', $k) }}"
+                            class="w-full py-2.5 rounded-xl bg-[#003FA9] hover:bg-[#002D7A] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 shadow-sm transition">
+                            <span>Telusuri Rombel</span>
+                            <i class='bx bx-right-arrow-alt text-base'></i>
+                        </a>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full py-16 text-center border border-slate-100 rounded-[24px] bg-white">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center text-2xl">
+                        <i class='bx bx-home-alt'></i>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-800">Belum Ada Rombongan Belajar</h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                        Tidak ditemukan data rombongan belajar untuk Kelas {{ $tingkat }} {{ $jurusan->kode_jurusan }}.
+                    </p>
+                </div>
+            @endforelse
+        </div>
+
     </div>
 @endsection

@@ -59,57 +59,61 @@
     </div>
 
     <!-- Recent Attendances -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 class="text-sm font-black text-slate-800">Aktivitas Presensi PKL Hari Ini</h3>
-            <span class="text-[11px] text-slate-400 font-medium">{{ now()->format('d M Y') }}</span>
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden p-6">
+        <div class="pb-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900 tracking-tight">Aktivitas Presensi PKL Hari Ini</h3>
+            <span class="text-xs text-slate-400 font-medium">{{ now()->format('d M Y') }}</span>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                        <th class="py-3 px-4">Siswa</th>
-                        <th class="py-3 px-4">Mitra Perusahaan</th>
-                        <th class="py-3 px-4">Jam Masuk</th>
-                        <th class="py-3 px-4">Jam Pulang</th>
-                        <th class="py-3 px-4">Validasi Lokasi</th>
-                        <th class="py-3 px-4">Status</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MITRA PERUSAHAAN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JAM MASUK</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">JAM PULANG</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">VALIDASI LOKASI</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATUS</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($todayAttendances as $att)
-                        <tr class="hover:bg-blue-50/30 transition">
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $att->placement->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $att->placement->siswa->kelas->nama_kelas ?? '' }}</span>
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4">
+                                <span class="font-bold text-slate-900 text-xs sm:text-sm block">{{ $att->placement->siswa->nama ?? 'Siswa' }}</span>
+                                <span class="text-[11px] text-slate-400 font-normal">{{ $att->placement->siswa->kelas->nama_kelas ?? '' }}</span>
                             </td>
-                            <td class="py-3 px-4 font-medium text-slate-700">
+                            <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
                                 {{ $att->placement->partner->nama_dudi ?? '-' }}
                             </td>
-                            <td class="py-3 px-4 font-bold text-slate-800">{{ $att->jam_masuk ?? '-' }}</td>
-                            <td class="py-3 px-4 font-bold text-slate-800">{{ $att->jam_pulang ?? '-' }}</td>
-                            <td class="py-3 px-4">
+                            <td class="py-4 px-4 font-mono font-bold text-slate-800 text-xs sm:text-sm">{{ $att->jam_masuk ?? '-' }}</td>
+                            <td class="py-4 px-4 font-mono font-bold text-slate-800 text-xs sm:text-sm">{{ $att->jam_pulang ?? '-' }}</td>
+                            <td class="py-4 px-4">
                                 @if($att->is_location_valid)
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                                        <i class='bx bx-check-circle text-base'></i>
                                         Valid ({{ $att->distance_meters }}m)
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-rose-600">
+                                        <i class='bx bx-error-circle text-base'></i>
                                         Di Luar Radius ({{ $att->distance_meters }}m)
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $att->status === 'hadir' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
+                            <td class="py-4 px-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $att->status === 'hadir' ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white' }}">
                                     {{ strtoupper($att->status) }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 text-xs">Belum ada presensi siswa masuk hari ini.</td>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-time text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Belum ada presensi siswa masuk hari ini</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Data presensi PKL harian akan muncul otomatis ketika siswa check-in.</p>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

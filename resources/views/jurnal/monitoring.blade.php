@@ -75,57 +75,57 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                            <th class="py-3 px-4">Tanggal & Jam</th>
-                            <th class="py-3 px-4">Guru Pengampu</th>
-                            <th class="py-3 px-4">Kelas & Jurusan</th>
-                            <th class="py-3 px-4">Mata Pelajaran</th>
-                            <th class="py-3 px-4">Materi Pokok</th>
-                            <th class="py-3 px-4">Kehadiran Sesi</th>
-                            <th class="py-3 px-4 text-right">Aksi</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL & JAM</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">GURU PENGAMPU</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KELAS & JURUSAN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MATA PELAJARAN</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">MATERI POKOK</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KEHADIRAN SESI</th>
+                            <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-20">AKSI</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         @foreach($journals as $j)
                             @php
                                 $hadir = $j->attendances->where('status', 'hadir')->count();
                                 $total = $j->attendances->count();
                             @endphp
-                            <tr class="hover:bg-blue-50/20 transition-colors">
-                                <td class="py-3 px-4 whitespace-nowrap text-slate-600">
-                                    <div class="font-bold text-slate-800">{{ $j->tanggal->translatedFormat('d M Y') }}</div>
-                                    <div class="text-[10px] text-slate-400 font-mono">{{ $j->jam_ke ?: '-' }}</div>
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="py-4 px-4 whitespace-nowrap text-slate-900 font-bold text-xs sm:text-sm">
+                                    <div>{{ $j->tanggal->translatedFormat('d M Y') }}</div>
+                                    <div class="text-[11px] text-slate-400 font-mono font-normal">{{ $j->jam_ke ?: '-' }}</div>
                                 </td>
-                                <td class="py-3 px-4">
-                                    <div class="font-bold text-slate-900">{{ $j->guru->nama }}</div>
-                                    <div class="text-[10px] text-slate-400 font-mono">NIP: {{ $j->guru->nip ?? '-' }}</div>
+                                <td class="py-4 px-4">
+                                    <div class="font-bold text-slate-900 text-xs sm:text-sm">{{ $j->guru->nama }}</div>
+                                    <div class="text-[11px] text-slate-400 font-mono">NIP: {{ $j->guru->nip ?? '-' }}</div>
                                 </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-[#0052CC]">
-                                        {{ $j->kelas->nama_kelas ?? '-' }}
-                                    </span>
+                                <td class="py-4 px-4 font-bold text-slate-900 font-mono text-xs sm:text-sm">
+                                    {{ $j->kelas->nama_kelas ?? '-' }}
                                 </td>
-                                <td class="py-3 px-4 text-slate-700 font-semibold">
+                                <td class="py-4 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
                                     {{ $j->nama_mapel }}
                                 </td>
-                                <td class="py-3 px-4 text-slate-700 max-w-xs truncate" title="{{ $j->materi_pokok }}">
-                                    {{ $j->materi_pokok }}
+                                <td class="py-4 px-4 text-slate-700 max-w-xs truncate" title="{{ $j->materi_pokok }}">
+                                    <span class="text-xs sm:text-sm font-medium text-slate-800">{{ $j->materi_pokok }}</span>
                                 </td>
-                                <td class="py-3 px-4 whitespace-nowrap">
+                                <td class="py-4 px-4 whitespace-nowrap">
                                     @if($total > 0)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                                            <i class='bx bx-user-check text-base'></i>
                                             {{ $hadir }}/{{ $total }} Hadir
                                         </span>
                                     @else
-                                        <span class="text-slate-400 text-[11px]">-</span>
+                                        <span class="text-slate-400 text-xs">-</span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4 text-right">
+                                <td class="py-4 px-4 text-right">
                                     <a href="{{ route('jurnal.show', $j->id) }}"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-[#0052CC] hover:bg-blue-100 transition-colors">
-                                        <i class='bx bx-show'></i> Detail
+                                       class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition inline-flex items-center gap-1"
+                                       title="Lihat Detail Jurnal">
+                                        <i class='bx bx-info-circle text-lg'></i>
                                     </a>
                                 </td>
                             </tr>
@@ -135,7 +135,7 @@
             </div>
 
             @if($journals->hasPages())
-                <div class="p-4 bg-slate-50/50 border-t border-slate-100">
+                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                     {{ $journals->links() }}
                 </div>
             @endif

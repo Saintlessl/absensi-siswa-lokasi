@@ -124,7 +124,7 @@ class AcademicStructureCohortIntegrationTest extends TestCase
     }
 
     /**
-     * Test Overview Struktur Akademik (Level 1) renders Jurusans, Active Cohorts, and Alumni Cohorts.
+     * Test Overview Struktur Akademik (Level 1) renders Jurusans and excludes school-level cohorts per redesign.
      */
     public function test_academic_overview_index_renders_jurusans_and_active_and_alumni_cohorts(): void
     {
@@ -134,9 +134,8 @@ class AcademicStructureCohortIntegrationTest extends TestCase
             ->assertSee('Struktur Akademik')
             ->assertSee('Program Keahlian')
             ->assertSee($this->jurusan1->nama_jurusan)
-            ->assertSee('ANGKATAN AKTIF (TINGKAT SEKOLAH)')
-            ->assertSee('ANGKATAN ALUMNI / LULUS')
-            ->assertSee($this->alumniCohort->nama_angkatan);
+            ->assertDontSee('ANGKATAN AKTIF (TINGKAT SEKOLAH)')
+            ->assertDontSee('ANGKATAN ALUMNI / LULUS');
     }
 
     /**

@@ -55,59 +55,58 @@
     </div>
 
     {{-- Students Table --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+    <div class="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden p-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-dark-50/70 border-b border-dark-100 text-[11px] font-bold text-dark-500 uppercase tracking-wider">
-                        <th class="px-5 py-4">No</th>
-                        <th class="px-5 py-4">Identitas Siswa</th>
-                        <th class="px-5 py-4">NIS / NISN</th>
-                        <th class="px-5 py-4">L/P</th>
-                        <th class="px-5 py-4">Nomor HP Siswa</th>
-                        <th class="px-5 py-4">Status Akun</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider w-12 text-center">NO</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">IDENTITAS SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NIS / NISN</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">L/P</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">NOMOR HP SISWA</th>
+                        <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">STATUS AKUN</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-100/60">
+                <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($students as $index => $s)
-                        <tr class="hover:bg-dark-50/30 transition">
-                            <td class="px-5 py-4 font-mono text-dark-400">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-4 px-4 font-medium text-xs text-slate-400 text-center">
                                 {{ $students->firstItem() + $index }}
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="py-4 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-700 font-bold flex items-center justify-center flex-shrink-0 text-xs">
+                                    <div class="w-9 h-9 rounded-xl bg-[#EFF5FF] text-[#003FA9] font-bold flex items-center justify-center shrink-0 text-xs">
                                         {{ strtoupper(substr($s->nama, 0, 2)) }}
                                     </div>
                                     <div>
-                                        <p class="font-bold text-dark-900">{{ $s->nama }}</p>
-                                        <p class="text-[10px] text-dark-400">{{ $s->user?->email ?? '-' }}</p>
+                                        <p class="font-bold text-slate-900 text-xs sm:text-sm">{{ $s->nama }}</p>
+                                        <p class="text-[11px] text-slate-400 font-mono">{{ $s->user?->email ?? '-' }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-4 font-mono text-dark-600">
-                                <div><span class="font-bold text-dark-800">{{ $s->nis }}</span></div>
-                                <div class="text-[10px] text-dark-400">{{ $s->nisn ?? '-' }}</div>
+                            <td class="py-4 px-4 font-mono">
+                                <div><span class="font-bold text-slate-900 text-xs sm:text-sm">{{ $s->nis }}</span></div>
+                                <div class="text-[11px] text-slate-400">NISN: {{ $s->nisn ?? '-' }}</div>
                             </td>
-                            <td class="px-5 py-4">
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $s->jenis_kelamin === 'L' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700' }}">
-                                    {{ $s->jenis_kelamin }}
-                                </span>
+                            <td class="py-4 px-4 text-center font-semibold text-slate-800 text-xs sm:text-sm">
+                                {{ $s->jenis_kelamin }}
                             </td>
-                            <td class="px-5 py-4 font-mono text-dark-600">
+                            <td class="py-4 px-4 font-mono text-xs text-slate-700">
                                 {{ $s->no_telp_siswa ?? $s->no_telp_orangtua ?? '-' }}
                             </td>
-                            <td class="px-5 py-4">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <td class="py-4 px-4 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">
                                     Aktif
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-dark-400">
-                                <i class='bx bx-user-x text-3xl mb-1 text-dark-300'></i>
-                                <p>Tidak ditemukan siswa pada rombel ini.</p>
+                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                <i class='bx bx-user-x text-4xl mb-2 text-slate-300'></i>
+                                <p class="font-semibold text-sm text-slate-600">Tidak ditemukan siswa pada rombel ini</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Siswa belum dialokasikan ke dalam rombongan belajar ini.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -116,7 +115,7 @@
         </div>
 
         @if($students->hasPages())
-            <div class="p-4 border-t border-dark-100/60 bg-dark-50/20">
+            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 {{ $students->links() }}
             </div>
         @endif

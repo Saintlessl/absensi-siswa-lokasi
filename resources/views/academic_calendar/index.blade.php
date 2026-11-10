@@ -74,42 +74,44 @@
                 <p class="text-sm text-dark-400 py-8 text-center">Belum ada hari non-efektif pada bulan ini.</p>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="text-left text-xs uppercase tracking-wider text-dark-400 border-b border-dark-100">
-                                <th class="py-3 pr-4 font-semibold">Tanggal</th>
-                                <th class="py-3 pr-4 font-semibold">Keterangan</th>
-                                <th class="py-3 pr-4 font-semibold">Status</th>
-                                <th class="py-3 font-semibold text-right">Aksi</th>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">KETERANGAN</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">STATUS</th>
+                                <th class="py-4 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right w-24">AKSI</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-dark-50">
+                        <tbody class="divide-y divide-slate-100 text-sm">
                             @foreach($days as $day)
-                                <tr>
-                                    <td class="py-3 pr-4 font-medium font-mono text-dark-700 whitespace-nowrap">{{ $day->tanggal->translatedFormat('d F Y') }}</td>
-                                    <td class="py-3 pr-4 text-dark-600">{{ $day->nama_kegiatan }}</td>
-                                    <td class="py-3 pr-4">
+                                <tr class="hover:bg-slate-50/70 transition-colors">
+                                    <td class="py-4 px-4 font-bold text-slate-900 font-mono text-xs sm:text-sm whitespace-nowrap">{{ $day->tanggal->translatedFormat('d F Y') }}</td>
+                                    <td class="py-4 px-4 text-slate-800 font-medium text-xs sm:text-sm">{{ $day->nama_kegiatan }}</td>
+                                    <td class="py-4 px-4">
                                         @if($day->is_active)
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white">Aktif</span>
                                         @else
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-dark-100 text-dark-500 border border-dark-200">Non-Aktif</span>
+                                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">Non-Aktif</span>
                                         @endif
                                     </td>
-                                    <td class="py-3 text-right whitespace-nowrap">
-                                        <form action="{{ route('academic_calendar.toggle', $day->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" title="{{ $day->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"
-                                                class="p-2 rounded-lg {{ $day->is_active ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' }} transition-colors">
-                                                <i class='bx {{ $day->is_active ? 'bx-pause-circle' : 'bx-play-circle' }} text-base'></i>
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('academic_calendar.destroy', $day->id) }}" method="POST" class="inline"
-                                            onsubmit="return confirm('Hapus hari non-efektif ini?');">
-                                            @csrf
-                                            <button type="submit" class="p-2 rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors">
-                                                <i class='bx bx-trash text-base'></i>
-                                            </button>
-                                        </form>
+                                    <td class="py-4 px-4 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <form action="{{ route('academic_calendar.toggle', $day->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" title="{{ $day->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"
+                                                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition">
+                                                    <i class='bx {{ $day->is_active ? 'bx-pause-circle' : 'bx-play-circle' }} text-lg'></i>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('academic_calendar.destroy', $day->id) }}" method="POST" class="inline"
+                                                onsubmit="return confirm('Hapus hari non-efektif ini?');">
+                                                @csrf
+                                                <button type="submit" class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Hapus">
+                                                    <i class='bx bx-trash text-lg'></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
