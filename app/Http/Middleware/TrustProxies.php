@@ -12,7 +12,11 @@ class TrustProxies extends Middleware
      *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    // Trust all proxies so the app honors X-Forwarded-Proto behind tunnels/Laragon.
+    // Without this, URL generation emits http:// behind an https tunnel; the Secure
+    // session cookie is then dropped on the http hop and users see "sesi berakhir"
+    // immediately after login (repro: localtunnel on a phone browser).
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
