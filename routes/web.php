@@ -447,7 +447,9 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     });
 });
 
-if (app()->environment('local')) {
+if (app()->environment('local', 'testing')) {
+    // Guarded: auth + superadmin only. Without this gate ANY visitor could GET
+    // /dev-login and instantly become superadmin (found live via localtunnel).
     Route::get('/dev-login', function (\Illuminate\Http\Request $request) {
         $role = $request->query('role', 'admin');
         if ($role === 'siswa') {
@@ -462,5 +464,5 @@ if (app()->environment('local')) {
         }
         \Illuminate\Support\Facades\Auth::login($user);
         return redirect()->route('dashboard');
-    });
+    })->middleware(['auth:web', 'role:superadmin']);
 }
