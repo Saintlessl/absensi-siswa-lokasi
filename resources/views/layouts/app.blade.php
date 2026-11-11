@@ -440,7 +440,7 @@
         @include('layouts.sidebar')
 
         {{-- Main Content Area --}}
-        <div id="main-content" class="flex-1 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003EA7]">
+        <div id="main-content" class="flex-1 min-w-0 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003EA7]">
 
             {{-- Floating Rounded Container --}}
             <div class="flex-1 bg-[#E2EDFF] rounded-[26px] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl">
