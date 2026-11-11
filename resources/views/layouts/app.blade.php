@@ -7,7 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="MySkanic — Sistem Presensi, Informasi & Manajemen Akademik SMK Negeri 1 Ciomas">
-    <title>@yield('title', 'Dashboard') — MySkanic</title>
+    @php $pageTitle = View::hasSection('title') ? trim(View::yieldContent('title')) : (trim(View::yieldContent('page-title')) ?: 'Dashboard'); @endphp
+    <title>{!! $pageTitle !!} — MySkanic</title>
 
     {{-- Google Fonts: Inter (Formal & Professional) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
