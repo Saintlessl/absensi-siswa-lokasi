@@ -423,6 +423,49 @@
                 transform: scale(1) translateY(0);
             }
         }
+
+        /* Mobile usability pass — from 390px tap-target audit:
+           filter selects rendered 17px tall, table links 16-20px. iOS Safari also
+           auto-zooms when focusing inputs with font-size < 16px, which made mobile
+           browsing jump around. Enforce 44px touch targets and 16px form text on phones. */
+        @media (max-width: 767.98px) {
+            main select,
+            main input[type=text],
+            main input[type=search],
+            main input[type=date],
+            main input[type=time],
+            main input[type=email],
+            main input[type=tel],
+            main input[type=number],
+            main input[type=password],
+            main textarea {
+                min-height: 2.75rem;
+                font-size: 16px !important;
+            }
+
+            main form button[type=submit],
+            main form a[class*="rounded"] {
+                min-height: 2.5rem;
+            }
+
+            main table td a.inline-flex,
+            main table td button {
+                min-height: 2.5rem;
+                min-width: 2.5rem;
+            }
+
+            main table td a:not(.inline-flex) {
+                padding: 9px 2px;
+                margin: -9px -2px;
+            }
+
+            nav[role=navigation] a,
+            nav[role=navigation] span,
+            main nav a,
+            main nav span {
+                min-height: 2.75rem;
+            }
+        }
     </style>
 
     @stack('styles')
