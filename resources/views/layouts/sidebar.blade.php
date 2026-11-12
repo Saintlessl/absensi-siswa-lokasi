@@ -745,30 +745,6 @@
                 </p>
                 <ul class="space-y-1 stagger-children">
                     <li>
-                        <a href="{{ route('gradebook.parent') }}"
-                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('gradebook.parent*')
-                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                            data-tooltip="Nilai Akademik Anak"
-                            title="Nilai Akademik Anak">
-                            <i class='bx bx-award text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('gradebook.parent*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('gradebook.parent*') ? 'font-bold' : '' }}">Nilai Akademik Anak</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('discipline.student.portal') }}"
-                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('discipline.student*')
-                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                            data-tooltip="Kedisiplinan & Prestasi Anak"
-                            title="Kedisiplinan & Prestasi Anak">
-                            <i class='bx bx-shield-quarter text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('discipline.student*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('discipline.student*') ? 'font-bold' : '' }}">Kedisiplinan & Prestasi Anak</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ route('siswa.devices') }}"
                             class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                                   {{ request()->routeIs('siswa.devices*')
