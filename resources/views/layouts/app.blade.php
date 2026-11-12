@@ -80,7 +80,13 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
     {{-- SweetAlert2 --}}
+    <link rel="stylesheet" href="{{ asset('css/myskanic-alerts.css') }}?v={{ file_exists(public_path('css/myskanic-alerts.css')) ? filemtime(public_path('css/myskanic-alerts.css')) : time() }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/myskanic-alerts.js') }}?v={{ file_exists(public_path('js/myskanic-alerts.js')) ? filemtime(public_path('js/myskanic-alerts.js')) : time() }}"></script>
+
+    {{-- Global MySkanic Searchable Select & Multi-Select Engine --}}
+    <link rel="stylesheet" href="{{ asset('css/myskanic-select.css') }}?v={{ file_exists(public_path('css/myskanic-select.css')) ? filemtime(public_path('css/myskanic-select.css')) : time() }}">
+    <script src="{{ asset('js/myskanic-select.js') }}?v={{ file_exists(public_path('js/myskanic-select.js')) ? filemtime(public_path('js/myskanic-select.js')) : time() }}"></script>
 
     <style>
         * {
@@ -672,58 +678,7 @@
     {{-- Modals Stack --}}
     @stack('modals')
 
-    {{-- SweetAlert Flash Messages --}}
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}',
-                showConfirmButton: false,
-                timer: 2500,
-                timerProgressBar: true,
-                toast: true,
-                position: 'top-end',
-                customClass: {
-                    popup: 'font-inter'
-                }
-            });
-        </script>
-    @endif
-
-    @if (session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: '{{ session('error') }}',
-                showConfirmButton: true,
-                confirmButtonColor: '#2563eb',
-                customClass: {
-                    popup: 'font-inter'
-                }
-            });
-        </script>
-    @endif
-
-    @if ($errors->any())
-        <script>
-            (function () {
-                const items = @js($errors->all());
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Data belum tersimpan',
-                    html: '<ul style="text-align:left;margin:0;padding-left:18px">'
-                        + items.map(e => '<li>' + String(e).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</li>').join('')
-                        + '</ul>',
-                    confirmButtonColor: '#2563eb',
-                    customClass: {
-                        popup: 'font-inter'
-                    }
-                });
-            })();
-        </script>
-    @endif
+    @include('components.notifications')
 
     @include('layouts.image-preview')
 

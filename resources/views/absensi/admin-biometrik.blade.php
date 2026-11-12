@@ -213,7 +213,8 @@
                                             {{-- Minta Re-Enroll (Admin & Superadmin) --}}
                                             @if ($s->faceBiometric && $s->biometric_status === 'enrolled')
                                                 <form action="{{ route('admin.biometrik.re_enroll', ['id' => $s->id]) }}" method="POST" class="inline"
-                                                    onsubmit="return confirm(@js('Minta siswa ' . $s->nama . ' untuk mendaftarkan ulang wajahnya saat login berikutnya?'));">
+                                                    data-confirm="Minta siswa {{ $s->nama }} untuk mendaftarkan ulang wajahnya saat login berikutnya?"
+                                                    data-confirm-title="Minta Registrasi Ulang Wajah">
                                                     @csrf
                                                     <button type="submit" title="Minta Registrasi Ulang Wajah"
                                                         class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition">
@@ -225,7 +226,8 @@
                                             {{-- Toggle Suspend / Aktifkan (Admin & Superadmin) --}}
                                             @if ($s->faceBiometric)
                                                 <form action="{{ route('admin.biometrik.toggle_suspend', ['id' => $s->id]) }}" method="POST" class="inline"
-                                                    onsubmit="return confirm('{{ $s->biometric_status === 'suspended' ? 'Aktifkan kembali biometrik siswa ini?' : 'Suspend biometrik siswa ini?' }}');">
+                                                    data-confirm="{{ $s->biometric_status === 'suspended' ? 'Aktifkan kembali biometrik siswa ini?' : 'Suspend biometrik siswa ini?' }}"
+                                                    data-confirm-title="{{ $s->biometric_status === 'suspended' ? 'Aktifkan Biometrik' : 'Suspend Biometrik' }}">
                                                     @csrf
                                                     <button type="submit" title="{{ $s->biometric_status === 'suspended' ? 'Aktifkan Biometrik' : 'Suspend Biometrik' }}"
                                                         class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
@@ -237,7 +239,9 @@
                                             {{-- Reset Permanen (Superadmin Only) --}}
                                             @if (Auth::user()->role === 'superadmin' && $s->faceBiometric)
                                                 <form action="{{ route('admin.biometrik.reset', ['id' => $s->id]) }}" method="POST" class="inline"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin mereset biometrik wajah siswa ini? Data biometrik akan dihapus dan siswa wajib merekam ulang wajahnya.');">
+                                                    data-confirm="Apakah Anda yakin ingin mereset biometrik wajah siswa ini? Data biometrik akan dihapus dan siswa wajib merekam ulang wajahnya."
+                                                    data-confirm-title="Reset Biometrik Permanen"
+                                                    data-confirm-danger="true">
                                                     @csrf
                                                     <button type="submit" title="Reset Biometrik Permanen (Superadmin Only)"
                                                         class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">

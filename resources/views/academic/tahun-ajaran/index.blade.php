@@ -105,7 +105,8 @@
                             Status semester saat ini: <span class="font-bold text-white">Semester {{ ucfirst($activeTahunAjaran->semester_aktif) }}</span>
                         </div>
                         <form action="{{ route('academic.tahun-ajaran.switch-semester', $activeTahunAjaran->id) }}" method="POST"
-                              onsubmit="return confirm('Apakah Anda yakin ingin mengganti semester aktif menjadi Semester {{ $activeTahunAjaran->semester_aktif === 'ganjil' ? 'Genap' : 'Ganjil' }}? Pergantian semester tidak memicu kenaikan kelas.');">
+                              data-confirm="Apakah Anda yakin ingin mengganti semester aktif menjadi Semester {{ $activeTahunAjaran->semester_aktif === 'ganjil' ? 'Genap' : 'Ganjil' }}? Pergantian semester tidak memicu kenaikan kelas."
+                              data-confirm-title="Ganti Semester Aktif">
                             @csrf
                             <button type="submit"
                                 class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold border border-white/20 transition shadow-xs">
@@ -268,7 +269,8 @@
                                 <div class="inline-flex items-center justify-center gap-1.5">
                                     @if(!$ta->is_active && in_array($user->role, ['superadmin', 'admin']))
                                         <form action="{{ route('academic.tahun-ajaran.activate', $ta->id) }}" method="POST"
-                                              onsubmit="return confirm('Aktifkan Tahun Ajaran {{ $ta->nama }} sebagai periode operasional sekolah? Periode aktif lain akan otomatis dinonaktifkan.');" class="inline">
+                                              data-confirm="Aktifkan Tahun Ajaran {{ $ta->nama }} sebagai periode operasional sekolah? Periode aktif lain akan otomatis dinonaktifkan."
+                                              data-confirm-title="Aktifkan Tahun Ajaran" class="inline">
                                             @csrf
                                             <button type="submit"
                                                 class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1 transition shadow-sm"
@@ -288,7 +290,9 @@
 
                                         @if(!$ta->is_active && $ta->kelas_count === 0 && $ta->enrollments_count === 0)
                                             <form action="{{ route('academic.tahun-ajaran.destroy', $ta->id) }}" method="POST"
-                                                  onsubmit="return confirm('Hapus permanen data Tahun Ajaran {{ $ta->nama }}?');" class="inline">
+                                                  data-confirm="Hapus permanen data Tahun Ajaran {{ $ta->nama }}?"
+                                                  data-confirm-title="Hapus Tahun Ajaran"
+                                                  data-confirm-danger="true" class="inline">
                                                 @csrf
                                                 <button type="submit"
                                                     class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"

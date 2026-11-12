@@ -115,7 +115,9 @@
                     @if($d->is_active)
                         <div class="mt-4 flex items-center justify-end">
                             <form action="{{ route('siswa.devices.revoke', ['id' => $d->id]) }}" method="POST"
-                                onsubmit="return confirm('Apakah Anda yakin ingin melepaskan perangkat ini? Anda harus login dan verifikasi ulang jika ingin menggunakan perangkat ini kembali.')">
+                                data-confirm="Apakah Anda yakin ingin melepaskan perangkat ini? Anda harus login dan verifikasi ulang jika ingin menggunakan perangkat ini kembali."
+                                data-confirm-title="Lepaskan Perangkat"
+                                data-confirm-danger="true">
                                 @csrf
                                 <button type="submit" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-1.5 transition-colors">
                                     <i class='bx bx-log-out-circle text-sm'></i>

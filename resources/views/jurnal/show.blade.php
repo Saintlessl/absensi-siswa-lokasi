@@ -19,7 +19,10 @@
                 <span>Cetak Jurnal</span>
             </button>
             @if(Auth::user()->role === 'superadmin' || (Auth::user()->role === 'guru' && Auth::user()->guru && Auth::user()->guru->id === $journal->guru_id))
-                <form action="{{ route('jurnal.destroy', $journal->id) }}" method="POST" onsubmit="return confirm('Hapus jurnal ini beserta presensi sesinya?')">
+                <form action="{{ route('jurnal.destroy', $journal->id) }}" method="POST"
+                    data-confirm="Hapus jurnal ini beserta presensi sesinya?"
+                    data-confirm-title="Hapus Jurnal Mengajar"
+                    data-confirm-danger="true">
                     @csrf
                     @method('DELETE')
                     <button type="submit"

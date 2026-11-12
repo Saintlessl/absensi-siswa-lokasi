@@ -101,7 +101,8 @@
                                     @if($izin->status === 'pending')
                                         <div class="flex items-center justify-end gap-1.5">
                                             <form action="{{ route('izin.approve', $izin->id) }}" method="POST" class="inline"
-                                                onsubmit="return confirm(@js('Setujui pengajuan ' . $izin->jenis . ' untuk ' . ($izin->siswa->nama ?? '') . '?'));">
+                                                data-confirm="Setujui pengajuan {{ $izin->jenis }} untuk {{ $izin->siswa->nama ?? '' }}?"
+                                                data-confirm-title="Setujui Izin">
                                                 @csrf
                                                 <input type="hidden" name="catatan" value="Disetujui">
                                                 <button type="submit" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition inline-flex items-center gap-1">
@@ -109,7 +110,9 @@
                                                 </button>
                                             </form>
                                             <form action="{{ route('izin.reject', $izin->id) }}" method="POST" class="inline"
-                                                onsubmit="return confirm(@js('Tolak pengajuan ' . $izin->jenis . ' untuk ' . ($izin->siswa->nama ?? '') . '?'));">
+                                                data-confirm="Tolak pengajuan {{ $izin->jenis }} untuk {{ $izin->siswa->nama ?? '' }}?"
+                                                data-confirm-title="Tolak Izin"
+                                                data-confirm-danger="true">
                                                 @csrf
                                                 <input type="hidden" name="catatan" value="Ditolak">
                                                 <button type="submit" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 transition inline-flex items-center gap-1">

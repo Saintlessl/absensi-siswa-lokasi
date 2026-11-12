@@ -165,7 +165,10 @@
                                 @endif
                             </td>
                             <td class="py-4 px-4 text-center">
-                                <form action="{{ route('rooms.assignments.destroy', $a) }}" method="POST" onsubmit="return confirm('Hapus alokasi rombel {{ $a->kelas->nama_kelas }} di {{ $a->room->name }}?')">
+                                <form action="{{ route('rooms.assignments.destroy', $a) }}" method="POST"
+                                    data-confirm="Hapus alokasi rombel {{ $a->kelas->nama_kelas }} di {{ $a->room->name }}?"
+                                    data-confirm-title="Hapus Alokasi Ruangan"
+                                    data-confirm-danger="true">
                                     @csrf
                                     <button type="submit"
                                         class="delete-confirm p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"

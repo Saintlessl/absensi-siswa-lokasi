@@ -159,7 +159,9 @@
                                         </a>
 
                                         @if($asm->status !== 'published')
-                                            <form action="{{ route('gradebook.publish', $asm->id) }}" method="POST" class="inline" onsubmit="return confirm('Publikasikan nilai ke siswa dan orang tua?')">
+                                            <form action="{{ route('gradebook.publish', $asm->id) }}" method="POST" class="inline"
+                                                data-confirm="Publikasikan nilai ke siswa dan orang tua?"
+                                                data-confirm-title="Publikasi Nilai">
                                                 @csrf
                                                 <button type="submit"
                                                     class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition"
@@ -169,7 +171,10 @@
                                             </form>
                                         @endif
 
-                                        <form action="{{ route('gradebook.destroy', $asm->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus asesmen ini beserta nilai seluruh siswa?')">
+                                        <form action="{{ route('gradebook.destroy', $asm->id) }}" method="POST" class="inline"
+                                            data-confirm="Hapus asesmen ini beserta nilai seluruh siswa?"
+                                            data-confirm-title="Hapus Asesmen"
+                                            data-confirm-danger="true">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"

@@ -745,18 +745,6 @@
                 </p>
                 <ul class="space-y-1 stagger-children">
                     <li>
-                        <a href="{{ route('siswa.devices') }}"
-                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('siswa.devices*')
-                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                            data-tooltip="Perangkat Saya"
-                            title="Perangkat Saya">
-                            <i class='bx bx-devices text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('siswa.devices*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('siswa.devices*') ? 'font-bold' : '' }}">Perangkat Saya</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="{{ route('gradebook.student') }}"
                             class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                                   {{ request()->routeIs('gradebook.student*')
@@ -766,18 +754,6 @@
                             title="Nilai Akademik">
                             <i class='bx bx-award text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('gradebook.student*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
                             <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('gradebook.student*') ? 'font-bold' : '' }}">Nilai Akademik</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('pkl.student.portal') }}"
-                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('pkl.student*')
-                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                            data-tooltip="Portal PKL & Magang"
-                            title="Portal PKL & Magang">
-                            <i class='bx bx-buildings text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('pkl.student*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('pkl.student*') ? 'font-bold' : '' }}">Portal PKL & Magang</span>
                         </a>
                     </li>
                     <li>
@@ -793,6 +769,18 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('pkl.student.portal') }}"
+                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('pkl.student*')
+                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                            data-tooltip="Portal PKL & Magang"
+                            title="Portal PKL & Magang">
+                            <i class='bx bx-buildings text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('pkl.student*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('pkl.student*') ? 'font-bold' : '' }}">Portal PKL & Magang</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('portfolio.student.index') }}"
                             class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                                   {{ request()->routeIs('portfolio.student*')
@@ -802,6 +790,18 @@
                             title="Portofolio & TeFa">
                             <i class='bx bx-palette text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('portfolio.student*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
                             <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('portfolio.student*') ? 'font-bold' : '' }}">Portofolio & TeFa</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('siswa.devices') }}"
+                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('siswa.devices*')
+                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                            data-tooltip="Perangkat Saya"
+                            title="Perangkat Saya">
+                            <i class='bx bx-devices text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('siswa.devices*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('siswa.devices*') ? 'font-bold' : '' }}">Perangkat Saya</span>
                         </a>
                     </li>
                 </ul>
@@ -827,6 +827,38 @@
                             title="Riwayat Kehadiran Anak">
                             <i class='bx bx-history text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('riwayatkehadiran') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
                             <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('riwayatkehadiran') ? 'font-bold' : '' }}">Riwayat Kehadiran Anak</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mb-5">
+                <p class="sidebar-section-title px-3 mb-2 text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.15em]">
+                    PERKEMBANGAN SISWA
+                </p>
+                <ul class="space-y-1 stagger-children">
+                    <li>
+                        <a href="{{ route('gradebook.parent') }}"
+                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('gradebook.parent*')
+                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                            data-tooltip="Nilai Akademik Anak"
+                            title="Nilai Akademik Anak">
+                            <i class='bx bx-award text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('gradebook.parent*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('gradebook.parent*') ? 'font-bold' : '' }}">Nilai Akademik Anak</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('discipline.student.portal') }}"
+                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ request()->routeIs('discipline.student*')
+                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                            data-tooltip="Kedisiplinan & Prestasi Anak"
+                            title="Kedisiplinan & Prestasi Anak">
+                            <i class='bx bx-shield-quarter text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('discipline.student*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('discipline.student*') ? 'font-bold' : '' }}">Kedisiplinan & Prestasi Anak</span>
                         </a>
                     </li>
                 </ul>

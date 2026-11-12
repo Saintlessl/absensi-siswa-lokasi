@@ -46,6 +46,7 @@
 
     {{-- SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ asset('css/myskanic-alerts.css') }}">
 
     <style>
         * {
@@ -522,7 +523,7 @@
                         </div>
                     </div>
 
-                    {{-- Remember Me Checkbox --}}
+                    {{-- Remember Me & Forgot Password --}}
                     <div class="flex items-center justify-between mb-6">
                         <label for="remember" class="flex items-center gap-2 cursor-pointer select-none">
                             <input type="checkbox"
@@ -535,6 +536,15 @@
                                 Ingat saya
                             </span>
                         </label>
+
+                        {{-- Tautan Lupa Password khusus akun Siswa --}}
+                        <a x-show="role === 'siswa'"
+                           x-transition
+                           href="{{ route('password.forgot') }}"
+                           class="text-xs font-bold text-[#003FA9] hover:text-[#002B75] hover:underline transition-colors"
+                           title="Atur ulang password siswa via kode OTP WhatsApp">
+                            Lupa Password?
+                        </a>
                     </div>
 
                     {{-- Primary Submit Button --}}
@@ -572,8 +582,8 @@
         // Alpine Component Definition
         function loginPage() {
             return {
-                // Initialize role based on URL query parameter or default to 'siswa'
-                role: new URLSearchParams(window.location.search).get('role') === 'guru' ? 'guru' : 'siswa',
+                // Initialize role based on server initialRole, URL query parameter, or default to 'siswa'
+                role: '{{ $initialRole ?? (request('role') === 'guru' ? 'guru' : 'siswa') }}',
                 showPassword: false,
                 isLoading: false,
 
@@ -643,38 +653,9 @@
         });
     </script>
 
-    {{-- SweetAlert2 Flash Messages --}}
-    @if (session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Gagal!',
-                text: '{{ session('error') }}',
-                confirmButtonColor: '#003FA9',
-                confirmButtonText: 'Coba Lagi',
-                customClass: {
-                    popup: 'rounded-2xl',
-                    confirmButton: 'rounded-xl px-6 py-2.5 text-sm font-semibold'
-                }
-            });
-        </script>
-    @endif
-
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}',
-                showConfirmButton: false,
-                timer: 2500,
-                timerProgressBar: true,
-                customClass: {
-                    popup: 'rounded-2xl'
-                }
-            });
-        </script>
-    @endif
+    {{-- Global MySkanic SweetAlert2 Integration --}}
+    <script src="{{ asset('js/myskanic-alerts.js') }}"></script>
+    <x-notifications />
 
 </body>
 

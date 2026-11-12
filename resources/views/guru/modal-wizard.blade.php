@@ -90,7 +90,7 @@
                                     processFile(file) {
                                         if (!file) return;
                                         if (file.size > 2 * 1024 * 1024) {
-                                            alert('Ukuran file maksimal 2MB');
+                                            window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file maksimal 2MB') : alert('Ukuran file maksimal 2MB');
                                             return;
                                         }
                                         const reader = new FileReader();

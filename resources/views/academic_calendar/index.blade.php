@@ -105,7 +105,9 @@
                                                 </button>
                                             </form>
                                             <form action="{{ route('academic_calendar.destroy', $day->id) }}" method="POST" class="inline"
-                                                onsubmit="return confirm('Hapus hari non-efektif ini?');">
+                                                data-confirm="Hapus hari non-efektif ini?"
+                                                data-confirm-title="Hapus Hari Non-Efektif"
+                                                data-confirm-danger="true">
                                                 @csrf
                                                 <button type="submit" class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Hapus">
                                                     <i class='bx bx-trash text-lg'></i>

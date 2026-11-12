@@ -135,6 +135,7 @@ class SiswaController extends Controller
             'kelas_id'             => 'required|exists:kelas,id',
             'jalur_masuk'          => 'nullable|in:baru,pindahan',
             'asal_sekolah'         => 'nullable|string|max:150',
+            'no_telp_siswa'        => 'required|string|max:25',
             'photo'                => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'parent_name'          => 'required_without:existing_orangtua_id|nullable|string|max:255',
             'parent_jenis_kelamin' => 'required_without:existing_orangtua_id|nullable|in:L,P',
@@ -147,6 +148,7 @@ class SiswaController extends Controller
         ], [
             'email.unique'                  => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
             'parent_phone.required_without' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
+            'no_telp_siswa.required'        => 'Nomor telepon aktif siswa wajib diisi.',
             'nis.unique'                    => 'NIS sudah terdaftar.',
             'nisn.unique'                   => 'NISN sudah terdaftar.',
         ]);
@@ -194,6 +196,11 @@ class SiswaController extends Controller
         }
 
         try {
+            $studentPhone = $this->normalizeIndonesianPhone($request->no_telp_siswa);
+            if (!$studentPhone) {
+                return back()->withErrors(['no_telp_siswa' => 'Nomor telepon siswa harus berupa nomor Indonesia yang valid.'])->withInput();
+            }
+
             $parentPhone = $request->filled('existing_orangtua_id') ? null : $this->normalizeIndonesianPhone($request->parent_phone);
             if (!$request->filled('existing_orangtua_id') && !$parentPhone) {
                 return back()->withErrors(['parent_phone' => 'Nomor WhatsApp harus berupa nomor Indonesia yang valid.'])->withInput();
@@ -204,7 +211,7 @@ class SiswaController extends Controller
                 $photoPath = $request->file('photo')->store('siswa-photos', 'public');
             }
 
-            $activationLink = DB::transaction(function () use ($request, $finalEmail, $parentPhone, $photoPath, $targetKelas, $activeTa, $tahunAjaranMasuk, $angkatan) {
+            $activationLink = DB::transaction(function () use ($request, $finalEmail, $studentPhone, $parentPhone, $photoPath, $targetKelas, $activeTa, $tahunAjaranMasuk, $angkatan) {
                 $user = User::create([
                     'name'                 => $request->nama,
                     'email'                => $finalEmail,
@@ -226,6 +233,7 @@ class SiswaController extends Controller
                     'tanggal_lahir'         => $request->tanggal_lahir,
                     'photo_path'            => $photoPath,
                     'kelas_id'              => $targetKelas->id,
+                    'no_telp_siswa'         => $studentPhone,
                     'angkatan_id'           => $angkatan?->id,
                     'tahun_ajaran_masuk_id' => $tahunAjaranMasuk->id,
                     'tahun_ajaran_masuk'    => $tahunAjaranMasuk->nama,

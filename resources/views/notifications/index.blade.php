@@ -44,7 +44,10 @@
                 </form>
             @endif
 
-            <form action="{{ route('notifications.clear_read') }}" method="POST" onsubmit="return confirm('Hapus seluruh notifikasi yang sudah dibaca?')">
+            <form action="{{ route('notifications.clear_read') }}" method="POST"
+                data-confirm="Hapus seluruh notifikasi yang sudah dibaca?"
+                data-confirm-title="Bersihkan Notifikasi"
+                data-confirm-danger="true">
                 @csrf
                 <button type="submit"
                     class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors">
@@ -130,7 +133,10 @@
                                 </form>
                             @endif
 
-                            <form action="{{ route('notifications.destroy', $notif->id) }}" method="POST" onsubmit="return confirm('Hapus notifikasi ini?')">
+                            <form action="{{ route('notifications.destroy', $notif->id) }}" method="POST"
+                                data-confirm="Hapus notifikasi ini?"
+                                data-confirm-title="Hapus Notifikasi"
+                                data-confirm-danger="true">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"

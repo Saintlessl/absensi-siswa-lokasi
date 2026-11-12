@@ -257,6 +257,7 @@ class PklController extends Controller
     /**
      * AJAX: PKL-eligible siswa of a rombel.
      * Eligible = status aktif + enrolled in that kelas-12 rombel + no active placement.
+     * Supports search ($request->q) and server-side pagination ($request->page).
      */
     public function optionSiswa(Request $request)
     {
@@ -271,22 +272,106 @@ class PklController extends Controller
             abort(403, 'Akses ditolak: rombel ini bukan dari jurusan yang Anda kepalai.');
         }
 
+        // Resolve selected IDs if requested (e.g. for preloading selected chips)
+        if ($request->has('selected_ids')) {
+            $selectedIds = is_array($request->selected_ids)
+                ? $request->selected_ids
+                : array_filter(explode(',', (string) $request->selected_ids));
+
+            if (!empty($selectedIds)) {
+                $selected = Siswa::whereIn('id', $selectedIds)
+                    ->get(['id', 'nama', 'nis', 'nisn'])
+                    ->map(fn ($s) => [
+                        'id'      => $s->id,
+                        'nama'    => $s->nama,
+                        'nis'     => $s->nis,
+                        'nisn'    => $s->nisn,
+                        'label'   => $s->nama . ' (NIS: ' . ($s->nis ?: '-') . ')',
+                        'subtext' => 'NIS: ' . ($s->nis ?: '-') . ($s->nisn ? ' • NISN: ' . $s->nisn : ''),
+                    ]);
+
+                return response()->json([
+                    'data' => $selected,
+                    'pagination' => [
+                        'current_page' => 1,
+                        'per_page'     => count($selected),
+                        'total'        => count($selected),
+                        'last_page'    => 1,
+                        'has_more'     => false,
+                    ],
+                ]);
+            }
+        }
+
         $placedIds = PklPlacement::where('status', 'active')->pluck('siswa_id');
 
-        $siswas = Siswa::query()
+        $query = Siswa::query()
             ->where('status', 'aktif')
             ->where(function ($q) use ($kelasId) {
                 $q->where('kelas_id', $kelasId)
                   ->orWhereHas('activeEnrollment', fn ($e) => $e->where('kelas_id', $kelasId));
             })
-            ->whereNotIn('id', $placedIds)
-            ->orderBy('nama')
-            ->get(['id', 'nama', 'nis'])
-            ->map(fn ($s) => ['id' => $s->id, 'nama' => $s->nama, 'nis' => $s->nis]);
+            ->whereNotIn('id', $placedIds);
+
+        $q = trim((string) $request->input('q'));
+        if ($q !== '') {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nis', 'like', "%{$q}%")
+                    ->orWhere('nisn', 'like', "%{$q}%");
+            });
+        }
+
+        $query->orderBy('nama');
+
+        // Check if server-side pagination requested (page or per_page)
+        if ($request->has('page') || $request->has('per_page')) {
+            $perPage = max(1, min(100, (int) $request->input('per_page', 15)));
+            $paginator = $query->paginate($perPage);
+
+            $data = $paginator->getCollection()->map(fn ($s) => [
+                'id'      => $s->id,
+                'nama'    => $s->nama,
+                'nis'     => $s->nis,
+                'nisn'    => $s->nisn,
+                'label'   => $s->nama . ' (NIS: ' . ($s->nis ?: '-') . ')',
+                'subtext' => 'NIS: ' . ($s->nis ?: '-') . ($s->nisn ? ' • NISN: ' . $s->nisn : ''),
+            ]);
+
+            return response()->json([
+                'data'       => $data,
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                    'last_page'    => $paginator->lastPage(),
+                    'has_more'     => $paginator->hasMorePages(),
+                ],
+                'message'    => $data->isEmpty() ? 'Semua siswa di rombel ini sudah memiliki penempatan aktif atau tidak ada siswa yang cocok.' : null,
+            ]);
+        }
+
+        // Backward-compatible unpaginated response
+        $siswas = $query->get(['id', 'nama', 'nis', 'nisn'])
+            ->map(fn ($s) => [
+                'id'      => $s->id,
+                'nama'    => $s->nama,
+                'nis'     => $s->nis,
+                'nisn'    => $s->nisn,
+                'label'   => $s->nama . ' (NIS: ' . ($s->nis ?: '-') . ')',
+                'subtext' => 'NIS: ' . ($s->nis ?: '-') . ($s->nisn ? ' • NISN: ' . $s->nisn : ''),
+            ]);
 
         return response()->json([
-            'data'    => $siswas,
-            'message' => $siswas->isEmpty() ? 'Semua siswa di rombel ini sudah memiliki penempatan aktif atau data belum tersedia.' : null,
+            'data'       => $siswas,
+            'pagination' => [
+                'current_page' => 1,
+                'per_page'     => $siswas->count(),
+                'total'        => $siswas->count(),
+                'last_page'    => 1,
+                'has_more'     => false,
+            ],
+            'message'    => $siswas->isEmpty() ? 'Semua siswa di rombel ini sudah memiliki penempatan aktif atau data belum tersedia.' : null,
         ]);
     }
 
@@ -439,14 +524,16 @@ class PklController extends Controller
     }
 
     /**
-     * Store Placement
+     * Store Placement (Supports Single & Multi-Select Bulk Plotting)
      */
     public function placementStore(Request $request)
     {
         $request->validate([
             'jurusan_id'          => 'nullable|exists:jurusans,id',
             'kelas_id'            => 'nullable|exists:kelas,id',
-            'siswa_id'            => 'required|exists:siswas,id',
+            'siswa_id'            => 'nullable|exists:siswas,id',
+            'siswa_ids'           => 'nullable|array|min:1',
+            'siswa_ids.*'         => 'required|exists:siswas,id',
             'pkl_dudi_partner_id' => 'required|exists:pkl_dudi_partners,id',
             'guru_pembimbing_id'  => 'nullable|exists:users,id',
             'tanggal_mulai'       => 'required|date',
@@ -454,43 +541,96 @@ class PklController extends Controller
             'catatan'             => 'nullable|string',
         ]);
 
-        try {
-            $chain = $this->validatePlacementChain(
-                (int) $request->siswa_id,
-                $request->jurusan_id ? (int) $request->jurusan_id : null,
-                $request->kelas_id ? (int) $request->kelas_id : null
-            );
-        } catch (\InvalidArgumentException $e) {
-            return back()->withInput()->with('error', $e->getMessage());
-        } catch (\RuntimeException $e) {
-            return back()->withInput()->with('error', 'Akses ditolak: Anda hanya dapat menempatkan siswa dari jurusan yang Anda kepalai.');
+        $siswaIds = $request->input('siswa_ids');
+        if (empty($siswaIds)) {
+            if ($request->filled('siswa_id')) {
+                $siswaIds = [(int) $request->siswa_id];
+            } else {
+                return back()->withInput()->with('error', 'Pilih minimal satu siswa untuk penempatan PKL.');
+            }
         }
 
-        $siswa = $chain['siswa'];
-
-        $activeExists = PklPlacement::where('siswa_id', $siswa->id)->where('status', 'active')->exists();
-        if ($activeExists) {
-            return back()->withInput()->with('error', 'Siswa tersebut sudah memiliki penempatan PKL aktif.');
+        // Deduplicate and sanitize
+        $siswaIds = array_values(array_unique(array_map('intval', $siswaIds)));
+        if (empty($siswaIds)) {
+            return back()->withInput()->with('error', 'Pilih minimal satu siswa untuk penempatan PKL.');
         }
 
         $partner = PklDudiPartner::findOrFail($request->pkl_dudi_partner_id);
-        $quotaError = $this->validatePartnerForPlacement($partner, $chain['kelas']);
-        if ($quotaError) {
-            return back()->withInput()->with('error', $quotaError);
+        if ($partner->status !== 'aktif') {
+            return back()->withInput()->with('error', 'Mitra industri tidak aktif. Pilih mitra lain.');
         }
 
-        $placement = PklPlacement::create([
-            'siswa_id'            => $siswa->id,
-            'pkl_dudi_partner_id' => $partner->id,
-            'guru_pembimbing_id'  => $request->guru_pembimbing_id,
-            'tanggal_mulai'       => $request->tanggal_mulai,
-            'tanggal_selesai'     => $request->tanggal_selesai,
-            'status'              => 'active',
-            'catatan'             => $request->catatan,
-        ]);
+        // Batch partner quota validation
+        if ($partner->kuota_siswa) {
+            $used = PklPlacement::where('pkl_dudi_partner_id', $partner->id)
+                ->where('status', 'active')
+                ->count();
+            $needed = count($siswaIds);
+            if ($used + $needed > (int) $partner->kuota_siswa) {
+                $sisa = max(0, (int) $partner->kuota_siswa - $used);
+                return back()->withInput()->with(
+                    'error',
+                    "Kapasitas mitra penuh. Sisa kuota untuk mitra {$partner->nama_dudi} adalah {$sisa} siswa, sementara Anda memilih {$needed} siswa."
+                );
+            }
+        }
 
-        return redirect()->route('pkl.placements.index')
-            ->with('success', "Penempatan PKL untuk {$siswa->nama} di {$partner->nama_dudi} berhasil disimpan.");
+        // Process placement within a database transaction
+        $createdPlacements = [];
+        try {
+            DB::beginTransaction();
+
+            foreach ($siswaIds as $sid) {
+                $chain = $this->validatePlacementChain(
+                    $sid,
+                    $request->jurusan_id ? (int) $request->jurusan_id : null,
+                    $request->kelas_id ? (int) $request->kelas_id : null
+                );
+
+                $siswa = $chain['siswa'];
+                $kelas = $chain['kelas'];
+
+                // Partner department compatibility check
+                if ($partner->jurusan_id && (int) $partner->jurusan_id !== (int) $kelas->jurusan_id) {
+                    throw new \InvalidArgumentException("Mitra tidak sesuai dengan jurusan siswa {$siswa->nama}.");
+                }
+
+                // Active placement conflict check
+                $activeExists = PklPlacement::where('siswa_id', $siswa->id)->where('status', 'active')->exists();
+                if ($activeExists) {
+                    throw new \InvalidArgumentException("Siswa {$siswa->nama} sudah memiliki penempatan PKL aktif.");
+                }
+
+                $createdPlacements[] = PklPlacement::create([
+                    'siswa_id'            => $siswa->id,
+                    'pkl_dudi_partner_id' => $partner->id,
+                    'guru_pembimbing_id'  => $request->guru_pembimbing_id,
+                    'tanggal_mulai'       => $request->tanggal_mulai,
+                    'tanggal_selesai'     => $request->tanggal_selesai,
+                    'status'              => 'active',
+                    'catatan'             => $request->catatan,
+                ]);
+            }
+
+            DB::commit();
+        } catch (\InvalidArgumentException $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', $e->getMessage());
+        } catch (\RuntimeException $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Akses ditolak: Anda hanya dapat menempatkan siswa dari jurusan yang Anda kepalai.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Terjadi kesalahan sistem saat menyimpan penempatan: ' . $e->getMessage());
+        }
+
+        $count = count($createdPlacements);
+        $msg = $count === 1
+            ? "Penempatan PKL untuk {$createdPlacements[0]->siswa->nama} di {$partner->nama_dudi} berhasil disimpan."
+            : "Penempatan PKL untuk {$count} siswa di {$partner->nama_dudi} berhasil disimpan.";
+
+        return redirect()->route('pkl.placements.index')->with('success', $msg);
     }
 
     /**

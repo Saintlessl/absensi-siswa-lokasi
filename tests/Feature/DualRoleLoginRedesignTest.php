@@ -59,8 +59,9 @@ class DualRoleLoginRedesignTest extends TestCase
         ]);
 
         $response = $this->post('/proseslogin', [
-            'email'    => 'guru.test@myskanic.test',
-            'password' => 'password123',
+            'email'       => 'guru.test@myskanic.test',
+            'password'    => 'password123',
+            'portal_role' => 'guru',
         ]);
 
         $response->assertRedirect(route('dashboard'));

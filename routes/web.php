@@ -36,7 +36,9 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\DisciplineCounselingController;
+use App\Http\Controllers\DisciplineMasterController;
 use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\StudentForgotPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -51,6 +53,8 @@ Route::get('/home', function () {
 
 Route::middleware(['guest:web'])->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('login');
+    Route::get('/login/guru', [AuthController::class, 'indexGuru'])->name('login.guru');
+    Route::get('/login/siswa', [AuthController::class, 'indexSiswa'])->name('login.siswa');
 
     // BUG-012: login had no throttling at all, allowing unlimited password
     // guessing. 5 attempts per minute per IP+email is generous for a human and
@@ -58,6 +62,28 @@ Route::middleware(['guest:web'])->group(function () {
     Route::post('/proseslogin', [AuthController::class, 'proseslogin'])
         ->middleware('throttle:5,1')
         ->name('proseslogin');
+
+    // =========================================================================
+    // FORGOT PASSWORD SISWA DENGAN WHATSAPP OTP (FONNTE)
+    // =========================================================================
+    Route::get('/lupa-password', [StudentForgotPasswordController::class, 'showIdentifyForm'])
+        ->name('password.forgot');
+    Route::post('/lupa-password/identifikasi', [StudentForgotPasswordController::class, 'processIdentify'])
+        ->middleware('throttle:5,1')
+        ->name('password.identify');
+    Route::get('/lupa-password/verifikasi-otp', [StudentForgotPasswordController::class, 'showOtpForm'])
+        ->name('password.otp');
+    Route::post('/lupa-password/verifikasi-otp', [StudentForgotPasswordController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('password.otp.verify');
+    Route::post('/lupa-password/kirim-ulang-otp', [StudentForgotPasswordController::class, 'resendOtp'])
+        ->middleware('throttle:3,1')
+        ->name('password.otp.resend');
+    Route::get('/lupa-password/buat-password', [StudentForgotPasswordController::class, 'showResetForm'])
+        ->name('password.reset.form');
+    Route::post('/lupa-password/simpan-password', [StudentForgotPasswordController::class, 'storeNewPassword'])
+        ->middleware('throttle:5,1')
+        ->name('password.reset.store');
 
     // =========================================================================
     // 2FA BIOMETRIC FACE VERIFICATION ON EVERY LOGIN
@@ -355,20 +381,38 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     Route::get('/inventaris', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/peminjaman-alat', [InventoryController::class, 'borrowingsIndex'])->name('inventory.borrowings');
     Route::post('/peminjaman-alat/ajukan', [InventoryController::class, 'requestBorrow'])->name('inventory.borrow.request');
+    Route::post('/peminjaman-alat/{id}/cancel', [InventoryController::class, 'cancelBorrow'])->name('inventory.borrow.cancel');
     Route::get('/peminjaman-alat/options', [InventoryController::class, 'manualOptions'])->name('inventory.manual.options');
+    Route::get('/inventaris/units/{unitId}/logs', [InventoryController::class, 'unitLogs'])->name('inventory.units.logs');
+
+    // Scan Barcode / QR Code Scanner
+    Route::get('/inventaris/scan', [InventoryController::class, 'scanIndex'])->name('inventory.scan');
+    Route::get('/inventaris/scan/lookup', [InventoryController::class, 'scanLookup'])->name('inventory.scan.lookup');
 
     // Manajemen Aset & Verifikasi Peminjaman/Pengembalian (Superadmin, Admin, Kaprog, Guru)
     Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
         Route::get('/inventaris/buat', [InventoryController::class, 'create'])->name('inventory.create');
         Route::post('/inventaris', [InventoryController::class, 'store'])->name('inventory.store');
+        Route::put('/inventaris/{id}', [InventoryController::class, 'update'])->name('inventory.update');
         Route::delete('/inventaris/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+        Route::get('/inventaris/{id}/print-labels', [InventoryController::class, 'printLabels'])->name('inventory.print');
+
+        // Unit Management
+        Route::post('/inventaris/{id}/units', [InventoryController::class, 'storeUnit'])->name('inventory.units.store');
+        Route::put('/inventaris/units/{unitId}', [InventoryController::class, 'updateUnit'])->name('inventory.units.update');
+        Route::post('/inventaris/units/{unitId}/archive', [InventoryController::class, 'archiveUnit'])->name('inventory.units.archive');
+        Route::post('/inventaris/units/{unitId}/restore', [InventoryController::class, 'restoreUnit'])->name('inventory.units.restore');
+
+        // Transaction lifecycle
         Route::post('/peminjaman-alat/{id}/approve', [InventoryController::class, 'approveBorrow'])->name('inventory.borrow.approve');
+        Route::post('/peminjaman-alat/{id}/handover', [InventoryController::class, 'handoverBorrow'])->name('inventory.borrow.handover');
         Route::post('/peminjaman-alat/{id}/return', [InventoryController::class, 'returnItem'])->name('inventory.borrow.return');
+        Route::post('/peminjaman-alat/{id}/reject', [InventoryController::class, 'rejectBorrow'])->name('inventory.borrow.reject');
         Route::post('/peminjaman-alat/manual', [InventoryController::class, 'manualBorrow'])->name('inventory.borrow.manual');
         Route::post('/peminjaman-alat/{id}/return-manual', [InventoryController::class, 'manualReturn'])->name('inventory.borrow.return.manual');
     });
 
-    // Detail Aset (Ditempatkan setelah /inventaris/buat untuk mencegah routing collision {id}='buat')
+    // Detail Aset (Ditempatkan setelah /inventaris/buat dan /inventaris/scan untuk mencegah routing collision {id})
     Route::get('/inventaris/{id}', [InventoryController::class, 'show'])->name('inventory.show');
 
     // =========================================================================
@@ -387,6 +431,13 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
         Route::get('/pkl/options/rombel', [PklController::class, 'optionRombel'])->name('pkl.options.rombel');
         Route::get('/pkl/options/siswa', [PklController::class, 'optionSiswa'])->name('pkl.options.siswa');
         Route::get('/pkl/options/mitra', [PklController::class, 'optionMitra'])->name('pkl.options.mitra');
+
+        // Global Searchable Select Options (Server-Side Pagination & AJAX)
+        Route::get('/options/select/siswa', [\App\Http\Controllers\SelectOptionController::class, 'siswa'])->name('options.select.siswa');
+        Route::get('/options/select/guru', [\App\Http\Controllers\SelectOptionController::class, 'guru'])->name('options.select.guru');
+        Route::get('/options/select/rombel', [\App\Http\Controllers\SelectOptionController::class, 'rombel'])->name('options.select.rombel');
+        Route::get('/options/select/mitra-pkl', [\App\Http\Controllers\SelectOptionController::class, 'mitraPkl'])->name('options.select.mitra');
+        Route::get('/options/select/discipline-categories', [\App\Http\Controllers\SelectOptionController::class, 'disciplineCategories'])->name('options.select.discipline-categories');
         Route::get('/pkl/monitoring', [PklController::class, 'monitoringDashboard'])->name('pkl.monitoring');
         Route::get('/pkl/verifikasi-logbook', [PklController::class, 'advisorLogbookIndex'])->name('pkl.advisor.logbooks');
         Route::post('/pkl/logbook/{id}/review', [PklController::class, 'advisorLogbookReview'])->name('pkl.advisor.review');
@@ -406,9 +457,19 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     Route::middleware(['role:superadmin,admin,kaprog,guru'])->group(function () {
         Route::get('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineIndex'])->name('discipline.index');
         Route::post('/kedisiplinan', [DisciplineCounselingController::class, 'disciplineStore'])->name('discipline.store');
+        Route::get('/kedisiplinan/{id}/detail', [DisciplineCounselingController::class, 'disciplineDetail'])->name('discipline.detail');
+        Route::put('/kedisiplinan/{id}', [DisciplineCounselingController::class, 'disciplineUpdate'])->name('discipline.update');
+        Route::delete('/kedisiplinan/{id}', [DisciplineCounselingController::class, 'disciplineDestroy'])->name('discipline.destroy');
         Route::post('/kedisiplinan/{id}/status', [DisciplineCounselingController::class, 'disciplineUpdateStatus'])->name('discipline.status');
         Route::get('/konseling-bk', [DisciplineCounselingController::class, 'counselingIndex'])->name('counseling.index');
         Route::post('/konseling-bk', [DisciplineCounselingController::class, 'counselingStore'])->name('counseling.store');
+
+        // Master Pelanggaran & Prestasi (Admin & Staff)
+        Route::get('/kedisiplinan/master', [DisciplineMasterController::class, 'index'])->name('discipline.master.index');
+        Route::post('/kedisiplinan/master', [DisciplineMasterController::class, 'store'])->name('discipline.master.store');
+        Route::put('/kedisiplinan/master/{id}', [DisciplineMasterController::class, 'update'])->name('discipline.master.update');
+        Route::post('/kedisiplinan/master/{id}/toggle-status', [DisciplineMasterController::class, 'toggleStatus'])->name('discipline.master.toggle-status');
+        Route::delete('/kedisiplinan/master/{id}', [DisciplineMasterController::class, 'destroy'])->name('discipline.master.destroy');
     });
 
     // Rekor Poin Kedisiplinan & Prestasi Siswa (Siswa & Orang Tua)

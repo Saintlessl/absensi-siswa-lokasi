@@ -250,7 +250,9 @@
                                         <i class='bx bx-edit text-lg'></i>
                                     </button>
                                     <form action="{{ route('guru.delete', $g->id) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Hapus data guru {{ $g->nama }} beserta akun autentikasinya?')">
+                                          data-confirm="Hapus data guru {{ $g->nama }} beserta akun autentikasinya?"
+                                          data-confirm-title="Hapus Guru"
+                                          data-confirm-danger="true">
                                         @csrf
                                         <button type="submit"
                                             class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"

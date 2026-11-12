@@ -208,7 +208,10 @@
                                         <i class='bx bx-edit text-base'></i>
                                     </button>
 
-                                    <form action="{{ route('rooms.regenerate', $room) }}" method="POST" onsubmit="return confirm('Regenerate QR Code untuk {{ $room->name }}? QR Code sebelumnya tidak akan bisa digunakan lagi!')">
+                                    <form action="{{ route('rooms.regenerate', $room) }}" method="POST"
+                                        data-confirm="Regenerate QR Code untuk {{ $room->name }}? QR Code sebelumnya tidak akan bisa digunakan lagi!"
+                                        data-confirm-title="Regenerate QR Ruangan"
+                                        data-confirm-danger="true">
                                         @csrf
                                         <button type="submit"
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition"
@@ -217,7 +220,10 @@
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('rooms.destroy', $room) }}" method="POST" onsubmit="return confirm('Hapus data ruangan {{ $room->name }}?')">
+                                    <form action="{{ route('rooms.destroy', $room) }}" method="POST"
+                                        data-confirm="Hapus data ruangan {{ $room->name }}?"
+                                        data-confirm-title="Hapus Ruangan"
+                                        data-confirm-danger="true">
                                         @csrf
                                         <button type="submit"
                                             class="delete-confirm p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"

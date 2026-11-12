@@ -96,7 +96,9 @@
                                         <i class='bx bx-edit text-lg'></i>
                                     </button>
                                     <form method="POST" action="{{ route('pkl.placements.destroy', $pl->id) }}"
-                                          onsubmit="return confirm('Batalkan/hapus penempatan {{ $pl->siswa->nama ?? 'siswa ini' }}?\n\nJika sudah ada riwayat logbook/presensi, sistem akan mengubah status menjadi WITHDRAWN (riwayat tetap tersimpan).');"
+                                          data-confirm="Batalkan/hapus penempatan {{ $pl->siswa->nama ?? 'siswa ini' }}? Jika sudah ada riwayat logbook/presensi, sistem akan mengubah status menjadi WITHDRAWN (riwayat tetap tersimpan)."
+                                          data-confirm-title="Hapus Penempatan PKL"
+                                          data-confirm-danger="true"
                                           class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit"
@@ -178,10 +180,22 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">3. Pilih Siswa <span class="text-rose-500">*</span></label>
-                        <select name="siswa_id" id="selSiswa" class="w-full h-11 text-sm rounded-xl border-0 bg-slate-100 px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none disabled:text-slate-400" disabled required>
-                            <option value="">-- Pilih rombel dulu --</option>
-                        </select>
+                        <x-searchable-select
+                            name="siswa_ids"
+                            id="selSiswaMulti"
+                            label="3. Pilih Siswa (Bisa Pilih Banyak)"
+                            placeholder="-- Pilih rombel terlebih dahulu --"
+                            searchPlaceholder="Cari siswa berdasarkan nama, NIS, atau NISN..."
+                            endpoint="{{ route('pkl.options.siswa') }}"
+                            :multiple="true"
+                            :required="true"
+                            :disabled="true"
+                            dependsOn="selRombel"
+                            dependsParam="kelas_id"
+                            hint="Mendukung multi-select, pencarian, dan pagination server-side"
+                            emptyMessage="Tidak ada siswa kelas 12 yang eligible di rombel ini."
+                            :perPage="15"
+                        />
                     </div>
 
                     <div>
@@ -349,17 +363,28 @@ function fillMitraLabels(list) {
 
 async function loadRombel(selJurusanId, prefillKelas, prefillSiswa) {
     const selR = document.getElementById('selRombel');
-    const selS = document.getElementById('selSiswa');
     const selM = document.getElementById('selMitra');
     if (!selR) return;
-    setOptionsDown(selS, selM);
-    if (!selJurusanId) { setPklOptions(selR, [], '-- Pilih jurusan dulu --'); selR.disabled = true; return; }
-    selR.disabled = true; setPklOptions(selR, [], 'Memuat rombel...');
+    setOptionsDown(selM);
+    if (!selJurusanId) {
+        setPklOptions(selR, [], '-- Pilih jurusan dulu --');
+        selR.disabled = true;
+        selR.dispatchEvent(new Event('change'));
+        return;
+    }
+    selR.disabled = true;
+    setPklOptions(selR, [], 'Memuat rombel...');
     try {
         const j = await pklFetch(PKL_BASE + '/options/rombel?jurusan_id=' + selJurusanId);
-        if (!j.data.length) { setPklOptions(selR, [], j.message || 'Tidak ada rombel kelas 12'); selR.disabled = true; return; }
+        if (!j.data.length) {
+            setPklOptions(selR, [], j.message || 'Tidak ada rombel kelas 12');
+            selR.disabled = true;
+            selR.dispatchEvent(new Event('change'));
+            return;
+        }
         setPklOptions(selR, j.data.map(k => ({ id: k.id, label: k.nama })), '-- Pilih Rombel --', prefillKelas);
         selR.disabled = false;
+        selR.dispatchEvent(new Event('change'));
         if (prefillKelas) await onRombelChange(prefillKelas, prefillSiswa);
         const jm = await pklFetch(PKL_BASE + '/options/mitra?jurusan_id=' + selJurusanId);
         setPklOptions(selM, fillMitraLabels(jm.data), '-- Pilih Mitra --');
@@ -370,29 +395,25 @@ async function loadRombel(selJurusanId, prefillKelas, prefillSiswa) {
     }
 }
 
-function setOptionsDown(selS, selM) {
-    if (selS) { selS.disabled = true; setPklOptions(selS, [], '-- Pilih rombel dulu --'); }
+function setOptionsDown(selM) {
     if (selM) { selM.disabled = true; setPklOptions(selM, [], '-- Tunggu --'); }
+    window.dispatchEvent(new CustomEvent('myskanic-select:reset', {
+        detail: { name: 'siswa_ids', disabled: true }
+    }));
 }
 
 function onJurusanChange(val) {
     const h = document.getElementById('hdnJurusan');
     if (h && !document.getElementById('selJurusan').disabled) h.value = val || '';
-    setOptionsDown(document.getElementById('selSiswa'), document.getElementById('selMitra'));
+    setOptionsDown(document.getElementById('selMitra'));
     loadRombel(val);
 }
 
 async function onRombelChange(val, prefillSiswa) {
-    const selS = document.getElementById('selSiswa');
-    if (!selS) return;
-    if (!val) { selS.disabled = true; setPklOptions(selS, [], '-- Pilih rombel dulu --'); return; }
-    selS.disabled = true; setPklOptions(selS, [], 'Memuat siswa...');
-    try {
-        const j = await pklFetch(PKL_BASE + '/options/siswa?kelas_id=' + val);
-        if (!j.data.length) { setPklOptions(selS, [], j.message || 'Tidak ada siswa eligible'); selS.disabled = true; return; }
-        setPklOptions(selS, j.data.map(s => ({ id: s.id, label: s.nama + ' (NIS: ' + (s.nis || '-') + ')' })), '-- Pilih Siswa --', prefillSiswa);
-        selS.disabled = false;
-    } catch (e) { setPklOptions(selS, [], 'Gagal memuat siswa'); }
+    const selR = document.getElementById('selRombel');
+    if (selR) {
+        selR.dispatchEvent(new Event('change'));
+    }
 }
 
 function openEditPlacement(raw) {

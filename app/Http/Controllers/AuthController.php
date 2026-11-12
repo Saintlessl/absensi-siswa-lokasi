@@ -11,9 +11,24 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('auth.login');
+        $initialRole = $request->query('role', 'siswa');
+        if (!in_array($initialRole, ['siswa', 'guru'], true)) {
+            $initialRole = 'siswa';
+        }
+
+        return view('auth.login', compact('initialRole'));
+    }
+
+    public function indexGuru()
+    {
+        return view('auth.login', ['initialRole' => 'guru']);
+    }
+
+    public function indexSiswa()
+    {
+        return view('auth.login', ['initialRole' => 'siswa']);
     }
 
     public function proseslogin(Request $request)
@@ -84,7 +99,35 @@ class AuthController extends Controller
                 ->withInput($request->only('email'));
         }
 
-        // 1. Non-student accounts (Superadmin, Admin, Guru, Orang Tua) log in directly
+        // Resolve portal role from input, query, or referer
+        $portalRole = strtolower(trim((string) $request->input('portal_role', '')));
+        if (empty($portalRole)) {
+            $referer = (string) $request->header('referer', '');
+            if (str_contains($referer, 'role=guru') || str_contains($referer, '/login/guru')) {
+                $portalRole = 'guru';
+            } else {
+                $portalRole = 'siswa';
+            }
+        }
+
+        // Strict Role-Based Portal Access Enforcement
+        if ($portalRole === 'siswa') {
+            // Portal Siswa accepts: Siswa, Orang Tua, Admin, Super Admin.
+            // Explicitly rejects: Guru, Kaprog.
+            if (in_array($user->role, ['guru', 'kaprog'], true)) {
+                return back()->with('error', 'Akun ini tidak dapat digunakan melalui portal login siswa. Silakan gunakan portal login guru.')
+                    ->withInput($request->only('email', 'remember'));
+            }
+        } elseif ($portalRole === 'guru') {
+            // Portal Guru accepts: Guru, Kaprog, Admin, Super Admin.
+            // Explicitly rejects: Siswa, Orang Tua.
+            if (in_array($user->role, ['siswa', 'orangtua'], true)) {
+                return back()->with('error', 'Akun ini tidak dapat digunakan melalui portal login guru. Silakan gunakan portal login siswa.')
+                    ->withInput($request->only('email', 'remember'));
+            }
+        }
+
+        // 1. Non-student accounts (Superadmin, Admin, Guru, Kaprog, Orang Tua) log in directly
         if ($user->role !== 'siswa') {
             Auth::login($user, $request->has('remember'));
             $request->session()->regenerate();

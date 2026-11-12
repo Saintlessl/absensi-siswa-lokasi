@@ -76,17 +76,43 @@
                             </select>
                         </div>
 
+                        {{-- Cakupan Akses Peminjaman --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Cakupan Akses Peminjaman <span class="text-rose-500">*</span></label>
+                            <select name="borrowing_scope" x-model="inv.borrowing_scope" required
+                                class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none font-semibold">
+                                <option value="jurusan">Khusus Jurusan (Hanya Siswa Jurusan Pemilik)</option>
+                                <option value="umum">Umum (Siswa Semua Jurusan & Guru)</option>
+                            </select>
+                        </div>
+
                         {{-- Kategori --}}
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Kategori Peralatan <span class="text-rose-500">*</span></label>
                             <input type="text" name="kategori" x-model="inv.kategori" required
-                                placeholder="Kamera & Video, Mesin & Las, Alat Otomotif"
+                                placeholder="Kamera & Video, Mesin & Las, Laptop & Komputer"
                                 class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                        </div>
+
+                        {{-- Merk & Tipe/Model --}}
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Merk / Brand</label>
+                                <input type="text" name="merk" x-model="inv.merk"
+                                    placeholder="Contoh: HP, Sony, Asus"
+                                    class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Model / Tipe</label>
+                                <input type="text" name="tipe_model" x-model="inv.tipe_model"
+                                    placeholder="Contoh: OMEN 16, A6400"
+                                    class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
+                            </div>
                         </div>
 
                         {{-- Lokasi Penyimpanan --}}
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Lokasi Penyimpanan <span class="text-rose-500">*</span></label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Lokasi Default <span class="text-rose-500">*</span></label>
                             <input type="text" name="lokasi_penyimpanan" x-model="inv.lokasi_penyimpanan" required
                                 placeholder="Contoh: Lemari Kaca Studio BCF"
                                 class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 placeholder-slate-400 focus:ring-2 focus:ring-[#003FA9]">
@@ -148,6 +174,10 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Kondisi</label>
                                 <div class="h-11 flex items-center px-4 rounded-xl bg-[#E2EDFF] text-sm font-semibold text-slate-800 capitalize" x-text="(inv.kondisi || '').replace('_', ' ')"></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Cakupan Akses</label>
+                                <div class="h-11 flex items-center px-4 rounded-xl bg-[#E2EDFF] text-sm font-semibold text-slate-800" x-text="inv.borrowing_scope === 'umum' ? 'Umum (Semua Jurusan & Guru)' : 'Khusus Jurusan'"></div>
                             </div>
                         </div>
                         <div x-show="inv.deskripsi">

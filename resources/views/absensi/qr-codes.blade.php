@@ -188,7 +188,10 @@
                         <span>Download PNG</span>
                     </button>
                     @if(in_array(Auth::user()->role, ['superadmin', 'admin']))
-                        <form action="{{ route('rooms.regenerate', $room) }}" method="POST" onsubmit="return confirm('Regenerate token QR ruangan {{ $room->name }}? QR lama tidak akan berlaku lagi!')">
+                        <form action="{{ route('rooms.regenerate', $room) }}" method="POST"
+                            data-confirm="Regenerate token QR ruangan {{ $room->name }}? QR lama tidak akan berlaku lagi!"
+                            data-confirm-title="Regenerate QR Token"
+                            data-confirm-danger="true">
                             @csrf
                             <button type="submit"
                                 class="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold flex items-center gap-1 transition-colors"
@@ -253,7 +256,7 @@
             }
 
             if (!src) {
-                alert('QR Code belum selesai dimuat.');
+                window.MySkanicAlert ? MySkanicAlert.warning('QR Code belum selesai dimuat.') : alert('QR Code belum selesai dimuat.');
                 return;
             }
 

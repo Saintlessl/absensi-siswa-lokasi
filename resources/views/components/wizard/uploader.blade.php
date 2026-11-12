@@ -27,7 +27,7 @@
         processFile(file) {
             if (!file) return;
             if (file.size > {{ $maxSizeMB }} * 1024 * 1024) {
-                alert('Ukuran file maksimal {{ $maxSizeMB }}MB');
+                window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file maksimal {{ $maxSizeMB }}MB') : alert('Ukuran file maksimal {{ $maxSizeMB }}MB');
                 return;
             }
             const reader = new FileReader();

@@ -26,6 +26,9 @@
             }
         }
     </script>
+    {{-- SweetAlert2 & MySkanic Design System Alerts --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ asset('css/myskanic-alerts.css') }}">
 </head>
 <body class="font-inter bg-slate-900 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-dark-100 relative overflow-hidden">
@@ -103,5 +106,9 @@
             &copy; {{ date('Y') }} MySkanic. All rights reserved.
         </div>
     </div>
+
+    {{-- Global MySkanic SweetAlert2 Integration --}}
+    <script src="{{ asset('js/myskanic-alerts.js') }}"></script>
+    <x-notifications />
 </body>
 </html>

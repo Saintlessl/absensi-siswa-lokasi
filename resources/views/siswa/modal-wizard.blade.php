@@ -2,7 +2,7 @@
 @if ($errors->any())
     @php
         $wizardRecover = collect(old())->only([
-            'nisn', 'nis', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+            'nisn', 'nis', 'nama', 'no_telp_siswa', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
             'tahun_ajaran_id', 'jalur_masuk', 'asal_sekolah', 'jurusan_id', 'angkatan_id',
             'tingkat', 'kelas_id', 'email', 'password', 'parent_name',
             'parent_jenis_kelamin', 'parent_phone', 'parent_address', 'existing_orangtua_id',
@@ -111,7 +111,7 @@
                                     processFile(file) {
                                         if (!file) return;
                                         if (file.size > 2 * 1024 * 1024) {
-                                            alert('Ukuran file maksimal 2MB');
+                                            window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file maksimal 2MB') : alert('Ukuran file maksimal 2MB');
                                             return;
                                         }
                                         const reader = new FileReader();
@@ -230,6 +230,18 @@
                                                 placeholder="Nama Lengkap Siswa"
                                                 required
                                                 model="student.nama" />
+                            </div>
+
+                            <div>
+                                <x-wizard.input label="Nomor Telepon Aktif Siswa"
+                                                hint="Contoh: 08123456789"
+                                                name="no_telp_siswa"
+                                                id="input_no_telp_siswa"
+                                                type="tel"
+                                                placeholder="08123456789"
+                                                maxlength="25"
+                                                required
+                                                model="student.no_telp_siswa" />
                             </div>
 
                             {{-- Row 3: Tempat Lahir & Tanggal Lahir (TTL) --}}
@@ -493,6 +505,10 @@
                                 {{-- Row 2: Nama Lengkap --}}
                                 <div>
                                     <x-wizard.review-field label="Nama Lengkap" bind="student.nama" />
+                                </div>
+
+                                <div>
+                                    <x-wizard.review-field label="Nomor Telepon Aktif Siswa" bind="student.no_telp_siswa || '-'" />
                                 </div>
 
                                 {{-- Row 3: Tempat & Tanggal Lahir (TTL) --}}

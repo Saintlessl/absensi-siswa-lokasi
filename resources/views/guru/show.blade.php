@@ -181,7 +181,9 @@
                         </div>
                     </div>
                     <form action="{{ route('guru.remove_homeroom_assignment', $guru->activeHomeroomAssignment->id) }}" method="POST"
-                          onsubmit="return confirm('Lepaskan penugasan wali kelas dari rombel ini? Riwayat tetap tersimpan.')">
+                          data-confirm="Lepaskan penugasan wali kelas dari rombel ini? Riwayat tetap tersimpan."
+                          data-confirm-title="Lepaskan Tugas Wali Kelas"
+                          data-confirm-danger="true">
                         @csrf
                         <button type="submit"
                             class="w-full py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-700 font-semibold text-xs transition">
@@ -251,7 +253,9 @@
                         </p>
                     </div>
                     <form action="{{ route('guru.remove_kaprog', $guru->id) }}" method="POST"
-                          onsubmit="return confirm('Lepaskan jabatan KAPROG dari guru ini?')">
+                          data-confirm="Lepaskan jabatan KAPROG dari guru ini?"
+                          data-confirm-title="Lepaskan Jabatan KAPROG"
+                          data-confirm-danger="true">
                         @csrf
                         <button type="submit"
                             class="w-full py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-700 font-semibold text-xs transition">
@@ -335,7 +339,9 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-center">
                                     <form action="{{ route('guru.remove_subject_assignment', $sa->id) }}" method="POST"
-                                          onsubmit="return confirm('Lepaskan penugasan mapel {{ $sa->mataPelajaran->nama_mapel ?? '' }} dari guru ini?')">
+                                          data-confirm="Lepaskan penugasan mapel {{ $sa->mataPelajaran->nama_mapel ?? '' }} dari guru ini?"
+                                          data-confirm-title="Lepaskan Penugasan Mapel"
+                                          data-confirm-danger="true">
                                         @csrf
                                         <button type="submit"
                                             class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"

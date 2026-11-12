@@ -458,12 +458,12 @@ function studentImportWizard() {
                     this.validationResult = data;
                     this.currentStep = 3; // Jump directly to preview validation
                 } else {
-                    alert(data.message || 'Gagal memvalidasi berkas.');
+                    window.MySkanicAlert ? MySkanicAlert.error(data.message || 'Gagal memvalidasi berkas.', 'Validasi Berkas Gagal') : alert(data.message || 'Gagal memvalidasi berkas.');
                 }
             })
             .catch(err => {
                 this.isUploading = false;
-                alert('Terjadi kesalahan jaringan saat memvalidasi berkas.');
+                window.MySkanicAlert ? MySkanicAlert.error('Terjadi kesalahan jaringan saat memvalidasi berkas.') : alert('Terjadi kesalahan jaringan saat memvalidasi berkas.');
             });
         },
 
@@ -487,12 +487,12 @@ function studentImportWizard() {
                     this.executionResult = data;
                     this.currentStep = 6;
                 } else {
-                    alert(data.message || 'Gagal mengeksekusi import.');
+                    window.MySkanicAlert ? MySkanicAlert.error(data.message || 'Gagal mengeksekusi import.', 'Import Gagal') : alert(data.message || 'Gagal mengeksekusi import.');
                 }
             })
             .catch(err => {
                 this.isExecuting = false;
-                alert('Terjadi kesalahan jaringan saat mengeksekusi import.');
+                window.MySkanicAlert ? MySkanicAlert.error('Terjadi kesalahan jaringan saat mengeksekusi import.') : alert('Terjadi kesalahan jaringan saat mengeksekusi import.');
             });
         }
     };

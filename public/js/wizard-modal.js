@@ -38,6 +38,7 @@ function studentWizardModal() {
             nisn: '',
             nis: '',
             nama: '',
+            no_telp_siswa: '',
             jenis_kelamin: '',
             tempat_lahir: '',
             tanggal_lahir: '',
@@ -449,11 +450,11 @@ function studentWizardModal() {
                     this.updateKelasName();
                     this.ensureEmailDomain();
                     if (!this.student.email.endsWith('@myskanic.com')) {
-                        alert('Email akun siswa wajib berakhiran @myskanic.com');
+                        window.MySkanicAlert ? MySkanicAlert.warning('Email akun siswa wajib berakhiran @myskanic.com') : alert('Email akun siswa wajib berakhiran @myskanic.com');
                         return;
                     }
                     if (this.student.password && this.student.password.length < 6) {
-                        alert('Password akun siswa minimal 6 karakter');
+                        window.MySkanicAlert ? MySkanicAlert.warning('Password akun siswa minimal 6 karakter') : alert('Password akun siswa minimal 6 karakter');
                         return;
                     }
                 }
@@ -587,7 +588,7 @@ function guruWizardModal() {
                 if (this.step === 2) {
                     const checkedClasses = currentPanel.querySelectorAll('input[name="kelas_ids[]"]:checked');
                     if (checkedClasses.length === 0) {
-                        alert('Pilih minimal 1 rombel/kelas yang diampu.');
+                        window.MySkanicAlert ? MySkanicAlert.warning('Pilih minimal 1 rombel/kelas yang diampu.') : alert('Pilih minimal 1 rombel/kelas yang diampu.');
                         return;
                     }
                 }
@@ -955,7 +956,7 @@ function jadwalWizardModal() {
                 if (!isValid) return;
 
                 if (this.jadwal.jam_mulai && this.jadwal.jam_selesai && this.jadwal.jam_selesai <= this.jadwal.jam_mulai) {
-                    alert('Jam selesai harus lebih akhir dari jam mulai!');
+                    window.MySkanicAlert ? MySkanicAlert.warning('Jam selesai harus lebih akhir dari jam mulai!') : alert('Jam selesai harus lebih akhir dari jam mulai!');
                     return;
                 }
             }
@@ -1054,11 +1055,11 @@ function roomAssignmentWizardModal() {
                 if (!isValid) return;
 
                 if (this.assignment.start_time && this.assignment.end_time && this.assignment.end_time <= this.assignment.start_time) {
-                    alert('Jam selesai harus lebih akhir dari jam mulai!');
+                    window.MySkanicAlert ? MySkanicAlert.warning('Jam selesai harus lebih akhir dari jam mulai!') : alert('Jam selesai harus lebih akhir dari jam mulai!');
                     return;
                 }
                 if (this.assignment.starts_on && this.assignment.ends_on && this.assignment.ends_on < this.assignment.starts_on) {
-                    alert('Tanggal selesai harus sama atau setelah tanggal mulai!');
+                    window.MySkanicAlert ? MySkanicAlert.warning('Tanggal selesai harus sama atau setelah tanggal mulai!') : alert('Tanggal selesai harus sama atau setelah tanggal mulai!');
                     return;
                 }
             }
@@ -1115,6 +1116,7 @@ function inventoryWizardModal() {
             kode_barang: '',
             nama_barang: '',
             jurusan_id: '',
+            borrowing_scope: 'jurusan',
             kategori: '',
             lokasi_penyimpanan: '',
             total_unit: 1,

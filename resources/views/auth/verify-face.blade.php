@@ -43,6 +43,7 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ asset('css/myskanic-alerts.css') }}">
 
     <style>
         .camera-video-frame {
@@ -497,5 +498,8 @@
             return token;
         }
     </script>
+    {{-- Global MySkanic SweetAlert2 Integration --}}
+    <script src="{{ asset('js/myskanic-alerts.js') }}"></script>
+    <x-notifications />
 </body>
 </html>

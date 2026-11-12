@@ -123,14 +123,35 @@
 </div>
 
 <script>
-    function fillScorePrompt() {
-        const val = prompt('Masukkan nilai seragam untuk seluruh siswa yang belum dinilai (0 - {{ $assessment->skor_maksimal }}):');
-        if (val !== null && val !== '') {
+    async function fillScorePrompt() {
+        if (!window.MySkanicAlert) return;
+
+        const result = await MySkanicAlert.prompt({
+            title: 'Isi Nilai Seragam',
+            text: 'Masukkan nilai untuk seluruh siswa yang belum dinilai (0 - {{ $assessment->skor_maksimal }}):',
+            input: 'number',
+            inputAttributes: {
+                min: 0,
+                max: {{ $assessment->skor_maksimal }},
+                step: 'any'
+            },
+            confirmText: 'Terapkan Nilai',
+            cancelText: 'Batal',
+            inputValidator: (val) => {
+                if (val === '' || isNaN(val) || val < 0 || val > {{ $assessment->skor_maksimal }}) {
+                    return 'Nilai harus berupa angka antara 0 dan {{ $assessment->skor_maksimal }}!';
+                }
+            }
+        });
+
+        if (result && result.isConfirmed && result.value !== undefined) {
+            const val = result.value;
             document.querySelectorAll('.score-input').forEach(input => {
                 if (input.value === '') {
                     input.value = val;
                 }
             });
+            MySkanicAlert.toast('Nilai ' + val + ' berhasil diterapkan ke baris yang kosong.', 'success');
         }
     }
 </script>
