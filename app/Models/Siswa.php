@@ -72,15 +72,22 @@ class Siswa extends Model
     }
 
     /**
-     * Public URL for the student's photo, mirroring Guru::getPhotoUrlAttribute.
+     * Protected URL for the student's photo, served through authorized route.
      */
     public function getPhotoUrlAttribute(): ?string
     {
-        if ($this->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->photo_path)) {
-            return asset('storage/' . $this->photo_path);
+        if (!$this->photo_path) {
+            return null;
         }
 
-        return null;
+        $exists = \Illuminate\Support\Facades\Storage::disk('local')->exists($this->photo_path)
+            || \Illuminate\Support\Facades\Storage::disk('public')->exists($this->photo_path);
+
+        if (!$exists) {
+            return null;
+        }
+
+        return route('siswa.photo', ['id' => $this->id]);
     }
 
     protected static function booted(): void

@@ -49,6 +49,7 @@ class SiswaWizardCreationTest extends TestCase
 
     public function test_student_wizard_modal_creates_student_and_parent_atomically(): void
     {
+        Storage::fake('local');
         Storage::fake('public');
 
         $photo = UploadedFile::fake()->image('student_photo.jpg', 300, 300);
@@ -57,6 +58,7 @@ class SiswaWizardCreationTest extends TestCase
             'nisn' => '0063677346',
             'nis' => '212127327',
             'nama' => 'Arya Saloka',
+            'no_telp_siswa' => '081299998888',
             'jenis_kelamin' => 'L',
             'kelas_id' => $this->kelas->id,
             'photo' => $photo,
@@ -98,10 +100,10 @@ class SiswaWizardCreationTest extends TestCase
     public function test_student_wizard_validates_required_fields(): void
     {
         $response = $this->actingAs($this->admin)->post(route('siswa.store'), [
-            // Missing nis, nama, etc.
+            // Missing nis, nama, photo, etc.
         ]);
 
-        $response->assertSessionHasErrors(['nis']);
+        $response->assertSessionHasErrors(['nis', 'photo']);
     }
 
     public function test_student_wizard_prevents_duplicate_nis(): void

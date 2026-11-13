@@ -39,6 +39,9 @@ use App\Http\Controllers\DisciplineCounselingController;
 use App\Http\Controllers\DisciplineMasterController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\StudentForgotPasswordController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\RoleManagementController;
+use App\Http\Controllers\TeacherLeaveController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -109,10 +112,63 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
 
-    // Profile (All Authenticated Users)
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-    Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/profile/password', [UserController::class, 'updatePassword'])->name('profile.password');
+    // Profile (All Authenticated Users) -> Unified Settings Profile
+    Route::get('/profile', [SettingsController::class, 'profile'])->name('profile');
+    Route::post('/profile/update', [SettingsController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [SettingsController::class, 'updatePassword'])->name('profile.password');
+
+    // =========================================================================
+    // PENGATURAN MYSKANIC (UNIFIED ADMIN & SETTINGS HUB)
+    // =========================================================================
+    Route::prefix('pengaturan')->name('settings.')->group(function () {
+        // Home Dashboard Pengaturan
+        Route::get('/', [SettingsController::class, 'home'])->name('home');
+
+        // Jam Sekolah
+        Route::get('/jam-sekolah', [SchoolSettingController::class, 'index'])->name('school');
+        Route::post('/jam-sekolah', [SchoolSettingController::class, 'update'])->name('school.update');
+
+        // Kalender Akademik
+        Route::get('/kalender-akademik', [AcademicCalendarController::class, 'index'])->name('calendar');
+
+        // Lokasi Sekolah
+        Route::get('/lokasi-sekolah', [LokasiSekolahController::class, 'index'])->name('location');
+        Route::post('/lokasi-sekolah', [LokasiSekolahController::class, 'update'])->name('location.update');
+
+        // Persetujuan Izin (Internal Pengaturan)
+        Route::get('/persetujuan-izin', [IzinApprovalController::class, 'index'])->name('izin.approval');
+
+        // Data Ruangan (Internal Pengaturan)
+        Route::get('/ruangan', [RoomController::class, 'index'])->name('rooms');
+
+        // Manajemen Pengguna (Internal Pengaturan)
+        Route::get('/pengguna', [UserController::class, 'index'])->name('users');
+
+        // Manajemen Role & Granular Permission
+        Route::get('/roles', [RoleManagementController::class, 'index'])->name('roles.index');
+        Route::post('/roles', [RoleManagementController::class, 'store'])->name('roles.store');
+        Route::put('/roles/{role}', [RoleManagementController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [RoleManagementController::class, 'destroy'])->name('roles.destroy');
+        Route::get('/roles/{role}/permissions', [RoleManagementController::class, 'permissions'])->name('roles.permissions');
+        Route::post('/roles/{role}/permissions', [RoleManagementController::class, 'updatePermissions'])->name('roles.permissions.update');
+
+        // Akun (Internal Pengaturan)
+        Route::get('/profil', [SettingsController::class, 'profile'])->name('profile');
+        Route::post('/profil/info', [SettingsController::class, 'updateProfile'])->name('profile.info');
+        Route::post('/profil/password', [SettingsController::class, 'updatePassword'])->name('profile.password');
+    });
+
+    // =========================================================================
+    // PENGAJUAN IZIN GURU (MANDIRI)
+    // =========================================================================
+    Route::middleware(['role:guru,kaprog,superadmin,admin'])->group(function () {
+        Route::get('/guru/izin', [TeacherLeaveController::class, 'index'])->name('teacher.izin.index');
+        Route::post('/guru/izin', [TeacherLeaveController::class, 'store'])->name('teacher.izin.store');
+        Route::post('/guru/izin/{id}/cancel', [TeacherLeaveController::class, 'cancel'])->name('teacher.izin.cancel');
+    });
+
+    // Protected Student Profile Photo Serving (Authenticated & Authorized only)
+    Route::get('/siswa/{id}/photo', [SiswaController::class, 'photo'])->name('siswa.photo')->whereNumber('id');
 
     // =========================================================================
     // FIRST LOGIN BIOMETRIC FACE ENROLLMENT ROUTES (Siswa)

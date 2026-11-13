@@ -32,6 +32,7 @@ function studentWizardModal() {
         formId: 'frmSiswa',
         isSubmitting: false,
         photoPreviewUrl: null,
+        hasValidPhoto: false,
 
         // Student Data Model
         student: {
@@ -83,6 +84,7 @@ function studentWizardModal() {
 
             window.addEventListener('wizard-photo-updated', (e) => {
                 this.photoPreviewUrl = e.detail ? e.detail.url : null;
+                this.hasValidPhoto = e.detail ? Boolean(e.detail.valid) : false;
             });
 
             // Watchers for instantaneous auto-detection and cascade synchronization
@@ -443,6 +445,23 @@ function studentWizardModal() {
 
                 // Step 1 email & name sync validation
                 if (this.step === 1) {
+                    // Mandatory Student Profile Photo Check
+                    const fileInput = document.getElementById('student_photo');
+                    const hasPhoto = (fileInput && fileInput.files && fileInput.files.length > 0) || this.hasValidPhoto || this.photoPreviewUrl;
+                    if (!hasPhoto) {
+                        if (window.MySkanicAlert) {
+                            MySkanicAlert.warning('Foto profil siswa wajib diunggah sebelum melanjutkan ke tahap berikutnya.');
+                        } else {
+                            alert('Foto profil siswa wajib diunggah sebelum melanjutkan.');
+                        }
+                        const photoBox = document.querySelector('[data-photo-container]');
+                        if (photoBox) {
+                            photoBox.classList.add('ring-2', 'ring-rose-500', 'border-rose-500');
+                            photoBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return;
+                    }
+
                     this.updateTahunAjaranName();
                     this.updateDependentAngkatan();
                     this.updateAngkatanName();
@@ -479,6 +498,23 @@ function studentWizardModal() {
             if (this.isSubmitting) return;
             const form = document.getElementById(this.formId);
             if (!form) return;
+
+            // Strict check: photo is mandatory
+            const fileInput = document.getElementById('student_photo');
+            const hasPhoto = (fileInput && fileInput.files && fileInput.files.length > 0) || this.hasValidPhoto;
+            if (!hasPhoto) {
+                this.step = 1;
+                if (window.MySkanicAlert) {
+                    MySkanicAlert.warning('Foto profil siswa wajib diunggah sebelum data siswa baru dapat disimpan.');
+                } else {
+                    alert('Foto profil siswa wajib diunggah.');
+                }
+                const photoBox = document.querySelector('[data-photo-container]');
+                if (photoBox) {
+                    photoBox.classList.add('ring-2', 'ring-rose-500', 'border-rose-500');
+                }
+                return;
+            }
 
             if (!form.checkValidity()) {
                 form.reportValidity();

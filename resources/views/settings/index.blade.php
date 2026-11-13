@@ -1,71 +1,72 @@
-@extends('layouts.app')
+@extends('settings.layout')
 
-@section('title', 'Pengaturan Sekolah')
-@section('page-title', 'Pengaturan Sekolah')
-@section('page-subtitle', 'Jam masuk, jam pulang, dan nama sekolah')
+@php
+    $settingsTitle = 'Pengaturan Jam Sekolah — MySkanic';
+    $settingsPageTitle = 'Jam Sekolah';
+    $settingsPageSubtitle = 'Konfigurasi batas waktu presensi masuk dan waktu kepulangan peserta didik';
+@endphp
 
-@section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Pengaturan Sekolah</li>
-@endsection
+@section('settings-content')
+<div class="space-y-6">
 
-@section('content')
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+        <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-[#003EA7] flex items-center justify-center text-xl font-bold">
+                <i class='bx bx-time-five'></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-900">Konfigurasi Jam Presensi</h3>
+                <p class="text-xs text-slate-400">Atur jam batas keterlambatan dan jam buka presensi kepulangan</p>
+            </div>
+        </div>
 
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-6 sm:p-8">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center text-primary-600">
-                    <i class='bx bx-time-five text-xl'></i>
-                </div>
+        <form action="{{ route('settings.update') }}" method="POST" class="space-y-5 max-w-2xl">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                    <h3 class="text-lg font-bold text-dark-800">Jam Absensi</h3>
-                    <p class="text-xs text-dark-400">Batas keterlambatan masuk & waktu buka absen pulang</p>
+                    <label for="jam_masuk" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Batas Jam Masuk (Terlambat setelah ini) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="time" name="jam_masuk" id="jam_masuk" required value="{{ old('jam_masuk', $jamMasuk) }}"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                    @error('jam_masuk')
+                        <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
+                    @enderror
+                    <span class="text-[11px] text-slate-400 mt-1 block">Siswa yang presensi setelah jam ini akan ditandai terlambat.</span>
+                </div>
+
+                <div>
+                    <label for="jam_pulang" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Jam Buka Absen Pulang <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="time" name="jam_pulang" id="jam_pulang" required value="{{ old('jam_pulang', $jamPulang) }}"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                    @error('jam_pulang')
+                        <p class="mt-1 text-xs text-rose-500">{{ $message }}</p>
+                    @enderror
+                    <span class="text-[11px] text-slate-400 mt-1 block">Presensi kepulangan baru dapat dilakukan setelah jam ini.</span>
                 </div>
             </div>
 
-            <form action="{{ route('settings.update') }}" method="POST" class="space-y-5">
-                @csrf
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="jam_masuk" class="block text-sm font-medium text-dark-700 mb-1.5">Batas Jam Masuk (terlambat setelah ini)</label>
-                        <input type="time" name="jam_masuk" id="jam_masuk" required value="{{ old('jam_masuk', $jamMasuk) }}"
-                            class="block w-full px-3.5 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                        @error('jam_masuk')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="jam_pulang" class="block text-sm font-medium text-dark-700 mb-1.5">Jam Buka Absen Pulang</label>
-                        <input type="time" name="jam_pulang" id="jam_pulang" required value="{{ old('jam_pulang', $jamPulang) }}"
-                            class="block w-full px-3.5 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                        @error('jam_pulang')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
-                    </div>
-                </div>
-                <div>
-                    <label for="nama_sekolah" class="block text-sm font-medium text-dark-700 mb-1.5">Nama Sekolah</label>
-                    <input type="text" name="nama_sekolah" id="nama_sekolah" maxlength="150" value="{{ old('nama_sekolah', $namaSekolah) }}"
-                        class="block w-full px-3.5 py-2.5 border border-dark-200 rounded-xl bg-dark-50/50 focus:bg-white text-dark-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
-                </div>
+            <div>
+                <label for="nama_sekolah" class="block text-xs font-bold text-slate-700 mb-1.5">
+                    Nama Resmi Sekolah
+                </label>
+                <input type="text" name="nama_sekolah" id="nama_sekolah" maxlength="150" value="{{ old('nama_sekolah', $namaSekolah) }}"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                <span class="text-[11px] text-slate-400 mt-1 block">Digunakan pada header laporan, dashboard dan export dokumen.</span>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
                 <button type="submit"
-                    class="w-full sm:w-auto px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition shadow-sm inline-flex items-center justify-center gap-2">
-                    <i class='bx bx-save'></i> Simpan Pengaturan
+                    class="px-6 py-2.5 bg-[#003EA7] hover:bg-blue-800 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-900/20 transition inline-flex items-center gap-2">
+                    <i class='bx bx-save text-base'></i>
+                    <span>Simpan Pengaturan Jam</span>
                 </button>
-            </form>
-        </div>
-
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-6 sm:p-8">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
-                    <i class='bx bx-info-circle text-xl'></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-dark-800">Informasi</h3>
-                    <p class="text-xs text-dark-400">Bagaimana jam ini dipakai</p>
-                </div>
             </div>
-            <ul class="space-y-3 text-sm text-dark-600">
-                <li class="flex gap-2"><i class='bx bx-check-circle text-emerald-500 mt-0.5'></i> Absen <b>masuk</b> setelah batas jam masuk dihitung <b>terlambat</b> (menit & durasi).</li>
-                <li class="flex gap-2"><i class='bx bx-check-circle text-emerald-500 mt-0.5'></i> Absen <b>pulang</b> baru bisa dilakukan mulai dari jam pulang yang diatur.</li>
-                <li class="flex gap-2"><i class='bx bx-check-circle text-emerald-500 mt-0.5'></i> Nilai ini otomatis dipakai halaman absensi siswa — tidak perlu ubah kode.</li>
-            </ul>
-        </div>
+        </form>
     </div>
+
+</div>
 @endsection

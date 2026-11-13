@@ -65,8 +65,19 @@
                                 {{ $sess->tanggal->format('d/m/Y') }}
                             </td>
                             <td class="py-4 px-4">
-                                <span class="font-semibold text-slate-800 block">{{ $sess->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-xs text-slate-400 mt-0.5 block">{{ $sess->siswa->kelas->nama_kelas ?? '' }}</span>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-50 border border-blue-100 shrink-0 flex items-center justify-center shadow-xs">
+                                        @if($sess->siswa?->photo_url)
+                                            <img src="{{ $sess->siswa->photo_url }}" alt="{{ $sess->siswa->nama }}" class="w-full h-full object-cover">
+                                        @else
+                                            <span class="text-[10px] font-bold text-[#003FA9]">{{ strtoupper(substr($sess->siswa->nama ?? 'S', 0, 1)) }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="font-bold text-slate-800 block truncate">{{ $sess->siswa->nama ?? 'Siswa' }}</span>
+                                        <span class="text-xs text-slate-400 mt-0.5 block truncate">{{ $sess->siswa->kelas->nama_kelas ?? '' }}</span>
+                                    </div>
+                                </div>
                             </td>
                             <td class="py-4 px-4 font-medium text-slate-700">
                                 {{ $sess->guruBk->name ?? 'Konselor' }}
@@ -149,13 +160,15 @@
                 @csrf
                 <div class="px-8 py-6 space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Siswa <span class="text-rose-500">*</span></label>
-                        <select name="siswa_id" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
-                            <option value="">-- Pilih Siswa Konseli --</option>
-                            @foreach($siswas as $s)
-                                <option value="{{ $s->id }}">{{ $s->nama }} ({{ $s->kelas->nama_kelas ?? 'Kelas' }})</option>
-                            @endforeach
-                        </select>
+                        <x-searchable-select
+                            name="siswa_id"
+                            id="counseling_siswa_id"
+                            label="Pilih Siswa"
+                            endpoint="{{ route('options.select.siswa') }}"
+                            placeholder="-- Pilih Siswa Konseli --"
+                            searchPlaceholder="Ketik nama siswa, NIS..."
+                            :required="true"
+                        />
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

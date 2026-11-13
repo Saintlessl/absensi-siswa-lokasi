@@ -14,19 +14,39 @@
 @section('content')
 <div x-data="{ activeTab: '{{ request('tab', 'timeline') }}' }" class="space-y-6">
 
-    {{-- Student Information Header Card (Matching Reference 2: SUPER ADMIN - DATA SISWA _ DETAIL.png) --}}
+    {{-- Student Information Header Card (Matching Reference 2 & Section 6.B) --}}
     <div class="bg-white rounded-[28px] p-7 sm:p-8 shadow-sm border border-slate-100">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            {{-- Left: Student Primary Identity --}}
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{{ $siswa->nama }}</h1>
-                <div class="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm text-slate-500 font-medium">
-                    <div>NIS: <span class="font-bold text-slate-800 font-mono">{{ $siswa->nis }}</span></div>
-                    <span>•</span>
-                    <div>NISN: <span class="font-bold text-slate-800 font-mono">{{ $siswa->nisn ?? '-' }}</span></div>
-                    <span>•</span>
-                    <div>Email: <a href="mailto:{{ $siswa->user?->email }}" class="font-semibold text-[#003FA9] hover:underline">{{ $siswa->user?->email ?? '-' }}</a></div>
-                    <span class="sr-only">Masuk TA: {{ $siswa->tahun_ajaran_masuk_nama }}</span>
+            {{-- Left: Student Primary Visual Identity (Photo + Details) --}}
+            <div class="flex items-center gap-5 sm:gap-6">
+                {{-- Larger Student Photo Header --}}
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#EFF5FF] border-2 border-blue-100 shrink-0 flex items-center justify-center shadow-sm">
+                    @if ($siswa->photo_url)
+                        <img src="{{ $siswa->photo_url }}" alt="{{ $siswa->nama }}" class="w-full h-full object-cover">
+                    @else
+                        <div class="flex flex-col items-center justify-center text-[#003FA9]">
+                            <span class="text-2xl sm:text-3xl font-extrabold">{{ strtoupper(substr($siswa->nama, 0, 1)) }}</span>
+                            <span class="text-[9px] font-semibold text-slate-400 mt-0.5">Belum Ada Foto</span>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Name & Administrative Details --}}
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{{ $siswa->nama }}</h1>
+                    <div class="flex items-center flex-wrap gap-x-3 gap-y-1.5 mt-2 text-xs sm:text-sm text-slate-500 font-medium">
+                        <div>NIS: <span class="font-bold text-slate-800 font-mono">{{ $siswa->nis }}</span></div>
+                        <span>•</span>
+                        <div>NISN: <span class="font-bold text-slate-800 font-mono">{{ $siswa->nisn ?? '-' }}</span></div>
+                        <span>•</span>
+                        <div>Kelas: <span class="font-bold text-slate-800">{{ $siswa->kelas->nama_kelas ?? '-' }}</span></div>
+                        <span>•</span>
+                        <div>Jurusan: <span class="font-bold text-slate-800">{{ $siswa->kelas->jurusan->nama_jurusan ?? ($siswa->jurusan->nama_jurusan ?? '-') }}</span></div>
+                        @if($siswa->user?->email)
+                            <span>•</span>
+                            <div>Email: <a href="mailto:{{ $siswa->user->email }}" class="font-semibold text-[#003FA9] hover:underline">{{ $siswa->user->email }}</a></div>
+                        @endif
+                    </div>
                 </div>
             </div>
 

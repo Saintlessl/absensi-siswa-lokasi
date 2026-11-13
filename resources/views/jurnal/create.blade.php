@@ -138,7 +138,18 @@
                                 <tr class="hover:bg-slate-50/70 transition-colors">
                                     <td class="py-4 px-4 text-slate-400 text-xs font-medium text-center">{{ $idx + 1 }}</td>
                                     <td class="py-4 px-4 font-mono font-bold text-slate-900 text-xs sm:text-sm">{{ $st->nis }}</td>
-                                    <td class="py-4 px-4 font-bold text-slate-900 text-xs sm:text-sm">{{ $st->nama }}</td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-50 border border-blue-100 shrink-0 flex items-center justify-center font-bold text-xs shadow-xs">
+                                                @if($st->photo_url)
+                                                    <img src="{{ $st->photo_url }}" alt="{{ $st->nama }}" class="w-full h-full object-cover">
+                                                @else
+                                                    <span class="text-[#003FA9]">{{ strtoupper(substr($st->nama, 0, 1)) }}</span>
+                                                @endif
+                                            </div>
+                                            <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ $st->nama }}</span>
+                                        </div>
+                                    </td>
                                     <td class="py-4 px-4 text-center">
                                         <div class="inline-flex items-center gap-2">
                                             @foreach(['hadir' => 'H', 'terlambat' => 'T', 'izin' => 'I', 'sakit' => 'S', 'alpa' => 'A'] as $statKey => $statLabel)

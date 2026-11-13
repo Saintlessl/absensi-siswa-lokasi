@@ -380,99 +380,24 @@
                 </div>
             @endif
 
-            {{-- 4. PENGATURAN & MASTER --}}
+            {{-- 4. PENGATURAN --}}
             <div class="mb-5">
                 <p class="sidebar-section-title px-3 mb-2 text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.15em]">
-                    PENGATURAN & MASTER
+                    PENGATURAN
                 </p>
                 <ul class="space-y-1 stagger-children">
-                    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
-                        {{-- Pengaturan Sekolah --}}
-                        <li>
-                            <a href="{{ route('settings.index') }}"
-                                class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('settings.*')
-                                          ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                                data-tooltip="Pengaturan Sekolah"
-                                title="Pengaturan Sekolah">
-                                <i class='bx bx-cog text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('settings.*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                                <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('settings.*') ? 'font-bold' : '' }}">Pengaturan Sekolah</span>
-                            </a>
-                        </li>
-
-                        {{-- Kalender Akademik --}}
-                        <li>
-                            <a href="{{ route('academic_calendar.index') }}"
-                                class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('academic_calendar.*')
-                                          ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                                data-tooltip="Kalender Akademik"
-                                title="Kalender Akademik">
-                                <i class='bx bx-calendar-x text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('academic_calendar.*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                                <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('academic_calendar.*') ? 'font-bold' : '' }}">Kalender Akademik</span>
-                            </a>
-                        </li>
-
-                        {{-- Persetujuan Izin (Superadmin & Admin) --}}
-                        <li>
-                            <a href="{{ route('izin.approval') }}"
-                                class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('izin.approval')
-                                          ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                                data-tooltip="Persetujuan Izin"
-                                title="Persetujuan Izin">
-                                <i class='bx bx-task text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('izin.approval') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                                <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('izin.approval') ? 'font-bold' : '' }}">Persetujuan Izin</span>
-                            </a>
-                        </li>
-
-                        {{-- Data Ruangan --}}
-                        <li>
-                            <a href="{{ route('rooms.index') }}"
-                                class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('rooms.index*')
-                                          ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                                data-tooltip="Data Ruangan"
-                                title="Data Ruangan">
-                                <i class='bx bx-building-house text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('rooms.index*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                                <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('rooms.index*') ? 'font-bold' : '' }}">Data Ruangan</span>
-                            </a>
-                        </li>
-
-                        {{-- Pengaturan Lokasi Absen --}}
-                        <li>
-                            <a href="{{ route('lokasi_sekolah') }}"
-                                class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('lokasi_sekolah*')
-                                          ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                                data-tooltip="Pengaturan Lokasi"
-                                title="Pengaturan Lokasi">
-                                <i class='bx bx-map-pin text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('lokasi_sekolah*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                                <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('lokasi_sekolah*') ? 'font-bold' : '' }}">Pengaturan Lokasi</span>
-                            </a>
-                        </li>
-                    @endif
-
-                    {{-- Manajemen Pengguna (Superadmin Only) --}}
-                    @if (Auth::user()->role === 'superadmin')
-                        <li>
-                            <a href="{{ route('user') }}"
-                                class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                      {{ request()->routeIs('user*')
-                                          ? 'active bg-white text-[#003EA7] font-bold shadow-none'
-                                          : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                                data-tooltip="Manajemen Pengguna"
-                                title="Manajemen Pengguna">
-                                <i class='bx bxs-user-account text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('user*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                                <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('user*') ? 'font-bold' : '' }}">Manajemen Pengguna</span>
-                            </a>
-                        </li>
-                    @endif
+                    <li>
+                        <a href="{{ route('settings.home') }}"
+                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ (request()->routeIs('settings.*') || request()->routeIs('academic_calendar.*') || request()->routeIs('lokasi_sekolah*') || request()->routeIs('izin.approval*') || request()->routeIs('rooms.index*') || request()->routeIs('user*'))
+                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                            data-tooltip="Pengaturan"
+                            title="Pengaturan">
+                            <i class='bx bx-cog text-[22px] flex-shrink-0 transition-colors {{ (request()->routeIs('settings.*') || request()->routeIs('academic_calendar.*') || request()->routeIs('lokasi_sekolah*') || request()->routeIs('izin.approval*') || request()->routeIs('rooms.index*') || request()->routeIs('user*')) ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ (request()->routeIs('settings.*') || request()->routeIs('academic_calendar.*') || request()->routeIs('lokasi_sekolah*') || request()->routeIs('izin.approval*') || request()->routeIs('rooms.index*') || request()->routeIs('user*')) ? 'font-bold' : '' }}">Pengaturan</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         @endif
@@ -490,18 +415,35 @@
                     MENU GURU
                 </p>
                 <ul class="space-y-1 stagger-children">
+                    {{-- Pengajuan Izin Guru --}}
                     <li>
-                        <a href="{{ route('izin.approval') }}"
+                        <a href="{{ route('teacher.izin.index') }}"
                             class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                                  {{ request()->routeIs('izin.approval')
+                                  {{ request()->routeIs('teacher.izin.*')
                                       ? 'active bg-white text-[#003EA7] font-bold shadow-none'
                                       : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
-                            data-tooltip="Persetujuan Izin"
-                            title="Persetujuan Izin">
-                            <i class='bx bx-task text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('izin.approval') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
-                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('izin.approval') ? 'font-bold' : '' }}">Persetujuan Izin</span>
+                            data-tooltip="Izin Mengajar"
+                            title="Pengajuan Izin Mengajar">
+                            <i class='bx bx-notepad text-[22px] flex-shrink-0 transition-colors {{ request()->routeIs('teacher.izin.*') ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ request()->routeIs('teacher.izin.*') ? 'font-bold' : '' }}">Izin Mengajar</span>
                         </a>
                     </li>
+
+                    {{-- Pengaturan (Jika berwenang menyetujui izin atau mengelola modul) --}}
+                    @if(Auth::user()->hasPermission('pengaturan.view') || Auth::user()->hasPermission('izin.view_siswa') || Auth::user()->hasPermission('izin.approve_siswa'))
+                    <li>
+                        <a href="{{ route('settings.home') }}"
+                            class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                                  {{ (request()->routeIs('settings.*') || request()->routeIs('izin.approval*'))
+                                      ? 'active bg-white text-[#003EA7] font-bold shadow-none'
+                                      : 'text-blue-100 hover:bg-white/10 hover:text-white' }}"
+                            data-tooltip="Pengaturan"
+                            title="Pengaturan">
+                            <i class='bx bx-cog text-[22px] flex-shrink-0 transition-colors {{ (request()->routeIs('settings.*') || request()->routeIs('izin.approval*')) ? "text-[#003EA7]" : "text-blue-100/90 group-hover:text-white" }}'></i>
+                            <span class="sidebar-label transition-all duration-200 {{ (request()->routeIs('settings.*') || request()->routeIs('izin.approval*')) ? 'font-bold' : '' }}">Pengaturan</span>
+                        </a>
+                    </li>
+                    @endif
                 </ul>
             </div>
 

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +21,19 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Superadmin bypasses all gates
+        Gate::before(function ($user, $ability) {
+            if ($user && $user->hasRole('superadmin')) {
+                return true;
+            }
+        });
+
+        // Dynamic gate resolution using our granular permission system
+        Gate::after(function ($user, $ability) {
+            if ($user) {
+                return $user->hasPermission($ability);
+            }
+            return false;
+        });
     }
 }

@@ -108,8 +108,12 @@
                                     <td class="py-4 px-4 text-xs font-medium text-slate-400 text-center">{{ $siswas->firstItem() + $loop->index }}</td>
                                     <td class="py-4 px-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="flex-shrink-0 w-8 h-8 rounded-xl bg-[#EFF5FF] text-[#003FA9] flex items-center justify-center font-bold text-xs uppercase">
-                                                {{ substr($s->nama, 0, 1) }}
+                                            <div class="flex-shrink-0 w-9 h-9 rounded-full overflow-hidden bg-[#EFF5FF] border border-blue-100 flex items-center justify-center font-bold text-xs shadow-xs">
+                                                @if ($s->photo_url)
+                                                    <img src="{{ $s->photo_url }}" alt="{{ $s->nama }}" class="w-full h-full object-cover">
+                                                @else
+                                                    <span class="text-[#003FA9] uppercase">{{ substr($s->nama, 0, 1) }}</span>
+                                                @endif
                                             </div>
                                             <div>
                                                 <p class="text-xs sm:text-sm font-bold text-slate-900">{{ $s->nama }}</p>

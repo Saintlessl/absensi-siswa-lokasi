@@ -56,7 +56,7 @@ class SelectOptionController extends Controller
             $jurusanId = $kaprogJurusanId;
         }
 
-        $query = Siswa::with(['kelas:id,nama_kelas,tingkat,jurusan_id'])
+        $query = Siswa::with(['kelas:id,nama_kelas,tingkat,jurusan_id', 'kelas.jurusan:id,nama_jurusan,kode_jurusan'])
             ->where('status', 'aktif');
 
         // Resolve pre-selected IDs if requested
@@ -66,17 +66,20 @@ class SelectOptionController extends Controller
                 : array_filter(explode(',', (string) $request->selected_ids));
 
             if (!empty($selectedIds)) {
-                $selectedSiswas = Siswa::with(['kelas:id,nama_kelas,tingkat,jurusan_id'])
+                $selectedSiswas = Siswa::with(['kelas:id,nama_kelas,tingkat,jurusan_id', 'kelas.jurusan:id,nama_jurusan,kode_jurusan'])
                     ->whereIn('id', $selectedIds)
                     ->get()
                     ->map(fn ($s) => [
-                        'id'      => $s->id,
-                        'label'   => $s->nama,
-                        'subtext' => 'NIS: ' . ($s->nis ?: '-') . ' • NISN: ' . ($s->nisn ?: '-') . ' • ' . ($s->kelas->nama_kelas ?? '-'),
-                        'nama'    => $s->nama,
-                        'nis'     => $s->nis,
-                        'nisn'    => $s->nisn,
-                        'kelas'   => $s->kelas->nama_kelas ?? '-',
+                        'id'        => $s->id,
+                        'label'     => $s->nama,
+                        'subtext'   => 'NIS: ' . ($s->nis ?: '-') . ' • NISN: ' . ($s->nisn ?: '-') . ' • ' . ($s->kelas->nama_kelas ?? '-') . ($s->kelas?->jurusan ? ' (' . $s->kelas->jurusan->kode_jurusan . ')' : ''),
+                        'nama'      => $s->nama,
+                        'nis'       => $s->nis,
+                        'nisn'      => $s->nisn,
+                        'kelas'     => $s->kelas->nama_kelas ?? '-',
+                        'jurusan'   => $s->kelas?->jurusan?->kode_jurusan ?? ($s->kelas?->jurusan?->nama_jurusan ?? '-'),
+                        'photo_url' => $s->photo_url,
+                        'initial'   => strtoupper(substr($s->nama, 0, 1)),
                     ]);
 
                 return response()->json([
@@ -125,13 +128,16 @@ class SelectOptionController extends Controller
         $paginator = $query->orderBy('nama')->paginate($perPage);
 
         $data = $paginator->getCollection()->map(fn ($s) => [
-            'id'      => $s->id,
-            'label'   => $s->nama,
-            'subtext' => 'NIS: ' . ($s->nis ?: '-') . ' • NISN: ' . ($s->nisn ?: '-') . ' • ' . ($s->kelas->nama_kelas ?? '-'),
-            'nama'    => $s->nama,
-            'nis'     => $s->nis,
-            'nisn'    => $s->nisn,
-            'kelas'   => $s->kelas->nama_kelas ?? '-',
+            'id'        => $s->id,
+            'label'     => $s->nama,
+            'subtext'   => 'NIS: ' . ($s->nis ?: '-') . ' • NISN: ' . ($s->nisn ?: '-') . ' • ' . ($s->kelas->nama_kelas ?? '-') . ($s->kelas?->jurusan ? ' (' . $s->kelas->jurusan->kode_jurusan . ')' : ''),
+            'nama'      => $s->nama,
+            'nis'       => $s->nis,
+            'nisn'      => $s->nisn,
+            'kelas'     => $s->kelas->nama_kelas ?? '-',
+            'jurusan'   => $s->kelas?->jurusan?->kode_jurusan ?? ($s->kelas?->jurusan?->nama_jurusan ?? '-'),
+            'photo_url' => $s->photo_url,
+            'initial'   => strtoupper(substr($s->nama, 0, 1)),
         ]);
 
         return response()->json([

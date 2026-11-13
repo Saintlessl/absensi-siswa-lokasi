@@ -74,7 +74,24 @@ class SiswaController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->boolean('tanpa_foto')) {
+            $query->where(function ($q) {
+                $q->whereNull('photo_path')->orWhere('photo_path', '');
+            });
+        }
+
         $siswa = $query->orderBy('nama')->paginate(10)->appends($request->query());
+
+        // Count students without photo for indicator banner
+        $tanpaFotoQuery = Siswa::where(function ($q) {
+            $q->whereNull('photo_path')->orWhere('photo_path', '');
+        });
+        if ($user && $user->role === 'kaprog') {
+            $tanpaFotoQuery->whereHas('kelas', function ($q) use ($user) {
+                $q->where('jurusan_id', $user->jurusan_id);
+            });
+        }
+        $tanpaFotoCount = $tanpaFotoQuery->count();
 
         if ($user && $user->role === 'kaprog') {
             $jurusans = Jurusan::where('id', $user->jurusan_id)->get();
@@ -89,7 +106,7 @@ class SiswaController extends Controller
         $activeTahunAjaran = TahunAjaran::getActive() ?? $tahunAjarans->first();
         $orangTuaExisting = OrangTua::with('siswa')->orderBy('nama')->get();
 
-        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting', 'angkatans', 'tahunAjarans', 'activeTahunAjaran') + [
+        return view('siswa.index', compact('siswa', 'kelas', 'jurusans', 'orangTuaExisting', 'angkatans', 'tahunAjarans', 'activeTahunAjaran', 'tanpaFotoCount') + [
             'search'          => $request->search ?? '',
             'kelas_id'        => $request->kelas_id ?? '',
             'jurusan_id'      => $request->jurusan_id ?? '',
@@ -97,6 +114,7 @@ class SiswaController extends Controller
             'angkatan_id'     => $request->angkatan_id ?? '',
             'tahun_ajaran_id' => $request->tahun_ajaran_id ?? '',
             'status'          => $request->status ?? '',
+            'tanpa_foto'      => $request->boolean('tanpa_foto'),
         ]);
     }
 
@@ -109,12 +127,8 @@ class SiswaController extends Controller
         }
         $rawUsername = preg_replace('/[^a-z0-9._-]/', '', $rawUsername);
 
-        if (empty($rawUsername)) {
-            return back()->withErrors(['nis' => 'NIS atau Username email siswa wajib diisi.'])->withInput();
-        }
-
-        $finalEmail = $rawUsername . '@myskanic.com';
-        $defaultPassword = $request->password ?: ($request->nis ?: 'password123');
+        $finalEmail = !empty($rawUsername) ? ($rawUsername . '@myskanic.com') : null;
+        $defaultPassword = $request->password ?: ($request->nis ?: null);
         $request->merge([
             'email'    => $finalEmail,
             'username' => $rawUsername,
@@ -136,7 +150,7 @@ class SiswaController extends Controller
             'jalur_masuk'          => 'nullable|in:baru,pindahan',
             'asal_sekolah'         => 'nullable|string|max:150',
             'no_telp_siswa'        => 'required|string|max:25',
-            'photo'                => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo'                => 'required|file|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
             'parent_name'          => 'required_without:existing_orangtua_id|nullable|string|max:255',
             'parent_jenis_kelamin' => 'required_without:existing_orangtua_id|nullable|in:L,P',
             'parent_phone'         => 'required_without:existing_orangtua_id|nullable|string|max:25',
@@ -146,6 +160,12 @@ class SiswaController extends Controller
             'email'                => 'required|email|unique:users,email',
             'password'             => 'required|min:6',
         ], [
+            'photo.required'                => 'Foto profil siswa wajib diunggah untuk data siswa baru.',
+            'photo.file'                    => 'File foto profil siswa tidak valid.',
+            'photo.image'                   => 'File yang diunggah harus berupa gambar yang valid.',
+            'photo.mimes'                   => 'Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.',
+            'photo.max'                     => 'Ukuran file foto profil maksimal 2 MB.',
+            'photo.dimensions'              => 'Resolusi foto profil minimal 300 x 300 piksel.',
             'email.unique'                  => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
             'parent_phone.required_without' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
             'no_telp_siswa.required'        => 'Nomor telepon aktif siswa wajib diisi.',
@@ -208,7 +228,7 @@ class SiswaController extends Controller
 
             $photoPath = null;
             if ($request->hasFile('photo')) {
-                $photoPath = $request->file('photo')->store('siswa-photos', 'public');
+                $photoPath = $request->file('photo')->store('siswa-photos', 'local');
             }
 
             $activationLink = DB::transaction(function () use ($request, $finalEmail, $studentPhone, $parentPhone, $photoPath, $targetKelas, $activeTa, $tahunAjaranMasuk, $angkatan) {
@@ -277,12 +297,21 @@ class SiswaController extends Controller
             return $this->parentAccounts->issueActivation($parentUser);
             });
 
+            logger()->info('Student registered with mandatory profile photo', [
+                'user_id'    => Auth::id(),
+                'nis'        => $request->nis,
+                'photo_path' => $photoPath,
+            ]);
+
             $message = 'Data siswa berhasil ditambahkan.';
             if ($activationLink) {
                 $message .= ' Akun orang tua menunggu aktivasi.';
             }
             return redirect()->back()->with('success', $message)->with('parent_activation_link', $activationLink);
         } catch (\Illuminate\Database\QueryException $e) {
+            if (!empty($photoPath) && Storage::disk('local')->exists($photoPath)) {
+                Storage::disk('local')->delete($photoPath);
+            }
             // Log technical detail server-side; show a safe message to the user.
             $sqlState = $e->errorInfo[0] ?? null;
             logger()->warning('Siswa store failed (QueryException)', [
@@ -300,9 +329,15 @@ class SiswaController extends Controller
             }
             return back()->with('error', 'Gagal menyimpan data siswa karena masalah database. Data tidak ada yang tersimpan sebagian.')->withInput();
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            if (!empty($photoPath) && Storage::disk('local')->exists($photoPath)) {
+                Storage::disk('local')->delete($photoPath);
+            }
             report($e);
             return back()->with('error', 'Anda tidak memiliki izin untuk melakukan tindakan ini.')->withInput();
         } catch (\Throwable $e) {
+            if (!empty($photoPath) && Storage::disk('local')->exists($photoPath)) {
+                Storage::disk('local')->delete($photoPath);
+            }
             logger()->error('Siswa store failed', [
                 'user_id' => Auth::id(),
                 'nis' => $request->nis,
@@ -484,7 +519,7 @@ class SiswaController extends Controller
             'angkatan_id'      => 'nullable|exists:angkatans,id',
             'jalur_masuk'      => 'nullable|in:baru,pindahan',
             'asal_sekolah'     => 'nullable|string|max:150',
-            'photo'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo'            => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
             'parent_name'          => 'required|string|max:255',
             'parent_jenis_kelamin' => 'nullable|in:L,P',
             'parent_phone'         => 'required|string|max:25',
@@ -492,6 +527,11 @@ class SiswaController extends Controller
             'email'            => ['required', 'email', Rule::unique('users', 'email')->ignore($siswa->user_id)],
             'password'         => 'nullable|min:6',
         ], [
+            'photo.file'                => 'File foto profil tidak valid.',
+            'photo.image'               => 'File yang diunggah harus berupa gambar yang valid.',
+            'photo.mimes'               => 'Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.',
+            'photo.max'                 => 'Ukuran file foto profil maksimal 2 MB.',
+            'photo.dimensions'          => 'Resolusi foto profil minimal 300 x 300 piksel.',
             'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
             'parent_phone.required' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
         ]);
@@ -511,25 +551,18 @@ class SiswaController extends Controller
             }
         }
 
+        $newPhotoPath = null;
         try {
             $parentPhone = $this->normalizeIndonesianPhone($request->parent_phone);
             if (!$parentPhone) {
                 return back()->withErrors(['parent_phone' => 'Nomor WhatsApp harus berupa nomor Indonesia yang valid.'])->withInput();
             }
 
-            $photoPath = $siswa->photo_path;
-            if ($request->boolean('remove_photo')) {
-                if ($photoPath && Storage::disk('public')->exists($photoPath)) {
-                    Storage::disk('public')->delete($photoPath);
-                }
-                $photoPath = null;
-            }
+            $oldPhotoPath = $siswa->photo_path;
             if ($request->hasFile('photo')) {
-                if ($photoPath && Storage::disk('public')->exists($photoPath)) {
-                    Storage::disk('public')->delete($photoPath);
-                }
-                $photoPath = $request->file('photo')->store('siswa-photos', 'public');
+                $newPhotoPath = $request->file('photo')->store('siswa-photos', 'local');
             }
+            $photoPath = $newPhotoPath ?: $oldPhotoPath;
 
             DB::transaction(function () use ($request, $siswa, $finalEmail, $parentPhone, $photoPath, $targetKelas) {
             $userData = [
@@ -587,11 +620,106 @@ class SiswaController extends Controller
             }
             $parent->update($parentData);
             });
+
+            // Safe cleanup of old photo file only after database transaction commits successfully
+            if ($newPhotoPath && $oldPhotoPath && $newPhotoPath !== $oldPhotoPath) {
+                if (Storage::disk('local')->exists($oldPhotoPath)) {
+                    Storage::disk('local')->delete($oldPhotoPath);
+                } elseif (Storage::disk('public')->exists($oldPhotoPath)) {
+                    Storage::disk('public')->delete($oldPhotoPath);
+                }
+                logger()->info('Student profile photo updated', [
+                    'user_id'   => Auth::id(),
+                    'siswa_id'  => $siswa->id,
+                    'old_photo' => $oldPhotoPath,
+                    'new_photo' => $newPhotoPath,
+                ]);
+            }
+
             return redirect()->back()->with('success', 'Data Siswa berhasil diperbarui');
         } catch (\Throwable $e) {
+            if ($newPhotoPath && Storage::disk('local')->exists($newPhotoPath)) {
+                Storage::disk('local')->delete($newPhotoPath);
+            }
             report($e);
             return back()->with('error', 'Gagal memperbarui data siswa dan orang tua. Tidak ada perubahan parsial yang disimpan.');
         }
+    }
+
+    /**
+     * Serve student profile photo securely with strict authorization.
+     */
+    public function photo(Request $request, $id)
+    {
+        $siswa = Siswa::with(['kelas', 'angkatan'])->findOrFail($id);
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Silakan login terlebih dahulu.');
+        }
+
+        // Authorization check based on roles and assigned scopes
+        if (in_array($user->role, ['superadmin', 'admin'])) {
+            // Super Admin and Admin have access to all student photos
+        } elseif ($user->role === 'kaprog') {
+            $siswaJurusanId = $siswa->kelas?->jurusan_id ?? $siswa->angkatan?->jurusan_id;
+            if (!$user->jurusan_id || (int) $siswaJurusanId !== (int) $user->jurusan_id) {
+                abort(403, 'Akses ditolak: siswa ini bukan bagian dari jurusan Anda.');
+            }
+        } elseif ($user->role === 'guru') {
+            // Teachers can view photos to identify students visually
+        } elseif ($user->role === 'siswa') {
+            if ((int) $siswa->user_id !== (int) $user->id) {
+                abort(403, 'Akses ditolak: Anda hanya dapat melihat foto Anda sendiri.');
+            }
+        } elseif ($user->role === 'orangtua') {
+            $isChild = $siswa->orangtua()->where('user_id', $user->id)->exists();
+            if (!$isChild) {
+                abort(403, 'Akses ditolak: Anda hanya dapat melihat foto anak Anda.');
+            }
+        } else {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (!$siswa->photo_path) {
+            return $this->fallbackPhotoResponse($siswa);
+        }
+
+        $disk = null;
+        if (Storage::disk('local')->exists($siswa->photo_path)) {
+            $disk = 'local';
+        } elseif (Storage::disk('public')->exists($siswa->photo_path)) {
+            $disk = 'public';
+        }
+
+        if (!$disk) {
+            return $this->fallbackPhotoResponse($siswa);
+        }
+
+        $fullPath = Storage::disk($disk)->path($siswa->photo_path);
+        $mime = Storage::disk($disk)->mimeType($siswa->photo_path) ?: 'image/jpeg';
+
+        return response()->file($fullPath, [
+            'Content-Type'  => $mime,
+            'Cache-Control' => 'private, max-age=86400, must-revalidate',
+        ]);
+    }
+
+    /**
+     * Fallback SVG avatar placeholder when photo is not present
+     */
+    protected function fallbackPhotoResponse(Siswa $siswa)
+    {
+        $initial = strtoupper(substr($siswa->nama, 0, 1)) ?: '?';
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">'
+            . '<rect width="200" height="200" rx="100" fill="#EFF5FF"/>'
+            . '<text x="100" y="115" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" fill="#003FA9" text-anchor="middle" dominant-baseline="middle">' . htmlspecialchars($initial) . '</text>'
+            . '</svg>';
+
+        return response($svg, 200, [
+            'Content-Type'  => 'image/svg+xml',
+            'Cache-Control' => 'private, max-age=86400',
+        ]);
     }
 
     private function normalizeIndonesianPhone(?string $phone): ?string

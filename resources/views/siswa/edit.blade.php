@@ -10,25 +10,39 @@
 
         {{-- Foto Profil Siswa --}}
         <div class="mb-5 p-4 rounded-2xl bg-white/70 border border-blue-100 flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-[#E2EDFF] border border-blue-200 flex items-center justify-center overflow-hidden flex-shrink-0" id="preview_edit_photo_container">
+            <div class="w-20 h-20 rounded-2xl bg-[#EFF5FF] border-2 border-blue-200 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs" id="preview_edit_photo_container">
                 @if ($siswa->photo_url)
                     <img src="{{ $siswa->photo_url }}" alt="{{ $siswa->nama }}" class="w-full h-full object-cover">
                 @else
-                    <span class="text-xl font-bold text-[#003FA9]">{{ strtoupper(substr($siswa->nama, 0, 1)) }}</span>
+                    <div class="flex flex-col items-center justify-center text-[#003FA9]">
+                        <span class="text-xl font-extrabold">{{ strtoupper(substr($siswa->nama, 0, 1)) }}</span>
+                        <span class="text-[9px] font-semibold text-slate-400">Belum Ada</span>
+                    </div>
                 @endif
             </div>
             <div class="flex-1">
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1">Ganti Pasfoto Siswa (Opsional)</label>
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <label class="block text-xs font-bold text-[#0F172A]">
+                        {{ $siswa->photo_path ? 'Perbarui Pasfoto Siswa' : 'Unggah Foto Profil Siswa' }}
+                    </label>
+                    @if ($siswa->photo_path)
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <i class='bx bx-check-circle'></i> Foto Terpasang
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            <i class='bx bx-info-circle'></i> Foto Belum Diunggah
+                        </span>
+                    @endif
+                </div>
                 <input type="file" name="photo" id="photo_edit" accept="image/jpeg,image/png,image/webp"
                     class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#003FA9] file:text-white hover:file:bg-[#00338d] cursor-pointer"
                     onchange="previewEditStudentPhoto(this)">
-                <p class="text-[11px] text-[#64748B] mt-1">Format: JPG, PNG, WebP. Maksimal 2MB.</p>
-                @if ($siswa->photo_path)
-                    <label class="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-rose-600 cursor-pointer">
-                        <input type="checkbox" name="remove_photo" value="1" class="rounded border-rose-300 text-rose-600 focus:ring-rose-500">
-                        Hapus foto profil saat ini
-                    </label>
-                @endif
+                <div class="flex items-center gap-2 mt-1 text-[11px] text-[#64748B]">
+                    <span>Format: JPG, JPEG, PNG, WebP (Maks 2MB)</span>
+                    <span>&bull;</span>
+                    <span class="font-semibold text-slate-700">Resolusi minimal 300 x 300 px</span>
+                </div>
             </div>
         </div>
 
@@ -302,11 +316,37 @@
     function previewEditStudentPhoto(input) {
         const container = document.getElementById('preview_edit_photo_container');
         if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                window.MySkanicAlert ? MySkanicAlert.warning('Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.') : alert('Format tidak didukung');
+                input.value = '';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file foto profil maksimal 2MB.') : alert('Ukuran file maksimal 2MB');
+                input.value = '';
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
-                container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-            }
-            reader.readAsDataURL(input.files[0]);
+                const img = new Image();
+                img.onload = function() {
+                    if (img.naturalWidth < 300 || img.naturalHeight < 300) {
+                        const msg = 'Resolusi foto profil minimal 300 x 300 piksel. Resolusi file: ' + img.naturalWidth + ' x ' + img.naturalHeight + ' piksel.';
+                        window.MySkanicAlert ? MySkanicAlert.warning(msg) : alert(msg);
+                        input.value = '';
+                        return;
+                    }
+                    container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                };
+                img.onerror = function() {
+                    window.MySkanicAlert ? MySkanicAlert.warning('File gambar rusak atau tidak dapat dibaca.') : alert('Gambar rusak.');
+                    input.value = '';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
     }
 

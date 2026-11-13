@@ -21,6 +21,26 @@
         </div>
     @endif
 
+    {{-- Indikator Siswa Belum Memiliki Pasfoto (Requirement Section 8) --}}
+    @if(isset($tanpaFotoCount) && $tanpaFotoCount > 0)
+        <div class="mb-5 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                    <i class='bx bx-camera-off text-xl'></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-amber-800">Terdapat {{ $tanpaFotoCount }} siswa belum memiliki foto profil.</p>
+                    <p class="text-[11px] text-amber-600 mt-0.5">Lengkapi foto profil melalui menu Edit Siswa agar identitas visual dapat dikenali guru dan staf.</p>
+                </div>
+            </div>
+            <a href="{{ route('siswa', array_merge(request()->query(), ['tanpa_foto' => 1])) }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-xs whitespace-nowrap">
+                <i class='bx bx-filter-alt'></i>
+                <span>Lihat Siswa Tanpa Foto</span>
+            </a>
+        </div>
+    @endif
+
     {{-- Main Container Card (Matching Reference 1: SUPER ADMIN - DATA SISWA.png) --}}
     <div class="bg-white rounded-[28px] p-6 sm:p-8 shadow-sm border border-slate-100">
         {{-- Card Header --}}
@@ -172,14 +192,25 @@
                                 <div class="text-[11px] text-slate-400 font-normal">NISN: {{ $s->nisn ?? '-' }}</div>
                             </td>
 
-                            {{-- 3. Nama Lengkap & Email --}}
+                            {{-- 3. Identitas Visual (Foto, Nama Lengkap & Email) --}}
                             <td class="py-4 px-4">
-                                <a href="{{ route('siswa.show', $s->id) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition block">
-                                    {{ $s->nama }}
-                                </a>
-                                @if($s->user?->email)
-                                    <div class="text-[11px] text-slate-400 font-mono">{{ $s->user->email }}</div>
-                                @endif
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full overflow-hidden bg-[#EFF5FF] border border-blue-100 shrink-0 flex items-center justify-center shadow-xs">
+                                        @if ($s->photo_url)
+                                            <img src="{{ $s->photo_url }}" alt="{{ $s->nama }}" class="w-full h-full object-cover">
+                                        @else
+                                            <span class="text-xs font-bold text-[#003FA9]">{{ strtoupper(substr($s->nama, 0, 1)) }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <a href="{{ route('siswa.show', $s->id) }}" class="font-bold text-slate-900 hover:text-[#003FA9] transition block truncate">
+                                            {{ $s->nama }}
+                                        </a>
+                                        @if($s->user?->email)
+                                            <div class="text-[11px] text-slate-400 font-mono truncate">{{ $s->user->email }}</div>
+                                        @endif
+                                    </div>
+                                </div>
                             </td>
 
                             {{-- 4. Kelas (Clean text, no chip) --}}

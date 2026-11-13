@@ -165,7 +165,18 @@
                             <tr class="hover:bg-slate-50/70 transition-colors">
                                 <td class="py-4 px-4 text-slate-400 font-medium text-xs text-center">{{ $idx + 1 }}</td>
                                 <td class="py-4 px-4 font-mono font-bold text-slate-900 text-xs sm:text-sm">{{ $att->siswa->nis ?? '-' }}</td>
-                                <td class="py-4 px-4 font-bold text-slate-900 text-xs sm:text-sm">{{ $att->siswa->nama ?? 'Siswa Terhapus' }}</td>
+                                <td class="py-4 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-50 border border-blue-100 shrink-0 flex items-center justify-center font-bold text-xs shadow-xs">
+                                            @if($att->siswa?->photo_url)
+                                                <img src="{{ $att->siswa->photo_url }}" alt="{{ $att->siswa->nama }}" class="w-full h-full object-cover">
+                                            @else
+                                                <span class="text-[#003FA9]">{{ strtoupper(substr($att->siswa->nama ?? 'S', 0, 1)) }}</span>
+                                            @endif
+                                        </div>
+                                        <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ $att->siswa->nama ?? 'Siswa Terhapus' }}</span>
+                                    </div>
+                                </td>
                                 <td class="py-4 px-4 text-center">
                                     <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase {{ $badge['bg'] }}">
                                         {{ $badge['label'] }}

@@ -1,40 +1,27 @@
-@extends('layouts.app')
+@extends('settings.layout')
 
-@section('title', 'Data Ruangan')
-@section('page-title', 'Data Ruangan')
-@section('page-subtitle', 'Kelola ruangan fisik sekolah, gedung, kapasitas, dan QR code permanen')
+@php
+    $settingsTitle = 'Data Ruangan — MySkanic';
+    $settingsPageTitle = 'Data Ruangan';
+    $settingsPageSubtitle = 'Manajemen Ruangan Fisik — kelola ruangan, gedung, kapasitas, dan QR code presensi';
+@endphp
 
-@section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li><span class="text-dark-500">Pengaturan</span></li>
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Data Ruangan</li>
-@endsection
-
-@section('page-header')
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="text-xl font-medium text-dark-800">Manajemen Ruangan Fisik</h2>
-            <p class="text-sm text-dark-400 mt-1">
-                Data ruangan fisik dipisahkan dari rombel belajar, memungkinkan rolling kelas tanpa ganti QR Code.
-            </p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('rooms.assignments') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 border border-dark-200 bg-white hover:bg-dark-50 text-dark-700 text-sm font-medium rounded-xl shadow-sm transition-all duration-200">
-                <i class='bx bx-transfer text-lg text-primary-600'></i>
-                <span>Alokasi & Rolling Ruangan</span>
-            </a>
-            <button onclick="openModal('modal-addroom')"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200">
-                <i class='bx bx-plus text-lg'></i>
-                <span>Tambah Ruangan</span>
-            </button>
-        </div>
+@section('settings-header-actions')
+    <div class="flex items-center gap-2">
+        <a href="{{ route('rooms.assignments') }}"
+            class="inline-flex items-center gap-2 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-2xl shadow-xs transition">
+            <i class='bx bx-transfer text-base text-[#003EA7]'></i>
+            <span>Alokasi & Rolling</span>
+        </a>
+        <button onclick="openModal('modal-addroom')"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[#003EA7] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl shadow-sm transition">
+            <i class='bx bx-plus-circle text-base'></i>
+            <span>Tambah Ruangan</span>
+        </button>
     </div>
 @endsection
 
-@section('content')
+@section('settings-content')
     {{-- Flash Message --}}
     @if(session('success'))
         <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-sm font-semibold">

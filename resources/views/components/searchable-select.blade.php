@@ -100,9 +100,21 @@
 
             {{-- SINGLE SELECT: Text Display --}}
             <template x-if="!multiple">
-                <div class="truncate text-sm font-medium"
-                     :class="hasSelection ? 'text-slate-900 font-semibold' : 'text-slate-400'"
-                     x-text="singleSelectedLabel">
+                <div class="flex items-center gap-2 min-w-0">
+                    <template x-if="hasSelection && (selectedItems[0]?.photo_url || selectedItems[0]?.initial)">
+                        <div class="w-6 h-6 rounded-full overflow-hidden bg-[#EFF5FF] border border-blue-200 shrink-0 flex items-center justify-center">
+                            <template x-if="selectedItems[0]?.photo_url">
+                                <img :src="selectedItems[0].photo_url" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!selectedItems[0]?.photo_url">
+                                <span class="text-[10px] font-bold text-[#003FA9]" x-text="selectedItems[0]?.initial || '?'"></span>
+                            </template>
+                        </div>
+                    </template>
+                    <div class="truncate text-sm font-medium"
+                         :class="hasSelection ? 'text-slate-900 font-semibold' : 'text-slate-400'"
+                         x-text="singleSelectedLabel">
+                    </div>
                 </div>
             </template>
         </div>
@@ -130,6 +142,34 @@
                :class="{ 'rotate-180 text-[#003FA9]': isOpen }"></i>
         </div>
     </div>
+
+    {{-- Selected Student Summary Card (Section 6.C.5) --}}
+    <template x-if="!multiple && hasSelection && (selectedItems[0]?.nis || selectedItems[0]?.photo_url)">
+        <div class="p-3 rounded-2xl bg-[#EFF5FF]/80 border border-blue-100 flex items-center gap-3.5 mt-2">
+            <div class="w-11 h-11 rounded-full overflow-hidden bg-white border border-blue-200 shrink-0 flex items-center justify-center shadow-xs">
+                <template x-if="selectedItems[0]?.photo_url">
+                    <img :src="selectedItems[0].photo_url" :alt="selectedItems[0].nama || selectedItems[0].label" class="w-full h-full object-cover">
+                </template>
+                <template x-if="!selectedItems[0]?.photo_url">
+                    <span class="text-sm font-bold text-[#003FA9]" x-text="selectedItems[0]?.initial || '?'"></span>
+                </template>
+            </div>
+            <div class="min-w-0 flex-1">
+                <div class="text-xs font-bold text-slate-900 truncate" x-text="selectedItems[0]?.nama || selectedItems[0]?.label"></div>
+                <div class="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
+                    <span class="font-mono" x-text="'NIS: ' + (selectedItems[0]?.nis || '-')"></span>
+                    <span>•</span>
+                    <span x-text="'Kelas: ' + (selectedItems[0]?.kelas || '-')"></span>
+                    <template x-if="selectedItems[0]?.jurusan">
+                        <span>•</span>
+                    </template>
+                    <template x-if="selectedItems[0]?.jurusan">
+                        <span class="font-semibold text-[#003FA9]" x-text="selectedItems[0]?.jurusan"></span>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
 
     {{-- Floating Dropdown Popover --}}
     <div class="myskanic-select-panel"
@@ -214,6 +254,18 @@
                             <i class='bx bx-check text-sm leading-none font-bold'></i>
                         </template>
                     </div>
+
+                    {{-- Optional Student / User Avatar Thumbnail --}}
+                    <template x-if="item.photo_url || item.initial">
+                        <div class="w-8 h-8 rounded-full overflow-hidden bg-[#EFF5FF] border border-blue-100 shrink-0 flex items-center justify-center">
+                            <template x-if="item.photo_url">
+                                <img :src="item.photo_url" :alt="item.nama || item.label" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!item.photo_url">
+                                <span class="text-[11px] font-bold text-[#003FA9]" x-text="item.initial || '?'"></span>
+                            </template>
+                        </div>
+                    </template>
 
                     {{-- Item Text Details --}}
                     <div class="min-w-0 flex-1">

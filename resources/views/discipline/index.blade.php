@@ -146,8 +146,19 @@
                                 {{ $rec->tanggal->format('d/m/Y') }}
                             </td>
                             <td class="py-4 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $rec->siswa->nama ?? 'Siswa' }}</span>
-                                <span class="text-xs text-slate-400 mt-0.5 block">NIS: {{ $rec->siswa->nis ?? '-' }} • {{ $rec->siswa->kelas->nama_kelas ?? 'Kelas' }}</span>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-50 border border-blue-100 shrink-0 flex items-center justify-center shadow-xs">
+                                        @if($rec->siswa?->photo_url)
+                                            <img src="{{ $rec->siswa->photo_url }}" alt="{{ $rec->siswa->nama }}" class="w-full h-full object-cover">
+                                        @else
+                                            <span class="text-[10px] font-bold text-[#003FA9]">{{ strtoupper(substr($rec->siswa->nama ?? 'S', 0, 1)) }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="font-bold text-slate-800 block truncate">{{ $rec->siswa->nama ?? 'Siswa' }}</span>
+                                        <span class="text-xs text-slate-400 mt-0.5 block truncate">NIS: {{ $rec->siswa->nis ?? '-' }} • {{ $rec->siswa->kelas->nama_kelas ?? 'Kelas' }}</span>
+                                    </div>
+                                </div>
                             </td>
                             <td class="py-4 px-4">
                                 <div class="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -297,15 +308,17 @@
             
             {{-- Scrollable Form Body --}}
             <div class="px-8 py-5 space-y-4 overflow-y-auto flex-1">
-                {{-- 1. Pilih Siswa --}}
+                {{-- 1. Pilih Siswa (Searchable with Photo & Live Details) --}}
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">1. Pilih Siswa <span class="text-rose-500">*</span></label>
-                    <select name="siswa_id" required class="w-full h-11 text-sm rounded-xl border-0 bg-[#E2EDFF] px-4 focus:ring-2 focus:ring-[#003FA9] appearance-none">
-                        <option value="">-- Pilih Siswa Terkait --</option>
-                        @foreach($siswas as $s)
-                            <option value="{{ $s->id }}">{{ $s->nama }} (NIS: {{ $s->nis }} - {{ $s->kelas->nama_kelas ?? 'Kelas' }})</option>
-                        @endforeach
-                    </select>
+                    <x-searchable-select
+                        name="siswa_id"
+                        id="discipline_siswa_id"
+                        label="1. Pilih Siswa"
+                        endpoint="{{ route('options.select.siswa') }}"
+                        placeholder="-- Pilih Siswa Terkait --"
+                        searchPlaceholder="Ketik nama siswa, NIS, atau NISN..."
+                        :required="true"
+                    />
                 </div>
 
                 {{-- 2. Tanggal & Judul Catatan --}}

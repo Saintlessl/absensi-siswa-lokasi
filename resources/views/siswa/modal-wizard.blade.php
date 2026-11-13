@@ -110,25 +110,59 @@
                                     },
                                     processFile(file) {
                                         if (!file) return;
+                                        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+                                        if (!validTypes.includes(file.type)) {
+                                            window.MySkanicAlert ? MySkanicAlert.warning('Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.') : alert('Format tidak didukung');
+                                            this.removePhoto();
+                                            return;
+                                        }
                                         if (file.size > 2 * 1024 * 1024) {
-                                            window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file maksimal 2MB') : alert('Ukuran file maksimal 2MB');
+                                            window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file foto profil maksimal 2MB.') : alert('Ukuran file maksimal 2MB');
+                                            this.removePhoto();
                                             return;
                                         }
                                         const reader = new FileReader();
                                         reader.onload = (e) => {
-                                            this.previewUrl = e.target.result;
-                                            window.dispatchEvent(new CustomEvent('wizard-photo-updated', { detail: { url: e.target.result } }));
+                                            const img = new Image();
+                                            img.onload = () => {
+                                                if (img.naturalWidth < 300 || img.naturalHeight < 300) {
+                                                    const msg = 'Resolusi foto profil minimal 300 x 300 piksel. Resolusi foto yang dipilih: ' + img.naturalWidth + ' x ' + img.naturalHeight + ' piksel.';
+                                                    window.MySkanicAlert ? MySkanicAlert.warning(msg) : alert(msg);
+                                                    this.removePhoto();
+                                                    return;
+                                                }
+                                                this.previewUrl = e.target.result;
+                                                const box = document.querySelector('[data-photo-container]');
+                                                if (box) box.classList.remove('ring-2', 'ring-rose-500', 'border-rose-500');
+                                                window.dispatchEvent(new CustomEvent('wizard-photo-updated', { detail: { url: e.target.result, valid: true } }));
+                                            };
+                                            img.onerror = () => {
+                                                window.MySkanicAlert ? MySkanicAlert.warning('File gambar rusak atau tidak dapat dibaca.') : alert('Gambar rusak.');
+                                                this.removePhoto();
+                                            };
+                                            img.src = e.target.result;
                                         };
                                         reader.readAsDataURL(file);
                                     },
                                     removePhoto() {
                                         this.previewUrl = null;
                                         this.$refs.fileInput.value = '';
-                                        window.dispatchEvent(new CustomEvent('wizard-photo-updated', { detail: { url: null } }));
+                                        window.dispatchEvent(new CustomEvent('wizard-photo-updated', { detail: { url: null, valid: false } }));
                                     }
                                  }">
+                                {{-- Mandatory Indicator & Guidelines Header --}}
+                                <div class="flex items-center justify-between mb-2 px-1">
+                                    <label class="block text-xs font-extrabold text-slate-800">
+                                        Foto Profil Siswa <span class="text-rose-500">*</span>
+                                    </label>
+                                    <span class="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                                        Wajib Diunggah
+                                    </span>
+                                </div>
+
                                 {{-- Dashed Container --}}
-                                <div class="w-full h-[395px] rounded-[28px] border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center p-6 text-center relative"
+                                <div data-photo-container
+                                     class="w-full h-[370px] rounded-[28px] border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center p-6 text-center relative"
                                      :class="dragOver ? 'border-[#003FA9] bg-blue-100/40' : 'border-[#93C5FD] bg-transparent'"
                                      @dragover.prevent="dragOver = true"
                                      @dragleave.prevent="dragOver = false"
@@ -145,7 +179,7 @@
                                     {{-- Empty State (No Image) --}}
                                     <div x-show="!previewUrl" class="flex flex-col items-center justify-center">
                                         {{-- Square Rounded Container with Avatar Icon --}}
-                                        <div class="w-[84px] h-[84px] rounded-2xl border-2 border-[#003FA9] flex items-center justify-center text-[#003FA9] mb-5">
+                                        <div class="w-[84px] h-[84px] rounded-2xl border-2 border-[#003FA9] flex items-center justify-center text-[#003FA9] mb-4">
                                             <svg class="w-11 h-11" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
                                                 <circle cx="12" cy="8" r="4"></circle>
                                                 <path stroke-linecap="round" d="M5.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"></path>
@@ -155,20 +189,22 @@
                                         {{-- Blue Upload Button --}}
                                         <button type="button"
                                                 @click="$refs.fileInput.click()"
-                                                class="h-[40px] px-5 rounded-xl bg-[#003FA9] hover:bg-[#00348C] text-white text-xs font-semibold inline-flex items-center gap-2 shadow-sm transition duration-150">
+                                                class="h-[40px] px-5 rounded-xl bg-[#003FA9] hover:bg-[#00348C] text-white text-xs font-bold inline-flex items-center gap-2 shadow-sm transition duration-150">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                             </svg>
-                                            <span>Tambahkan Foto Siswa</span>
+                                            <span>Unggah Foto Profil</span>
                                         </button>
 
-                                        {{-- Subtitles --}}
-                                        <p class="text-xs font-medium text-[#60A5FA] mt-4">
-                                            Atau tarik dan lepas di sini
+                                        {{-- Subtitles & Requirements --}}
+                                        <p class="text-xs font-semibold text-[#003FA9] mt-3">
+                                            Tarik dan lepas pasfoto di sini
                                         </p>
-                                        <p class="text-[11px] text-[#94A3B8] mt-0.5">
-                                            Format: JPG, PNG, WebP. Maksimal 2MB.
-                                        </p>
+                                        <div class="mt-2 text-[11px] text-slate-500 space-y-0.5">
+                                            <p>Format: JPG, JPEG, PNG, WebP (Maks. 2MB)</p>
+                                            <p class="text-slate-600 font-semibold">Resolusi: Minimal 300 x 300 piksel</p>
+                                            <p class="text-slate-400 text-[10px]">Wajah menghadap depan & pencahayaan cukup</p>
+                                        </div>
                                     </div>
 
                                     {{-- Preview State (With Image) --}}
@@ -180,22 +216,23 @@
                                             <div class="absolute inset-0 bg-slate-900/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                                 <button type="button"
                                                         @click="$refs.fileInput.click()"
-                                                        class="p-2 bg-white text-[#003FA9] rounded-lg shadow text-xs font-semibold">
-                                                    Ganti
+                                                        class="p-2 bg-white text-[#003FA9] rounded-lg shadow text-xs font-bold">
+                                                    Ganti Foto
                                                 </button>
                                                 <button type="button"
                                                         @click="removePhoto()"
-                                                        class="p-2 bg-rose-600 text-white rounded-lg shadow text-xs font-semibold">
+                                                        class="p-2 bg-rose-600 text-white rounded-lg shadow text-xs font-bold">
                                                     Hapus
                                                 </button>
                                             </div>
                                         </div>
-                                        <p class="text-xs font-medium text-emerald-600 mt-3 flex items-center gap-1">
+                                        <p class="text-xs font-bold text-emerald-600 mt-3 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                             </svg>
-                                            Foto siap diunggah
+                                            Foto valid & siap diunggah
                                         </p>
+                                        <p class="text-[10px] text-slate-400 mt-0.5">Arahkan kursor untuk mengganti foto</p>
                                     </div>
                                 </div>
                             </div>

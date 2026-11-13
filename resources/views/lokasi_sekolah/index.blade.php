@@ -1,13 +1,10 @@
-@extends('layouts.app')
+@extends('settings.layout')
 
-@section('title', 'Lokasi Sekolah')
-@section('page-title', 'Pengaturan Lokasi')
-@section('page-subtitle', 'Tentukan titik koordinat dan radius absensi sekolah')
-
-@section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Lokasi Sekolah</li>
-@endsection
+@php
+    $settingsTitle = 'Pengaturan Lokasi — MySkanic';
+    $settingsPageTitle = 'Lokasi Sekolah';
+    $settingsPageSubtitle = 'Tentukan titik koordinat GPS dan radius geofencing presensi sekolah';
+@endphp
 
 @push('styles')
     <!-- Leaflet CSS -->
@@ -16,13 +13,13 @@
         #map {
             height: 450px;
             width: 100%;
-            border-radius: 0.75rem;
+            border-radius: 1rem;
             z-index: 10;
         }
     </style>
 @endpush
 
-@section('content')
+@section('settings-content')
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {{-- Form Card --}}

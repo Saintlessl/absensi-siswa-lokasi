@@ -112,6 +112,46 @@
             background: #64748b;
         }
 
+        /* Settings independent scrolling content */
+        .settings-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #bfdbfe transparent;
+        }
+        .settings-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .settings-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .settings-scroll::-webkit-scrollbar-thumb {
+            background: #bfdbfe;
+            border-radius: 9999px;
+        }
+        .settings-scroll::-webkit-scrollbar-thumb:hover {
+            background: #93c5fd;
+        }
+
+        /* Settings left nav sleek scrollbar */
+        .settings-nav-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .settings-nav-scroll::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        /* Mobile horizontal scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
         /* Sidebar scrollbar on the LEFT side (custom sleek WebKit, zero native arrows) */
         .sidebar-scroll {
             direction: rtl;
@@ -489,19 +529,23 @@
         {{-- Sidebar --}}
         @include('layouts.sidebar')
 
+        @php
+            $isSettingsLayout = View::hasSection('is-settings-layout') || request()->routeIs('settings.*');
+        @endphp
+
         {{-- Main Content Area --}}
-        <div id="main-content" class="flex-1 min-w-0 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003EA7]">
+        <div id="main-content" class="flex-1 min-w-0 lg:ml-[272px] content-transition min-h-screen flex flex-col p-2.5 sm:p-4 lg:p-5 bg-[#003EA7] {{ $isSettingsLayout ? 'lg:h-screen lg:max-h-screen lg:overflow-hidden' : '' }}">
 
             {{-- Floating Rounded Container --}}
-            <div class="flex-1 bg-[#E2EDFF] rounded-[26px] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl">
+            <div class="flex-1 bg-[#E2EDFF] rounded-[26px] sm:rounded-[36px] flex flex-col overflow-hidden shadow-2xl {{ $isSettingsLayout ? 'lg:h-full lg:max-h-full' : '' }}">
 
                 {{-- Header --}}
                 @include('layouts.header')
 
                 {{-- Page Content --}}
-                <main class="flex-1 px-4 sm:px-8 pb-8 pt-1">
-                    {{-- Breadcrumb: Guaranteed on all pages --}}
-                    @if(!request()->routeIs('dashboard'))
+                <main class="flex-1 px-4 sm:px-8 pb-8 pt-1 {{ $isSettingsLayout ? 'lg:pb-5 lg:pt-0 lg:flex lg:flex-col lg:min-h-0 lg:overflow-hidden' : '' }}">
+                    {{-- Breadcrumb: Guaranteed on all pages EXCEPT settings which has internal unified header --}}
+                    @if(!request()->routeIs('dashboard') && !$isSettingsLayout)
                         <nav class="mb-4 fade-in" aria-label="Breadcrumb">
                             <ol class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500 font-medium flex-wrap">
                                 <li class="flex items-center gap-1">
@@ -534,17 +578,19 @@
                     @endif
 
                     {{-- Main Content --}}
-                    <div class="fade-in" style="animation-delay: 0.1s;">
+                    <div class="fade-in {{ $isSettingsLayout ? 'flex-1 min-h-0 flex flex-col' : '' }}" style="animation-delay: 0.1s;">
                         @yield('content')
                     </div>
                 </main>
 
-                {{-- Footer --}}
+                {{-- Footer (suppressed on settings to allow maximum content canvas matching reference design) --}}
+                @if(!$isSettingsLayout)
                 <footer class="border-t border-blue-200/50 bg-white/40 px-6 sm:px-8 py-3.5">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 font-medium">
                         <p>&copy; {{ date('Y') }} MySkanic &bull; SMK Negeri 1 Ciomas</p>
                     </div>
                 </footer>
+                @endif
             </div>
         </div>
     </div>

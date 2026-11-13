@@ -1,29 +1,20 @@
-@extends('layouts.app')
+@extends('settings.layout')
 
-@section('title', 'Manajemen User')
-@section('page-title', 'Manajemen User')
-@section('page-subtitle', 'Kelola data pengguna sistem')
+@php
+    $settingsTitle = 'Manajemen Pengguna — MySkanic';
+    $settingsPageTitle = 'Manajemen Pengguna';
+    $settingsPageSubtitle = 'Kelola seluruh akun pengguna sistem, role penugasan, dan status akses';
+@endphp
 
-@section('breadcrumb')
-    <li><i class='bx bx-chevron-right text-dark-400'></i></li>
-    <li class="text-primary-600 font-medium">Data User</li>
+@section('settings-header-actions')
+    <button onclick="openModal('modal-inputuser')"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-[#003EA7] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl shadow-sm transition">
+        <i class='bx bx-plus-circle text-base'></i>
+        <span>Tambah Pengguna</span>
+    </button>
 @endsection
 
-@section('page-header')
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="text-xl font-medium text-dark-800">Daftar Pengguna</h2>
-            <p class="text-sm text-dark-400 mt-1">Kelola data user dan akses sistem.</p>
-        </div>
-        <button onclick="openModal('modal-inputuser')"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-primary-500/40 transition-all duration-200 hover:-translate-y-0.5">
-            <i class='bx bx-plus text-lg'></i>
-            Tambah User
-        </button>
-    </div>
-@endsection
-
-@section('content')
+@section('settings-content')
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden">
         {{-- Filter Bar --}}
         <div class="pb-6 mb-6 border-b border-slate-100">
