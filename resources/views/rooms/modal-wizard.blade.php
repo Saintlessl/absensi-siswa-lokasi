@@ -12,7 +12,7 @@
          @click="close()"></div>
 
     <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-        <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800"
+        <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800"
              @keydown.escape.window="close()">
 
             {{-- Header --}}

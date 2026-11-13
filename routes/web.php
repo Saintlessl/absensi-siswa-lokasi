@@ -111,6 +111,7 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
     // Shared Dashboard & Auth
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/proseslogout', [AuthController::class, 'proseslogout'])->name('proseslogout');
+    Route::post('/logout', [AuthController::class, 'proseslogout'])->name('logout');
 
     // Profile (All Authenticated Users) -> Unified Settings Profile
     Route::get('/profile', [SettingsController::class, 'profile'])->name('profile');

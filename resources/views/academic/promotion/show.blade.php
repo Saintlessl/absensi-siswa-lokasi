@@ -21,7 +21,7 @@
             <div class="flex items-center gap-2.5">
                 <span class="px-2.5 py-1 rounded-md bg-blue-100 text-[#003EA7] font-mono text-xs font-bold">{{ $batch->batch_code }}</span>
                 <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
-                    {{ $batch->status === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                    {{ $batch->status === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
                     {{ $batch->status }}
                 </span>
             </div>

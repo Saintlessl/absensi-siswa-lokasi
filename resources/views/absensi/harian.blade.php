@@ -16,7 +16,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {{-- Card Hari Ini --}}
             <div class="md:col-span-1">
-                <div class="glass-card rounded-2xl border border-dark-200/50 p-6 h-full">
+                <div class="glass-card rounded-2xl border border-slate-100 p-6 h-full">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
                             <i class='bx bx-calendar-event text-2xl'></i>
@@ -32,7 +32,7 @@
 
             {{-- Card Kelas Hari Ini --}}
             <div class="md:col-span-1">
-                <div class="glass-card rounded-2xl border border-dark-200/50 p-6 h-full">
+                <div class="glass-card rounded-2xl border border-slate-100 p-6 h-full">
                     <h4 class="text-sm font-bold text-dark-800 mb-3 flex items-center gap-2">
                         <i class='bx bx-chalkboard text-primary-500'></i> Kelas Anda Hari Ini:
                     </h4>
@@ -58,7 +58,7 @@
 
             {{-- Card Informasi --}}
             <div class="md:col-span-1">
-                <div class="glass-card rounded-2xl border border-dark-200/50 p-6 bg-primary-50/30 h-full">
+                <div class="glass-card rounded-2xl border border-slate-100 p-6 bg-primary-50/30 h-full">
                     <h4 class="text-sm font-bold text-dark-800 mb-2 flex items-center gap-2">
                         <i class='bx bx-info-circle text-primary-600'></i> Informasi
                     </h4>
@@ -72,7 +72,7 @@
 
         {{-- Panel Daftar Siswa (SEKARANG DI BAWAH) --}}
         <div class="w-full">
-            <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+            <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden">
                 <div
                     class="px-6 py-5 border-b border-dark-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-dark-50/30">
                     <div>
@@ -199,7 +199,7 @@
             <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editabsensi')"></div>
             <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-                <div class="relative w-full max-w-md rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                <div class="relative w-full max-w-md rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                     <div class="flex items-start justify-between">
                         <div>
                             <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Absensi Siswa</h2>

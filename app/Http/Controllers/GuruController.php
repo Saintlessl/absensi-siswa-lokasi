@@ -442,6 +442,9 @@ class GuruController extends Controller
     public function destroy($id)
     {
         $guru = Guru::findOrFail($id);
+        if ($guru->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($guru->photo_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($guru->photo_path);
+        }
         if ($guru->user) {
             $guru->user->delete();
         } else {

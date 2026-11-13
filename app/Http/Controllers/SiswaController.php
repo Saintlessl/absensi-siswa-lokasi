@@ -149,7 +149,7 @@ class SiswaController extends Controller
             'kelas_id'             => 'required|exists:kelas,id',
             'jalur_masuk'          => 'nullable|in:baru,pindahan',
             'asal_sekolah'         => 'nullable|string|max:150',
-            'no_telp_siswa'        => 'required|string|max:25',
+            'no_telp_siswa'        => 'nullable|string|max:25',
             'photo'                => 'required|file|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=300,min_height=300',
             'parent_name'          => 'required_without:existing_orangtua_id|nullable|string|max:255',
             'parent_jenis_kelamin' => 'required_without:existing_orangtua_id|nullable|in:L,P',
@@ -216,8 +216,8 @@ class SiswaController extends Controller
         }
 
         try {
-            $studentPhone = $this->normalizeIndonesianPhone($request->no_telp_siswa);
-            if (!$studentPhone) {
+            $studentPhone = $request->filled('no_telp_siswa') ? $this->normalizeIndonesianPhone($request->no_telp_siswa) : null;
+            if ($request->filled('no_telp_siswa') && !$studentPhone) {
                 return back()->withErrors(['no_telp_siswa' => 'Nomor telepon siswa harus berupa nomor Indonesia yang valid.'])->withInput();
             }
 
@@ -559,8 +559,17 @@ class SiswaController extends Controller
             }
 
             $oldPhotoPath = $siswa->photo_path;
+            $newPhotoPath = null;
             if ($request->hasFile('photo')) {
                 $newPhotoPath = $request->file('photo')->store('siswa-photos', 'local');
+                if ($oldPhotoPath) {
+                    if (Storage::disk('local')->exists($oldPhotoPath)) {
+                        Storage::disk('local')->delete($oldPhotoPath);
+                    }
+                    if (Storage::disk('public')->exists($oldPhotoPath)) {
+                        Storage::disk('public')->delete($oldPhotoPath);
+                    }
+                }
             }
             $photoPath = $newPhotoPath ?: $oldPhotoPath;
 
@@ -737,6 +746,15 @@ class SiswaController extends Controller
 
         if ($siswa->promotionItems()->exists()) {
             return redirect()->back()->with('error', "Siswa {$siswa->nama} memiliki catatan riwayat kenaikan kelas / kelulusan dan tidak dapat dihapus demi integritas data.");
+        }
+
+        if ($siswa->photo_path) {
+            if (Storage::disk('local')->exists($siswa->photo_path)) {
+                Storage::disk('local')->delete($siswa->photo_path);
+            }
+            if (Storage::disk('public')->exists($siswa->photo_path)) {
+                Storage::disk('public')->delete($siswa->photo_path);
+            }
         }
 
         if ($siswa->user) {

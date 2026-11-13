@@ -2,7 +2,7 @@
     @csrf
 
     @if ($angkatan->jurusan)
-        <div class="p-3 bg-blue-50 border border-blue-200/60 rounded-xl flex items-center justify-between">
+        <div class="p-3 bg-blue-50 border border-slate-100 rounded-xl flex items-center justify-between">
             <div>
                 <span class="text-[11px] font-semibold text-dark-500 uppercase">Jurusan / Program Keahlian</span>
                 <p class="text-sm font-bold text-[#003EA7]">{{ $angkatan->jurusan->kode_jurusan }} - {{ $angkatan->jurusan->nama_jurusan }}</p>

@@ -47,40 +47,40 @@
 @section('content')
     {{-- KPI Cards Row --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-6">
-        <div class="glass-card rounded-2xl p-4 border border-dark-200/50">
-            <p class="text-[11px] font-semibold text-dark-400 uppercase tracking-wider">Total Siswa</p>
-            <p class="text-2xl font-bold text-dark-800 mt-1">{{ $stats['total_siswa'] }}</p>
-            <p class="text-[11px] text-dark-400 mt-0.5">{{ $stats['rombel_count'] }} Rombel Terdata</p>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Siswa</p>
+            <p class="text-2xl font-bold text-slate-800 mt-1">{{ $stats['total_siswa'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">{{ $stats['rombel_count'] }} Rombel Terdata</p>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-blue-100 bg-blue-50/20">
-            <p class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider">Siswa Aktif</p>
-            <p class="text-2xl font-bold text-blue-700 mt-1">{{ $stats['siswa_aktif'] }}</p>
-            <p class="text-[11px] text-blue-500 mt-0.5">Bersekolah aktif</p>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+            <p class="text-[11px] font-semibold text-[#003EA7] uppercase tracking-wider">Siswa Aktif</p>
+            <p class="text-2xl font-bold text-slate-800 mt-1">{{ $stats['siswa_aktif'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Bersekolah aktif</p>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-emerald-100 bg-emerald-50/20">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
             <p class="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">Lulus (Alumni)</p>
-            <p class="text-2xl font-bold text-emerald-700 mt-1">{{ $stats['siswa_lulus'] }}</p>
-            <p class="text-[11px] text-emerald-500 mt-0.5">Resmi kelulusan</p>
+            <p class="text-2xl font-bold text-slate-800 mt-1">{{ $stats['siswa_lulus'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Resmi kelulusan</p>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-amber-100 bg-amber-50/20">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
             <p class="text-[11px] font-semibold text-amber-600 uppercase tracking-wider">Proses Lulus</p>
-            <p class="text-2xl font-bold text-amber-700 mt-1">{{ $stats['siswa_proses'] }}</p>
-            <p class="text-[11px] text-amber-500 mt-0.5">Sedang verifikasi</p>
+            <p class="text-2xl font-bold text-slate-800 mt-1">{{ $stats['siswa_proses'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Sedang verifikasi</p>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-rose-100 bg-rose-50/20">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
             <p class="text-[11px] font-semibold text-rose-600 uppercase tracking-wider">Tidak Lulus</p>
-            <p class="text-2xl font-bold text-rose-700 mt-1">{{ $stats['siswa_tidak_lulus'] }}</p>
-            <p class="text-[11px] text-rose-500 mt-0.5">Penetapan dewan</p>
+            <p class="text-2xl font-bold text-slate-800 mt-1">{{ $stats['siswa_tidak_lulus'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Penetapan dewan</p>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-purple-100 bg-purple-50/20">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
             <p class="text-[11px] font-semibold text-purple-600 uppercase tracking-wider">Pindah / Keluar</p>
-            <p class="text-2xl font-bold text-purple-700 mt-1">{{ $stats['siswa_pindah'] + $stats['siswa_keluar'] }}</p>
-            <p class="text-[11px] text-purple-500 mt-0.5">Mutasi siswa</p>
+            <p class="text-2xl font-bold text-slate-800 mt-1">{{ $stats['siswa_pindah'] + $stats['siswa_keluar'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Mutasi siswa</p>
         </div>
     </div>
 
     {{-- Siswa Table Card --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         {{-- Filter Bar --}}
         <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30">
             <form action="{{ route('angkatan.show', $angkatan->id) }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">

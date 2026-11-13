@@ -42,6 +42,8 @@
                         <div>Kelas: <span class="font-bold text-slate-800">{{ $siswa->kelas->nama_kelas ?? '-' }}</span></div>
                         <span>•</span>
                         <div>Jurusan: <span class="font-bold text-slate-800">{{ $siswa->kelas->jurusan->nama_jurusan ?? ($siswa->jurusan->nama_jurusan ?? '-') }}</span></div>
+                        <span>•</span>
+                        <div>Masuk TA: {{ $siswa->tahun_ajaran_masuk_nama }}</div>
                         @if($siswa->user?->email)
                             <span>•</span>
                             <div>Email: <a href="mailto:{{ $siswa->user->email }}" class="font-semibold text-[#003FA9] hover:underline">{{ $siswa->user->email }}</a></div>
@@ -583,7 +585,7 @@
 
         {{-- Modal Positioning Container --}}
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-            <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+            <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                 {{-- Header --}}
                 <div class="flex items-start justify-between">
                     <div>

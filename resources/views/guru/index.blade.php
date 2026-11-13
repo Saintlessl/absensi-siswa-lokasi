@@ -294,7 +294,7 @@
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onclick="closeModal('modal-editguru')"></div>
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Guru</h2>

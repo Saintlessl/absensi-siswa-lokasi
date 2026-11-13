@@ -85,7 +85,7 @@
                         };
                         $isUnread = is_null($notif->read_at);
                     @endphp
-                    <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors {{ $isUnread ? 'bg-blue-50/20' : 'hover:bg-slate-50/70' }}">
+                    <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors {{ $isUnread ? 'bg-white' : 'hover:bg-slate-50/70' }}">
                         <div class="flex items-start gap-3.5 min-w-0">
                             {{-- Category Icon --}}
                             <div class="w-10 h-10 rounded-xl {{ $catStyle['bg'] }} {{ $catStyle['text'] }} flex items-center justify-center flex-shrink-0 text-xl shadow-xs">

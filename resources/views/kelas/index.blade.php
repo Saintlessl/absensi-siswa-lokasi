@@ -26,7 +26,7 @@
 @endsection
 
 @section('content')
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+    <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden">
         {{-- Filter Bar --}}
         <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30">
             <form action="{{ route('kelas') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">
@@ -157,7 +157,7 @@
             <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onclick="closeModal('modal-editkelas')"></div>
             <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                     <div class="flex items-start justify-between">
                         <div>
                             <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Rombongan Belajar</h2>

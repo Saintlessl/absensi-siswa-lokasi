@@ -63,11 +63,11 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div class="flex items-center gap-2 flex-wrap">
                             @if($rec->effective_type === 'prestasi')
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">
                                     Prestasi
                                 </span>
                             @else
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-rose-50 text-rose-700 border border-rose-200">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-rose-100 text-rose-800">
                                     Pelanggaran
                                 </span>
                             @endif
@@ -84,11 +84,11 @@
 
                         <div>
                             @if($rec->poin < 0)
-                                <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-rose-50 text-rose-700 border border-rose-200">
+                                <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-rose-100 text-rose-800">
                                     {{ $rec->poin }} Poin
                                 </span>
                             @elseif($rec->poin > 0)
-                                <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-800">
                                     +{{ $rec->poin }} Poin
                                 </span>
                             @else

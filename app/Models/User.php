@@ -162,6 +162,36 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's unified profile photo URL across roles.
+     * Integrates student and teacher photos into the User account.
+     */
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if ($this->siswa) {
+            return $this->siswa->photo_url;
+        }
+
+        if ($this->guru) {
+            return $this->guru->photo_url;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get avatar initials (1-2 uppercase letters) for fallback display.
+     */
+    public function getAvatarInitialsAttribute(): string
+    {
+        $name = trim($this->name ?? 'User');
+        $parts = preg_split('/\s+/', $name);
+        if (count($parts) >= 2) {
+            return strtoupper(mb_substr($parts[0], 0, 1) . mb_substr($parts[1], 0, 1));
+        }
+        return strtoupper(mb_substr($name, 0, 2)) ?: 'U';
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>

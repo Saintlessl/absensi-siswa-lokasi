@@ -38,8 +38,8 @@
             <template x-for="(s, index) in steps" :key="s.number">
                 <div class="flex items-center gap-3 p-2.5 rounded-xl transition-all cursor-pointer"
                     :class="{
-                        'bg-blue-50/80 border border-blue-200 text-[#003EA7] font-bold shadow-sm': step === s.number,
-                        'text-emerald-700 bg-emerald-50/50 border border-emerald-100': step > s.number,
+                        'bg-[#EFF5FF] text-[#003EA7] font-bold shadow-xs': step === s.number,
+                        'text-emerald-700 bg-slate-50': step > s.number,
                         'text-slate-400 opacity-60 cursor-not-allowed': step < s.number
                     }"
                     @click="goToStep(s.number)">
@@ -114,7 +114,7 @@
             </div>
 
             {{-- Tahun Ajaran Tujuan --}}
-            <div class="p-5 rounded-2xl bg-blue-50/50 border border-blue-200/70 space-y-4">
+            <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs space-y-4">
                 <div class="flex items-center justify-between">
                     <label class="text-xs font-bold text-[#003EA7] uppercase tracking-wider flex items-center gap-2">
                         <i class='bx bx-right-arrow-alt text-[#003EA7]'></i>
@@ -125,7 +125,7 @@
                 </div>
 
                 <select x-model="destTaId" @change="onDestTaChange()"
-                    class="w-full px-4 py-3 rounded-xl border border-blue-200 bg-white text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#003EA7] focus:border-transparent transition-all">
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#003EA7] focus:border-transparent transition-all">
                     <option value="">-- Pilih Tahun Ajaran Tujuan --</option>
                     @foreach($academicYears as $ta)
                         <option value="{{ $ta->id }}">
@@ -134,7 +134,7 @@
                     @endforeach
                 </select>
 
-                <div class="text-xs text-slate-500 bg-white p-3 rounded-xl border border-blue-100 space-y-1">
+                <div class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
                     <div class="flex justify-between">
                         <span>Rombel Tujuan Terdaftar:</span>
                         <strong class="text-[#003EA7]" x-text="destClasses.length + ' Rombel'"></strong>
@@ -149,7 +149,7 @@
 
         {{-- Notice on Destination Academic Year --}}
         <div x-show="destTaId && destClasses.length === 0" x-cloak
-            class="p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-900 text-xs">
+            class="p-4 rounded-xl bg-amber-50 border border-amber-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-900 text-xs">
             <div class="flex items-center gap-3">
                 <i class='bx bx-info-circle text-2xl text-amber-600 flex-shrink-0'></i>
                 <div>
@@ -166,7 +166,7 @@
 
         {{-- Warning if no active students in selected origin TA --}}
         <div x-show="originTaId && originClasses.length > 0 && totalActiveStudentsInOrigin === 0" x-cloak
-            class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2.5">
+            class="p-4 rounded-xl bg-amber-50 border border-amber-100 text-xs text-amber-800 flex items-start gap-2.5">
             <i class='bx bx-info-circle text-amber-600 text-lg flex-shrink-0 mt-0.5'></i>
             <div>
                 <p class="font-bold text-amber-900">Perhatian: Tidak Ada Siswa Aktif pada Tahun Ajaran Ini</p>
@@ -386,19 +386,19 @@
 
             {{-- Summary Badges --}}
             <div class="flex flex-wrap items-center gap-2">
-                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#EFF5FF] text-[#003EA7]">
                     Naik: <strong x-text="countAction('naik_kelas')"></strong>
                 </span>
-                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-900">
                     Tinggal: <strong x-text="countAction('tinggal_kelas')"></strong>
                 </span>
-                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800">
                     Lulus: <strong x-text="countAction('lulus')"></strong>
                 </span>
-                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-100 text-purple-800">
                     Pindah: <strong x-text="countAction('pindah')"></strong>
                 </span>
-                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-800">
                     Keluar/DO: <strong x-text="countAction('keluar')"></strong>
                 </span>
             </div>
@@ -535,7 +535,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
                 <template x-for="dc in destClasses" :key="dc.id">
                     <div class="p-2.5 rounded-xl border bg-slate-50/50"
-                        :class="getAllocatedCountForClass(dc.id) > dc.kapasitas ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200'">
+                        :class="getAllocatedCountForClass(dc.id) > dc.kapasitas ? 'border-rose-300 bg-white' : 'border-slate-200'">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-800 truncate" x-text="dc.nama_kelas"></span>
                             <span class="text-[10px] font-bold"
@@ -584,7 +584,7 @@
                             <td class="py-4 px-4">
                                 <select x-model="s.kelas_tujuan_id"
                                     class="w-full px-3 py-2 text-xs rounded-xl border font-semibold shadow-xs"
-                                    :class="!s.kelas_tujuan_id ? 'border-rose-300 bg-rose-50/30 text-rose-700' : 'border-slate-200 bg-white text-slate-800'">
+                                    :class="!s.kelas_tujuan_id ? 'border-rose-300 bg-white text-rose-700' : 'border-slate-200 bg-white text-slate-800'">
                                     <option value="">-- Pilih Rombel Tujuan --</option>
                                     <template x-for="dc in destClasses" :key="dc.id">
                                         <option :value="dc.id"
@@ -692,23 +692,23 @@
                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Siswa</span>
                 <p class="text-lg font-bold text-slate-800 mt-0.5" x-text="students.length"></p>
             </div>
-            <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+            <div class="p-3.5 rounded-xl bg-[#EFF5FF]">
                 <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Naik Kelas</span>
                 <p class="text-lg font-bold text-blue-700 mt-0.5" x-text="countAction('naik_kelas')"></p>
             </div>
-            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+            <div class="p-3.5 rounded-xl bg-amber-50">
                 <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Tinggal Kelas</span>
                 <p class="text-lg font-bold text-amber-700 mt-0.5" x-text="countAction('tinggal_kelas')"></p>
             </div>
-            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+            <div class="p-3.5 rounded-xl bg-emerald-50">
                 <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Kelulusan</span>
                 <p class="text-lg font-bold text-emerald-700 mt-0.5" x-text="countAction('lulus')"></p>
             </div>
-            <div class="p-3.5 rounded-xl bg-purple-50 border border-purple-200">
+            <div class="p-3.5 rounded-xl bg-purple-50">
                 <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Mutasi Pindah</span>
                 <p class="text-lg font-bold text-purple-700 mt-0.5" x-text="countAction('pindah')"></p>
             </div>
-            <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200">
+            <div class="p-3.5 rounded-xl bg-rose-50">
                 <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Keluar / DO</span>
                 <p class="text-lg font-bold text-rose-700 mt-0.5" x-text="countAction('keluar')"></p>
             </div>
@@ -724,7 +724,7 @@
         </div>
 
         {{-- Final Confirmation Checkbox --}}
-        <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200 flex items-start gap-3">
+        <div class="p-4 rounded-xl bg-[#EFF5FF] flex items-start gap-3">
             <input type="checkbox" id="confirmCheckbox" x-model="isConfirmed"
                 class="mt-1 rounded text-[#003EA7] focus:ring-[#003EA7]">
             <label for="confirmCheckbox" class="text-xs text-slate-700 font-medium cursor-pointer">

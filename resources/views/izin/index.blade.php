@@ -14,7 +14,7 @@
         
         {{-- Form Panel --}}
         <div class="lg:col-span-2 space-y-6">
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 sm:p-8">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 sm:p-8">
                 <div class="border-b border-dark-100 pb-4 mb-6 relative">
                     <h3 class="text-xl font-bold text-dark-800">Form Pengajuan Izin/Sakit</h3>
                     <p class="text-sm text-dark-500 mt-1">Harap isi data dengan sebenar-benarnya.</p>
@@ -104,7 +104,7 @@
         <div class="lg:col-span-1 space-y-6">
             
             {{-- Student Overview --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 relative overflow-hidden group">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 relative overflow-hidden group">
                 <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl group-hover:bg-primary-500/20 transition-all duration-500"></div>
                 
                 <h3 class="text-sm font-bold text-dark-800 uppercase tracking-wider mb-6 flex items-center gap-2">
@@ -130,7 +130,7 @@
             </div>
 
             {{-- Policy --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 bg-primary-50/30">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 bg-primary-50/30">
                 <h4 class="text-sm font-bold text-dark-800 mb-3 flex items-center gap-2">
                     <i class='bx bx-info-circle text-primary-600 text-lg'></i> Ketentuan Izin:
                 </h4>
@@ -142,7 +142,7 @@
             </div>
 
             {{-- Riwayat Pengajuan --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6">
                 <h4 class="text-sm font-bold text-dark-800 mb-4 flex items-center gap-2">
                     <i class='bx bx-history text-primary-600 text-lg'></i> Riwayat Pengajuan
                 </h4>

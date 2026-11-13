@@ -26,11 +26,11 @@
                         {{ $siswa->photo_path ? 'Perbarui Pasfoto Siswa' : 'Unggah Foto Profil Siswa' }}
                     </label>
                     @if ($siswa->photo_path)
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                             <i class='bx bx-check-circle'></i> Foto Terpasang
                         </span>
                     @else
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">
                             <i class='bx bx-info-circle'></i> Foto Belum Diunggah
                         </span>
                     @endif

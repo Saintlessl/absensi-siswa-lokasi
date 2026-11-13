@@ -142,7 +142,7 @@
 
     {{-- Modal Card --}}
     <div class="relative flex items-center justify-center min-h-full p-4">
-        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden">
+        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 overflow-hidden">
 
             {{-- Header --}}
             <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
@@ -258,7 +258,7 @@
 <div id="modalEditPenempatan" class="hidden fixed inset-0 z-[60] overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalEditPenempatan').classList.add('hidden')"></div>
     <div class="relative flex items-center justify-center min-h-full p-4">
-        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden">
+        <div class="relative w-full max-w-2xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 overflow-hidden">
             <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
                 <div class="flex items-center justify-between">
                     <div>

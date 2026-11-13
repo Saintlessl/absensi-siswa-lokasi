@@ -122,19 +122,19 @@
 
                 {{-- 5 Quick Badges --}}
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800">
                         {{ $stats['hadir'] }} Hadir
                     </span>
                     <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-50 text-[#0052CC] border border-blue-200">
                         {{ $stats['terlambat'] }} Terlambat
                     </span>
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-100 text-amber-900">
                         {{ $stats['izin'] }} Izin
                     </span>
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-purple-100 text-purple-800">
                         {{ $stats['sakit'] }} Sakit
                     </span>
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-100 text-rose-800">
                         {{ $stats['alpa'] }} Alpa
                     </span>
                 </div>

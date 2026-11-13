@@ -69,7 +69,7 @@
                         PERIODE AKTIF
                     </span>
                 @else
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
                         {{ ucfirst($tahunAjaran->status) }}
                     </span>
                 @endif

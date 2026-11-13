@@ -5,7 +5,7 @@
     {{-- Logo Section --}}
     <div class="sidebar-logo-container flex items-center gap-3.5 px-6 pt-6 pb-4 transition-all duration-300">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3.5 group">
-            <img src="{{ asset('img/school-crest.png') }}"
+            <img src="{{ \App\Models\SchoolSetting::getLogoUrl() }}"
                  alt="Logo MySkanic"
                  class="sidebar-logo-img w-10 h-10 object-contain transition-transform duration-200 group-hover:scale-105 flex-shrink-0">
             <div class="sidebar-logo-text overflow-hidden transition-all duration-300">

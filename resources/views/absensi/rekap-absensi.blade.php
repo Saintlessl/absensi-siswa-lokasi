@@ -13,7 +13,7 @@
     <div class="flex flex-col gap-6">
 
         {{-- Filter Bulan & Tahun --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-6">
+        <div class="glass-card rounded-2xl border border-slate-100 p-6">
             <form action="{{ route('rekapabsensi') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-4">
                 <div class="flex-1 w-full">
                     <label class="block text-sm font-medium text-dark-700 mb-1.5">Bulan</label>
@@ -61,7 +61,7 @@
         </div>
 
         {{-- Tabel Rekap --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+        <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>

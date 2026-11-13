@@ -43,8 +43,8 @@
             {{-- Left: Avatar & Dominant Teacher Name --}}
             <div class="flex items-center gap-5">
                 <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#003FA9] text-white flex items-center justify-center font-extrabold text-2xl flex-shrink-0 shadow-md shadow-blue-900/10 overflow-hidden">
-                    @if ($guru->photo_path && file_exists(public_path('storage/' . $guru->photo_path)))
-                        <img src="{{ asset('storage/' . $guru->photo_path) }}" alt="{{ $guru->nama }}" class="w-full h-full object-cover">
+                    @if ($guru->photo_url)
+                        <img src="{{ $guru->photo_url }}" alt="{{ $guru->nama }}" class="w-full h-full object-cover">
                     @else
                         {{ strtoupper(substr($guru->nama, 0, 2)) }}
                     @endif
@@ -739,9 +739,30 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Ganti Foto Profil (Opsional)</label>
-                    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
-                        class="w-full text-xs text-slate-600 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#003FA9] file:text-white hover:file:bg-[#002D7A] cursor-pointer">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Foto Profil Pendidik</label>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#003FA9] text-white flex items-center justify-center font-bold text-base flex-shrink-0 overflow-hidden shadow-xs" id="guru_preview_container">
+                            @if ($guru->photo_url)
+                                <img src="{{ $guru->photo_url }}" alt="{{ $guru->nama }}" class="w-full h-full object-cover">
+                            @else
+                                <span>{{ strtoupper(substr($guru->nama, 0, 2)) }}</span>
+                            @endif
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <input type="file" name="photo" id="guru_photo_input" accept="image/jpeg,image/png,image/webp"
+                                class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#003FA9] file:text-white hover:file:bg-[#002D7A] cursor-pointer"
+                                onchange="previewGuruPhoto(this)">
+                            <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-400">
+                                <span>JPG, JPEG, PNG, WebP (Maks 2MB)</span>
+                                @if($guru->photo_url)
+                                    <label class="inline-flex items-center gap-1 text-rose-600 cursor-pointer hover:underline ml-auto font-medium">
+                                        <input type="checkbox" name="remove_photo" value="1" class="rounded text-rose-600 focus:ring-rose-500">
+                                        <span>Hapus foto</span>
+                                    </label>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -871,7 +892,7 @@
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onclick="closeModal('modal-add-subject')"></div>
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-            <div class="relative w-full max-w-lg rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+            <div class="relative w-full max-w-lg rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Tugaskan Mapel Baru</h2>
@@ -913,7 +934,7 @@
                                 <button type="button" onclick="document.querySelectorAll('.add-subject-cb').forEach(cb => cb.checked = false)" class="text-slate-500 hover:underline">Hapus</button>
                             </div>
                         </div>
-                        <div class="max-h-40 overflow-y-auto border border-blue-200/60 rounded-xl p-3 bg-white/70 grid grid-cols-2 gap-2 shadow-inner">
+                        <div class="max-h-40 overflow-y-auto border border-slate-100 rounded-xl p-3 bg-white/70 grid grid-cols-2 gap-2 shadow-inner">
                             @foreach($kelasList as $k)
                                 <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-50/80 text-xs text-slate-800 cursor-pointer transition">
                                     <input type="checkbox" name="kelas_ids[]" value="{{ $k->id }}" class="add-subject-cb rounded text-[#003FA9] focus:ring-[#003FA9]">
@@ -951,7 +972,7 @@
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onclick="closeModal('modal-editguru-inline')"></div>
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Guru</h2>
@@ -1007,6 +1028,29 @@
                     confirmButton: 'rounded-xl text-xs px-5 py-2'
                 }
             });
+        }
+    }
+    function previewGuruPhoto(input) {
+        const container = document.getElementById('guru_preview_container');
+        if (!container) return;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                window.MySkanicAlert ? MySkanicAlert.warning('Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.') : alert('Format tidak didukung');
+                input.value = '';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                window.MySkanicAlert ? MySkanicAlert.warning('Ukuran file foto profil maksimal 2MB.') : alert('Ukuran file maksimal 2MB');
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(file);
         }
     }
 </script>

@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="MySKANIC — Sistem Presensi, Informasi & Manajemen Akademik SMK Negeri 1 Ciomas">
     <title>Login — MySkanic</title>
+    <link rel="shortcut icon" href="{{ \App\Models\SchoolSetting::getFaviconUrl() }}" type="image/x-icon">
 
     {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -192,10 +193,12 @@
             'logo_bcf'       => 'images/jurusan/bcf.png',
         ];
 
-        // Resolve logo URL
-        $logoUrl = file_exists(public_path($assets['logo_svg']))
-            ? asset($assets['logo_svg'])
-            : (file_exists(public_path($assets['logo_png'])) ? asset($assets['logo_png']) : asset('img/logo.png'));
+        // Resolve logo URL (prioritizes custom school logo uploaded via settings)
+        $logoUrl = \App\Models\SchoolSetting::hasCustomLogo()
+            ? \App\Models\SchoolSetting::getLogoUrl()
+            : (file_exists(public_path($assets['logo_svg']))
+                ? asset($assets['logo_svg'])
+                : (file_exists(public_path($assets['logo_png'])) ? asset($assets['logo_png']) : \App\Models\SchoolSetting::getLogoUrl()));
 
         // Resolve pattern URL (prefers seamless emblem pattern tile)
         $patternUrl = file_exists(public_path($assets['pattern']))
@@ -475,7 +478,7 @@
                     @endif
 
                     @if (session('info'))
-                        <div class="mb-5 p-3.5 rounded-xl bg-blue-50 border border-blue-200/80 text-blue-800 text-xs flex items-start gap-2.5 shadow-sm">
+                        <div class="mb-5 p-3.5 rounded-xl bg-blue-50 border border-slate-100 text-blue-800 text-xs flex items-start gap-2.5 shadow-sm">
                             <i class="bx bx-info-circle text-lg shrink-0 mt-0.5 text-blue-600"></i>
                             <p class="font-medium flex-1">{{ session('info') }}</p>
                         </div>

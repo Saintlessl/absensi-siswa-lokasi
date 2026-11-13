@@ -33,7 +33,7 @@
 
 @section('content')
     {{-- Search Bar --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white mb-6 shadow-sm">
+    <div class="glass-card rounded-2xl border border-slate-100 p-4 bg-white mb-6 shadow-sm">
         <form action="{{ route('teacher.class.students', $kelas->id) }}" method="GET" class="flex items-center gap-3">
             <div class="flex-1 relative">
                 <i class='bx bx-search absolute left-3.5 top-1/2 -translate-y-1/2 text-dark-400 text-lg'></i>

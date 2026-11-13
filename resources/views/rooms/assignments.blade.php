@@ -57,7 +57,7 @@
     @endif
 
     {{-- Filter Bar --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-4 mb-6 bg-white">
+    <div class="glass-card rounded-2xl border border-slate-100 p-4 mb-6 bg-white">
         <form action="{{ route('rooms.assignments') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">
             <div class="w-full sm:w-64">
                 <label class="block text-xs font-medium text-dark-600 mb-1">Filter Ruangan Fisik</label>

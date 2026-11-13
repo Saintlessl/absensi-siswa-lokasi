@@ -11,19 +11,17 @@
 
     {{-- Profil Banner Card --}}
     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center gap-6">
-        <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#003EA7] to-blue-500 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-blue-900/10 flex-shrink-0 overflow-hidden">
-            @if($user->guru && $user->guru->photo_path && file_exists(public_path('storage/' . $user->guru->photo_path)))
-                <img src="{{ asset('storage/' . $user->guru->photo_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
-            @elseif($user->siswa && $user->siswa->photo_path && file_exists(public_path('storage/' . $user->siswa->photo_path)))
-                <img src="{{ asset('storage/' . $user->siswa->photo_path) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+        <div class="w-20 h-20 rounded-2xl bg-[#003EA7] flex items-center justify-center text-white text-2xl font-black shadow-md shadow-blue-950/10 flex-shrink-0 overflow-hidden">
+            @if($user->profile_photo_url)
+                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
             @else
-                <i class='bx bxs-user'></i>
+                <span>{{ $user->avatar_initials }}</span>
             @endif
         </div>
         <div class="text-center sm:text-left flex-1 min-w-0">
             <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                 <h2 class="text-xl font-bold text-slate-900 truncate">{{ $user->salutation_name ?? $user->name }}</h2>
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-blue-50 text-[#003EA7] border border-blue-200 w-fit mx-auto sm:mx-0">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 w-fit mx-auto sm:mx-0">
                     {{ strtoupper($user->roleRel->display_name ?? $user->role) }}
                 </span>
             </div>
@@ -35,13 +33,24 @@
                     Program Keahlian: <strong class="text-slate-700">{{ $user->jurusan->nama_jurusan }}</strong>
                 </p>
             @endif
+            @if($user->siswa)
+                <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
+                    <i class='bx bx-check-circle text-emerald-600'></i>
+                    <span>Foto profil terhubung otomatis dengan Data Siswa.</span>
+                </p>
+            @elseif($user->guru)
+                <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
+                    <i class='bx bx-check-circle text-emerald-600'></i>
+                    <span>Foto profil terhubung otomatis dengan Data Guru / Pendidik.</span>
+                </p>
+            @endif
         </div>
     </div>
 
     {{-- Form 1: Ubah Informasi Akun --}}
     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
         <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-100">
-            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-[#003EA7] flex items-center justify-center text-xl font-bold">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-[#003EA7] flex items-center justify-center text-xl font-bold">
                 <i class='bx bx-user'></i>
             </div>
             <div>
@@ -77,7 +86,7 @@
     {{-- Form 2: Ubah Password --}}
     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
         <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-100">
-            <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-xl font-bold">
                 <i class='bx bx-lock-alt'></i>
             </div>
             <div>

@@ -28,7 +28,7 @@
 
         {{-- Sidebar Profil --}}
         <div class="lg:col-span-1">
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 text-center">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 text-center">
                 {{-- Avatar --}}
                 <div class="flex justify-center mb-4">
                     <div
@@ -42,10 +42,10 @@
                 <div class="mt-3">
                     <span
                         class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider
-                        @if ($user->role === 'admin') bg-indigo-50 text-indigo-700 border border-indigo-200
-                        @elseif($user->role === 'guru') bg-emerald-50 text-emerald-700 border border-emerald-200
-                        @elseif($user->role === 'siswa') bg-blue-50 text-blue-700 border border-blue-200
-                        @else bg-amber-50 text-amber-700 border border-amber-200 @endif">
+                        @if ($user->role === 'admin') bg-indigo-100 text-indigo-800
+                        @elseif($user->role === 'guru') bg-emerald-100 text-emerald-800
+                        @elseif($user->role === 'siswa') bg-[#EFF5FF] text-[#003EA7]
+                        @else bg-amber-100 text-amber-900 @endif">
                         <i class='bx bx-shield-quarter text-sm'></i>
                         {{ $user->role }}
                     </span>
@@ -89,7 +89,7 @@
                                         <span class="text-xs text-dark-400">({{ $user->effective_gender }})</span>
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-100 text-amber-900">
                                         Belum diatur
                                     </span>
                                 @endif
@@ -104,7 +104,7 @@
         <div class="lg:col-span-2 space-y-6">
 
             {{-- Edit Profil --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+            <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden">
                 <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30 flex items-center gap-2">
                     <i class='bx bx-user-circle text-primary-600 text-xl'></i>
                     <h3 class="text-base font-bold text-dark-800">Informasi Profil</h3>
@@ -170,7 +170,7 @@
             </div>
 
             {{-- Ganti Password --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+            <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden">
                 <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30 flex items-center gap-2">
                     <i class='bx bx-lock-alt text-amber-600 text-xl'></i>
                     <h3 class="text-base font-bold text-dark-800">Ubah Password</h3>

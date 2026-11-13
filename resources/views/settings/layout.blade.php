@@ -19,16 +19,14 @@
             
             {{-- Profile Card (Matches Reference Screenshot: White card, Avatar circle, Name, KAPROG) --}}
             <a href="{{ route('settings.profile') }}"
-               class="group block bg-white rounded-2xl p-4 shadow-sm border {{ request()->routeIs('settings.profile*') ? 'border-[#003EA7] ring-2 ring-[#003EA7]/20 bg-blue-50/20' : 'border-slate-100/90 hover:border-blue-200' }} transition-all flex-shrink-0 mb-3"
+               class="group block bg-white rounded-2xl p-4 shadow-sm border {{ request()->routeIs('settings.profile*') ? 'border-[#003EA7] ring-2 ring-[#003EA7]/20 bg-white' : 'border-slate-100/90 hover:border-blue-200' }} transition-all flex-shrink-0 mb-3"
                title="Klik untuk kelola Profil & Keamanan Akun">
                 <div class="flex items-center gap-3.5">
                     <div class="w-12 h-12 rounded-full bg-[#003EA7] text-white flex items-center justify-center text-xl font-bold flex-shrink-0 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
-                        @if(Auth::user()->guru && Auth::user()->guru->photo_path && file_exists(public_path('storage/' . Auth::user()->guru->photo_path)))
-                            <img src="{{ asset('storage/' . Auth::user()->guru->photo_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
-                        @elseif(Auth::user()->siswa && Auth::user()->siswa->photo_path && file_exists(public_path('storage/' . Auth::user()->siswa->photo_path)))
-                            <img src="{{ asset('storage/' . Auth::user()->siswa->photo_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                        @if(Auth::user()->profile_photo_url)
+                            <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
                         @else
-                            <i class='bx bxs-user text-2xl'></i>
+                            <span class="text-sm font-bold text-white">{{ Auth::user()->avatar_initials }}</span>
                         @endif
                     </div>
                     <div class="min-w-0 flex-1">
@@ -66,7 +64,7 @@
                         <div class="w-8 h-8 rounded-lg flex items-center justify-center text-lg flex-shrink-0 transition-transform {{ $isSchool ? 'bg-white/20 text-white' : 'bg-[#003EA7] text-white group-hover:scale-105 shadow-xs' }}">
                             <i class='bx bxs-school'></i>
                         </div>
-                        <span class="text-sm {{ $isSchool ? 'text-white font-bold' : 'text-slate-800 group-hover:text-slate-900' }}">Jam Absensi</span>
+                        <span class="text-sm {{ $isSchool ? 'text-white font-bold' : 'text-slate-800 group-hover:text-slate-900' }}">Identitas & Jam Sekolah</span>
                     </div>
                 </a>
                 @endif
@@ -190,12 +188,10 @@
         <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="w-10 h-10 rounded-full bg-[#003EA7] text-white flex items-center justify-center text-lg font-bold flex-shrink-0 overflow-hidden">
-                    @if(Auth::user()->guru && Auth::user()->guru->photo_path && file_exists(public_path('storage/' . Auth::user()->guru->photo_path)))
-                        <img src="{{ asset('storage/' . Auth::user()->guru->photo_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
-                    @elseif(Auth::user()->siswa && Auth::user()->siswa->photo_path && file_exists(public_path('storage/' . Auth::user()->siswa->photo_path)))
-                        <img src="{{ asset('storage/' . Auth::user()->siswa->photo_path) }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                    @if(Auth::user()->profile_photo_url)
+                        <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
                     @else
-                        <i class='bx bxs-user'></i>
+                        <span class="text-xs font-bold text-white">{{ Auth::user()->avatar_initials }}</span>
                     @endif
                 </div>
                 <div class="min-w-0">
@@ -220,7 +216,7 @@
             @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.jam_sekolah'))
             <a href="{{ route('settings.school') }}"
                class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 {{ request()->routeIs('settings.school*') ? 'bg-[#003EA7] text-white shadow-xs' : 'bg-white/80 text-slate-700 hover:bg-white' }}">
-                <i class='bx bxs-school'></i> <span>Jam Absensi</span>
+                <i class='bx bxs-school'></i> <span>Identitas & Jam</span>
             </a>
             @endif
             @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.kalender'))
@@ -258,7 +254,7 @@
             </a>
             @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.jam_sekolah'))
             <a href="{{ route('settings.school') }}" class="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold {{ request()->routeIs('settings.school*') ? 'bg-[#003EA7] text-white' : 'text-slate-700 hover:bg-slate-50' }}">
-                <i class='bx bxs-school text-base'></i> Jam Absensi
+                <i class='bx bxs-school text-base'></i> Identitas & Jam
             </a>
             @endif
             @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.kalender'))

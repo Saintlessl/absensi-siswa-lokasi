@@ -45,7 +45,7 @@
 
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-5 bg-white flex items-center gap-4">
+        <div class="glass-card rounded-2xl border border-slate-100 p-5 bg-white flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center text-primary-600 text-2xl flex-shrink-0">
                 <i class='bx bx-building-house'></i>
             </div>
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-5 bg-white flex items-center gap-4">
+        <div class="glass-card rounded-2xl border border-slate-100 p-5 bg-white flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 text-2xl flex-shrink-0">
                 <i class='bx bx-check-circle'></i>
             </div>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-5 bg-white flex items-center gap-4">
+        <div class="glass-card rounded-2xl border border-slate-100 p-5 bg-white flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 text-2xl flex-shrink-0">
                 <i class='bx bx-laptop'></i>
             </div>
@@ -77,7 +77,7 @@
     </div>
 
     {{-- Filter Bar --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-4 mb-6 bg-white">
+    <div class="glass-card rounded-2xl border border-slate-100 p-4 mb-6 bg-white">
         <form action="{{ route('rooms.index') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">
             <div class="flex-1 w-full">
                 <label class="block text-xs font-medium text-dark-600 mb-1">Cari Ruangan</label>
@@ -255,7 +255,7 @@
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onclick="closeModal('modal-editroom')"></div>
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+            <div class="relative w-full max-w-2xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Data Ruangan</h2>
@@ -348,7 +348,7 @@
         <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onclick="closeModal('modal-previewqr')"></div>
         <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-center">
-            <div class="relative w-full max-w-sm rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+            <div class="relative w-full max-w-sm rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-xs font-semibold text-[#003FA9] bg-blue-100/60 px-2.5 py-0.5 rounded-full">
                         QR Code Presensi
@@ -366,7 +366,7 @@
                     <div id="modal_qrcode_container"></div>
                 </div>
 
-                <p class="text-[10px] text-slate-500 font-mono break-all bg-[#E2EDFF] p-2.5 rounded-xl border border-blue-200/50" id="modal_qr_token"></p>
+                <p class="text-[10px] text-slate-500 font-mono break-all bg-[#E2EDFF] p-2.5 rounded-xl border border-slate-100" id="modal_qr_token"></p>
 
                 <div class="mt-6 flex items-center justify-center gap-3">
                     <button type="button" id="btnDownloadModalQr"

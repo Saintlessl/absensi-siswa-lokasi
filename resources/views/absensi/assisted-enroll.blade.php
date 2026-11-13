@@ -74,7 +74,7 @@
 <div class="max-w-4xl mx-auto py-2 space-y-6">
 
     {{-- Official Session Header Card --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="glass-card rounded-2xl border border-slate-100 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-dark-100 text-dark-700 border border-dark-200 flex items-center justify-center text-2xl flex-shrink-0">
                 <i class='bx bx-desktop text-primary-600'></i>
@@ -98,7 +98,7 @@
     {{-- Info Grid: Siswa & Petugas Verifikator --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {{-- Kartu Siswa --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-5 flex items-center gap-4">
+        <div class="glass-card rounded-2xl border border-slate-100 p-5 flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-600 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0">
                 {{ strtoupper(substr($siswa->nama, 0, 1)) }}
             </div>
@@ -111,13 +111,13 @@
                     <span>{{ $siswa->kelas->nama_kelas ?? '-' }}</span>
                 </div>
             </div>
-            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 flex-shrink-0">
                 {{ strtoupper(str_replace('_', ' ', $siswa->biometric_status ?? 'not_enrolled')) }}
             </span>
         </div>
 
         {{-- Kartu Petugas / Guru Pendamping --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-5 flex items-center gap-4">
+        <div class="glass-card rounded-2xl border border-slate-100 p-5 flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-md flex-shrink-0">
                 <i class='bx bx-user-check'></i>
             </div>
@@ -135,7 +135,7 @@
     </div>
 
     {{-- VIEWPORT KAMERA LAB & INTERACTIVE ENROLLMENT --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 p-6 sm:p-8 space-y-5">
+    <div class="glass-card rounded-2xl border border-slate-100 p-6 sm:p-8 space-y-5">
 
         {{-- Universal Camera Toolbar (Multi-Device Switcher) --}}
         <div class="max-w-lg mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-xl bg-dark-50/80 border border-dark-200 text-xs">
@@ -149,7 +149,7 @@
 
             <div class="flex items-center gap-2 self-end sm:self-center">
                 <span id="deviceBadge" class="px-2 py-0.5 rounded text-[11px] font-medium bg-dark-100 text-dark-500">Mendeteksi...</span>
-                <span id="resolutionBadge" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">HD Ready</span>
+                <span id="resolutionBadge" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800">HD Ready</span>
             </div>
         </div>
 

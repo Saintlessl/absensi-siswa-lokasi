@@ -2,7 +2,7 @@
     @csrf
     <div class="space-y-4">
         {{-- Preview Banner --}}
-        <div class="p-3.5 bg-[#E2EDFF] rounded-xl flex items-center justify-between border border-blue-200/60">
+        <div class="p-3.5 bg-[#E2EDFF] rounded-xl flex items-center justify-between border border-slate-100">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-[#003FA9]"></span>
                 <span class="text-xs font-semibold text-[#003FA9] uppercase tracking-wider">Format Standar Rombel:</span>

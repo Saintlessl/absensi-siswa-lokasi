@@ -173,12 +173,12 @@
                     <span>Total Baris:</span>
                     <span class="text-sm font-black" x-text="validationResult.total_rows || 0"></span>
                 </div>
-                <div class="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-2">
+                <div class="px-4 py-2 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-2">
                     <i class='bx bx-check-circle text-base'></i>
                     <span>Siap Diimpor:</span>
                     <span class="text-sm font-black" x-text="validationResult.valid_count || 0"></span>
                 </div>
-                <div class="px-4 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-2">
+                <div class="px-4 py-2 rounded-xl bg-rose-100 text-rose-800 text-xs font-bold flex items-center gap-2">
                     <i class='bx bx-error-circle text-base'></i>
                     <span>Bermasalah:</span>
                     <span class="text-sm font-black" x-text="validationResult.error_count || 0"></span>

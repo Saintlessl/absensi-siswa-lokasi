@@ -17,11 +17,11 @@
             <div>
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#003EA7] flex items-center justify-center text-lg font-bold">
+                        <div class="w-9 h-9 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-lg font-bold">
                             <i class='bx bx-time-five'></i>
                         </div>
                         <div>
-                            <h3 class="text-base font-bold text-slate-900">Jam Absensi</h3>
+                            <h3 class="text-base font-bold text-slate-900">Identitas & Jam</h3>
                             <p class="text-[11px] text-slate-400">{{ $namaSekolah }}</p>
                         </div>
                     </div>
@@ -173,7 +173,7 @@
                         <span class="text-[11px] font-medium text-purple-600">Total Role Sistem</span>
                         <span class="block text-2xl font-black text-purple-900 mt-1">{{ $activeRolesCount }}</span>
                     </div>
-                    <div class="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100/60">
+                    <div class="p-3.5 rounded-2xl bg-blue-50/50 border border-slate-100">
                         <span class="text-[11px] font-medium text-blue-600">Total Permission</span>
                         <span class="block text-2xl font-black text-[#003EA7] mt-1">{{ $totalPermissionsCount }}</span>
                     </div>
@@ -182,7 +182,7 @@
                 {{-- Role Badges with User Counts --}}
                 <div class="flex flex-wrap gap-2">
                     @foreach($mainRoles as $r)
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700/60">
                             <span>{{ $r->display_name }}</span>
                             <span class="px-1.5 py-0.2 rounded-md bg-white text-[10px] font-bold text-[#003EA7] shadow-xs">
                                 {{ $r->users_count }}
@@ -295,7 +295,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     @if($leave->applicant_type === 'guru')
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">Guru</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">Guru</span>
                                     @else
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">Siswa</span>
                                     @endif
@@ -338,8 +338,12 @@
     {{-- ROW 4: Informasi Akun Terlogin --}}
     <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-[#003EA7] flex items-center justify-center text-white text-xl font-bold shadow-md shadow-blue-900/10 flex-shrink-0">
-                <i class='bx bx-user-check'></i>
+            <div class="w-12 h-12 rounded-2xl bg-[#003EA7] flex items-center justify-center text-white text-xl font-bold shadow-md shadow-blue-900/10 flex-shrink-0 overflow-hidden">
+                @if(Auth::user()->profile_photo_url)
+                    <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full object-cover">
+                @else
+                    <span class="text-sm font-bold text-white">{{ Auth::user()->avatar_initials }}</span>
+                @endif
             </div>
             <div>
                 <h4 class="text-base font-bold text-slate-900">
@@ -351,7 +355,7 @@
             </div>
         </div>
 
-        <a href="{{ route('settings.profile') }}" class="w-fit text-xs font-semibold text-[#003EA7] hover:text-white bg-blue-50 hover:bg-[#003EA7] border border-blue-200 px-4 py-2.5 rounded-xl transition duration-150 inline-flex items-center gap-2">
+        <a href="{{ route('settings.profile') }}" class="w-fit text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl transition shadow-xs inline-flex items-center gap-2">
             <i class='bx bx-cog'></i> Pengaturan Akun & Password
         </a>
     </div>

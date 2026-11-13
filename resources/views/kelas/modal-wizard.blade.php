@@ -12,7 +12,7 @@
          @click="close()"></div>
 
     <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-        <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800"
+        <div class="relative w-full max-w-3xl rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800"
              @keydown.escape.window="close()">
 
             {{-- Header --}}
@@ -53,7 +53,7 @@
                 <div x-show="step === 1" data-step="1" class="transition-opacity duration-200">
                     <div class="flex flex-col gap-4">
                         {{-- Live Preview Banner --}}
-                        <div class="p-3.5 bg-[#E2EDFF] rounded-xl flex items-center justify-between border border-blue-200/60">
+                        <div class="p-3.5 bg-[#E2EDFF] rounded-xl flex items-center justify-between border border-slate-100">
                             <div class="flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-[#003FA9]"></span>
                                 <span class="text-xs font-semibold text-[#003FA9] uppercase tracking-wider">Format Standar Rombel:</span>

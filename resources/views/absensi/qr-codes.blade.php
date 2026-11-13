@@ -68,7 +68,7 @@
 
 @section('content')
     {{-- Filter Bar --}}
-    <div class="no-print glass-card rounded-2xl border border-dark-200/50 p-4 mb-6">
+    <div class="no-print glass-card rounded-2xl border border-slate-100 p-4 mb-6">
         <form action="{{ route('absensi.qrcodes') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">
             <div class="flex-1 w-full">
                 <label class="block text-xs font-medium text-dark-600 mb-1">Cari Ruangan</label>
@@ -128,13 +128,13 @@
                 $activeAssignment = $room->assignments->first();
                 $assignedKelas = $activeAssignment?->kelas;
             @endphp
-            <div class="qr-card-print glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col items-center text-center bg-white shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div class="qr-card-print glass-card rounded-2xl border border-slate-100 p-6 flex flex-col items-center text-center bg-white shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
                 {{-- Badge Status Ruangan --}}
                 <div class="w-full flex items-center justify-between gap-2 mb-2">
                     <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold font-mono uppercase bg-dark-100 text-dark-700 border border-dark-200">
                         {{ $room->code }}
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $room->is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-dark-100 text-dark-500' }}">
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $room->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }}">
                         {{ $room->is_active ? 'Ruangan Aktif' : 'Nonaktif' }}
                     </span>
                 </div>
@@ -151,17 +151,17 @@
                 </div>
 
                 {{-- Active Class Badge --}}
-                <div class="w-full py-2 px-3 rounded-xl mb-2 text-xs {{ $assignedKelas ? 'bg-primary-50/80 border border-primary-200 text-primary-900' : 'bg-amber-50 border border-amber-200 text-amber-800' }}">
-                    <p class="text-[10px] uppercase font-bold {{ $assignedKelas ? 'text-primary-600' : 'text-amber-600' }}">Alokasi Rombel Saat Ini</p>
+                <div class="w-full py-2.5 px-3 rounded-xl mb-2 text-xs {{ $assignedKelas ? 'bg-[#EFF5FF] text-slate-800' : 'bg-slate-100 text-slate-600' }}">
+                    <p class="text-[10px] uppercase font-bold {{ $assignedKelas ? 'text-[#003EA7]' : 'text-slate-500' }}">Alokasi Rombel Saat Ini</p>
                     @if($assignedKelas)
                         <div class="font-bold text-sm mt-0.5 flex items-center justify-center gap-1.5">
-                            <i class='bx bx-door-open text-primary-600'></i>
+                            <i class='bx bx-door-open text-[#003EA7]'></i>
                             <span>{{ $assignedKelas->nama_kelas }}</span>
                             @if($assignedKelas->jurusan)
-                                <span class="text-[10px] px-1.5 py-0.2 rounded bg-primary-200/60 font-mono">{{ $assignedKelas->jurusan->kode_jurusan }}</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-white font-mono text-[#003EA7] font-semibold">{{ $assignedKelas->jurusan->kode_jurusan }}</span>
                             @endif
                         </div>
-                        <p class="text-[10px] text-dark-500 mt-0.5">Wali: {{ $assignedKelas->wali_kelas ?? '-' }}</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Wali: {{ $assignedKelas->wali_kelas ?? '-' }}</p>
                     @else
                         <p class="font-semibold text-xs mt-0.5 italic">Belum dialokasikan ke rombel</p>
                     @endif
@@ -204,7 +204,7 @@
                 </div>
             </div>
         @empty
-            <div class="col-span-full py-12 text-center glass-card rounded-2xl border border-dark-200/50">
+            <div class="col-span-full py-12 text-center glass-card rounded-2xl border border-slate-100">
                 <i class='bx bx-building-house text-4xl text-dark-400 mb-2'></i>
                 <h4 class="text-base font-bold text-dark-800">Tidak Ada Data Ruangan</h4>
                 <p class="text-xs text-dark-500 mt-1">Belum ada data ruangan fisik yang terdaftar.</p>

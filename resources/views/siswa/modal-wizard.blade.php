@@ -31,7 +31,7 @@
     {{-- Modal Positioning Container --}}
     <div class="flex min-h-full items-center justify-center p-2 sm:p-6 text-left">
         {{-- Modal Card (Exact 1024px desktop, #EFF5FF surface, rounded-3xl) --}}
-        <div class="relative w-full max-w-[1024px] rounded-[28px] bg-[#EFF5FF] px-9 pt-8 pb-6 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800"
+        <div class="relative w-full max-w-[1024px] rounded-[28px] bg-[#EFF5FF] px-9 pt-8 pb-6 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800"
              @keydown.escape.window="close()">
 
             {{-- Header (Matching reference images) --}}

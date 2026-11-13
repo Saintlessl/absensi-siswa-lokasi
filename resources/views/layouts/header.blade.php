@@ -33,11 +33,11 @@
             @endphp
             <div>
                 <h2 class="text-xl sm:text-2xl font-normal text-slate-900 tracking-tight leading-tight">
-                    {!! $resolvedHeaderTitle !!}
+                    {{ $resolvedHeaderTitle }}
                 </h2>
                 @if(!empty($resolvedHeaderSubtitle))
                     <p class="text-xs text-slate-500 mt-0.5 font-normal">
-                        {!! $resolvedHeaderSubtitle !!}
+                        {{ $resolvedHeaderSubtitle }}
                     </p>
                 @endif
             </div>
@@ -74,7 +74,7 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                     x-transition:leave-end="opacity-0 scale-95 translate-y-1"
-                    class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-blue-100/80 z-50 overflow-hidden divide-y divide-slate-100">
+                    class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden divide-y divide-slate-100">
 
                     {{-- Popover Header --}}
                     <div class="px-4 py-3 bg-[#F8FAFC] flex items-center justify-between">
@@ -114,7 +114,7 @@
                         <template x-for="item in items" :key="item.id">
                             <div @click="openItem(item)"
                                 class="p-3.5 flex items-start gap-3 hover:bg-blue-50/50 cursor-pointer transition-colors relative"
-                                :class="!item.read_at ? 'bg-blue-50/20' : ''">
+                                :class="!item.read_at ? 'bg-white' : ''">
                                 {{-- Icon by Category --}}
                                 <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-base"
                                     :class="{
@@ -153,6 +153,121 @@
                     </div>
                 </div>
             </div>
+
+                        {{-- User Profile Pill & Dropdown --}}
+            @auth
+            <div x-data="{ userMenuOpen: false }" class="relative" @click.outside="userMenuOpen = false">
+                <button @click="userMenuOpen = !userMenuOpen"
+                        id="user-dropdown-trigger"
+                        type="button"
+                        class="flex items-center gap-2.5 p-1 sm:pl-2.5 sm:pr-2 sm:py-1 rounded-full sm:rounded-2xl hover:bg-white/70 focus:outline-none transition-all duration-200"
+                        :class="userMenuOpen ? 'bg-white shadow-xs' : ''"
+                        aria-label="Menu Pengguna">
+                    {{-- User Info (Desktop) --}}
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span class="text-xs font-bold text-slate-800 truncate max-w-[140px] leading-tight">
+                            {{ Auth::user()->salutation_name ?? Auth::user()->name }}
+                        </span>
+                        <span class="text-[10px] font-semibold text-slate-400 capitalize leading-tight">
+                            {{ Auth::user()->roleRel->display_name ?? Auth::user()->role }}
+                        </span>
+                    </div>
+
+                    {{-- Avatar Photo / Initials --}}
+                    <div class="w-9 h-9 rounded-full sm:rounded-xl overflow-hidden bg-[#003EA7] text-white flex items-center justify-center text-xs font-bold shadow-xs flex-shrink-0">
+                        @if(Auth::user()->profile_photo_url)
+                            <img src="{{ Auth::user()->profile_photo_url }}"
+                                 alt="{{ Auth::user()->name }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <span>{{ Auth::user()->avatar_initials }}</span>
+                        @endif
+                    </div>
+
+                    <i class='bx bx-chevron-down text-slate-400 hidden sm:block text-base transition-transform duration-200'
+                       :class="userMenuOpen ? 'rotate-180' : ''"></i>
+                </button>
+
+                {{-- User Dropdown Card --}}
+                <div x-show="userMenuOpen" x-cloak
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95 translate-y-1"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 translate-y-1"
+                    id="user-dropdown"
+                    class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden divide-y divide-slate-100">
+
+                    {{-- User Header in Dropdown --}}
+                    <div class="p-4 bg-slate-50/70">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-[#003EA7] text-white flex items-center justify-center text-sm font-bold shadow-xs flex-shrink-0">
+                                @if(Auth::user()->profile_photo_url)
+                                    <img src="{{ Auth::user()->profile_photo_url }}"
+                                         alt="{{ Auth::user()->name }}"
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <span>{{ Auth::user()->avatar_initials }}</span>
+                                @endif
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-slate-900 truncate">{{ Auth::user()->salutation_name ?? Auth::user()->name }}</p>
+                                <p class="text-[11px] text-slate-400 truncate">{{ Auth::user()->email }}</p>
+                                <span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">
+                                    {{ strtoupper(Auth::user()->roleRel->display_name ?? Auth::user()->role) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Menu Links --}}
+                    <div class="p-2 space-y-1">
+                        <a href="{{ route('settings.profile') }}"
+                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-[#EFF5FF] hover:text-[#003EA7] transition-colors">
+                            <i class='bx bx-user text-base text-slate-400'></i>
+                            <span>Profil & Akun</span>
+                        </a>
+
+                        @if(in_array(Auth::user()->role, ['superadmin', 'admin', 'guru', 'kaprog']))
+                            <a href="{{ route('settings.home') }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-[#EFF5FF] hover:text-[#003EA7] transition-colors">
+                                <i class='bx bx-cog text-base text-slate-400'></i>
+                                <span>Pusat Pengaturan</span>
+                            </a>
+                        @endif
+
+                        @if(Auth::user()->guru)
+                            <a href="{{ route('guru.show', Auth::user()->guru->id) }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-[#EFF5FF] hover:text-[#003EA7] transition-colors">
+                                <i class='bx bx-id-card text-base text-slate-400'></i>
+                                <span>Data Pendidik Saya</span>
+                            </a>
+                        @endif
+
+                        @if(Auth::user()->siswa)
+                            <a href="{{ route('siswa.show', Auth::user()->siswa->id) }}"
+                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-[#EFF5FF] hover:text-[#003EA7] transition-colors">
+                                <i class='bx bx-id-card text-base text-slate-400'></i>
+                                <span>Biodata Siswa</span>
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- Logout Section --}}
+                    <div class="p-2">
+                        <form action="{{ route('proseslogout') }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                                <i class='bx bx-log-out text-base'></i>
+                                <span>Keluar dari Aplikasi</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endauth
 
             <script>
                 function headerNotificationCenter() {

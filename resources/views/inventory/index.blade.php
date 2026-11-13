@@ -105,7 +105,7 @@
 
         {{-- C. TIGA TAB FILTER STATUS PEMINJAMAN --}}
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div class="inline-flex p-1 rounded-2xl bg-[#EFF5FF] border border-blue-100/60 text-xs font-bold gap-1 flex-wrap">
+            <div class="inline-flex p-1 rounded-2xl bg-[#EFF5FF] border border-slate-100 text-xs font-bold gap-1 flex-wrap">
                 {{-- 1. Sedang Dipinjam --}}
                 <a href="{{ route('inventory.index', array_merge(request()->except(['monitoring_page', 'page']), ['monitoring_tab' => 'dipinjam'])) }}"
                    class="px-4 py-2.5 rounded-xl transition inline-flex items-center gap-2 {{ $monitoringTab === 'dipinjam' ? 'bg-[#003FA9] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60' }}">
@@ -150,7 +150,7 @@
         </div>
 
         {{-- Search & Filter Controls for Global Monitoring --}}
-        <form method="GET" action="{{ route('inventory.index') }}" class="p-4 rounded-2xl bg-[#EFF5FF]/60 border border-blue-100/60">
+        <form method="GET" action="{{ route('inventory.index') }}" class="p-4 rounded-2xl bg-[#EFF5FF]/60 border border-slate-100">
             <input type="hidden" name="monitoring_tab" value="{{ $monitoringTab }}">
             <div class="flex flex-col lg:flex-row items-stretch lg:items-end gap-3">
                 {{-- Search peminjam, nama barang, kode unit --}}
@@ -265,7 +265,7 @@
                                 {{-- 4. Role --}}
                                 <td class="py-4 px-4">
                                     @if($b->siswa)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-indigo-100 text-indigo-800">
                                             Siswa
                                         </span>
                                     @elseif($b->peminjamGuru)
@@ -511,7 +511,7 @@
                                 <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-100 text-slate-700">
                                     {{ $item->jurusan ? $item->jurusan->kode_jurusan : 'UMUM' }}
                                 </span>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $item->borrowing_scope === 'umum' ? 'bg-blue-50 text-[#003FA9] border border-blue-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}"
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold {{ $item->borrowing_scope === 'umum' ? 'bg-[#EFF5FF] text-[#003FA9]' : 'bg-amber-100 text-amber-900' }}"
                                       title="{{ $item->borrowing_scope === 'umum' ? 'Dapat dipinjam semua jurusan & guru' : 'Hanya untuk siswa jurusan pemilik' }}">
                                     {{ $item->borrowing_scope === 'umum' ? 'Umum' : 'Khusus' }}
                                 </span>
@@ -540,22 +540,22 @@
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Ringkasan Fisik</p>
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 @if($breakdown['baik'] > 0)
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800">
                                         {{ $breakdown['baik'] }} Baik
                                     </span>
                                 @endif
                                 @if($breakdown['rusak_ringan'] > 0)
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-900">
                                         {{ $breakdown['rusak_ringan'] }} Rusak Ringan
                                     </span>
                                 @endif
                                 @if($breakdown['rusak_berat'] > 0)
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800">
                                         {{ $breakdown['rusak_berat'] }} Rusak Berat
                                     </span>
                                 @endif
                                 @if($breakdown['perlu_pemeriksaan'] > 0)
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">
                                         {{ $breakdown['perlu_pemeriksaan'] }} Verifikasi
                                     </span>
                                 @endif

@@ -56,7 +56,7 @@
         {{-- Statistics Cards (4 Cards horizontal row) --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
             {{-- Total Siswa --}}
-            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition">
                 <div>
                     <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL SISWA</p>
                     <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $totalSiswa ?? 0 }}</h3>
@@ -70,7 +70,7 @@
             </div>
 
             {{-- Total Guru --}}
-            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition">
                 <div>
                     <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL GURU</p>
                     <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $totalGuru ?? 0 }}</h3>
@@ -84,7 +84,7 @@
             </div>
 
             {{-- Total Kelas --}}
-            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition">
                 <div>
                     <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL KELAS</p>
                     <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $totalKelas ?? 0 }}</h3>
@@ -98,7 +98,7 @@
             </div>
 
             {{-- Hadir Hari Ini --}}
-            <div class="bg-white rounded-2xl p-6 border border-blue-100/60 shadow-sm flex items-center justify-between hover:shadow-md transition">
+            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition">
                 <div>
                     <p class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">HADIR HARI INI</p>
                     <h3 class="text-3xl font-extrabold text-[#0052CC] mt-1.5 leading-none">{{ $hadirHariIni ?? 0 }}</h3>
@@ -113,7 +113,7 @@
         </div>
 
         {{-- Rekap Absensi Siswa Section --}}
-        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-blue-100/60 shadow-sm mb-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm mb-6">
             {{-- Header + Action Buttons --}}
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
                 <div>
@@ -286,7 +286,7 @@
         {{-- Info Anak --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {{-- Card Profil Anak --}}
-            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6">
+            <div class="lg:col-span-2 glass-card rounded-2xl border border-slate-100 p-6">
                 <div class="flex items-center gap-4 mb-5">
                     <div
                         class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-primary-500/25">
@@ -366,7 +366,7 @@
             </div>
 
             {{-- Card Rekap Donut Chart --}}
-            <div class="lg:col-span-1 glass-card rounded-2xl border border-dark-200/50 p-6">
+            <div class="lg:col-span-1 glass-card rounded-2xl border border-slate-100 p-6">
                 <h4 class="text-sm font-bold text-dark-800 mb-2">Rekap Absensi Bulanan</h4>
 
                 <form action="{{ route('dashboard') }}" method="GET" class="mb-4">
@@ -527,7 +527,7 @@
         {{-- Statistics Cards (Gaya Admin) --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {{-- Status Hari Ini --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-slate-100">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Status Hari Ini</p>
@@ -551,7 +551,7 @@
             </div>
 
             {{-- Hadir Bulan Ini --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-slate-100">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Hadir Bulan Ini</p>
@@ -565,7 +565,7 @@
             </div>
 
             {{-- Keterlambatan --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-slate-100">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Keterlambatan</p>
@@ -581,7 +581,7 @@
             </div>
 
             {{-- Izin & Sakit --}}
-            <div class="glass-card rounded-2xl p-5 hover-lift border border-dark-200/50">
+            <div class="glass-card rounded-2xl p-5 hover-lift border border-slate-100">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-dark-400 text-xs font-semibold uppercase tracking-wider">Izin & Sakit</p>
@@ -600,7 +600,7 @@
         {{-- Mid Section: Profil Siswa & Aksi Cepat --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {{-- Info Profil Siswa --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 space-y-4">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 space-y-4">
                 <div class="flex items-center gap-3 pb-4 border-b border-dark-100">
                     <div class="w-12 h-12 rounded-xl bg-primary-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-primary-500/20 flex-shrink-0">
                         {{ strtoupper(substr($siswa->nama, 0, 1)) }}
@@ -632,14 +632,14 @@
             </div>
 
             {{-- Action Card Presensi --}}
-            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col justify-between">
+            <div class="lg:col-span-2 glass-card rounded-2xl border border-slate-100 p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between pb-3 border-b border-dark-100 mb-4">
                         <div>
                             <h3 class="text-base font-bold text-dark-800">Presensi Mandiri Siswa</h3>
                             <p class="text-xs text-dark-500 mt-0.5">Sistem verifikasi QR Code kelas, biometrik wajah & radius GPS sekolah.</p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                             <i class='bx bx-check-shield'></i> Biometrik Aktif
                         </span>
                     </div>
@@ -772,7 +772,7 @@
         {{-- Top Statistics & Teacher Profile Row --}}
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
             {{-- Clock & Realtime Date --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col justify-center items-center text-center bg-white shadow-sm">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 flex flex-col justify-center items-center text-center bg-white shadow-sm">
                 <div class="w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mb-3">
                     <i class='bx bx-time-five text-3xl'></i>
                 </div>
@@ -781,7 +781,7 @@
             </div>
 
             {{-- Teacher Profile Details --}}
-            <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 bg-white shadow-sm">
+            <div class="lg:col-span-2 glass-card rounded-2xl border border-slate-100 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5 bg-white shadow-sm">
                 <div class="relative w-16 h-16 rounded-2xl overflow-hidden bg-primary-100 flex-shrink-0 flex items-center justify-center text-primary-700 font-bold text-xl border-2 border-white shadow-sm">
                     @if($guru->photo_path && file_exists(public_path('storage/' . $guru->photo_path)))
                         <img src="{{ asset('storage/' . $guru->photo_path) }}" alt="{{ $guru->nama }}" class="w-full h-full object-cover">
@@ -817,7 +817,7 @@
                             </a>
                         @endif
 
-                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-[#EFF5FF] text-[#003EA7]">
                             {{ $guru->activeSubjectAssignments->count() }} Mapel Diajar
                         </span>
                     </div>
@@ -825,7 +825,7 @@
             </div>
 
             {{-- Workload Status Pill --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 bg-white shadow-sm flex flex-col justify-between">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 bg-white shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-dark-400 text-xs mb-1">
                         <span class="font-bold uppercase tracking-wider text-[10px]">Beban Kerja Guru</span>
@@ -848,7 +848,7 @@
         {{-- Main Dashboard Body: Schedules & Homeroom / KAPROG Widgets --}}
         <div class="grid grid-cols-1 {{ isset($homeroomStats) || isset($kaprogJurusan) ? 'lg:grid-cols-3' : '' }} gap-6">
             {{-- Today's Teaching Schedule --}}
-            <div class="{{ isset($homeroomStats) || isset($kaprogJurusan) ? 'lg:col-span-2' : '' }} glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+            <div class="{{ isset($homeroomStats) || isset($kaprogJurusan) ? 'lg:col-span-2' : '' }} glass-card rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm">
                 <div class="p-5 border-b border-dark-100/60 flex items-center justify-between bg-dark-50/40">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
@@ -1031,7 +1031,7 @@
                 <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                     onclick="closeModal('modal-editabsensi-dash')"></div>
                 <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-left">
-                    <div class="relative w-full max-w-md rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-blue-100/60 my-auto transform transition-all text-slate-800">
+                    <div class="relative w-full max-w-md rounded-[28px] bg-[#EFF5FF] p-6 sm:p-8 shadow-2xl border border-slate-100 my-auto transform transition-all text-slate-800">
                         <div class="flex items-start justify-between">
                             <div>
                                 <h2 class="text-2xl font-bold text-[#0F172A] tracking-tight">Edit Absensi Siswa</h2>

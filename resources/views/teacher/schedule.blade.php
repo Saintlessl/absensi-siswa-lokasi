@@ -45,7 +45,7 @@
 
     {{-- Quick Stat Bar --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
+        <div class="glass-card rounded-2xl border border-slate-100 p-4 bg-white flex items-center gap-3">
             <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl flex-shrink-0">
                 <i class='bx bx-calendar-check'></i>
             </div>
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
+        <div class="glass-card rounded-2xl border border-slate-100 p-4 bg-white flex items-center gap-3">
             <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0">
                 <i class='bx bx-time'></i>
             </div>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white flex items-center gap-3">
+        <div class="glass-card rounded-2xl border border-slate-100 p-4 bg-white flex items-center gap-3">
             <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl flex-shrink-0">
                 <i class='bx bx-building-house'></i>
             </div>
@@ -84,7 +84,7 @@
             @php
                 $daySchedules = $groupedSchedules->get($day, collect());
             @endphp
-            <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+            <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm">
                 <div class="p-4 px-5 border-b border-dark-100/70 bg-dark-50/50 flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
                         <span class="w-2.5 h-2.5 rounded-full {{ $daySchedules->count() > 0 ? 'bg-primary-600' : 'bg-dark-300' }}"></span>

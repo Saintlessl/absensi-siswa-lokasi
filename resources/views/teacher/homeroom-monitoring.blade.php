@@ -41,7 +41,7 @@
 @section('content')
     {{-- Summary Statistics Grid --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-6">
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-4 bg-white">
+        <div class="glass-card rounded-2xl border border-slate-100 p-4 bg-white">
             <p class="text-[10px] font-bold uppercase tracking-wider text-dark-400">Total Siswa</p>
             <h3 class="text-2xl font-black text-dark-900 mt-1">{{ $totalStudents }}</h3>
             <p class="text-[10px] text-dark-400 mt-0.5">Siswa terdaftar</p>
@@ -87,7 +87,7 @@
     @endphp
 
     @if($problemStudents->count() > 0)
-        <div class="glass-card rounded-2xl border border-rose-200/80 bg-rose-50/30 p-5 mb-6 shadow-sm">
+        <div class="glass-card rounded-2xl border border-rose-200/80 bg-white p-5 mb-6 shadow-sm">
             <div class="flex items-center gap-2 mb-3">
                 <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold">
                     <i class='bx bx-error-alt'></i>
@@ -136,7 +136,7 @@
     @endif
 
     {{-- Main Attendance Table for this Homeroom --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden bg-white shadow-sm">
+    <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm">
         <div class="p-4 px-5 border-b border-dark-100/70 bg-dark-50/40 flex items-center justify-between">
             <div>
                 <h4 class="text-sm font-bold text-dark-800">Daftar Presensi Peserta Didik</h4>

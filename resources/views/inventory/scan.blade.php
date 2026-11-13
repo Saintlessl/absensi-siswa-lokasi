@@ -64,7 +64,7 @@
             {{-- Right Column: Manual Code Input & Scan Results --}}
             <div class="space-y-5">
                 {{-- Manual Code Input Form (Barcodes guns & manual entry) --}}
-                <div class="p-5 rounded-2xl bg-[#EFF5FF] border border-blue-100/60 space-y-3">
+                <div class="p-5 rounded-2xl bg-[#EFF5FF] border border-slate-100 space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-800 mb-1">Input Kode / Barcode Manual</label>
                         <p class="text-[11px] text-slate-500">Ketik kode unit atau gunakan scanner barcode USB / Bluetooth.</p>

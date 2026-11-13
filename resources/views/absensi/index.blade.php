@@ -88,7 +88,7 @@
         {{-- KOLOM KIRI: Profil Siswa & Ringkasan Hari Ini --}}
         <div class="lg:col-span-1 space-y-6">
             {{-- Kartu Siswa --}}
-            <div class="glass-card rounded-2xl border border-dark-200/50 p-6 relative overflow-hidden">
+            <div class="glass-card rounded-2xl border border-slate-100 p-6 relative overflow-hidden">
                 <div class="flex items-center gap-4 mb-5">
                     <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-primary-500/30">
                         {{ strtoupper(substr($siswa->nama, 0, 1)) }}
@@ -102,7 +102,7 @@
                                     {{ $siswa->kelas->nama_kelas }}
                                 </span>
                                 @if ($siswa->kelas->jurusan)
-                                    <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800">
                                         {{ $siswa->kelas->jurusan->kode_jurusan }}
                                     </span>
                                 @endif
@@ -194,7 +194,7 @@
         {{-- KOLOM KANAN: WIZARD ABSENSI (Scan QR -> Selfie -> Lokasi -> Kirim) --}}
         <div class="lg:col-span-2">
             @if (Auth::user()->role == 'orangtua')
-                <div class="glass-card rounded-2xl border border-dark-200/50 p-8 text-center">
+                <div class="glass-card rounded-2xl border border-slate-100 p-8 text-center">
                     <div class="w-16 h-16 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-4 text-3xl">
                         <i class='bx bx-user-check'></i>
                     </div>
@@ -206,7 +206,7 @@
             @else
                 {{-- Cek apakah sudah tuntas absen masuk dan pulang --}}
                 @if ($absenHariIni && $absenHariIni->jam_masuk && $absenHariIni->jam_pulang)
-                    <div class="glass-card rounded-2xl border border-emerald-200 bg-emerald-50/30 p-8 text-center">
+                    <div class="glass-card rounded-2xl border border-emerald-200 bg-white p-8 text-center">
                         <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-4xl shadow-lg shadow-emerald-500/20">
                             <i class='bx bx-check-double'></i>
                         </div>
@@ -237,7 +237,7 @@
                         </div>
                     @else
                         {{-- Container Form Wizard --}}
-                        <div class="glass-card rounded-2xl border border-dark-200/50 p-6 sm:p-8">
+                        <div class="glass-card rounded-2xl border border-slate-100 p-6 sm:p-8">
                             {{-- Pilihan Tipe Absensi: Masuk atau Pulang --}}
                             @php
                                 $nowHourMinute = date('H:i');
@@ -686,7 +686,7 @@
                         b.innerHTML = "<i class='bx bx-check text-xs'></i>";
                     }
                     if (t) {
-                        t.className = 'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 transition-all';
+                        t.className = 'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-800 transition-all';
                     }
                 } else if (s === step) {
                     if (b) {

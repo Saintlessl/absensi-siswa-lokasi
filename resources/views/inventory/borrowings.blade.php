@@ -371,7 +371,7 @@
 <div id="modalManualTx" class="hidden fixed inset-0 z-[60] overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalManualTx').classList.add('hidden')"></div>
     <div class="relative flex items-center justify-center min-h-full p-4">
-        <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 overflow-hidden text-left">
+        <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 overflow-hidden text-left">
             <div class="px-8 pt-7 pb-4 border-b border-blue-100/60">
                 <div class="flex items-center justify-between">
                     <div>

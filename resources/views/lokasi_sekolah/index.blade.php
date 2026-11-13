@@ -23,7 +23,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {{-- Form Card --}}
-        <div class="lg:col-span-1 glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col">
+        <div class="lg:col-span-1 glass-card rounded-2xl border border-slate-100 p-6 flex flex-col">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center text-primary-600">
                     <i class='bx bx-map-pin text-xl'></i>
@@ -88,7 +88,7 @@
         </div>
 
         {{-- Map Card --}}
-        <div class="lg:col-span-2 glass-card rounded-2xl border border-dark-200/50 p-2 relative">
+        <div class="lg:col-span-2 glass-card rounded-2xl border border-slate-100 p-2 relative">
             <div id="map" class="shadow-inner"></div>
             
             <div class="absolute top-6 right-6 z-[400]">

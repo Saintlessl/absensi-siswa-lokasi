@@ -34,46 +34,46 @@
         $totalSiswaGlobal = $angkatans->sum(fn($a) => $a->computed_stats['total_siswa'] ?? 0);
     @endphp
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="glass-card rounded-2xl p-4 border border-dark-200/50 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#003EA7] flex items-center justify-center text-2xl font-bold flex-shrink-0">
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                 <i class='bx bxs-graduation'></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-dark-400">Total Angkatan</p>
-                <p class="text-xl font-bold text-dark-800 mt-0.5">{{ $totalAngkatan }}</p>
+                <p class="text-xs font-medium text-slate-400">Total Angkatan</p>
+                <p class="text-xl font-bold text-slate-800 mt-0.5">{{ $totalAngkatan }}</p>
             </div>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-dark-200/50 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                 <i class='bx bx-user-check'></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-dark-400">Angkatan Aktif</p>
-                <p class="text-xl font-bold text-dark-800 mt-0.5">{{ $totalAktif }} <span class="text-xs font-normal text-dark-400">Kohort</span></p>
+                <p class="text-xs font-medium text-slate-400">Angkatan Aktif</p>
+                <p class="text-xl font-bold text-slate-800 mt-0.5">{{ $totalAktif }} <span class="text-xs font-normal text-slate-400">Kohort</span></p>
             </div>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-dark-200/50 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                 <i class='bx bx-award'></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-dark-400">Angkatan Alumni (Lulus)</p>
-                <p class="text-xl font-bold text-dark-800 mt-0.5">{{ $totalSelesai }} <span class="text-xs font-normal text-dark-400">Kohort</span></p>
+                <p class="text-xs font-medium text-slate-400">Angkatan Alumni (Lulus)</p>
+                <p class="text-xl font-bold text-slate-800 mt-0.5">{{ $totalSelesai }} <span class="text-xs font-normal text-slate-400">Kohort</span></p>
             </div>
         </div>
-        <div class="glass-card rounded-2xl p-4 border border-dark-200/50 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+        <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                 <i class='bx bx-group'></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-dark-400">Total Siswa Terdata</p>
-                <p class="text-xl font-bold text-dark-800 mt-0.5">{{ $totalSiswaGlobal }} <span class="text-xs font-normal text-dark-400">Siswa</span></p>
+                <p class="text-xs font-medium text-slate-400">Total Siswa Terdata</p>
+                <p class="text-xl font-bold text-slate-800 mt-0.5">{{ $totalSiswaGlobal }} <span class="text-xs font-normal text-slate-400">Siswa</span></p>
             </div>
         </div>
     </div>
 
     {{-- Main Container Card --}}
-    <div class="glass-card rounded-2xl border border-dark-200/50 overflow-hidden">
+    <div class="glass-card rounded-2xl border border-slate-100 overflow-hidden">
         {{-- Filter Bar --}}
         <div class="px-6 py-4 border-b border-dark-100 bg-dark-50/30">
             <form action="{{ route('angkatan.index') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-3">

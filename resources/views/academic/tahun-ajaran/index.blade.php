@@ -89,7 +89,7 @@
                         <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-mono">
                             {{ $activeTahunAjaran?->nama ?? '2026/2027' }}
                         </h2>
-                        <span class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold uppercase tracking-wider">
+                        <span class="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
                             Semester {{ ucfirst($activeTahunAjaran?->semester_aktif ?? 'ganjil') }}
                         </span>
                     </div>
@@ -121,36 +121,36 @@
 
         {{-- Mini Stats Grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-            <div class="p-5 rounded-2xl bg-white border border-dark-100 shadow-xs flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#003EA7] flex items-center justify-center text-2xl font-bold flex-shrink-0">
+            <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center gap-4">
+                <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                     <i class='bx bx-chalkboard'></i>
                 </div>
                 <div>
-                    <span class="text-xs font-medium text-dark-400 block">Total Rombel Aktif</span>
-                    <span class="text-2xl font-bold text-dark-800">{{ $stats['total_classes'] }}</span>
-                    <span class="text-[11px] text-dark-400 block mt-0.5">Seluruh jenjang X, XI, XII</span>
+                    <span class="text-xs font-medium text-slate-400 block">Total Rombel Aktif</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ $stats['total_classes'] }}</span>
+                    <span class="text-[11px] text-slate-400 block mt-0.5">Seluruh jenjang X, XI, XII</span>
                 </div>
             </div>
 
-            <div class="p-5 rounded-2xl bg-white border border-dark-100 shadow-xs flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+            <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center gap-4">
+                <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                     <i class='bx bx-user-check'></i>
                 </div>
                 <div>
-                    <span class="text-xs font-medium text-dark-400 block">Siswa Aktif Terdaftar</span>
-                    <span class="text-2xl font-bold text-dark-800">{{ $stats['active_students'] }}</span>
-                    <span class="text-[11px] text-dark-400 block mt-0.5">Memiliki enrollment aktif</span>
+                    <span class="text-xs font-medium text-slate-400 block">Siswa Aktif Terdaftar</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ $stats['active_students'] }}</span>
+                    <span class="text-[11px] text-slate-400 block mt-0.5">Memiliki enrollment aktif</span>
                 </div>
             </div>
 
-            <div class="p-5 rounded-2xl bg-white border border-dark-100 shadow-xs flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+            <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center gap-4">
+                <div class="w-11 h-11 rounded-xl bg-[#EFF5FF] text-[#003EA7] flex items-center justify-center text-xl font-bold flex-shrink-0">
                     <i class='bx bx-history'></i>
                 </div>
                 <div>
-                    <span class="text-xs font-medium text-dark-400 block">Total Periode Terdata</span>
-                    <span class="text-2xl font-bold text-dark-800">{{ $stats['total_periods'] }}</span>
-                    <span class="text-[11px] text-dark-400 block mt-0.5">Historis & Perencanaan</span>
+                    <span class="text-xs font-medium text-slate-400 block">Total Periode Terdata</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ $stats['total_periods'] }}</span>
+                    <span class="text-[11px] text-slate-400 block mt-0.5">Historis & Perencanaan</span>
                 </div>
             </div>
         </div>
@@ -213,7 +213,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm">
                     @forelse($tahunAjarans as $index => $ta)
-                        <tr class="hover:bg-slate-50/70 transition-colors {{ $ta->is_active ? 'bg-blue-50/30' : '' }}">
+                        <tr class="hover:bg-slate-50/70 transition-colors {{ $ta->is_active ? 'bg-white' : '' }}">
                             <td class="py-4 px-4 text-center font-medium text-xs text-slate-400">
                                 {{ $tahunAjarans->firstItem() + $index }}
                             </td>

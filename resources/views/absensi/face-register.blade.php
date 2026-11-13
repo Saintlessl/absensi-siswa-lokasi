@@ -73,9 +73,9 @@
     <div class="max-w-4xl mx-auto space-y-6">
 
         {{-- Status Registrasi Saat Ini --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="glass-card rounded-2xl border border-slate-100 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold shadow-md {{ $biometric && $biometric->is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-amber-50 text-amber-600 border border-amber-200' }}">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold shadow-md {{ $biometric && $biometric->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
                     <i class='bx {{ $biometric && $biometric->is_active ? 'bx-check-shield' : 'bx-scan' }}'></i>
                 </div>
                 <div>
@@ -93,18 +93,18 @@
             </div>
 
             @if ($biometric && $biometric->is_active)
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800">
                     <i class='bx bxs-check-circle'></i> Siap Digunakan
                 </span>
             @else
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 text-amber-900">
                     <i class='bx bx-time'></i> Menunggu Pendaftaran
                 </span>
             @endif
         </div>
 
         {{-- Panel Pendaftaran Biometrik Wajah --}}
-        <div class="glass-card rounded-2xl border border-dark-200/50 p-6 sm:p-8">
+        <div class="glass-card rounded-2xl border border-slate-100 p-6 sm:p-8">
             <div class="max-w-xl mx-auto text-center mb-6">
                 <h4 class="text-lg font-bold text-dark-900">
                     {{ $biometric && $biometric->is_active ? 'Perbarui Template Wajah' : 'Perekaman Template Biometrik' }}

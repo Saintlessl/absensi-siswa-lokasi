@@ -85,19 +85,19 @@
 
                             <td class="px-4 py-4">
                                 @if($role->data_scope === 'all')
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800">
                                         <i class='bx bx-globe'></i> Seluruh Sekolah
                                     </span>
                                 @elseif($role->data_scope === 'department')
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-100">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-purple-100 text-purple-800">
                                         <i class='bx bx-git-branch'></i> Jurusan / Program
                                     </span>
                                 @elseif($role->data_scope === 'assigned')
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-blue-100 text-blue-800">
                                         <i class='bx bx-chalkboard'></i> Kelas Diampu
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700">
                                         <i class='bx bx-user'></i> Data Pribadi
                                     </span>
                                 @endif
@@ -111,11 +111,11 @@
 
                             <td class="px-4 py-4 text-center">
                                 @if($role->name === 'superadmin')
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900">
                                         Semua (Full Access)
                                     </span>
                                 @else
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $role->permissions_count > 0 ? 'bg-blue-50 text-[#003EA7] border border-blue-200' : 'bg-slate-100 text-slate-400' }}">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $role->permissions_count > 0 ? 'bg-[#EFF5FF] text-[#003EA7]' : 'bg-slate-100 text-slate-400' }}">
                                         {{ $role->permissions_count }} / {{ $totalPermissions }}
                                     </span>
                                 @endif

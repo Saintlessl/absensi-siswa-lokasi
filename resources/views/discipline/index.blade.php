@@ -200,11 +200,11 @@
                             </td>
                             <td class="py-4 px-4 text-center">
                                 @if($rec->poin < 0)
-                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-rose-100 text-rose-800">
                                         {{ $rec->poin }} Poin
                                     </span>
                                 @elseif($rec->poin > 0)
-                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-800">
                                         +{{ $rec->poin }} Poin
                                     </span>
                                 @else
@@ -286,7 +286,7 @@
     <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeCatatModal()"></div>
 
     {{-- Modal Card with Fixed Height Constraint & Smooth Scroll --}}
-    <div class="relative w-full max-w-3xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
+    <div class="relative w-full max-w-3xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
 
         {{-- Header (Fixed Top) --}}
         <div class="px-8 pt-6 pb-4 border-b border-blue-100/60 shrink-0 bg-[#EFF5FF]">
@@ -336,7 +336,7 @@
                 </div>
 
                 {{-- 3. INTERACTIVE MULTI-ITEM BUILDER AREA --}}
-                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100/80 shadow-sm space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <label class="block text-xs font-extrabold text-slate-800">
@@ -412,7 +412,7 @@
                                                 </td>
                                                 <td class="py-3 px-3 text-center">
                                                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-extrabold"
-                                                          :class="item.poin < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'"
+                                                          :class="item.poin < 0 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'"
                                                           x-text="(item.poin > 0 ? '+' : '') + item.poin + ' Poin'">
                                                     </span>
                                                 </td>
@@ -444,7 +444,7 @@
                                 </div>
 
                                 {{-- Total Points Counter --}}
-                                <div class="flex items-center gap-3 bg-[#EFF5FF] px-4 py-2 rounded-xl border border-blue-100/80">
+                                <div class="flex items-center gap-3 bg-[#EFF5FF] px-4 py-2 rounded-xl border border-slate-100">
                                     <span class="text-xs text-slate-600 font-semibold">Total Item: <span class="font-bold text-slate-800" x-text="selectedItems.length + ' Item'"></span></span>
                                     <span class="text-slate-300">|</span>
                                     <div class="flex items-center gap-1.5">
@@ -601,7 +601,7 @@
 
         <div class="px-8 py-5 space-y-4 overflow-y-auto flex-1">
             {{-- Student & Record Info Grid --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#EFF5FF] p-4 rounded-2xl border border-blue-100/60 text-xs">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#EFF5FF] p-4 rounded-2xl border border-slate-100 text-xs">
                 <div>
                     <span class="text-[10px] text-slate-400 uppercase font-bold block">Siswa</span>
                     <span class="font-extrabold text-slate-800" id="dtl_siswa_nama">-</span>
@@ -690,7 +690,7 @@
 {{-- MODAL UPDATE STATUS KASUS --}}
 <div id="modalUpdateStatus" class="hidden fixed inset-0 z-[60] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeStatusModal()"></div>
-    <div class="relative w-full max-w-lg bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
+    <div class="relative w-full max-w-lg bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
         <div class="px-8 pt-6 pb-4 border-b border-blue-100/60 shrink-0">
             <div class="flex items-center justify-between">
                 <div>

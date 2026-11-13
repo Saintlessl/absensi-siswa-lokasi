@@ -335,7 +335,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs">
                             @forelse ($logs as $log)
-                                <tr class="hover:bg-slate-50/70 transition-colors {{ in_array($log->status, ['failed_match', 'failed_liveness']) ? 'bg-rose-50/30' : '' }}">
+                                <tr class="hover:bg-slate-50/70 transition-colors {{ in_array($log->status, ['failed_match', 'failed_liveness']) ? 'bg-white' : '' }}">
                                     <td class="py-4 px-4 text-slate-500 whitespace-nowrap">
                                         {{ $log->created_at->format('d/m/Y H:i:s') }}
                                     </td>

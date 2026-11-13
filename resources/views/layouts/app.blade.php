@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="MySkanic — Sistem Presensi, Informasi & Manajemen Akademik SMK Negeri 1 Ciomas">
     @php $pageTitle = View::hasSection('title') ? trim(View::yieldContent('title')) : (trim(View::yieldContent('page-title')) ?: 'Dashboard'); @endphp
-    <title>{!! $pageTitle !!} — MySkanic</title>
+    <title>{{ $pageTitle }} — MySkanic</title>
 
     {{-- Google Fonts: Inter (Formal & Professional) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link rel="shortcut icon" href="{{ asset('img/logo.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ \App\Models\SchoolSetting::getFaviconUrl() }}" type="image/x-icon">
     {{-- Tailwind CSS via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
     {{-- Alpine.js for lightweight UI interactions --}}
@@ -339,12 +339,11 @@
             justify-content: center;
         }
 
-        /* Glass morphism card */
+        /* Solid Professional Card (Standardized to Reference Design System) */
         .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
 
         /* Gradient background */
@@ -563,7 +562,7 @@
                                                 ? trim(View::yieldContent('page-title'))
                                                 : (View::hasSection('title') ? trim(preg_replace('/(\s*[\x{2014}-]\s*MySkanic|\s*[\x{2014}-]\s*SMK Neg.*)/iu', '', View::yieldContent('title'))) : 'Halaman');
                                         @endphp
-                                        <span class="text-[#0052CC] font-medium">{!! !empty($resolvedBreadcrumbTitle) ? $resolvedBreadcrumbTitle : 'Halaman' !!}</span>
+                                        <span class="text-[#0052CC] font-medium">{{ !empty($resolvedBreadcrumbTitle) ? $resolvedBreadcrumbTitle : 'Halaman' }}</span>
                                     </li>
                                 @endif
                             </ol>

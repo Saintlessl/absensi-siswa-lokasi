@@ -156,11 +156,11 @@
                             </td>
                             <td class="py-4 px-4 text-center">
                                 @if($cat->default_poin < 0)
-                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-extrabold bg-rose-100 text-rose-800">
                                         {{ $cat->formatted_default_poin }} Poin
                                     </span>
                                 @elseif($cat->default_poin > 0)
-                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="inline-block px-3 py-1 rounded-xl text-xs font-extrabold bg-emerald-100 text-emerald-800">
                                         {{ $cat->formatted_default_poin }} Poin
                                     </span>
                                 @else
@@ -245,7 +245,7 @@
 {{-- Modal Tambah Master Data --}}
 <div id="modalTambahMaster" class="hidden fixed inset-0 z-[60] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeTambahModal()"></div>
-    <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
+    <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
         <div class="px-8 pt-6 pb-4 border-b border-blue-100/60 shrink-0 bg-[#EFF5FF]">
             <div class="flex items-center justify-between">
                 <div>
@@ -337,7 +337,7 @@
 {{-- Modal Edit Master Data --}}
 <div id="modalEditMaster" class="hidden fixed inset-0 z-[60] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeEditModal()"></div>
-    <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-blue-100/60 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
+    <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden my-auto z-10">
         <div class="px-8 pt-6 pb-4 border-b border-blue-100/60 shrink-0 bg-[#EFF5FF]">
             <div class="flex items-center justify-between">
                 <div>

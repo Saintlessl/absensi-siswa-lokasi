@@ -146,11 +146,11 @@
                                 {{-- Kategori Pemohon --}}
                                 <td class="px-4 py-4">
                                     @if($izin->applicant_type === 'guru')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800">
                                             <i class='bx bx-id-card'></i> GURU
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-[#003EA7] border border-blue-200">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#EFF5FF] text-[#003EA7]">
                                             <i class='bx bx-user'></i> SISWA
                                         </span>
                                     @endif

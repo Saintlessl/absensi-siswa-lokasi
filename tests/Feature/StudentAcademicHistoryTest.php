@@ -231,6 +231,7 @@ class StudentAcademicHistoryTest extends TestCase
             'parent_jenis_kelamin' => 'L',
             'parent_phone'         => '081234567890',
             'parent_address'       => 'Ciomas, Bogor',
+            'photo'                => \Illuminate\Http\UploadedFile::fake()->image('photo1.jpg', 400, 400),
         ];
 
         $response = $this->actingAs($this->admin)->post(route('siswa.store'), $payload);
@@ -267,6 +268,7 @@ class StudentAcademicHistoryTest extends TestCase
             'parent_jenis_kelamin' => 'L',
             'parent_phone'         => '081233445566',
             'parent_address'       => 'Ciomas, Bogor',
+            'photo'                => \Illuminate\Http\UploadedFile::fake()->image('photo2.jpg', 400, 400),
         ];
 
         $response = $this->actingAs($this->admin)->post(route('siswa.store'), $payload);
@@ -511,6 +513,7 @@ class StudentAcademicHistoryTest extends TestCase
             'parent_jenis_kelamin' => 'L',
             'parent_phone'         => '081299887766',
             'parent_address'       => 'Bogor Barat',
+            'photo'                => \Illuminate\Http\UploadedFile::fake()->image('photo3.jpg', 400, 400),
         ];
 
         $response = $this->actingAs($this->admin)->post(route('siswa.store'), $payload);

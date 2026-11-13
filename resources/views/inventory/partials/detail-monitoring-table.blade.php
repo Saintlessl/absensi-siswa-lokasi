@@ -46,7 +46,7 @@
                     {{-- 3. Role --}}
                     <td class="py-3.5 px-4">
                         @if($b->siswa)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-indigo-100 text-indigo-800">
                                 Siswa
                             </span>
                         @elseif($b->peminjamGuru)

@@ -31,7 +31,7 @@
                         <i class='{{ $scopeBadge['icon'] }} text-sm'></i>
                         <span>{{ $scopeBadge['label'] }}</span>
                     </span>
-                    <span class="px-3 py-1 rounded-xl text-xs font-bold uppercase {{ $item->countAvailableUnits() > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                    <span class="px-3 py-1 rounded-xl text-xs font-bold uppercase {{ $item->countAvailableUnits() > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
                         {{ $item->countAvailableUnits() }} / {{ $activeUnits->count() }} Unit Siap Pinjam
                     </span>
                 </div>
@@ -91,7 +91,7 @@
             $activeCount = $activeUnits->count();
         @endphp
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
-            <div class="p-3.5 rounded-2xl bg-[#EFF5FF] border border-blue-100/60">
+            <div class="p-3.5 rounded-2xl bg-[#EFF5FF] border border-slate-100">
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Fisik Aktif</p>
                 <p class="text-xl font-bold font-mono text-slate-900 mt-0.5">{{ $activeCount }} <span class="text-xs font-sans font-semibold text-slate-500">Unit</span></p>
             </div>
@@ -183,10 +183,10 @@
                             @foreach($activeUnits as $unit)
                                 @php
                                     $badgeKondisi = match($unit->kondisi) {
-                                        'baik'              => ['bg' => 'bg-emerald-50 text-emerald-700 border border-emerald-200', 'label' => 'Baik'],
-                                        'rusak_ringan'      => ['bg' => 'bg-amber-50 text-amber-700 border border-amber-200', 'label' => 'Rusak Ringan'],
-                                        'rusak_berat'       => ['bg' => 'bg-rose-50 text-rose-700 border border-rose-200', 'label' => 'Rusak Berat'],
-                                        'perlu_pemeriksaan' => ['bg' => 'bg-slate-100 text-slate-700 border border-slate-200', 'label' => 'Perlu Pemeriksaan'],
+                                        'baik'              => ['bg' => 'bg-emerald-100 text-emerald-800', 'label' => 'Baik'],
+                                        'rusak_ringan'      => ['bg' => 'bg-amber-100 text-amber-900', 'label' => 'Rusak Ringan'],
+                                        'rusak_berat'       => ['bg' => 'bg-rose-100 text-rose-800', 'label' => 'Rusak Berat'],
+                                        'perlu_pemeriksaan' => ['bg' => 'bg-slate-100 text-slate-700', 'label' => 'Perlu Pemeriksaan'],
                                     };
                                     $isBorrowed = $unit->status_ketersediaan === 'dipinjam';
                                     $isReserved = $unit->isReserved();
@@ -222,14 +222,14 @@
                                                 </div>
                                             @endif
                                         @elseif($isReserved)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800">
                                                 Direservasi
                                             </span>
                                             @if($activeBorrowing)
                                                 <div class="text-[10px] text-slate-400 mt-0.5">Untuk: {{ $activeBorrowing->user?->name }}</div>
                                             @endif
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
                                                 Tersedia
                                             </span>
                                         @endif
@@ -513,7 +513,7 @@
 <div id="modalAddUnit" class="hidden fixed inset-0 z-[60] overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalAddUnit').classList.add('hidden')"></div>
     <div class="relative flex items-center justify-center min-h-full p-4">
-        <div class="relative w-full max-w-lg bg-[#EFF5FF] rounded-[28px] p-7 shadow-2xl border border-blue-100/60 text-left">
+        <div class="relative w-full max-w-lg bg-[#EFF5FF] rounded-[28px] p-7 shadow-2xl border border-slate-100 text-left">
             <div class="flex items-center justify-between pb-4 border-b border-blue-100/60">
                 <div>
                     <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Tambah Unit Fisik</h3>
@@ -589,7 +589,7 @@
 <div id="modalEditUnit" class="hidden fixed inset-0 z-[60] overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalEditUnit').classList.add('hidden')"></div>
     <div class="relative flex items-center justify-center min-h-full p-4">
-        <div class="relative w-full max-w-lg bg-[#EFF5FF] rounded-[28px] p-7 shadow-2xl border border-blue-100/60 text-left">
+        <div class="relative w-full max-w-lg bg-[#EFF5FF] rounded-[28px] p-7 shadow-2xl border border-slate-100 text-left">
             <div class="flex items-center justify-between pb-4 border-b border-blue-100/60">
                 <div>
                     <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Edit Kondisi & Informasi Unit</h3>
@@ -698,7 +698,7 @@
 <div id="modalEditGroup" class="hidden fixed inset-0 z-[60] overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="document.getElementById('modalEditGroup').classList.add('hidden')"></div>
     <div class="relative flex items-center justify-center min-h-full p-4">
-        <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] p-7 shadow-2xl border border-blue-100/60 text-left">
+        <div class="relative w-full max-w-xl bg-[#EFF5FF] rounded-[28px] p-7 shadow-2xl border border-slate-100 text-left">
             <div class="flex items-center justify-between pb-4 border-b border-blue-100/60">
                 <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Edit Informasi Kelompok Aset</h3>
                 <button type="button" onclick="document.getElementById('modalEditGroup').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/60">

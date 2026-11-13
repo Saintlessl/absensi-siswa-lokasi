@@ -27,7 +27,7 @@
     {{-- Classes Grid --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         @forelse($classes as $c)
-            <div class="glass-card rounded-2xl border border-dark-200/50 bg-white p-5 hover-lift shadow-sm flex flex-col justify-between">
+            <div class="glass-card rounded-2xl border border-slate-100 bg-white p-5 hover-lift shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-primary-50 text-primary-700 border border-primary-200">
@@ -45,7 +45,7 @@
                         <p class="text-[10px] font-bold uppercase tracking-wider text-dark-400 mb-2">Mata Pelajaran yang Anda Ampu:</p>
                         <div class="flex flex-wrap gap-1.5">
                             @forelse($c->my_subjects as $sName)
-                                <span class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold flex items-center gap-1">
+                                <span class="px-2.5 py-1 bg-[#EFF5FF] text-[#003EA7] rounded-lg text-xs font-semibold flex items-center gap-1">
                                     <i class='bx bx-book-bookmark text-xs'></i> {{ $sName }}
                                 </span>
                             @empty
@@ -67,7 +67,7 @@
                 </div>
             </div>
         @empty
-            <div class="col-span-full py-12 text-center text-dark-400 glass-card rounded-2xl border border-dark-200/50 bg-white">
+            <div class="col-span-full py-12 text-center text-dark-400 glass-card rounded-2xl border border-slate-100 bg-white">
                 <i class='bx bx-chalkboard text-4xl mb-2 text-dark-300'></i>
                 <p class="text-sm font-semibold text-dark-600">Belum ada kelas yang ditugaskan kepada Anda.</p>
                 <p class="text-xs text-dark-400 mt-1">Hubungi Administrator Kurikulum untuk menambahkan penugasan mata pelajaran atau jadwal.</p>
