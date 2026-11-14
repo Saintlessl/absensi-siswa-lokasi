@@ -1,4 +1,7 @@
-@if (session('success') || session('error') || session('warning') || session('info') || session('status') || $errors->any())
+@php
+    $hasErrors = isset($errors) && is_object($errors) && method_exists($errors, 'any') && $errors->any();
+@endphp
+@if (session('success') || session('error') || session('warning') || session('info') || session('status') || $hasErrors)
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             @if (session('success'))
@@ -21,7 +24,7 @@
                 MySkanicAlert.toast(@js(session('status')), 'info');
             @endif
 
-            @if ($errors->any())
+            @if ($hasErrors)
                 MySkanicAlert.validation(@js($errors->all()));
             @endif
         });

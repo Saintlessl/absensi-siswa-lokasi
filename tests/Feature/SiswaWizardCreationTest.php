@@ -84,7 +84,7 @@ class SiswaWizardCreationTest extends TestCase
         // Check student account with fixed domain @myskanic.com
         $studentUser = User::find($siswa->user_id);
         $this->assertNotNull($studentUser);
-        $this->assertEquals('212127327@myskanic.com', $studentUser->email);
+        $this->assertEquals('aryasaloka@myskanic.com', $studentUser->email);
         $this->assertEquals('siswa', $studentUser->role);
 
         // Check parent created and linked

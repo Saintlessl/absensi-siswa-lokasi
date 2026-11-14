@@ -56,7 +56,7 @@
                 </a>
 
                 {{-- 2. Jam Absensi --}}
-                @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.jam_sekolah'))
+                @if(Auth::user()->hasRole(['superadmin', 'admin']))
                 @php $isSchool = request()->routeIs('settings.school*'); @endphp
                 <a href="{{ route('settings.school') }}"
                    class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-150 {{ $isSchool ? 'bg-[#003EA7] text-white shadow-md shadow-blue-900/15 font-semibold' : 'text-slate-800 hover:bg-white/60 font-semibold group' }}">
@@ -213,7 +213,7 @@
                class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 {{ request()->routeIs('settings.home') ? 'bg-[#003EA7] text-white shadow-xs' : 'bg-white/80 text-slate-700 hover:bg-white' }}">
                 <i class='bx bxs-home'></i> <span>Home</span>
             </a>
-            @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.jam_sekolah'))
+            @if(Auth::user()->hasRole(['superadmin', 'admin']))
             <a href="{{ route('settings.school') }}"
                class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1.5 {{ request()->routeIs('settings.school*') ? 'bg-[#003EA7] text-white shadow-xs' : 'bg-white/80 text-slate-700 hover:bg-white' }}">
                 <i class='bx bxs-school'></i> <span>Identitas & Jam</span>
@@ -252,7 +252,7 @@
             <a href="{{ route('settings.home') }}" class="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold {{ request()->routeIs('settings.home') ? 'bg-[#003EA7] text-white' : 'text-slate-700 hover:bg-slate-50' }}">
                 <i class='bx bxs-home text-base'></i> Home
             </a>
-            @if(Auth::user()->hasRole(['superadmin', 'admin']) || Auth::user()->hasPermission('pengaturan.jam_sekolah'))
+            @if(Auth::user()->hasRole(['superadmin', 'admin']))
             <a href="{{ route('settings.school') }}" class="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold {{ request()->routeIs('settings.school*') ? 'bg-[#003EA7] text-white' : 'text-slate-700 hover:bg-slate-50' }}">
                 <i class='bx bxs-school text-base'></i> Identitas & Jam
             </a>

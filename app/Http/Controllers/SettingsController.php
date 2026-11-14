@@ -118,6 +118,16 @@ class SettingsController extends Controller
         $user->email = $request->email;
         $user->save();
 
+        if ($user->siswa) {
+            $user->siswa->update(['nama' => $request->name]);
+        }
+        if ($user->guru) {
+            $user->guru->update(['nama' => $request->name]);
+        }
+        if ($user->orangTua) {
+            $user->orangTua->update(['nama' => $request->name]);
+        }
+
         AuditLog::log('user.profile.update', $user, $oldData, ['name' => $user->name, 'email' => $user->email], 'Memperbarui profil akun');
 
         return back()->with('success', 'Informasi akun berhasil diperbarui.');

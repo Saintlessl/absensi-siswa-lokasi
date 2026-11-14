@@ -14,11 +14,13 @@ class ParentAccountService
         // This internal address is never exposed as a credential or derived password.
         // The parent sets their own password through the one-time activation flow.
         return User::create([
-            'name' => $name,
-            'email' => 'wali.' . preg_replace('/\D/', '', $phone) . '.' . Str::lower(Str::random(8)) . '@myskanic.com',
-            'password' => Hash::make(Str::random(64)),
-            'role' => 'orangtua',
-            'jenis_kelamin' => $gender,
+            'name'                 => $name,
+            'email'                => 'wali.' . preg_replace('/\D/', '', $phone) . '.' . Str::lower(Str::random(8)) . '@myskanic.com',
+            'password'             => Hash::make(Str::random(64)),
+            'role'                 => 'orangtua',
+            'status'               => 'pending',
+            'must_change_password' => false,
+            'jenis_kelamin'        => $gender,
         ]);
     }
 

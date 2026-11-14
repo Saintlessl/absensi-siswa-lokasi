@@ -268,7 +268,7 @@
             <span class="w-6 h-6 rounded-full bg-[#003FA9] text-white flex items-center justify-center text-xs font-bold">3</span>
             <h4 class="text-base font-bold text-[#0F172A]">Akun Login Siswa (@myskanic.com)</h4>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-4">
             <div>
                 <label for="username_edit" class="block text-sm font-semibold text-[#1E293B] mb-1.5">
                     Username / Email Siswa <span class="text-rose-500">*</span>
@@ -277,14 +277,24 @@
                     $userEmail = $siswa->user->email ?? '';
                     $currentUsername = str_contains($userEmail, '@') ? explode('@', $userEmail)[0] : $userEmail;
                 @endphp
-                <div class="flex rounded-xl overflow-hidden bg-[#E2EDFF]">
-                    <input type="text" name="username" id="username_edit" value="{{ $currentUsername }}"
-                        class="w-full h-11 px-4 bg-transparent border-none text-slate-800 text-sm font-mono focus:outline-none"
-                        placeholder="username.siswa" required autocomplete="off">
-                    <span class="inline-flex items-center px-3.5 bg-blue-200/50 text-[#003FA9] font-bold text-xs select-none">
-                        @myskanic.com
-                    </span>
+                <div class="w-full h-11 rounded-xl bg-[#E2EDFF] flex items-center overflow-hidden focus-within:bg-white focus-within:ring-2 focus-within:ring-[#003FA9]/30 transition-all border-0">
+                    <input type="text"
+                           name="username"
+                           id="username_edit"
+                           value="{{ old('username', $currentUsername) }}"
+                           placeholder="namaemail"
+                           required
+                           autocomplete="off"
+                           class="flex-1 h-full px-4 bg-transparent border-0 text-slate-800 text-sm font-medium placeholder-[#94A3B8] focus:ring-0 focus:outline-none lowercase"
+                           oninput="this.value = this.value.toLowerCase().replace(/@.*$/, '').replace(/[^a-z0-9._-]/g, '')"
+                           onpaste="setTimeout(() => { this.value = this.value.toLowerCase().replace(/@.*$/, '').replace(/[^a-z0-9._-]/g, ''); }, 0)">
+                    <div class="h-full flex items-center pr-4 pl-1 select-none pointer-events-none whitespace-nowrap shrink-0">
+                        <span class="text-sm font-bold text-[#003FA9]">@myskanic.com</span>
+                    </div>
                 </div>
+                <p class="text-[11px] text-slate-400 mt-1">
+                    Format email permanen @myskanic.com. Masukkan username tanpa @myskanic.com.
+                </p>
             </div>
 
             <div>

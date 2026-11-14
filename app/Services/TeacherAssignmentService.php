@@ -22,9 +22,16 @@ class TeacherAssignmentService
      */
     public function assignSubject(int $guruId, int $mataPelajaranId, int $kelasId, string $tahunAjaran = '2026/2027'): TeacherSubjectAssignment
     {
-        $guru = Guru::findOrFail($guruId);
+        $guru = Guru::with('user')->findOrFail($guruId);
         $mapel = MataPelajaran::findOrFail($mataPelajaranId);
         $kelas = Kelas::findOrFail($kelasId);
+
+        // Validation: Teacher must be active
+        if (!$guru->is_active || ($guru->user && in_array($guru->user->status, ['inactive', 'deactivated', 'suspended']))) {
+            throw ValidationException::withMessages([
+                'guru' => ["Guru {$guru->nama} berstatus nonaktif dan tidak dapat menerima penugasan mata pelajaran baru."],
+            ]);
+        }
 
         $exists = TeacherSubjectAssignment::where('guru_id', $guruId)
             ->where('mata_pelajaran_id', $mataPelajaranId)
@@ -271,6 +278,13 @@ class TeacherAssignmentService
             if (!$guru->user) {
                 throw ValidationException::withMessages([
                     'guru' => ['Guru ini tidak memiliki akun autentikasi yang terhubung.'],
+                ]);
+            }
+
+            // Validation: Teacher must be active
+            if (!$guru->is_active || in_array($guru->user->status, ['inactive', 'deactivated', 'suspended'])) {
+                throw ValidationException::withMessages([
+                    'guru' => ["Guru {$guru->nama} berstatus nonaktif dan tidak dapat menerima penugasan KAPROG baru."],
                 ]);
             }
 

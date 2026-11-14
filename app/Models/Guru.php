@@ -149,4 +149,53 @@ class Guru extends Model
     {
         return app(\App\Services\SalutationService::class)->forGuru($this);
     }
+
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class, 'guru_id');
+    }
+
+    public function teachingJournals(): HasMany
+    {
+        return $this->hasMany(TeachingJournal::class, 'guru_id');
+    }
+
+    public function studentEnrollments(): HasMany
+    {
+        return $this->hasMany(StudentEnrollment::class, 'wali_kelas_guru_id');
+    }
+
+    /**
+     * Check whether teacher has any historical academic records that must be protected.
+     */
+    public function hasAcademicRecords(): bool
+    {
+        return $this->assessments()->exists()
+            || $this->teachingJournals()->exists()
+            || $this->homeroomAssignments()->exists()
+            || $this->subjectAssignments()->exists()
+            || $this->studentEnrollments()->exists();
+    }
+
+    /**
+     * Detailed breakdown of historical academic records.
+     */
+    public function getAcademicRecordsSummary(): array
+    {
+        $assessmentsCount = $this->assessments()->count();
+        $assessmentIds = $this->assessments()->pluck('id');
+        $scoresCount = AssessmentScore::whereIn('assessment_id', $assessmentIds)->count();
+        $journalsCount = $this->teachingJournals()->count();
+        $homeroomCount = $this->homeroomAssignments()->count();
+        $subjectCount = $this->subjectAssignments()->count();
+
+        return [
+            'assessments' => $assessmentsCount,
+            'scores'      => $scoresCount,
+            'journals'    => $journalsCount,
+            'homeroom'    => $homeroomCount,
+            'subject'     => $subjectCount,
+            'has_records' => ($assessmentsCount > 0 || $journalsCount > 0 || $homeroomCount > 0 || $subjectCount > 0),
+        ];
+    }
 }

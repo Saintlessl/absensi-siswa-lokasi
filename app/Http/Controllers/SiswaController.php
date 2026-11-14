@@ -118,14 +118,75 @@ class SiswaController extends Controller
         ]);
     }
 
+    /**
+     * Generate a sanitized student email username based on full name.
+     * e.g. "Leonardo De Luciano" -> "leonardodeluciano"
+     */
+    public static function generateStudentUsername(string $name): string
+    {
+        $clean = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $name) ?: $name;
+        $clean = preg_replace('/[\x{0300}-\x{036f}]/u', '', $clean);
+        $clean = strtolower($clean);
+        if (str_contains($clean, '@')) {
+            $clean = explode('@', $clean)[0];
+        }
+        $clean = preg_replace('/[^a-z0-9._-]/', '', $clean);
+        return $clean;
+    }
+
+    /**
+     * Resolve a unique student username by auto-incrementing if collisions exist.
+     * e.g. "muhammadrizky" -> "muhammadrizky2" -> "muhammadrizky3"
+     */
+    public static function resolveUniqueStudentUsername(string $baseUsername, ?int $ignoreUserId = null): string
+    {
+        $baseUsername = static::generateStudentUsername($baseUsername);
+        if (empty($baseUsername)) {
+            $baseUsername = 'siswa';
+        }
+
+        $username = $baseUsername;
+        $counter = 1;
+
+        while (true) {
+            $testEmail = $username . '@myskanic.com';
+            $query = User::where('email', $testEmail);
+            if ($ignoreUserId) {
+                $query->where('id', '!=', $ignoreUserId);
+            }
+            if (!$query->exists()) {
+                return $username;
+            }
+            $counter++;
+            $username = $baseUsername . $counter;
+        }
+    }
+
     public function store(Request $request)
     {
-        // Enforce fixed domain @myskanic.com for student accounts
-        $rawUsername = strtolower(trim($request->username ?? $request->email ?? $request->nis ?? ''));
-        if (str_contains($rawUsername, '@')) {
-            $rawUsername = explode('@', $rawUsername)[0];
+        // Auto-generate or resolve student email username with permanent domain @myskanic.com
+        $isManual = $request->boolean('is_manual_username');
+        $generatedFromNama = static::generateStudentUsername($request->nama ?? '');
+
+        if ($request->filled('username')) {
+            $rawUsername = static::generateStudentUsername($request->username);
+            // If not marked manual, check if it matches auto-generated from name
+            if (!$isManual && $rawUsername !== $generatedFromNama) {
+                $isManual = true;
+            }
+        } elseif ($request->filled('email')) {
+            $rawUsername = static::generateStudentUsername($request->email);
+            if (!$isManual && $rawUsername !== $generatedFromNama) {
+                $isManual = true;
+            }
+        } else {
+            $rawUsername = $generatedFromNama ?: static::generateStudentUsername($request->nis ?? '');
         }
-        $rawUsername = preg_replace('/[^a-z0-9._-]/', '', $rawUsername);
+
+        // If auto-generated, auto-resolve any duplicate collision by appending counter
+        if (!$isManual && !empty($rawUsername)) {
+            $rawUsername = static::resolveUniqueStudentUsername($rawUsername);
+        }
 
         $finalEmail = !empty($rawUsername) ? ($rawUsername . '@myskanic.com') : null;
         $defaultPassword = $request->password ?: ($request->nis ?: null);
@@ -166,7 +227,7 @@ class SiswaController extends Controller
             'photo.mimes'                   => 'Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.',
             'photo.max'                     => 'Ukuran file foto profil maksimal 2 MB.',
             'photo.dimensions'              => 'Resolusi foto profil minimal 300 x 300 piksel.',
-            'email.unique'                  => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
+            'email.unique'                  => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com). Silakan pilih username lain.",
             'parent_phone.required_without' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
             'no_telp_siswa.required'        => 'Nomor telepon aktif siswa wajib diisi.',
             'nis.unique'                    => 'NIS sudah terdaftar.',
@@ -492,11 +553,20 @@ class SiswaController extends Controller
         $this->assertCanManageSiswa($siswa);
 
         // Enforce fixed domain @myskanic.com for student accounts
-        $rawUsername = strtolower(trim($request->username ?? $request->email ?? ''));
-        if (str_contains($rawUsername, '@')) {
-            $rawUsername = explode('@', $rawUsername)[0];
+        $currentUserEmail = $siswa->user?->email;
+        $currentUsername = $currentUserEmail && str_contains($currentUserEmail, '@')
+            ? explode('@', $currentUserEmail)[0]
+            : $currentUserEmail;
+
+        if ($request->filled('username')) {
+            $rawUsername = static::generateStudentUsername($request->username);
+        } elseif ($request->filled('email')) {
+            $rawUsername = static::generateStudentUsername($request->email);
+        } elseif ($currentUserEmail) {
+            $rawUsername = $currentUsername;
+        } else {
+            $rawUsername = static::generateStudentUsername($request->nama ?? $siswa->nama);
         }
-        $rawUsername = preg_replace('/[^a-z0-9._-]/', '', $rawUsername);
 
         if (empty($rawUsername)) {
             return back()->with('error', 'Username email siswa wajib diisi.')->withInput();
@@ -532,7 +602,7 @@ class SiswaController extends Controller
             'photo.mimes'               => 'Format foto profil hanya boleh JPG, JPEG, PNG, atau WEBP.',
             'photo.max'                 => 'Ukuran file foto profil maksimal 2 MB.',
             'photo.dimensions'          => 'Resolusi foto profil minimal 300 x 300 piksel.',
-            'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com).",
+            'email.unique'              => "Username '{$rawUsername}' sudah digunakan oleh siswa lain (@myskanic.com). Silakan pilih username lain.",
             'parent_phone.required' => 'Nomor WhatsApp orang tua/wali wajib diisi.',
         ]);
 

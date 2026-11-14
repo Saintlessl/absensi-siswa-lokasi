@@ -9,6 +9,21 @@
 @section('settings-content')
 <div class="space-y-6">
 
+    {{-- Banner Wajib Ubah Password jika must_change_password true --}}
+    @if ($user->must_change_password)
+        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 sm:p-5 flex items-start gap-4 text-amber-900 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/20">
+                <i class='bx bx-shield-quarter text-2xl'></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="font-bold text-amber-900 text-sm sm:text-base">Wajib Ganti Password</h4>
+                <p class="text-xs sm:text-sm text-amber-800 mt-1 leading-relaxed">
+                    Demi keamanan akun dan integritas data sekolah, Anda diwajibkan mengubah kata sandi default terlebih dahulu sebelum dapat mengakses modul lain di aplikasi MySkanic. Silakan masukkan kata sandi baru pada formulir <strong>Ubah Password</strong> di bawah ini.
+                </p>
+            </div>
+        </div>
+    @endif
+
     {{-- Profil Banner Card --}}
     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center gap-6">
         <div class="w-20 h-20 rounded-2xl bg-[#003EA7] flex items-center justify-center text-white text-2xl font-black shadow-md shadow-blue-950/10 flex-shrink-0 overflow-hidden">
@@ -100,23 +115,38 @@
 
             <div>
                 <label for="current_password" class="block text-xs font-bold text-slate-700 mb-1">Password Saat Ini</label>
-                <input type="password" name="current_password" id="current_password" required placeholder="Masukkan password lama..."
-                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                <div class="relative">
+                    <input type="password" name="current_password" id="current_password" required placeholder="Masukkan password lama..."
+                        class="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                    <button type="button" onclick="togglePasswordVisibility('current_password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                        <i class='bx bx-show text-lg'></i>
+                    </button>
+                </div>
                 @error('current_password')<p class="mt-1 text-xs text-rose-500">{{ $message }}</p>@enderror
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="password" class="block text-xs font-bold text-slate-700 mb-1">Password Baru</label>
-                    <input type="password" name="password" id="password" required placeholder="Minimal 6 karakter..."
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                    <div class="relative">
+                        <input type="password" name="password" id="password" required placeholder="Minimal 6 karakter..."
+                            class="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                        <button type="button" onclick="togglePasswordVisibility('password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                            <i class='bx bx-show text-lg'></i>
+                        </button>
+                    </div>
                     @error('password')<p class="mt-1 text-xs text-rose-500">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="password_confirmation" class="block text-xs font-bold text-slate-700 mb-1">Ulangi Password Baru</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" required placeholder="Ketik ulang password..."
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                    <div class="relative">
+                        <input type="password" name="password_confirmation" id="password_confirmation" required placeholder="Ketik ulang password..."
+                            class="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[#003EA7]/20 focus:border-[#003EA7]">
+                        <button type="button" onclick="togglePasswordVisibility('password_confirmation', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                            <i class='bx bx-show text-lg'></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -129,4 +159,25 @@
     </div>
 
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) {
+                icon.classList.remove('bx-show');
+                icon.classList.add('bx-hide');
+            }
+        } else {
+            input.type = 'password';
+            if (icon) {
+                icon.classList.remove('bx-hide');
+                icon.classList.add('bx-show');
+            }
+        }
+    }
+</script>
 @endsection

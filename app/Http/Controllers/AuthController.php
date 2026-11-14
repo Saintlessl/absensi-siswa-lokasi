@@ -94,8 +94,9 @@ class AuthController extends Controller
                 ->withInput($request->only('email'));
         }
 
-        if ($user->status === 'pending' && $user->role === 'guru') {
-            return back()->with('error', 'Akun guru Anda belum diaktifkan. Silakan periksa tautan aktivasi akun Anda atau hubungi administrator.')
+        if ($user->status === 'pending' && in_array($user->role, ['guru', 'orangtua'])) {
+            $roleLabel = $user->role === 'guru' ? 'guru' : 'orang tua';
+            return back()->with('error', "Akun {$roleLabel} Anda belum diaktifkan. Silakan selesaikan proses aktivasi akun melalui tautan yang diberikan sekolah.")
                 ->withInput($request->only('email'));
         }
 

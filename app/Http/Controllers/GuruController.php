@@ -297,6 +297,14 @@ class GuruController extends Controller
         $guru = Guru::with('user')->findOrFail($id);
         $request->validate(['status' => 'required|in:active,pending,suspended,deactivated']);
 
+        if ($request->status === 'deactivated') {
+            return $this->deactivate($id);
+        }
+
+        if ($request->status === 'active') {
+            return $this->activate($id);
+        }
+
         $this->accountService->setAccountStatus($guru->user, $request->status);
 
         return redirect()->back()->with('success', "Status akun {$guru->nama} berhasil diubah menjadi " . ucfirst($request->status) . ".");
@@ -437,11 +445,70 @@ class GuruController extends Controller
     }
 
     /**
-     * Delete teacher and associated account.
+     * Deactivate teacher and safely close active assignments while preserving all academic history.
+     */
+    public function deactivate($id)
+    {
+        $guru = Guru::with(['user', 'homeroomAssignments', 'subjectAssignments', 'kaprogAssignments'])->findOrFail($id);
+
+        DB::transaction(function () use ($guru) {
+            // 1. Deactivate teacher and user account
+            $guru->update(['is_active' => false]);
+            if ($guru->user) {
+                $this->accountService->setAccountStatus($guru->user, 'deactivated');
+            }
+
+            // 2. Safely end active assignments while keeping complete history
+            $today = \Carbon\Carbon::today();
+
+            $guru->homeroomAssignments()->where('is_active', true)->update([
+                'is_active' => false,
+                'ends_on'   => $today,
+            ]);
+
+            $guru->subjectAssignments()->where('is_active', true)->update([
+                'is_active' => false,
+                'ends_on'   => $today,
+            ]);
+
+            $guru->kaprogAssignments()->where('is_active', true)->update([
+                'is_active' => false,
+                'ends_on'   => $today,
+            ]);
+        });
+
+        return redirect()->back()->with('success', "Guru {$guru->nama} berhasil dinonaktifkan. Seluruh riwayat nilai, asesmen, dan jurnal mengajar tetap tersimpan aman.");
+    }
+
+    /**
+     * Reactivate teacher.
+     */
+    public function activate($id)
+    {
+        $guru = Guru::with('user')->findOrFail($id);
+
+        DB::transaction(function () use ($guru) {
+            $guru->update(['is_active' => true]);
+            if ($guru->user) {
+                $this->accountService->setAccountStatus($guru->user, 'active');
+            }
+        });
+
+        return redirect()->back()->with('success', "Guru {$guru->nama} berhasil diaktifkan kembali.");
+    }
+
+    /**
+     * Delete teacher and associated account (only permitted if NO academic history exists).
      */
     public function destroy($id)
     {
         $guru = Guru::findOrFail($id);
+
+        // Security & Data Integrity Check: Protect academic records from cascade deletion
+        if ($guru->hasAcademicRecords()) {
+            return redirect()->back()->with('error', 'Guru ' . $guru->nama . ' memiliki rekam jejak akademik historis (asesmen, nilai siswa, jurnal mengajar, atau riwayat penugasan). Data tidak dapat dihapus demi integritas data akademik sekolah. Silakan gunakan tindakan Nonaktifkan Guru.');
+        }
+
         if ($guru->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($guru->photo_path)) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($guru->photo_path);
         }

@@ -236,8 +236,12 @@
                                 @endif
                             </td>
 
-                            {{-- 8. Aksi (Minimalist icons matching Data Siswa) --}}
+                            {{-- 8. Aksi (Deactivate/Activate as Primary & Protected Delete) --}}
                             <td class="py-4 px-4 text-center">
+                                @php
+                                    $hasAcademicHistory = $g->hasAcademicRecords();
+                                    $isTeacherActive = $g->is_active && ($g->user?->status !== 'deactivated');
+                                @endphp
                                 <div class="flex items-center justify-center gap-1.5">
                                     <a href="{{ route('guru.show', $g->id) }}"
                                         class="p-1.5 rounded-lg text-slate-400 hover:text-[#003FA9] hover:bg-blue-50 transition"
@@ -249,17 +253,55 @@
                                         title="Edit Data Guru">
                                         <i class='bx bx-edit text-lg'></i>
                                     </button>
-                                    <form action="{{ route('guru.delete', $g->id) }}" method="POST" class="inline"
-                                          data-confirm="Hapus data guru {{ $g->nama }} beserta akun autentikasinya?"
-                                          data-confirm-title="Hapus Guru"
-                                          data-confirm-danger="true">
-                                        @csrf
-                                        <button type="submit"
-                                            class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                                            title="Hapus Guru">
-                                            <i class='bx bx-trash text-lg'></i>
+
+                                    {{-- Primary Action: Deactivate / Activate --}}
+                                    @if ($isTeacherActive)
+                                        <form action="{{ route('guru.deactivate', $g->id) }}" method="POST" class="inline"
+                                              data-confirm="Nonaktifkan guru {{ $g->nama }}? Penugasan aktif akan dihentikan, namun seluruh data historis (asesmen nilai siswa, jurnal mengajar, dan absensi) tetap tersimpan aman."
+                                              data-confirm-title="Nonaktifkan Guru"
+                                              data-confirm-btn="Ya, Nonaktifkan">
+                                            @csrf
+                                            <button type="submit"
+                                                class="p-1.5 rounded-lg text-amber-500 hover:text-amber-700 hover:bg-amber-50 transition"
+                                                title="Nonaktifkan Guru (Pertahankan Histori Akademik)">
+                                                <i class='bx bx-user-x text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('guru.activate', $g->id) }}" method="POST" class="inline"
+                                              data-confirm="Aktifkan kembali akun dan status guru {{ $g->nama }}?"
+                                              data-confirm-title="Aktifkan Guru"
+                                              data-confirm-btn="Ya, Aktifkan">
+                                            @csrf
+                                            <button type="submit"
+                                                class="p-1.5 rounded-lg text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 transition"
+                                                title="Aktifkan Kembali Guru">
+                                                <i class='bx bx-user-check text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    {{-- Delete Action (Only available if NO academic history exists) --}}
+                                    @if (!$hasAcademicHistory)
+                                        <form action="{{ route('guru.delete', $g->id) }}" method="POST" class="inline"
+                                              data-confirm="Hapus data guru {{ $g->nama }}? Guru ini tidak memiliki rekam jejak akademik sehingga aman dihapus."
+                                              data-confirm-title="Hapus Guru"
+                                              data-confirm-danger="true">
+                                            @csrf
+                                            <button type="submit"
+                                                class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                                title="Hapus Permanen (Tanpa Rekam Jejak)">
+                                                <i class='bx bx-trash text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <button type="button"
+                                            onclick="MySkanicAlert.warning('Guru {{ addslashes($g->nama) }} memiliki rekam jejak akademik (nilai siswa, asesmen, atau jurnal mengajar). Demi integritas data, guru ini tidak dapat dihapus permanen melainkan dinonaktifkan.', 'Penghapusan Dilindungi')"
+                                            class="p-1.5 rounded-lg text-slate-300 hover:text-amber-600 hover:bg-amber-50/50 transition cursor-help"
+                                            title="Histori Akademik Terlindungi (Gunakan Nonaktifkan)">
+                                            <i class='bx bx-shield-quarter text-lg'></i>
                                         </button>
-                                    </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

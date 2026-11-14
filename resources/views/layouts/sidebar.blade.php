@@ -1,4 +1,8 @@
 {{-- Sidebar --}}
+@php
+    $sidebarUser = Auth::user();
+    $sidebarRole = $sidebarUser?->role;
+@endphp
 <aside id="sidebar"
     class="fixed top-0 left-0 z-50 h-screen lg:w-[272px] w-[272px] -translate-x-full lg:translate-x-0 sidebar-transition bg-[#003EA7] flex flex-col shadow-none select-none">
 
@@ -42,7 +46,7 @@
         {{-- ============================================================== --}}
         {{-- ADMIN / SUPERADMIN / KAPROG NAVIGATION                           --}}
         {{-- ============================================================== --}}
-        @if (in_array(Auth::user()->role, ['superadmin', 'admin', 'kaprog']))
+        @if ($sidebarUser && in_array($sidebarRole, ['superadmin', 'admin', 'kaprog']))
 
             {{-- 1. MANAJEMEN SEKOLAH --}}
             <div class="mb-5">
@@ -64,7 +68,7 @@
                         </a>
                     </li>
 
-                    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+                    @if (in_array($sidebarRole, ['superadmin', 'admin']))
                         {{-- Data Guru --}}
                         <li>
                             <a href="{{ route('guru') }}"
@@ -199,7 +203,7 @@
                                 <i class='bx bx-sitemap text-sm'></i>
                                 <span>Overview Hierarki</span>
                             </a>
-                            @if(in_array(Auth::user()->role, ['superadmin', 'admin']))
+                            @if(in_array($sidebarRole, ['superadmin', 'admin']))
                                 <a href="{{ route('academic.tahun-ajaran.index') }}"
                                     class="flex items-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors
                                     {{ request()->routeIs('academic.tahun-ajaran.*') ? 'text-primary-400 bg-white/10 font-semibold' : 'text-dark-400 hover:text-white hover:bg-white/5' }}">
@@ -240,7 +244,7 @@
                         </div>
                     </li>
 
-                    @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+                    @if (in_array($sidebarRole, ['superadmin', 'admin']))
                         {{-- Jadwal Pelajaran --}}
                         <li>
                             <a href="{{ route('jadwal') }}"
@@ -314,7 +318,7 @@
                 </ul>
             </div>
 
-            @if (in_array(Auth::user()->role, ['superadmin', 'admin']))
+            @if (in_array($sidebarRole, ['superadmin', 'admin']))
                 {{-- 3. PRESENSI & AKSES --}}
                 <div class="mb-5">
                     <p class="sidebar-section-title px-3 mb-2 text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.15em]">
@@ -405,9 +409,9 @@
         {{-- ============================================================== --}}
         {{-- GURU ROLE NAVIGATION                                            --}}
         {{-- ============================================================== --}}
-        @if (Auth::user()->role === 'guru')
+        @if ($sidebarRole === 'guru')
             @php
-                $sidebarGuru = Auth::user()->guru;
+                $sidebarGuru = $sidebarUser?->guru;
             @endphp
 
             <div class="mb-5">
@@ -430,7 +434,7 @@
                     </li>
 
                     {{-- Pengaturan (Jika berwenang menyetujui izin atau mengelola modul) --}}
-                    @if(Auth::user()->hasPermission('pengaturan.view') || Auth::user()->hasPermission('izin.view_siswa') || Auth::user()->hasPermission('izin.approve_siswa'))
+                    @if($sidebarUser && ($sidebarUser->hasPermission('pengaturan.view') || $sidebarUser->hasPermission('izin.view_siswa') || $sidebarUser->hasPermission('izin.approve_siswa')))
                     <li>
                         <a href="{{ route('settings.home') }}"
                             class="sidebar-nav-link group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
@@ -623,7 +627,7 @@
         {{-- ============================================================== --}}
         {{-- SISWA ROLE NAVIGATION                                           --}}
         {{-- ============================================================== --}}
-        @if (Auth::user()->role === 'siswa')
+        @if ($sidebarRole === 'siswa')
             <div class="mb-5">
                 <p class="sidebar-section-title px-3 mb-2 text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.15em]">
                     PRESENSI SISWA
@@ -753,7 +757,7 @@
         {{-- ============================================================== --}}
         {{-- ORANG TUA ROLE NAVIGATION                                       --}}
         {{-- ============================================================== --}}
-        @if (Auth::user()->role === 'orangtua')
+        @if ($sidebarRole === 'orangtua')
             <div class="mb-5">
                 <p class="sidebar-section-title px-3 mb-2 text-[10px] font-bold text-blue-200/70 uppercase tracking-[0.15em]">
                     MONITORING KEHADIRAN

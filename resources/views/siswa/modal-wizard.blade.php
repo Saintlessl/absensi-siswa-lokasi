@@ -2,7 +2,7 @@
 @if ($errors->any())
     @php
         $wizardRecover = collect(old())->only([
-            'nisn', 'nis', 'nama', 'no_telp_siswa', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+            'nisn', 'nis', 'nama', 'username', 'is_manual_username', 'no_telp_siswa', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
             'tahun_ajaran_id', 'jalur_masuk', 'asal_sekolah', 'jurusan_id', 'angkatan_id',
             'tingkat', 'kelas_id', 'email', 'password', 'parent_name',
             'parent_jenis_kelamin', 'parent_phone', 'parent_address', 'existing_orangtua_id',
@@ -76,13 +76,14 @@
             <form action="{{ route('siswa.store') }}"
                   method="POST"
                   id="frmSiswa"
+                  autocomplete="off"
                   enctype="multipart/form-data"
                   @submit.prevent="handleSubmit($event)">
                 @csrf
 
-                {{-- Hidden fields for auto student account sync --}}
-                <input type="hidden" name="username" :value="student.nis">
-                <input type="hidden" name="password" :value="student.nis">
+                {{-- Shield inputs to absorb browser autofill of admin/superadmin credentials --}}
+                <input type="text" name="fake_username_autofill_shield" style="position:absolute;opacity:0;height:0;width:0;z-index:-1" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <input type="password" name="fake_password_autofill_shield" style="position:absolute;opacity:0;height:0;width:0;z-index:-1" tabindex="-1" autocomplete="new-password" aria-hidden="true">
 
                 {{-- ==================== STEP 1: Akun & Identitas Siswa ==================== --}}
                 <div x-show="step === 1"
@@ -413,17 +414,52 @@
                                 </x-wizard.select>
                             </div>
 
-                            {{-- Row 7: Akun Siswa (Email @myskanic.com & Password) --}}
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <x-wizard.input label="Email Akun Siswa"
-                                                hint="akhiran @myskanic.com"
-                                                name="email"
-                                                id="input_student_email"
-                                                type="text"
-                                                placeholder="contoh : 212127327@myskanic.com"
-                                                required
-                                                model="student.email"
-                                                @blur="ensureEmailDomain()" />
+                            {{-- Row 7: Email Akun Siswa (@myskanic.com) --}}
+                            <div class="w-full">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="input_student_username" class="block text-xs font-semibold text-[#0F172A]">
+                                        Email Akun Siswa <span class="text-rose-500 font-normal">*</span>
+                                    </label>
+                                    {{-- Reset to Name button if manually edited --}}
+                                    <button type="button"
+                                            x-show="isEmailManuallyEdited && student.nama"
+                                            x-cloak
+                                            @click="resetEmailToDefault()"
+                                            class="inline-flex items-center gap-1 text-[11px] font-bold text-[#003FA9] hover:text-[#002b75] hover:underline transition-colors cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        <span>Reset ke Nama</span>
+                                    </button>
+                                </div>
+                                <div class="w-full h-12 rounded-xl bg-[#E2EDFF] flex items-center overflow-hidden focus-within:bg-white focus-within:ring-2 focus-within:ring-[#003FA9]/30 transition-all border-0">
+                                    <input type="text"
+                                           name="username"
+                                           id="input_student_username"
+                                           x-model="student.username"
+                                           x-init="if (!student.nama) { student.username = ''; student.email = ''; isEmailManuallyEdited = false; $el.value = ''; }"
+                                           @input="onUsernameInput($event)"
+                                           @paste="onUsernamePaste($event)"
+                                           :placeholder="student.nama ? 'namaemail' : 'Otomatis dibuat setelah Nama Lengkap diisi...'"
+                                           required
+                                           autocomplete="new-password"
+                                           data-lpignore="true"
+                                           data-1p-ignore="true"
+                                           data-form-type="other"
+                                           class="flex-1 h-full px-4 bg-transparent border-0 text-[#0F172A] text-sm font-medium placeholder-[#94A3B8] focus:ring-0 focus:outline-none lowercase">
+                                    <div class="h-full flex items-center pr-4 pl-1 select-none pointer-events-none whitespace-nowrap shrink-0">
+                                        <span class="text-sm font-bold text-[#003FA9]">@myskanic.com</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="email" :value="student.username ? (student.username + '@myskanic.com') : ''">
+                                <input type="hidden" name="is_manual_username" :value="isEmailManuallyEdited ? '1' : '0'">
+                                <p class="text-[11px] text-slate-400 mt-1">
+                                    Otomatis dibuat dari nama siswa. Domain @myskanic.com bersifat permanen.
+                                </p>
+                            </div>
+
+                            {{-- Row 8: Password Akun Siswa --}}
+                            <div class="w-full">
                                 <x-wizard.input label="Password Akun"
                                                 hint="min. 6 karakter"
                                                 name="password"
@@ -431,6 +467,9 @@
                                                 type="password"
                                                 placeholder="Minimal 6 karakter"
                                                 required
+                                                autocomplete="new-password"
+                                                data-lpignore="true"
+                                                data-1p-ignore="true"
                                                 model="student.password" />
                             </div>
                         </div>
@@ -581,9 +620,13 @@
                                     <x-wizard.review-field label="Rombongan Belajar (Rombel)" bind="student.kelas_name" />
                                 </div>
 
-                                {{-- Row 7: Email Akun | Password --}}
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <x-wizard.review-field label="Email Akun Siswa" bind="student.email" />
+                                {{-- Row 7: Email Akun Siswa --}}
+                                <div>
+                                    <x-wizard.review-field label="Email Akun Siswa" bind="student.username ? (student.username + '@myskanic.com') : (student.email || '-')" />
+                                </div>
+
+                                {{-- Row 8: Password Akun --}}
+                                <div>
                                     <x-wizard.review-field label="Password Akun" bind="student.password ? '••••••••' : '-'" />
                                 </div>
                             </div>

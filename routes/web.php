@@ -125,9 +125,11 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
         // Home Dashboard Pengaturan
         Route::get('/', [SettingsController::class, 'home'])->name('home');
 
-        // Jam Sekolah
-        Route::get('/jam-sekolah', [SchoolSettingController::class, 'index'])->name('school');
-        Route::post('/jam-sekolah', [SchoolSettingController::class, 'update'])->name('school.update');
+        // Jam Sekolah (Strictly Super Admin & Admin Only)
+        Route::middleware(['role:superadmin,admin'])->group(function () {
+            Route::get('/jam-sekolah', [SchoolSettingController::class, 'index'])->name('school');
+            Route::post('/jam-sekolah', [SchoolSettingController::class, 'update'])->name('school.update');
+        });
 
         // Kalender Akademik
         Route::get('/kalender-akademik', [AcademicCalendarController::class, 'index'])->name('calendar');
@@ -305,6 +307,8 @@ Route::middleware(['auth:web', 'password.changed', 'biometric.enrolled'])->group
         Route::post('/guru/edit', [GuruController::class, 'edit'])->name('guru.edit');
         Route::post('/guru/{id}', [GuruController::class, 'update'])->name('guru.update');
         Route::post('/guru/{id}/status', [GuruController::class, 'updateStatus'])->name('guru.status');
+        Route::post('/guru/{id}/deactivate', [GuruController::class, 'deactivate'])->name('guru.deactivate');
+        Route::post('/guru/{id}/activate', [GuruController::class, 'activate'])->name('guru.activate');
         Route::post('/guru/{id}/activation-link', [GuruController::class, 'regenerateActivation'])->name('guru.activation_link');
         Route::post('/guru/{id}/assign-subject', [GuruController::class, 'assignSubject'])->name('guru.assign_subject');
         Route::post('/guru/assignment-subject/{assignmentId}/delete', [GuruController::class, 'removeSubjectAssignment'])->name('guru.remove_subject_assignment');

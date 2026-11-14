@@ -42,15 +42,22 @@ class EnsureBiometricEnrolled
             'siswa.enrollment.challenge',
             'siswa.enrollment.process',
             'proseslogout',
+            'logout',
             'profile',
-            'profile.password'
+            'profile.password',
+            'profile.update',
+            'settings.profile',
+            'settings.profile.password',
+            'settings.profile.info',
         ];
 
         $currentRouteName = $request->route() ? $request->route()->getName() : '';
         $isEnrollmentPath = $request->is('siswa/biometric-enrollment*') ||
                             $request->is('proseslogout') ||
+                            $request->is('logout') ||
                             $request->is('profile*') ||
-                            in_array($currentRouteName, $allowedEnrollmentRouteNames);
+                            $request->is('pengaturan/profil*') ||
+                            in_array($currentRouteName, $allowedEnrollmentRouteNames, true);
 
         $isEnrolled = $siswa->isBiometricEnrolled();
 

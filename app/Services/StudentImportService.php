@@ -13,6 +13,7 @@ use App\Models\StudentEnrollment;
 use App\Models\StudentImportBatch;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use App\Http\Controllers\SiswaController;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -174,6 +175,7 @@ class StudentImportService
 
         $seenNis = [];
         $seenNisn = [];
+        $seenBatchEmails = [];
         $validRows = [];
         $errors = [];
 
@@ -308,6 +310,31 @@ class StudentImportService
                     'messages' => $rowErrors,
                 ];
             } else {
+                // Generate student email from name, ensuring permanent domain and uniqueness
+                $resolvedRowEmail = null;
+                if (!empty($email)) {
+                    $rawU = SiswaController::generateStudentUsername($email);
+                    $resolvedRowEmail = $rawU ? ($rawU . '@myskanic.com') : null;
+                }
+                if (empty($resolvedRowEmail)) {
+                    $baseU = SiswaController::generateStudentUsername($nama);
+                    if (empty($baseU)) {
+                        $baseU = SiswaController::generateStudentUsername($nis);
+                    }
+                    $uniqueU = SiswaController::resolveUniqueStudentUsername($baseU);
+                    $resolvedRowEmail = $uniqueU . '@myskanic.com';
+                }
+
+                // Ensure uniqueness within batch
+                while (isset($seenBatchEmails[$resolvedRowEmail])) {
+                    $localUser = explode('@', $resolvedRowEmail)[0];
+                    preg_match('/^(.*?)([0-9]+)?$/', $localUser, $matches);
+                    $prefix = $matches[1] ?? $localUser;
+                    $num = isset($matches[2]) && is_numeric($matches[2]) ? ((int)$matches[2] + 1) : 2;
+                    $resolvedRowEmail = $prefix . $num . '@myskanic.com';
+                }
+                $seenBatchEmails[$resolvedRowEmail] = true;
+
                 $validRows[] = [
                     'row_number'        => $row,
                     'nisn'              => $nisn ?: null,
@@ -316,7 +343,7 @@ class StudentImportService
                     'jenis_kelamin'     => $jk,
                     'tempat_lahir'      => $tempatLahir ?: null,
                     'tanggal_lahir'     => $tglLahir ? Carbon::parse($tglLahir)->format('Y-m-d') : null,
-                    'email'             => $email ?: "{$nis}@myskanic.com",
+                    'email'             => $resolvedRowEmail,
                     'tahun_ajaran_masuk_id' => $taMasuk?->id ?? $taEnr->id,
                     'tahun_ajaran_masuk'    => $taMasuk?->nama ?? $taEnr->nama,
                     'tahun_masuk'       => $taMasuk?->tahun_mulai ?? $taEnr->tahun_mulai,

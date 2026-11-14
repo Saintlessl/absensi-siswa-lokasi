@@ -10,16 +10,24 @@ use Illuminate\Support\Facades\Storage;
 class SchoolSettingController extends Controller
 {
     /**
+     * Defense-in-depth: Enforce role-based access control at the controller constructor level.
+     */
+    public function __construct()
+    {
+        $this->middleware(['auth:web', 'role:superadmin,admin']);
+    }
+
+    /**
      * Ensure current user has permission to manage school settings and branding.
      */
     private function authorizeAdmin(): void
     {
         $user = auth()->user();
         if (!$user) {
-            abort(401);
+            abort(401, 'Unauthenticated.');
         }
-        if (!$user->hasRole(['superadmin', 'admin']) && !$user->hasPermission('pengaturan.jam_sekolah')) {
-            abort(403, 'Anda tidak memiliki hak akses untuk mengubah pengaturan sekolah.');
+        if (!$user->hasRole(['superadmin', 'admin'])) {
+            abort(403, 'Akses ditolak: Hanya Super Admin dan Admin yang memiliki izin untuk melihat dan mengubah pengaturan jam operasional sekolah.');
         }
     }
 

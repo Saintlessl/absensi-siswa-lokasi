@@ -10,6 +10,13 @@ window.openModal = function(id) {
         el.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
         el.scrollTop = 0;
+        if (id === 'modal-inputsiswa') {
+            const namaEl = document.getElementById('input_nama');
+            if (!namaEl || !namaEl.value.trim()) {
+                const uEl = document.getElementById('input_student_username');
+                if (uEl) uEl.value = '';
+            }
+        }
     }
 };
 
@@ -33,12 +40,14 @@ function studentWizardModal() {
         isSubmitting: false,
         photoPreviewUrl: null,
         hasValidPhoto: false,
+        isEmailManuallyEdited: false,
 
         // Student Data Model
         student: {
             nisn: '',
             nis: '',
             nama: '',
+            username: '',
             no_telp_siswa: '',
             jenis_kelamin: '',
             tempat_lahir: '',
@@ -72,10 +81,17 @@ function studentWizardModal() {
                 Object.entries(window.__siswaWizardRecover).forEach(([k, v]) => {
                     if (v === null || v === undefined) return;
                     this.student[k] = String(v);
-                    const el = document.getElementById(k) || document.getElementById('modal_' + k);
+                    const el = document.getElementById(k) || document.getElementById('modal_' + k) || document.getElementById('input_' + k) || document.getElementById('input_student_' + k);
                     if (el && (el.tagName === 'SELECT' || el.tagName === 'INPUT')) el.value = String(v);
                 });
                 if (window.__siswaWizardRecover.confirm_parent_verified) this.student.verified = true;
+                if (window.__siswaWizardRecover.is_manual_username === '1' || window.__siswaWizardRecover.is_manual_username === true) {
+                    this.isEmailManuallyEdited = true;
+                }
+                if (window.__siswaWizardRecover.username) {
+                    this.student.username = String(window.__siswaWizardRecover.username);
+                    this.student.email = this.student.username + '@myskanic.com';
+                }
             }
             if (window.__siswaWizardReopen) {
                 window.openModal(this.modalId);
@@ -85,6 +101,22 @@ function studentWizardModal() {
             window.addEventListener('wizard-photo-updated', (e) => {
                 this.photoPreviewUrl = e.detail ? e.detail.url : null;
                 this.hasValidPhoto = e.detail ? Boolean(e.detail.valid) : false;
+            });
+
+            // Watcher on student.nama to auto-generate student email username
+            this.$watch('student.nama', (val) => {
+                const trimmed = (val || '').trim();
+                if (!trimmed) {
+                    this.student.username = '';
+                    this.student.email = '';
+                    this.isEmailManuallyEdited = false;
+                    const uInput = document.getElementById('input_student_username');
+                    if (uInput) uInput.value = '';
+                    return;
+                }
+                if (!this.isEmailManuallyEdited) {
+                    this.generateEmailFromName(trimmed);
+                }
             });
 
             // Watchers for instantaneous auto-detection and cascade synchronization
@@ -132,22 +164,96 @@ function studentWizardModal() {
             });
         },
 
-        onNisChange() {
-            // Auto suggest email if email is empty or starts with NIS
-            const raw = (this.student.nis || '').trim().toLowerCase();
-            if (raw && (!this.student.email || this.student.email.endsWith('@myskanic.com'))) {
-                this.student.email = raw + '@myskanic.com';
+        cleanNameForUsername(name) {
+            if (!name) return '';
+            let clean = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            if (clean.includes('@')) {
+                clean = clean.split('@')[0];
             }
+            return clean.replace(/[^a-z0-9._-]/g, '');
+        },
+
+        generateEmailFromName(name) {
+            const trimmed = (name || '').trim();
+            if (!trimmed) {
+                this.student.username = '';
+                this.student.email = '';
+                this.isEmailManuallyEdited = false;
+                return;
+            }
+            let clean = this.cleanNameForUsername(trimmed);
+            this.student.username = clean;
+            this.student.email = clean ? (clean + '@myskanic.com') : '';
+        },
+
+        onUsernameInput(event) {
+            // Guard: Sebelum nama lengkap diisi, username email WAJIB dibiarkan kosong
+            if (!this.student.nama || !this.student.nama.trim()) {
+                this.student.username = '';
+                this.student.email = '';
+                this.isEmailManuallyEdited = false;
+                event.target.value = '';
+                return;
+            }
+
+            let val = event.target.value || '';
+            val = val.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            if (val.includes('@')) {
+                val = val.split('@')[0];
+            }
+            val = val.replace(/[^a-z0-9._-]/g, '');
+
+            this.student.username = val;
+            this.student.email = val ? (val + '@myskanic.com') : '';
+
+            const defaultFromNama = this.cleanNameForUsername(this.student.nama);
+            this.isEmailManuallyEdited = (val !== defaultFromNama);
+        },
+
+        onUsernamePaste(event) {
+            event.preventDefault();
+            // Guard: Sebelum nama lengkap diisi, paste diabaikan dan dibiarkan kosong
+            if (!this.student.nama || !this.student.nama.trim()) {
+                this.student.username = '';
+                this.student.email = '';
+                this.isEmailManuallyEdited = false;
+                return;
+            }
+
+            const pasteData = (event.clipboardData || window.clipboardData).getData('text') || '';
+            let val = pasteData.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            if (val.includes('@')) {
+                val = val.split('@')[0];
+            }
+            val = val.replace(/[^a-z0-9._-]/g, '');
+
+            this.student.username = val;
+            this.student.email = val ? (val + '@myskanic.com') : '';
+
+            const defaultFromNama = this.cleanNameForUsername(this.student.nama);
+            this.isEmailManuallyEdited = (val !== defaultFromNama);
+        },
+
+        resetEmailToDefault() {
+            this.isEmailManuallyEdited = false;
+            this.generateEmailFromName(this.student.nama);
+        },
+
+        onNisChange() {
+            // Password defaults to NIS or password123, email is NOT based on NIS
             if (!this.student.password) {
-                this.student.password = 'password123';
+                this.student.password = (this.student.nis || '').trim() || 'password123';
             }
         },
 
         ensureEmailDomain() {
-            let email = (this.student.email || '').trim().toLowerCase();
-            if (email && !email.includes('@')) {
-                this.student.email = email + '@myskanic.com';
+            let u = (this.student.username || '').trim().toLowerCase();
+            if (u.includes('@')) {
+                u = u.split('@')[0];
             }
+            u = u.replace(/[^a-z0-9._-]/g, '');
+            this.student.username = u;
+            this.student.email = u ? (u + '@myskanic.com') : '';
         },
 
         getActiveSchoolYear() {
@@ -468,8 +574,8 @@ function studentWizardModal() {
                     this.updateDependentRombel();
                     this.updateKelasName();
                     this.ensureEmailDomain();
-                    if (!this.student.email.endsWith('@myskanic.com')) {
-                        window.MySkanicAlert ? MySkanicAlert.warning('Email akun siswa wajib berakhiran @myskanic.com') : alert('Email akun siswa wajib berakhiran @myskanic.com');
+                    if (!this.student.username || !this.student.email.endsWith('@myskanic.com')) {
+                        window.MySkanicAlert ? MySkanicAlert.warning('Email akun siswa wajib diisi dan berakhiran @myskanic.com') : alert('Email akun siswa wajib diisi dan berakhiran @myskanic.com');
                         return;
                     }
                     if (this.student.password && this.student.password.length < 6) {
@@ -531,6 +637,11 @@ function studentWizardModal() {
             setTimeout(() => {
                 this.step = 1;
                 this.isSubmitting = false;
+                if (!this.student.nama || !this.student.nama.trim()) {
+                    this.student.username = '';
+                    this.student.email = '';
+                    this.isEmailManuallyEdited = false;
+                }
             }, 300);
         }
     };

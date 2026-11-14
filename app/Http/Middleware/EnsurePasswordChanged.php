@@ -32,14 +32,20 @@ class EnsurePasswordChanged
             'profile',
             'profile.password',
             'profile.update',
+            'settings.profile',
+            'settings.profile.password',
+            'settings.profile.info',
             'proseslogout',
+            'logout',
         ];
 
         $currentRouteName = $request->route() ? $request->route()->getName() : '';
 
         $isAllowed = in_array($currentRouteName, $allowedRouteNames, true) ||
                      $request->is('profile*') ||
-                     $request->is('proseslogout');
+                     $request->is('pengaturan/profil*') ||
+                     $request->is('proseslogout') ||
+                     $request->is('logout');
 
         if ($isAllowed) {
             return $next($request);

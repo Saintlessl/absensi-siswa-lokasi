@@ -134,6 +134,11 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Tidak dapat menghapus satu-satunya akun Superadmin.');
         }
 
+        // Security & Data Integrity Check: Protect academic records connected to teacher account
+        if ($user->guru && $user->guru->hasAcademicRecords()) {
+            return redirect()->back()->with('error', 'Akun Guru ' . $user->guru->nama . ' memiliki rekam jejak akademik historis (asesmen nilai siswa, jurnal mengajar, atau penugasan). Akun tidak dapat dihapus permanen demi integritas data akademik sekolah. Silakan gunakan tindakan Nonaktifkan Akun.');
+        }
+
         $user->delete();
 
         return redirect()->back()->with('success', 'Data User berhasil dihapus');
